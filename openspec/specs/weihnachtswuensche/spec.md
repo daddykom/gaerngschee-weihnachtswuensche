@@ -1,26 +1,26 @@
-# Mässpäggli Capability Spec
+# Weihnachtswünsche Capability Spec
 
 ## Overview
 
-Hauptspezifikation für die Gärngschee-Mässpäggli-Plattform.
+Hauptspezifikation für die Gärngschee-Weihnachtswünsche-Plattform.
 
 ## Benutzerrollen
 
 | Rolle | Beschreibung | Key Features |
 |-------|-------------|--------------|
-| Besucher | Nicht angemeldete Benutzer | Öffentliche Infos, Spendenseite, Anmeldung |
+| Besucher | Nicht angemeldete Benutzer | Öffentliche Infos, verfügbare Wünsche, Anmeldung |
 | Klient | Personen/Familien mit knappen Mitteln | Anmeldung, Bearbeitung, Status, QR-Code |
-| Spender | Finanzen Mässpäggli | Anzahl wählen, Payrexx |
+| Erfüller | Erfüllen einzelne Weihnachtswünsche | Wunsch auswählen, Erfüllung bestätigen |
 | Mitarbeiter | Vereinsmitarbeiter | Anmeldungen, Warteliste, QR-Codes, E-Mails |
 | Administrator | Systemverwaltung | Stammdaten, Konfiguration, Benutzer |
 
 ## Kernfunktionen
 
-### 1. Spenden
+### 1. Wünsche erfüllen
 
-- Weiterleitung zu Payrexx
-- Anzahl Mässpäggli auswählen
-- Erfassung erfolgreicher Spenden
+- Verfügbare Weihnachtswünsche anzeigen
+- Einen einzelnen Wunsch auswählen
+- Erfüllung des ausgewählten Wunsches bestätigen
 
 → Siehe: [../donations/spec.md](../donations/spec.md)
 

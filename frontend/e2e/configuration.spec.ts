@@ -29,7 +29,7 @@ test.describe('Configuration route', () => {
         body: JSON.stringify([{
           id: 'config-1',
           variableName: 'SITE_TITLE',
-          value: 'Mässpäggli',
+          value: 'Weihnachtswünsche',
           description: 'Titel',
           accessGroup: ['admin'],
           updateGroup: ['admin'],

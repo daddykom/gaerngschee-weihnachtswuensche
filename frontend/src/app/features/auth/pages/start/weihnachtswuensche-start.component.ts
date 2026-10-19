@@ -12,7 +12,7 @@ import { StartActions } from '../../../../store/start/start.actions';
 import { inputLimits } from '../../../../shared/constants/input-limits';
 
 @Component({
-  selector: 'app-maesspaeggli-start',
+  selector: 'app-weihnachtswuensche-start',
   standalone: true,
   imports: [
     FormField,
@@ -24,10 +24,10 @@ import { inputLimits } from '../../../../shared/constants/input-limits';
     InfoBoxComponent,
     ControlErrorComponent,
   ],
-  templateUrl: './maesspaeggli-start.component.html',
-  styleUrl: './maesspaeggli-start.component.scss',
+  templateUrl: './weihnachtswuensche-start.component.html',
+  styleUrl: './weihnachtswuensche-start.component.scss',
 })
-export class MaesspaeggliStartComponent {
+export class WeihnachtswuenscheStartComponent {
   private readonly store = inject(Store);
   private readonly translate = inject(TranslateService);
 

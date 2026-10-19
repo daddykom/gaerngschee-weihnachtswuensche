@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Shared\Mail;
 
 use App\Registration\Services\AnmeldungMailVariant;
+
 interface EmailSenderInterface
 {
     public function sendAnmeldung(
@@ -13,8 +14,6 @@ interface EmailSenderInterface
         string $locale = 'de',
         ?string $loginUrl = null,
     ): void;
-
-    public function sendOrderStatus(string $recipient, string $status, string $locale = 'de'): void;
 
     public function sendUserCreated(string $recipient, string $temporaryPassword): void;
 
@@ -27,9 +26,6 @@ interface EmailSenderInterface
 
     /** @param array<string, mixed> $order */
     public function renderOrderConfirmation(array $order, string $mailStatus): array;
-
-    /** @param array<string, mixed> $order */
-    public function renderDeliveryNotification(array $order, string $deliveryUrl, string $qrDataUri): array;
 
     /** @return array{subject: string, html: string, text: string} */
     public function renderFairgateReminder(string $fairgateUrl, string $status = 'not_found', ?string $documentEmail = null): array;

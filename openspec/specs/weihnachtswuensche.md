@@ -4,13 +4,13 @@ updated: 2026-07-06 14:32
 ---
 
 ---
-Betreff: Fachkonzept Mässpäggli
+Betreff: Fachkonzept Weihnachtswünsche
 ---
-# **Fachkonzept Gärngschee-Mässpäggli**
+# **Fachkonzept Gärngschee-Weihnachtswünsche**
 
 ## **Zweck dieses Dokuments**
 
-Dieses Dokument beschreibt den fachlichen Funktionsumfang der neuen Gärngschee-Mässpäggli-Plattform.
+Dieses Dokument beschreibt den fachlichen Funktionsumfang der neuen Gärngschee-Weihnachtswünsche-Plattform.
 
 ---
 
@@ -23,8 +23,8 @@ Nicht angemeldete Benutzer.
 ### **Funktionsumfang**
 
 - Öffentliche Informationen ansehen.
-- Zur Spendenseite wechseln.
-- Anmeldung für Mässpäggli erfassen.
+- Verfügbare Weihnachtswünsche anzeigen.
+- Anmeldung für Weihnachtswünsche erfassen.
 
 ### **Fachliche Regeln**
 
@@ -52,19 +52,20 @@ Personen oder Familien mit knappen finanziellen Mitteln.
 
 ---
 
-## **Spender**
+## **Erfüller**
 
-Personen, welche Mässpäggli finanzieren.
+Personen, welche einzelne Weihnachtswünsche auswählen und erfüllen.
 
 ### **Funktionsumfang**
 
-- Anzahl Mässpäggli auswählen.
-- Zur Payrexx-Spendenseite wechseln.
+- Verfügbare Weihnachtswünsche anzeigen.
+- Einen einzelnen Weihnachtswunsch auswählen.
+- Die Erfüllung des ausgewählten Wunsches bestätigen.
 
 ### **Fachliche Regeln**
 
-- Die Zahlungsabwicklung erfolgt vollständig über Payrexx.
-- Jede erfolgreiche Spende erhöht die Anzahl verfügbarer Mässpäggli.
+- Ein Wunsch kann nur einmal gleichzeitig erfüllt werden.
+- Die Erfüllung wird dem ausgewählten Wunsch zugeordnet.
 
 ---
 
@@ -99,23 +100,22 @@ Verwaltet die Anwendung.
 
 ---
 
-# **2. Spenden**
+# **2. Wünsche erfüllen**
 
 ## **Ziel**
 
-Spender finanzieren Mässpäggli.
+Erfüller wählen einzelne Weihnachtswünsche aus und erfüllen sie.
 
 ### **Funktionsumfang**
 
-- Weiterleitung zu Payrexx.
-- Anzahl Mässpäggli auswählen.
-- Erfassung erfolgreicher Spenden.
+- Verfügbare Wünsche anzeigen.
+- Einen einzelnen Wunsch auswählen.
+- Erfüllung bestätigen und speichern.
 
 ### **Fachliche Regeln**
 
-- Die Anwendung verarbeitet keine Zahlungen selbst.
-- Die Zahlungsabwicklung erfolgt ausschliesslich über Payrexx.
-- Nur erfolgreich bezahlte Spenden erhöhen die Anzahl verfügbarer Mässpäggli.
+- Jeder Wunsch wird einzeln verwaltet.
+- Ein erfüllter Wunsch ist für weitere Erfüller nicht mehr verfügbar.
 
 ---
 
@@ -123,7 +123,7 @@ Spender finanzieren Mässpäggli.
 
 ## **Ziel**
 
-Klienten können Mässpäggli beantragen.
+Klienten können Weihnachtswünsche beantragen.
 
 ### **Funktionsumfang**
 
@@ -164,7 +164,7 @@ Prüfung, ob eine Anmeldung berechtigt ist.
 
 ## **Ziel**
 
-Verwaltung von Anmeldungen, wenn nicht genügend Mässpäggli verfügbar sind.
+Verwaltung von Anmeldungen, wenn nicht genügend Weihnachtswünsche verfügbar sind.
 
 ### **Funktionsumfang**
 
@@ -175,7 +175,7 @@ Verwaltung von Anmeldungen, wenn nicht genügend Mässpäggli verfügbar sind.
 ### **Fachliche Regeln**
 
 - Neue Anmeldungen können automatisch auf die Warteliste gesetzt werden.
-- Wartelisten-Anmeldungen können nachträglich qualifiziert werden, sobald genügend Mässpäggli verfügbar sind.
+- Wartelisten-Anmeldungen können nachträglich qualifiziert werden, sobald genügend Weihnachtswünsche verfügbar sind.
 
 ---
 
@@ -193,7 +193,7 @@ Qualifizierte Klienten erhalten eine Zusage.
 
 ### **Fachliche Regeln**
 
-- Eine Anmeldung kann erst qualifiziert werden, wenn genügend Mässpäggli verfügbar sind.
+- Eine Anmeldung kann erst qualifiziert werden, wenn genügend Weihnachtswünsche verfügbar sind.
 - Nach der Qualifikation erhält der Klient automatisch eine Informations-E-Mail mit seinem persönlichen QR-Code.
 
 ---
@@ -202,21 +202,21 @@ Qualifizierte Klienten erhalten eine Zusage.
 
 ## **Ziel**
 
-Ausgabe der Mässpäggli an die Klienten.
+Ausgabe der Weihnachtswünsche an die Klienten.
 
 ### **Funktionsumfang**
 
 - QR-Code prüfen.
 - Anmeldung anzeigen.
 - Abgabe bestätigen.
-- Bereits abgegebene Mässpäggli anzeigen.
+- Bereits abgegebene Weihnachtswünsche anzeigen.
 
 ### **Fachliche Regeln**
 
 - Ein QR-Code identifiziert genau eine Anmeldung.
-- Eine Anmeldung kann mehrere Mässpäggli enthalten.
+- Eine Anmeldung kann mehrere Weihnachtswünsche enthalten.
 - Eine teilweise Abgabe ist möglich.
-- Bereits abgegebene Mässpäggli werden entsprechend gekennzeichnet.
+- Bereits abgegebene Weihnachtswünsche werden entsprechend gekennzeichnet.
 - Eine bestätigte Abgabe kann durch berechtigte Mitarbeitende rückgängig gemacht werden.
 
 ---
@@ -276,13 +276,12 @@ Verwaltung sämtlicher fachlicher Daten.
 ### **Funktionsumfang**
 
 - Anmeldungen verwalten.
-- Spendenübersicht anzeigen.
+- Übersicht der verfügbaren und erfüllten Wünsche anzeigen.
 - Warteliste verwalten.
 - Status verwalten.
 
 ### **Fachliche Regeln**
 
 - Änderungen werden protokolliert.
-- Die Anzahl verfügbarer Mässpäggli ist jederzeit ersichtlich.
+- Die Anzahl verfügbarer Weihnachtswünsche ist jederzeit ersichtlich.
 - Die Anzahl qualifizierter und wartender Anmeldungen ist jederzeit ersichtlich.
-

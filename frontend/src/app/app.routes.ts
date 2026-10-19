@@ -2,20 +2,12 @@ import { Routes } from '@angular/router';
 import { provideEffects } from '@ngrx/effects';
 import { provideState } from '@ngrx/store';
 import { groupGuard } from './shared/guards/group.guard';
-import { orderResolver } from './features/order/order.resolver';
 import { clientLoginGuard } from './features/auth/guards/client-login.guard';
-import { adminOverviewResolver } from './features/admin/pages/overview/admin-overview.resolver';
 import { configurationResolver } from './features/admin/pages/configuration/configuration.resolver';
 import { publicConfigurationResolver } from './features/public-configuration/public-configuration.resolver';
 import { startEffects } from './store/start/start.effects';
 import { startFeature } from './store/start/start.feature';
-import { orderEffects } from './store/order/order.effects';
-import { orderFeature } from './store/order/order.feature';
-import { deliveryEffects } from './store/delivery/delivery.effects';
-import { deliveryFeature } from './store/delivery/delivery.feature';
 import { passwordResetFeature } from './store/password-reset/password-reset.feature';
-import { adminOverviewFeature } from './store/admin-overview/admin-overview.feature';
-import { adminOverviewEffects } from './store/admin-overview/admin-overview.effects';
 import { adminUsersEffects } from './store/admin-users/admin-users.effects';
 import { adminUsersFeature } from './store/admin-users/admin-users.feature';
 import { fairgateTestEffects } from './store/fairgate-test/fairgate-test.effects';
@@ -40,7 +32,7 @@ export const appRoutes: Routes = [
           {
             path: '',
             data: { pageTitle: 'app.anmeldung.title' },
-            loadComponent: () => import('./features/auth/pages/start/maesspaeggli-start.component').then((m) => m.MaesspaeggliStartComponent),
+            loadComponent: () => import('./features/auth/pages/start/weihnachtswuensche-start.component').then((m) => m.WeihnachtswuenscheStartComponent),
           },
           {
             path: 'success',
@@ -59,18 +51,7 @@ export const appRoutes: Routes = [
         canMatch: [clientLoginGuard],
         children: [{ path: '', redirectTo: 'start', pathMatch: 'full' }],
       },
-      {
-        path: 'order',
-        canActivate: [groupGuard(['client'])],
-        resolve: { order: orderResolver },
-        providers: [provideState(orderFeature), provideEffects(orderEffects)],
-        data: { pageTitle: 'app.order.pageTitle' },
-        children: [
-          { path: '', redirectTo: 'edit', pathMatch: 'full' },
-          { path: 'edit', data: { pageTitle: 'app.order.pageTitle' }, loadComponent: () => import('./features/order/pages/order/order.component').then((m) => m.OrderComponent) },
-          { path: 'summary', data: { pageTitle: 'app.order.summary.pageTitle' }, loadComponent: () => import('./features/order/pages/order-summary/order-summary.component').then((m) => m.OrderSummaryComponent) },
-        ],
-      },
+      { path: 'bestellung', data: { pageTitle: 'app.bestellung.pageTitle' }, loadComponent: () => import('./features/order/pages/order/order.component').then((m) => m.OrderComponent) },
       {
         path: 'password-change',
         data: { pageTitle: 'app.passwordChange.pageTitle' },
@@ -91,23 +72,20 @@ export const appRoutes: Routes = [
       { path: 'impressum', data: { legalPage: 'impressum' }, loadComponent: () => import('./features/legal/pages/legal-page/legal-page.component').then((m) => m.LegalPageComponent) },
       { path: 'datenschutz', data: { legalPage: 'datenschutz' }, loadComponent: () => import('./features/legal/pages/legal-page/legal-page.component').then((m) => m.LegalPageComponent) },
       { path: 'not-found', data: { pageTitle: 'app.notFound.pageTitle' }, loadComponent: () => import('./features/errors/pages/not-found/not-found.component').then((m) => m.NotFoundComponent) },
-      { path: 'delivery', canActivate: [groupGuard(['user', 'admin'])], providers: [provideState(deliveryFeature), provideEffects(deliveryEffects)], data: { pageTitle: 'app.delivery.title' }, loadComponent: () => import('./features/delivery/pages/delivery').then((m) => m.Delivery) },
       {
         path: 'admin', canActivate: [groupGuard(['user', 'admin'])], providers: [
-          provideState(adminOverviewFeature),
           provideState(adminUsersFeature),
           provideState(fairgateTestFeature),
           provideState(fairgateLookupFeature),
-          provideEffects(adminOverviewEffects, adminUsersEffects, fairgateTestEffects, fairgateLookupEffects),
+           provideEffects(adminUsersEffects, fairgateTestEffects, fairgateLookupEffects),
         ], children: [
-          { path: 'overview', resolve: { overview: adminOverviewResolver }, data: { pageTitle: 'app.admin.overview.title' }, loadComponent: () => import('./features/admin/pages/overview/admin-overview.component').then((m) => m.AdminOverviewComponent) },
+          { path: 'overview', data: { pageTitle: 'app.admin.overview.title' }, loadComponent: () => import('./features/admin/pages/overview/admin-overview.component').then((m) => m.AdminOverviewComponent) },
           { path: 'fairgate-test', canActivate: [groupGuard(['admin'])], data: { pageTitle: 'app.admin.fairgateTest.title' }, loadComponent: () => import('./features/admin/pages/fairgate-test/fairgate-test.component').then((m) => m.FairgateTestComponent) },
           { path: 'fairgate-lookup', canActivate: [groupGuard(['admin'])], data: { pageTitle: 'app.admin.fairgateLookup.title' }, loadComponent: () => import('./features/admin/pages/fairgate-lookup/fairgate-lookup').then((m) => m.FairgateLookup) },
           { path: 'configuration', resolve: { configuration: configurationResolver }, data: { pageTitle: 'app.admin.configuration.title' }, loadComponent: () => import('./features/admin/pages/configuration/configuration.component').then((m) => m.ConfigurationComponent) },
-          { path: 'client-deletion', canActivate: [groupGuard(['admin'])], data: { pageTitle: 'app.admin.users.clientDeletion.title' }, loadComponent: () => import('./features/admin/pages/client-deletion/client-deletion').then((m) => m.ClientDeletion) },
           { path: 'users', children: [
             { path: 'new', canActivate: [groupGuard(['admin'])], data: { pageTitle: 'app.admin.users.createTitle' }, loadComponent: () => import('./features/admin/pages/users/user-edit.component').then((m) => m.UserEditComponent) },
-            { path: ':userId', canActivate: [groupGuard(['user', 'admin'])], data: { pageTitle: 'app.admin.users.editTitle' }, loadComponent: () => import('./features/admin/pages/users/user-edit.component').then((m) => m.UserEditComponent) },
+             { path: ':userId', canActivate: [groupGuard(['user', 'admin'])], data: { pageTitle: 'app.admin.users.editTitle' }, loadComponent: () => import('./features/admin/pages/users/user-edit.component').then((m) => m.UserEditComponent) },
             { path: '', canActivate: [groupGuard(['admin'])], data: { pageTitle: 'app.admin.users.title' }, loadComponent: () => import('./features/admin/pages/users/users.component').then((m) => m.UsersComponent) },
           ] },
         ],

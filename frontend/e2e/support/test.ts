@@ -13,27 +13,6 @@ export const test = base.extend({
       });
     });
 
-    await page.route('http://localhost:8080/admin/overview**', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          year: 2026,
-          recentDays: 14,
-          orders: { provisional: 0, recentProvisional: 0, definitive: 0, toDeliver: 0, qrcode: 0, delivered: 0 },
-          categories: [],
-        }),
-      });
-    });
-
-    await page.route('http://localhost:8080/client/order**', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ order: null }),
-      });
-    });
-
     await page.route('http://localhost:8080/auth/email-check', async (route) => {
       await route.fulfill({
         status: 200,

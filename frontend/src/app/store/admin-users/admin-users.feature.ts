@@ -19,35 +19,6 @@ export const adminUsersFeature = createFeature({
       ...state,
       loading: false,
     })),
-    on(AdminUsersActions.clientDeletionEmailChanged, (state, { email }) => ({
-      ...state,
-      clientDeletion: { status: 'initial', email },
-    })),
-    on(AdminUsersActions.clientDeletionSearch, (state, { email }) => ({
-      ...state,
-      clientDeletion: { status: 'loading', email },
-    })),
-    on(AdminUsersActions.clientDeletionSearchSuccess, (state, { result }) => ({
-      ...state,
-      clientDeletion: { status: 'loaded', email: result.client.email, result },
-    })),
-    on(AdminUsersActions.clientDeletionSearchFailure, (state, { errorCode }) => ({
-      ...state,
-      clientDeletion: { status: 'error', email: state.clientDeletion.email, errorCode },
-    })),
-    on(AdminUsersActions.clientDeletion, (state) => ({
-      ...state,
-      deletingClientOrder: true,
-    })),
-    on(AdminUsersActions.clientDeletionSuccess, (state) => ({
-      ...state,
-      deletingClientOrder: false,
-      clientDeletion: { status: 'initial', email: state.clientDeletion.email },
-    })),
-    on(AdminUsersActions.clientDeletionFailure, (state) => ({
-      ...state,
-      deletingClientOrder: false,
-    })),
     on(AdminUsersActions.create, AdminUsersActions.update, AdminUsersActions.delete, AdminUsersActions.sendPasswordReset, (state) => ({
       ...state,
       saving: true,
@@ -80,6 +51,4 @@ export const {
   selectUsers: selectAdminUsers,
   selectLoading: selectAdminUsersLoading,
   selectSaving: selectAdminUsersSaving,
-  selectClientDeletion: selectAdminClientDeletion,
-  selectDeletingClientOrder: selectAdminUsersDeletingClientOrder,
 } = adminUsersFeature;

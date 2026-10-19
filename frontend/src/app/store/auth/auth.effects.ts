@@ -125,7 +125,7 @@ export const navigateOnLoginSuccessEffect = createEffect(
     actions$.pipe(
       ofType(AuthActions.loginSuccess),
        map(({ requiredPasswordReset, group }) => NavigationActions.navigate({
-         target: requiredPasswordReset ? '/password-change' : group === 'user' ? '/delivery' : '/admin/overview',
+          target: requiredPasswordReset ? '/password-change' : group === 'user' ? '/bestellung' : '/admin/overview',
       })),
     ),
   { functional: true },
@@ -183,7 +183,7 @@ export const navigateOnPasswordResetSuccessEffect = createEffect(
 export const navigateOnPasswordChangeSuccessEffect = createEffect(
   (actions$ = inject(Actions), store = inject(Store, { optional: true })) => actions$.pipe(
     ofType(AuthActions.passwordChangeSuccess),
-    map(() => NavigationActions.navigate({ target: store?.selectSignal(selectAuthGroup)() === 'user' ? '/delivery' : '/admin/overview' })),
+    map(() => NavigationActions.navigate({ target: store?.selectSignal(selectAuthGroup)() === 'user' ? '/bestellung' : '/admin/overview' })),
   ),
   { functional: true },
 );

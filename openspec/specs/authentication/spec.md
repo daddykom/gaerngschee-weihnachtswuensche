@@ -2,7 +2,7 @@
 
 ## Overview
 
-Authentication and URL-based authorization for the Gärngschee-Mässpäggli
+Authentication and URL-based authorization for the Gärngschee-Weihnachtswünsche
 platform. This capability currently covers the Slim backend.
 
 ## Zugriffmodell
@@ -28,7 +28,7 @@ group:
 
 | Gruppe | Beschreibung |
 |--------|--------------|
-| `client` | Personen, die Mässpäggli anfragen oder ihre Registrierung verwalten |
+| `client` | Personen, die Weihnachtswünsche anfragen oder ihre Registrierung verwalten |
 | `user` | Authenticated platform users |
 | `admin` | System administration and user management |
 

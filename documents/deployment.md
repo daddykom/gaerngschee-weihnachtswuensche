@@ -4,7 +4,7 @@ Die Anwendung wird pro Umgebung in einem eigenen Verzeichnis installiert. Das
 Verzeichnis kann `prod` oder `pre-prod` heissen:
 
 ```text
-$HOME/public_html/gaerngschee/maesspaeggli/<umgebung>/
+$HOME/public_html/gaerngschee/weihnachtswuensche/<umgebung>/
 ├── backend/
 │   ├── .env
 │   └── public/
@@ -41,7 +41,7 @@ JWT_SECRET=...
 FRONTEND_BASE_URL=https://example.org
 MAILER_DSN=smtp://...
 MAIL_FROM_ADDRESS=...
-MAIL_FROM_NAME=Gärngschee-Mässpäggli
+MAIL_FROM_NAME=Gärngschee-Weihnachtswünsche
 FSA_MODE=real
 FSA_BASE_URL=https://...
 FSA_ORGANIZATION_ID=...
@@ -71,7 +71,7 @@ Angular-Builds nach `<deployment>/frontend` veröffentlicht.
 
 Das versionierte Script deployt den `main`-Branch in die für die Umgebung
 vorgesehene Installation. Standardmässig wird
-`$HOME/public_html/gaerngschee/maesspaeggli` als Basisverzeichnis verwendet:
+`$HOME/public_html/gaerngschee/weihnachtswuensche` als Basisverzeichnis verwendet:
 
 ```bash
 scripts/deploy.sh pre-prod
@@ -81,8 +81,8 @@ scripts/deploy.sh prod
 Die Ziele sind damit:
 
 ```text
-$HOME/public_html/gaerngschee/maesspaeggli/pre-prod/
-$HOME/public_html/gaerngschee/maesspaeggli/prod/
+$HOME/public_html/gaerngschee/weihnachtswuensche/pre-prod/
+$HOME/public_html/gaerngschee/weihnachtswuensche/prod/
 ```
 
 Vor dem ersten Lauf muss in jeder Umgebung die Datei

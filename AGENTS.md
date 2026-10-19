@@ -4,9 +4,9 @@ Project information for AI assistants. This file is an **index** - see linked do
 
 ## Project Overview
 
-**Gärngschee-Mässpäggli** - Open-source Webplattform für die Verwaltung von Spenden und die Verteilung von Mässpäggli an Menschen mit knappen finanziellen Mitteln.
+**Gärngschee-Weihnachtswünsche** - Open-source Webplattform für die Verwaltung von Spenden und die Verteilung von Weihnachtswünsche an Menschen mit knappen finanziellen Mitteln.
 
-→ See: [openspec/specs/maesspaeggli.md](./openspec/specs/maesspaeggli.md)
+→ See: [openspec/specs/weihnachtswuensche.md](./openspec/specs/weihnachtswuensche.md)
 
 ## Documentation Structure
 
@@ -28,7 +28,7 @@ gaerngschee/
 
 ### For Humans
 
-- [openspec/specs/maesspaeggli.md](./openspec/specs/maesspaeggli.md) - Fachkonzept
+- [openspec/specs/weihnachtswuensche.md](./openspec/specs/weihnachtswuensche.md) - Fachkonzept
 - [documents/project.md](./documents/project.md) - Project overview
 - [documents/architecture.md](./documents/architecture.md) - System architecture
 - [documents/directory-structure.md](./documents/directory-structure.md) - Aktuelle Verzeichnisstruktur
@@ -38,7 +38,7 @@ gaerngschee/
 
 - [openspec/specs/authentication/spec.md](./openspec/specs/authentication/spec.md) - User authentication & roles
 - [openspec/specs/registrations/spec.md](./openspec/specs/registrations/spec.md) - Anmeldungen
-- [openspec/specs/donations/spec.md](./openspec/specs/donations/spec.md) - Spenden
+- [openspec/specs/donations/spec.md](./openspec/specs/donations/spec.md) - Erfüllung einzelner Weihnachtswünsche
 - [openspec/specs/platform/spec.md](./openspec/specs/platform/spec.md) - PWA, i18n, a11y
 - [documents/frontend-conventions.md](./documents/frontend-conventions.md) - Angular-Konventionen
 - [documents/ui-design.md](./documents/ui-design.md) - UI- und Layout-Regeln

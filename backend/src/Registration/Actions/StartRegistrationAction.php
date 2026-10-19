@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Registration\Actions;
 
 use App\Configuration\Data\FrontendConfigRepository;
-use App\Registration\Data\OrderRepository;
 use App\Registration\Services\AnmeldungService;
 use App\Registration\Services\RegistrationTokenService;
 use DateTimeImmutable;
@@ -27,9 +26,7 @@ final class StartRegistrationAction
         private readonly ?RegistrationTokenService $tokens = null,
         private readonly ?FrontendConfigRepository $configs = null,
         private readonly ?DateTimeImmutable $now = null,
-        private readonly ?OrderRepository $orders = null,
-    )
-    {
+    ) {
     }
 
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
@@ -50,20 +47,6 @@ final class StartRegistrationAction
                 $campaignStatus === 'ended' ? 'CAMPAIGN_ENDED' : 'CAMPAIGN_NOT_STARTED',
                 403,
             );
-        }
-
-        $configuration = $this->configs ?? new FrontendConfigRepository(Database::getConnection());
-        $orderStatus = ($this->orders ?? new OrderRepository(Database::getConnection()))
-            ->findStatusForEmailAndYear($email, $configuration->findCampaignYear());
-        if ($orderStatus !== null && !in_array($orderStatus, ['provisional', 'definitive'], true)) {
-            try {
-                ($this->anmeldung ?? self::createService())->sendOrderStatus($email, $orderStatus, $locale);
-            } catch (Throwable $exception) {
-                ExceptionLogger::log('Start registration email delivery failed', $exception);
-                return JsonResponse::error($response, 'REQUEST_FAILED', 503);
-            }
-
-            return JsonResponse::success($response, ['sent' => true], 202);
         }
 
         try {

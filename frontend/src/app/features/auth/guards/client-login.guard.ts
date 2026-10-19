@@ -29,7 +29,7 @@ export const clientLoginGuard: CanMatchFn = () => {
         adultsCount: response.adultsCount,
         salutation: response.salutation,
       }));
-      return router.parseUrl('/order/edit');
+      return router.parseUrl('/bestellung');
     }),
     catchError((error: HttpErrorResponse) => {
       store.dispatch(AuthActions.registrationLoginFailure({

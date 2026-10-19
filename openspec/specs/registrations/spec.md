@@ -2,7 +2,7 @@
 
 ## Overview
 
-Anmeldungsverwaltung für Mässpäggli.
+Anmeldungsverwaltung für Weihnachtswünsche.
 
 ## Features
 

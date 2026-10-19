@@ -15,8 +15,8 @@ final class EmailSenderTest extends TestCase
     public function testSendAnmeldungRendersClientOrderVariant(): void
     {
         $variant = AnmeldungMailVariant::ClientOrder;
-        $subject = 'Dein Link zur Mässpäggli-Bestellung';
-        $content = 'Jetzt für Mässpäggli anmelden';
+        $subject = 'Dein Link zur Weihnachtswünsche-Bestellung';
+        $content = 'Jetzt für Weihnachtswünsche anmelden';
         $link = 'http://localhost:4200/login';
         $mailer = $this->createMock(MailerInterface::class);
         $mailer->expects(self::once())
@@ -25,17 +25,17 @@ final class EmailSenderTest extends TestCase
                 self::assertSame('person@example.com', $email->getTo()[0]->getAddress());
                 self::assertSame($subject, $email->getSubject());
                 self::assertStringContainsString($content, $email->getHtmlBody());
-                 self::assertStringContainsString($link, $email->getHtmlBody());
-                 self::assertStringContainsString('cid:gaerngschee-logo', $email->getHtmlBody());
-                 self::assertStringContainsString('gaerngschee-logo', $email->getBody()->toString());
-                 self::assertStringContainsString('#8a2858', $email->getHtmlBody());
-                 self::assertStringContainsString('#f5b6d3', $email->getHtmlBody());
-                 self::assertStringNotContainsString('#159447', $email->getHtmlBody());
+                self::assertStringContainsString($link, $email->getHtmlBody());
+                self::assertStringContainsString('cid:gaerngschee-logo', $email->getHtmlBody());
+                self::assertStringContainsString('gaerngschee-logo', $email->getBody()->toString());
+                self::assertStringContainsString('#8a2858', $email->getHtmlBody());
+                self::assertStringContainsString('#f5b6d3', $email->getHtmlBody());
+                self::assertStringNotContainsString('#159447', $email->getHtmlBody());
 
                 return true;
             }));
 
-        $sender = new EmailSender($mailer, 'noreply@example.com', 'Gärngschee-Mässpäggli');
+        $sender = new EmailSender($mailer, 'noreply@example.com', 'Gärngschee-Weihnachtswünsche');
 
         $sender->sendAnmeldung('person@example.com', $variant);
     }
@@ -54,7 +54,7 @@ final class EmailSenderTest extends TestCase
                 return true;
             }));
 
-        $sender = new EmailSender($mailer, 'noreply@example.com', 'Gärngschee-Mässpäggli');
+        $sender = new EmailSender($mailer, 'noreply@example.com', 'Gärngschee-Weihnachtswünsche');
 
         $sender->sendUserCreated('new@example.com', 'temporary-secret');
     }
@@ -65,8 +65,8 @@ final class EmailSenderTest extends TestCase
         $mailer->expects(self::once())
             ->method('send')
             ->with(self::callback(static function (Email $email): bool {
-                self::assertSame('Dein Link zur Mässpäggli-Bestellung', $email->getSubject());
-                 self::assertStringContainsString('Mässpäggli auswählen', $email->getHtmlBody());
+                self::assertSame('Dein Link zur Weihnachtswünsche-Bestellung', $email->getSubject());
+                self::assertStringContainsString('Weihnachtswünsche auswählen', $email->getHtmlBody());
                 self::assertStringContainsString('http://localhost:4200/client-login?token=test-token', $email->getHtmlBody());
                 self::assertStringContainsString('10 Minuten gültig', $email->getHtmlBody());
                 self::assertStringContainsString('http://localhost:4200/client-login?token=test-token', $email->getTextBody());
@@ -75,7 +75,7 @@ final class EmailSenderTest extends TestCase
                 return true;
             }));
 
-        $sender = new EmailSender($mailer, 'noreply@example.com', 'Gärngschee-Mässpäggli');
+        $sender = new EmailSender($mailer, 'noreply@example.com', 'Gärngschee-Weihnachtswünsche');
 
         $sender->sendAnmeldung(
             'person@example.com',
@@ -85,25 +85,6 @@ final class EmailSenderTest extends TestCase
         );
     }
 
-    public function testSendOrderStatusDoesNotContainALoginLink(): void
-    {
-        $mailer = $this->createMock(MailerInterface::class);
-        $mailer->expects(self::once())
-            ->method('send')
-            ->with(self::callback(static function (Email $email): bool {
-                self::assertSame('Information zu deiner Mässpäggli-Bestellung', $email->getSubject());
-                 self::assertStringContainsString('Wir haben dir schon einen QR-Code für die Abholung gesandt.', $email->getHtmlBody());
-                self::assertStringNotContainsString('http://localhost:4200', $email->getHtmlBody());
-                 self::assertStringNotContainsString('Mässpäggli auswählen', $email->getHtmlBody());
-
-                return true;
-            }));
-
-        $sender = new EmailSender($mailer, 'noreply@example.com', 'Gärngschee-Mässpäggli');
-
-        $sender->sendOrderStatus('person@example.com', 'qrcode');
-    }
-
     public function testSendOrderConfirmationRendersDefinitiveOrder(): void
     {
         $mailer = $this->createMock(MailerInterface::class);
@@ -111,17 +92,16 @@ final class EmailSenderTest extends TestCase
             ->method('send')
             ->with(self::callback(static function (Email $email): bool {
                 self::assertSame('client@example.com', $email->getTo()[0]->getAddress());
-                 self::assertSame('Deine Mässpäggli-Anmeldung ist definitiv bestätigt', $email->getSubject());
+                self::assertSame('Deine Weihnachtswünsche-Anmeldung ist definitiv bestätigt', $email->getSubject());
                 self::assertStringContainsString('definitiv bestätigt', $email->getHtmlBody());
-                 self::assertStringContainsString('Erwachsene ruhig: 2', $email->getHtmlBody());
-                 self::assertStringContainsString('QR-Code', $email->getHtmlBody());
-                 self::assertStringContainsString('#f5b6d3', $email->getHtmlBody());
-                 self::assertStringContainsString('#dff4e8', $email->getHtmlBody());
+                self::assertStringContainsString('Erwachsene: <strong>2</strong>', $email->getHtmlBody());
+                self::assertStringContainsString('#f5b6d3', $email->getHtmlBody());
+                self::assertStringContainsString('#dff4e8', $email->getHtmlBody());
 
                 return true;
             }));
 
-        $sender = new EmailSender($mailer, 'noreply@example.com', 'Gärngschee-Mässpäggli');
+        $sender = new EmailSender($mailer, 'noreply@example.com', 'Gärngschee-Weihnachtswünsche');
 
         $sender->sendOrderConfirmation('client@example.com', [
             'year' => 2026,
@@ -134,49 +114,17 @@ final class EmailSenderTest extends TestCase
         ]);
     }
 
-    public function testRenderDeliveryNotificationUsesThePickupInformationAndQrCode(): void
-    {
-        $sender = new EmailSender(
-            $this->createMock(MailerInterface::class),
-            'noreply@example.com',
-            'Gärngschee-Mässpäggli',
-        );
-
-        $message = $sender->renderDeliveryNotification(
-            [],
-            'https://example.com/delivery?token=test-token',
-            'data:image/svg+xml;base64,qr-code',
-        );
-
-        foreach ([
-            'Das Mässpäggli ist bereit zur Abholung!',
-            'Es ist so weit: Dein Mässpäggli liegt für dich bereit!',
-            'Freitag, 30. Oktober 2026',
-            '13:00 – 17:00 Uhr',
-            'Clarastrasse 10, 4058 Basel',
-            'Bitte zeige bei der Ausgabe diesen QR-Code',
-            'Falls du es persönlich nicht schaffst',
-            'Basler Herbstmesse',
-        ] as $text) {
-            self::assertStringContainsString($text, $message['html']);
-            self::assertStringContainsString($text, $message['text']);
-        }
-
-        self::assertStringContainsString('data:image/svg+xml;base64,qr-code', $message['html']);
-        self::assertStringNotContainsString('https://example.com/delivery?token=test-token', $message['html']);
-    }
-
     public function testRenderFairgateReminderUsesSharedTranslations(): void
     {
         $sender = new EmailSender(
             $this->createMock(MailerInterface::class),
             'noreply@example.com',
-            'Gärngschee-Mässpäggli',
+            'Gärngschee-Weihnachtswünsche',
         );
 
         $message = $sender->renderFairgateReminder('https://fairgate.example/login');
 
-        self::assertSame('Bitte schliesse deine Mässpäggli-Anmeldung ab', $message['subject']);
+        self::assertSame('Bitte schliesse deine Weihnachtswünsche-Anmeldung ab', $message['subject']);
         self::assertStringContainsString('Fairgate', $message['html']);
         self::assertStringContainsString('https://fairgate.example/login', $message['html']);
         self::assertStringContainsString('Fairgate anmelden', $message['text']);
@@ -187,7 +135,7 @@ final class EmailSenderTest extends TestCase
         $sender = new EmailSender(
             $this->createMock(MailerInterface::class),
             'noreply@example.com',
-            'Gärngschee-Mässpäggli',
+            'Gärngschee-Weihnachtswünsche',
         );
 
         $message = $sender->renderFairgateReminder('https://fairgate.example/login', 'expired', 'Info@gaerngschee.ch');
@@ -202,7 +150,7 @@ final class EmailSenderTest extends TestCase
         $sender = new EmailSender(
             $this->createMock(MailerInterface::class),
             'noreply@example.com',
-            'Gärngschee-Mässpäggli',
+            'Gärngschee-Weihnachtswünsche',
         );
 
         $message = $sender->renderOrderConfirmation([
@@ -217,7 +165,7 @@ final class EmailSenderTest extends TestCase
         ], 'provisional');
 
         self::assertStringContainsString('https://fairgate.example/login', $message['html']);
-        self::assertStringContainsString('Mässpäggli 2026', $message['html']);
+        self::assertStringContainsString('Weihnachtswünsche 2026', $message['html']);
         self::assertStringNotContainsString('{{ YEAR }}', $message['html']);
         self::assertStringContainsString('Zum Registrierungsformular', $message['text']);
     }
@@ -235,7 +183,7 @@ final class EmailSenderTest extends TestCase
                 return true;
             }));
 
-        $sender = new EmailSender($mailer, 'noreply@example.com', 'Gärngschee-Mässpäggli');
+        $sender = new EmailSender($mailer, 'noreply@example.com', 'Gärngschee-Weihnachtswünsche');
 
         $sender->sendUserEmailChanged('new@example.com');
     }

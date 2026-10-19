@@ -26,16 +26,15 @@ final class PublicRoutes
         ?FrontendConfigRepository $configRepository = null,
         ?OrderRepository $orderRepository = null,
         ?RateLimitService $rateLimitService = null,
-    ): void
-    {
+    ): void {
         $app->get('/public/php-test', static function (ServerRequestInterface $request, ResponseInterface $response): ResponseInterface {
             $response->getBody()->write('PHP backend is reachable.');
 
             return $response->withHeader('Content-Type', 'text/plain; charset=utf-8');
         });
 
-        $app->group('/public', function (RouteCollectorProxy $group) use ($anmeldungService, $registrationTokens, $configRepository, $orderRepository, $rateLimitService): void {
-            $start = $group->post('/start', new StartRegistrationAction($anmeldungService, $registrationTokens, $configRepository, null, $orderRepository));
+        $app->group('/public', function (RouteCollectorProxy $group) use ($anmeldungService, $registrationTokens, $configRepository, $rateLimitService): void {
+            $start = $group->post('/start', new StartRegistrationAction($anmeldungService, $registrationTokens, $configRepository));
             if ($rateLimitService !== null) {
                 $start->add(new RateLimitMiddleware(3, 900, static fn ($request): string => RateLimitMiddleware::ipAndEmail($request), $rateLimitService));
                 $start->add(new RateLimitMiddleware(20, 3600, static fn ($request): string => RateLimitMiddleware::ip($request), $rateLimitService));

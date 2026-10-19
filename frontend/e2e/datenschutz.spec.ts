@@ -8,7 +8,7 @@ test.describe('Privacy route', () => {
 
     await page.goto('/datenschutz');
 
-    await expect(page.locator('h1')).toHaveText('Datenschutz – Gärngschee Mässpäggli');
+    await expect(page.locator('h1')).toHaveText('Datenschutz – Gärngschee Weihnachtswünsche');
     await expect(page.locator('.legal-page__content')).toContainText('Prüfung bei Fairgate');
     await expect(page.locator('.legal-page__content')).toContainText('Statistik mit Matomo');
     await expect(page.getByRole('link', { name: 'Datenschutzerklärung' })).toHaveAttribute('href', '/datenschutz');

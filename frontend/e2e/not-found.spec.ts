@@ -19,7 +19,7 @@ test.describe('Not-found route', () => {
 
   test('links to the start page', async ({ page }) => {
     await page.goto('/not-found');
-    await page.getByRole('link', { name: 'Mässpäggli bestellen' }).click();
+    await page.getByRole('link', { name: 'Weihnachtswünsche bestellen' }).click();
 
     await page.waitForURL('**/start');
   });

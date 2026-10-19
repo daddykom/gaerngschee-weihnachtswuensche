@@ -3,7 +3,6 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { UserGroup } from '../models/frontend-config.model';
-import { ClientOrder } from '../models/order.model';
 
 export interface AdminUser {
   id: string;
@@ -19,13 +18,6 @@ export interface UserMutationResponse {
   emailSentTo?: string;
 }
 
-export interface ClientDeletionLookup {
-  client: Pick<AdminUser, 'id' | 'email'>;
-  year: number;
-  order: ClientOrder;
-  canDelete: boolean;
-}
-
 @Injectable({ providedIn: 'root' })
 export class AdminUsersService {
   private readonly http = inject(HttpClient);
@@ -33,19 +25,6 @@ export class AdminUsersService {
 
   list(): Observable<AdminUser[]> {
     return this.http.get<AdminUser[]>(this.baseUrl, { withCredentials: true });
-  }
-
-  findClientOrder(email: string): Observable<ClientDeletionLookup> {
-    return this.http.get<ClientDeletionLookup>(`${environment.apiUrl}/admin/client-deletion`, {
-      params: { email },
-      withCredentials: true,
-    });
-  }
-
-  deleteClientOrder(userId: string): Observable<{ deleted: boolean; userId: string }> {
-    return this.http.delete<{ deleted: boolean; userId: string }>(`${environment.apiUrl}/admin/client-deletion/${userId}`, {
-      withCredentials: true,
-    });
   }
 
   get(userId: string): Observable<{ user: AdminUser }> {

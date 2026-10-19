@@ -8,7 +8,7 @@ Qualifizierte Klienten erhalten eine Zusage.
 
 ### F1: Qualifikation
 
-- Anmeldung qualifizieren wenn Mässpäggli verfügbar
+- Anmeldung qualifizieren wenn Weihnachtswünsche verfügbar
 - Automatische Statusänderung
 
 ### F2: Zusage versenden
@@ -43,7 +43,7 @@ interface Qualification {
 
 ## Fachliche Regeln
 
-- Eine Anmeldung kann erst qualifiziert werden wenn genügend Mässpäggli verfügbar sind
+- Eine Anmeldung kann erst qualifiziert werden wenn genügend Weihnachtswünsche verfügbar sind
 - Nach Qualifikation erhält der Klient automatisch eine Informations-E-Mail mit QR-Code
 
 ## Implementation Status

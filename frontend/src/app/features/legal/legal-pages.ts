@@ -32,13 +32,13 @@ export const legalPages = {
     `,
   },
   datenschutz: {
-    title: 'Datenschutz – Gärngschee Mässpäggli',
+    title: 'Datenschutz – Gärngschee Weihnachtswünsche',
     content: `
       <p>Der Schutz deiner persönlichen Daten ist uns wichtig.</p>
-      <p>Hier erklären wir in einfachem Deutsch, welche Daten wir für die Mässpäggli-Aktion brauchen und was wir damit machen.</p>
+      <p>Hier erklären wir in einfachem Deutsch, welche Daten wir für die Weihnachtswünsche-Aktion brauchen und was wir damit machen.</p>
 
       <h2>Wer ist verantwortlich?</h2>
-      <p>Verantwortlich für die Mässpäggli-Aktion ist:</p>
+      <p>Verantwortlich für die Weihnachtswünsche-Aktion ist:</p>
       <p><strong>Verein Gärngschee</strong><br>
         Clarastrasse 10<br>
         4058 Basel<br>
@@ -54,30 +54,30 @@ export const legalPages = {
         <li>um dir deinen persönlichen Anmeldelink zu schicken,</li>
         <li>um deine Anmeldung zu verwalten,</li>
         <li>um bei Fairgate zu prüfen, ob du bei Gärngschee registriert bist,</li>
-        <li>um dein Mässpäggli später der richtigen Anmeldung zuzuordnen.</li>
+        <li>um dein Weihnachtswünsche später der richtigen Anmeldung zuzuordnen.</li>
       </ul>
-      <p>An der Mässpäggli-Aktion können nur Personen teilnehmen, die in der Schweiz wohnen und die notwendige Prüfung bei Gärngschee erfüllen.</p>
+      <p>An der Weihnachtswünsche-Aktion können nur Personen teilnehmen, die in der Schweiz wohnen und die notwendige Prüfung bei Gärngschee erfüllen.</p>
 
       <h2>Prüfung bei Fairgate</h2>
       <p>Wenn du dich anmeldest, prüfen wir deine Angaben bei <strong>Fairgate</strong>.</p>
       <p>Wir fragen dort ab, welche Erwachsenen und Kinder zu deiner Registrierung gehören.</p>
-      <p>Für die Mässpäggli-Aktion übernehmen und speichern wir davon nur:</p>
+      <p>Für die Weihnachtswünsche-Aktion übernehmen und speichern wir davon nur:</p>
       <ul>
         <li>deine E-Mail-Adresse,</li>
         <li>die Anzahl Erwachsene,</li>
         <li>die Anzahl Kinder.</li>
       </ul>
-      <p>Weitere persönliche Angaben aus Fairgate speichern wir nicht in der Mässpäggli-Anwendung.</p>
+      <p>Weitere persönliche Angaben aus Fairgate speichern wir nicht in der Weihnachtswünsche-Anwendung.</p>
 
       <h2>Dein Name bei der Abholung</h2>
       <p>Normalerweise zeigst du bei der Abholung deinen persönlichen QR-Code. Dann müssen wir deinen Namen nicht suchen.</p>
       <p>Hast du deinen QR-Code nicht dabei, können unsere Mitarbeitenden nach deiner E-Mail-Adresse suchen.</p>
-      <p>Nur in diesem Fall fragen wir bei Fairgate deinen Vornamen und Nachnamen ab. Der Name wird unseren Mitarbeitenden angezeigt. So können sie prüfen, ob das Mässpäggli der richtigen Person abgegeben wird.</p>
-      <p><strong>Vorname und Nachname werden nicht in der Mässpäggli-Anwendung gespeichert.</strong></p>
+      <p>Nur in diesem Fall fragen wir bei Fairgate deinen Vornamen und Nachnamen ab. Der Name wird unseren Mitarbeitenden angezeigt. So können sie prüfen, ob das Weihnachtswünsche der richtigen Person abgegeben wird.</p>
+      <p><strong>Vorname und Nachname werden nicht in der Weihnachtswünsche-Anwendung gespeichert.</strong></p>
       <p>Wir verwenden sie für keinen anderen Zweck.</p>
 
       <h2>E-Mails</h2>
-      <p>Wir schicken dir E-Mails, die für die Mässpäggli-Aktion notwendig sind. Dazu gehören zum Beispiel:</p>
+      <p>Wir schicken dir E-Mails, die für die Weihnachtswünsche-Aktion notwendig sind. Dazu gehören zum Beispiel:</p>
       <ul>
         <li>der Anmeldelink,</li>
         <li>Bestätigungen,</li>
@@ -88,19 +88,19 @@ export const legalPages = {
       <p>Wir verwenden deine E-Mail-Adresse nicht für Werbung oder Newsletter.</p>
 
       <h2>Hosting</h2>
-      <p>Die Mässpäggli-Anwendung und ihre Daten werden bei der <strong>cyon GmbH in der Schweiz</strong> gehostet.</p>
+      <p>Die Weihnachtswünsche-Anwendung und ihre Daten werden bei der <strong>cyon GmbH in der Schweiz</strong> gehostet.</p>
       <p>Beim Betrieb einer Webseite entstehen technische Daten. Dazu können zum Beispiel die IP-Adresse, der Zeitpunkt eines Zugriffs, die aufgerufene Seite und Informationen über den verwendeten Browser gehören.</p>
       <p>Solche Daten können in technischen Protokollen gespeichert werden. Sie werden für den sicheren und zuverlässigen Betrieb der Webseite benötigt.</p>
 
       <h2>Statistik mit Matomo</h2>
-      <p>Wir möchten wissen, wie unsere Webseite genutzt wird. Das hilft uns, die Mässpäggli-Anwendung zu verbessern.</p>
+      <p>Wir möchten wissen, wie unsere Webseite genutzt wird. Das hilft uns, die Weihnachtswünsche-Anwendung zu verbessern.</p>
       <p>Dafür verwenden wir <strong>Matomo</strong>.</p>
       <p>Wir erfassen zum Beispiel:</p>
       <ul>
         <li>ob du ein Smartphone, Tablet oder einen Computer verwendest,</li>
         <li>welchen Browser und welches Betriebssystem du verwendest,</li>
         <li>welche Bildschirmauflösung dein Gerät hat,</li>
-        <li>welche Seiten der Mässpäggli-Anwendung besucht werden,</li>
+        <li>welche Seiten der Weihnachtswünsche-Anwendung besucht werden,</li>
         <li>aus welchem Land die Zugriffe ungefähr kommen.</li>
       </ul>
       <p>Die IP-Adresse wird anonymisiert.</p>
@@ -111,7 +111,7 @@ export const legalPages = {
 
       <h2>Wie lange speichern wir deine Daten?</h2>
       <p>Wir speichern deine Daten höchstens 3 Jahre.</p>
-      <p>Danach werden deine E-Mail-Adresse sowie die gespeicherte Anzahl Erwachsene und Kinder automatisch aus der Mässpäggli-Anwendung gelöscht.</p>
+      <p>Danach werden deine E-Mail-Adresse sowie die gespeicherte Anzahl Erwachsene und Kinder automatisch aus der Weihnachtswünsche-Anwendung gelöscht.</p>
 
       <h2>Deine Rechte</h2>
       <p>Du kannst uns fragen:</p>

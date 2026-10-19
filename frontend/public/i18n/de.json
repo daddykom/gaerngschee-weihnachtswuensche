@@ -1,8 +1,8 @@
 {
   "app": {
-    "title": "Mässpäggli",
+    "title": "Weihnachtswünsche",
     "footer": {
-      "product": "Mässpäggli",
+      "product": "Weihnachtswünsche",
       "openSource": "Open Source auf GitHub",
       "developedBy": "entwickelt von",
       "imprint": "Impressum",
@@ -11,25 +11,25 @@
       "navigationLabel": "Rechtliche und weiterführende Links"
     },
     "home": {
-      "title": "Mässpäggli",
+      "title": "Weihnachtswünsche",
       "lead": "Gemeinsam machen wir einen Herbstmess-Besuch möglich - auch wenn das Geld knapp ist.",
       "externalLink": "(öffnet in einem neuen Fenster)",
       "loading": "Die Aktionsseite wird geladen ...",
       "login": "Anmelden",
       "logout": "Abmelden",
       "donate": {
-        "title": "Mässpäggli spenden",
+        "title": "Weihnachtswünsche spenden",
         "text": "Erfülle einer Familie einen Besuch an der Messe {{year}}.",
         "action": "Jetzt spenden",
         "unavailable": "Der Spendenlink ist momentan nicht verfügbar."
       },
       "receive": {
-        "title": "Mässpäggli erhalten",
-        "text": "Möchtest Du ein Mässpäggli für Dich und deine Famile? Starte hier deine Anfrage.",
-        "action": "Mässpäggli anfragen",
-        "notStarted": "Die nächste Mässpäggli-Aktion beginnt am {{date}}.",
+        "title": "Weihnachtswünsche erhalten",
+        "text": "Möchtest Du ein Weihnachtswünsche für Dich und deine Famile? Starte hier deine Anfrage.",
+        "action": "Weihnachtswünsche anfragen",
+        "notStarted": "Die nächste Weihnachtswünsche-Aktion beginnt am {{date}}.",
         "ended": "Wegen zu grosser Nachfrage sind leider keine Neuanmeldungen mehr möglich.",
-        "unavailable": "Die Mässpäggli-Aktion ist momentan nicht verfügbar."
+        "unavailable": "Die Weihnachtswünsche-Aktion ist momentan nicht verfügbar."
       }
     },
     "publicConfiguration": {
@@ -38,7 +38,7 @@
       "error": "Die erforderlichen Einstellungen konnten nicht geladen werden. Bitte versuche es später erneut."
     },
     "anmeldung": {
-      "title": "Mässpäggli Anmeldung",
+      "title": "Weihnachtswünsche Anmeldung",
       "lead": "Schreib deine E-Mail-Adresse hier hinein. Wir schicken dir dann einen direkten Link zum Bestellformular.",
       "fairgate": "Bist Du bereits bei Gärngschee angemeldet? Dann gib hier die E-Mail-Adresse ein, die Du bei deiner Anmeldung bei Fairgate verwendet hast.",
       "emailHeading": "Deine E-Mail-Adresse",
@@ -58,11 +58,11 @@
       "emailSentTitle": "E-Mail versandt",
       "emailSentMessage": "Wir haben dir eine E-Mail mit deinem persönlichen Anmeldelink geschickt. Der Link ist 10 Minuten gültig.",
       "privacyTitle": "Warum brauchen wir deine E-Mail-Adresse?",
-      "privacyText": "Wir schicken dir per E-Mail einen persönlichen Link für deine Anmeldung zur Mässpäggli-Aktion.\n\nBei der Anmeldung prüfen wir bei Fairgate, ob du bei Gärngschee registriert bist und wie viele Erwachsene und Kinder zu deiner Anmeldung gehören.\n\nWir speichern nur deine E-Mail-Adresse und die Anzahl Erwachsene und Kinder.",
+      "privacyText": "Wir schicken dir per E-Mail einen persönlichen Link für deine Anmeldung zur Weihnachtswünsche-Aktion.\n\nBei der Anmeldung prüfen wir bei Fairgate, ob du bei Gärngschee registriert bist und wie viele Erwachsene und Kinder zu deiner Anmeldung gehören.\n\nWir speichern nur deine E-Mail-Adresse und die Anzahl Erwachsene und Kinder.",
       "privacyLink": "Mehr zum Datenschutz"
     },
     "login": {
-      "pageTitle": "Mässpäggli verwalten",
+      "pageTitle": "Weihnachtswünsche verwalten",
       "heading": "Anmelden",
       "emailLabel": "E-Mail-Adresse",
       "passwordLabel": "Passwort",
@@ -80,12 +80,17 @@
         }
       }
     },
+    "bestellung": {
+      "pageTitle": "Bestellung",
+      "title": "Weihnachtswünsche",
+      "message": "Die Bestellfunktion wird derzeit vorbereitet."
+    },
     "order": {
-      "pageTitle": "Mässpäggli bestellen",
-      "heading": "Mässpäggli bestellen",
+      "pageTitle": "Weihnachtswünsche bestellen",
+      "heading": "Weihnachtswünsche bestellen",
       "description": "Dies ist die vorbereitete Bestellseite.",
       "intro": "Für deine Bestellung sind {{adults}} Erwachsene und {{children}} Kinder erfasst.",
-      "introInstruction": "Wähle für jede Person das passende Mässpäggli aus.",
+      "introInstruction": "Wähle für jede Person das passende Weihnachtswünsche aus.",
       "adults": "Erwachsene",
       "children": "Kinder",
       "fairgate": "Fairgate-Konto vorhanden",
@@ -93,7 +98,7 @@
       "no": "Nein",
       "noFairgate": {
         "title": "Lieber Besteller",
-        "messageBeforeLink": "Wir können Dich leider nicht bei Fairgate finden. Bitte melde Dich dort an, damit Du berechtigt bist, ein oder mehrere Mässpäggli zu bestellen. Verwende dabei die E-Mail, die Du hier verwendet hast. Du kannst Dich trotzdem provisorisch anmelden, Du musst uns einfach die richtige Anzahl Erwachsene und Kinder angeben. Sobald wir deine Anmeldung bei Fairgate erhalten haben, wird deine Anmeldung automatisch definitiv. Anmelden kannst Du Dich",
+        "messageBeforeLink": "Wir können Dich leider nicht bei Fairgate finden. Bitte melde Dich dort an, damit Du berechtigt bist, ein oder mehrere Weihnachtswünsche zu bestellen. Verwende dabei die E-Mail, die Du hier verwendet hast. Du kannst Dich trotzdem provisorisch anmelden, Du musst uns einfach die richtige Anzahl Erwachsene und Kinder angeben. Sobald wir deine Anmeldung bei Fairgate erhalten haben, wird deine Anmeldung automatisch definitiv. Anmelden kannst Du Dich",
         "link": "hier",
         "messageAfterLink": "."
       },
@@ -108,13 +113,13 @@
         "children": "Anzahl Kinder"
       },
       "categories": {
-        "title": "Mässpäggli anfordern",
-        "description": "Du kannst die Kategorien für dein Mässpäggli selbst auswählen. \nBitte beachte: Bei einigen Bahnen gibt es Vorgaben zu Grösse, Gewicht oder Alter. ",
+        "title": "Weihnachtswünsche anfordern",
+        "description": "Du kannst die Kategorien für dein Weihnachtswünsche selbst auswählen. \nBitte beachte: Bei einigen Bahnen gibt es Vorgaben zu Grösse, Gewicht oder Alter. ",
         "adults": "Erwachsene",
         "children": "Kinder",
         "adult": "Erwachsene Person",
         "child": "Kind",
-        "category": "Mässpäggli-Kategorie",
+        "category": "Weihnachtswünsche-Kategorie",
         "pleaseSelect": "Bitte auswählen",
         "errors": {
           "required": "Bitte auswählen."
@@ -226,7 +231,7 @@
       "pageTitle": "Seite nicht gefunden",
       "heading": "Diese Seite gibt es nicht",
       "login": "Anmelden",
-      "start": "Mässpäggli bestellen"
+      "start": "Weihnachtswünsche bestellen"
     },
     "auth": {
       "loginErrorTitle": "Anmeldung fehlgeschlagen",
@@ -244,6 +249,10 @@
     },
     "admin": {
       "overview": {
+        "stub": {
+          "title": "Übersicht",
+          "message": "Die Übersicht für Weihnachtswünsche wird derzeit vorbereitet."
+        },
         "title": "Admin-Übersicht"
       },
       "fairgateTest": {
@@ -455,12 +464,12 @@
       "order": {
         "confirmation": {
           "definitive": {
-            "subject": "Deine Mässpäggli-Anmeldung ist definitiv bestätigt",
-            "title": "Deine Mässpäggli-Anmeldung ist definitiv bestätigt",
+            "subject": "Deine Weihnachtswünsche-Anmeldung ist definitiv bestätigt",
+            "title": "Deine Weihnachtswünsche-Anmeldung ist definitiv bestätigt",
             "highlight": "Danke für deine Geduld.",
-            "body": "Vielen Dank für deine Geduld! Deine Anmeldung für das Mässpäggli {{year}} wurde erfolgreich geprüft und ist nun definitiv bestätigt.",
+            "body": "Vielen Dank für deine Geduld! Deine Anmeldung für das Weihnachtswünsche {{year}} wurde erfolgreich geprüft und ist nun definitiv bestätigt.",
             "nextTitle": "Wie geht es weiter?",
-            "nextText": "Sobald die Mässpäggli abholbereit sind, senden wir dir eine E-Mail mit deinem persönlichen QR-Code. Diesen QR-Code zeigst du einfach bei der Ausgabe vor, um dein Mässpäggli in Empfang zu nehmen.",
+            "nextText": "Sobald die Weihnachtswünsche abholbereit sind, senden wir dir eine E-Mail mit deinem persönlichen QR-Code. Diesen QR-Code zeigst du einfach bei der Ausgabe vor, um dein Weihnachtswünsche in Empfang zu nehmen.",
             "correction": "Wir haben die Anzahl der Erwachsenen und Kinder anhand der Angaben in Fairgate angepasst. Bitte prüfe deine Bestellübersicht.",
             "correctionLink": "Anmeldung prüfen oder anpassen",
             "overviewTitle": "Bestellübersicht",
@@ -471,7 +480,7 @@
           "provisional": {
             "subject": "Fast geschafft!",
             "title": "Fast geschafft!",
-            "highlight": "Danke für deine Anmeldung zum Mässpäggli {{year}}.",
+            "highlight": "Danke für deine Anmeldung zum Weihnachtswünsche {{year}}.",
             "body": "",
             "fairgateTitle": "Fairgate-Prüfung steht noch aus",
             "fairgateText": "Wichtig: Verwende die gleiche E-Mail-Adresse wie bei deiner Anmeldung.\n\nDanach prüfen wir deine Angaben und schicken dir die Bestätigung per E-Mail.",
@@ -512,10 +521,10 @@
         "ignore": "Wenn du diese Anfrage nicht gestellt hast, kannst du diese E-Mail ignorieren."
       },
       "delivery": {
-        "subject": "Das Mässpäggli ist bereit zur Abholung!",
-        "title": "Das Mässpäggli ist bereit zur Abholung!",
+        "subject": "Das Weihnachtswünsche ist bereit zur Abholung!",
+        "title": "Das Weihnachtswünsche ist bereit zur Abholung!",
         "greeting": "Liebe/r Bezüger/in",
-        "introduction": "Es ist so weit: Dein Mässpäggli liegt für dich bereit! Wir freuen uns riesig, dir damit eine unbeschwerte Zeit an der Herbstmesse zu ermöglichen.",
+        "introduction": "Es ist so weit: Dein Weihnachtswünsche liegt für dich bereit! Wir freuen uns riesig, dir damit eine unbeschwerte Zeit an der Herbstmesse zu ermöglichen.",
         "pickupInformationTitle": "Hier sind alle Infos zur Abholung:",
         "pickupDateLabel": "Wann",
         "pickupDate": "Freitag, 30. Oktober 2026",
@@ -526,38 +535,38 @@
         "pickupImportantTitle": "Wichtig für die Abholung:",
         "pickupQrInstruction": "Bitte zeige bei der Ausgabe diesen QR-Code (ausgedruckt oder direkt auf dem Smartphone) vor:",
         "qrAlt": "QR-Code für die Abholung",
-        "pickupProxy": "Falls du es persönlich nicht schaffst, kann auch eine Vertrauensperson dein Mässpäggli mit diesem QR-Code für dich abholen.",
+        "pickupProxy": "Falls du es persönlich nicht schaffst, kann auch eine Vertrauensperson dein Weihnachtswünsche mit diesem QR-Code für dich abholen.",
         "closingMessage": "Wir wünschen dir und deinen Liebsten ganz viel Freude und tolle Erlebnisse an der Basler Herbstmesse!",
         "closing": "Herzliche Grüsse",
         "team": "Dein Gärngschee-Team"
       },
       "fairgateReminder": {
-        "subject": "Bitte schliesse deine Mässpäggli-Anmeldung ab",
+        "subject": "Bitte schliesse deine Weihnachtswünsche-Anmeldung ab",
         "notFound": "Wir haben dich bei Fairgate noch nicht gefunden.",
-        "body": "Bitte registriere dich bei Fairgate.\nWichtig: Verwende die gleiche E-Mail-Adresse wie für deine Mässpäggli-Anmeldung.\n\nDanach prüfen wir deine Anmeldung automatisch.",
+        "body": "Bitte registriere dich bei Fairgate.\nWichtig: Verwende die gleiche E-Mail-Adresse wie für deine Weihnachtswünsche-Anmeldung.\n\nDanach prüfen wir deine Anmeldung automatisch.",
         "button": "Bei Fairgate anmelden",
         "expired": "Dein Bedürftigkeitsausweis bei Fairgate ist abgelaufen.",
         "expiredBody": "Bitte sende uns einen aktuellen Bedürftigkeitsausweis an folgende Adresse:"
       },
       "registration": {
         "clientOrder": {
-          "title": "Jetzt für Mässpäggli anmelden",
-          "highlight": "Dein Anmeldelink für das Mässpäggli ist bereit.",
-          "body": "Schön, dass du dabei bist! Klicke einfach auf den folgenden Link, um deine Anmeldung für das Mässpäggli 2026 zu starten:",
+          "title": "Jetzt für Weihnachtswünsche anmelden",
+          "highlight": "Dein Anmeldelink für das Weihnachtswünsche ist bereit.",
+          "body": "Schön, dass du dabei bist! Klicke einfach auf den folgenden Link, um deine Anmeldung für das Weihnachtswünsche 2026 zu starten:",
           "nextTitle": "Wichtig",
           "nextText": "Der Link ist 10 Minuten gültig und kann nur einmal verwendet werden.",
-          "button": "Mässpäggli auswählen",
-          "subject": "Dein Link zur Mässpäggli-Bestellung"
+          "button": "Weihnachtswünsche auswählen",
+          "subject": "Dein Link zur Weihnachtswünsche-Bestellung"
         },
         "common": {
           "ignore": "Falls du diese Anfrage nicht ausgelöst hast, kannst du diese E-Mail ignorieren."
         },
         "clientOrderStatus": {
-          "title": "Information zu deiner Mässpäggli-Bestellung",
-          "subject": "Information zu deiner Mässpäggli-Bestellung",
+          "title": "Information zu deiner Weihnachtswünsche-Bestellung",
+          "subject": "Information zu deiner Weihnachtswünsche-Bestellung",
           "toDeliver": "Deine Anmeldung wird bereits vorbereitet.",
           "qrcode": "Wir haben dir schon einen QR-Code für die Abholung gesandt.",
-          "delivered": "Die Mässpäggli wurden bereits ausgeliefert."
+          "delivered": "Die Weihnachtswünsche wurden bereits ausgeliefert."
         }
       }
     }

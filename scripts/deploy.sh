@@ -2,9 +2,9 @@
 
 set -Eeuo pipefail
 
-readonly repository_url="${REPO_URL:-https://github.com/daddykom/gaerngschee-maesspaeggli.git}"
+readonly repository_url="${REPO_URL:-https://github.com/daddykom/gaerngschee-weihnachtswuensche.git}"
 readonly branch="${DEPLOY_BRANCH:-main}"
-readonly base_directory="${DEPLOY_BASE_DIR:-$HOME/public_html/gaerngschee/maesspaeggli}"
+readonly base_directory="${DEPLOY_BASE_DIR:-$HOME/public_html/gaerngschee/weihnachtswuensche}"
 readonly composer_binary="${COMPOSER_BIN:-$HOME/bin/composer}"
 readonly build_cpu="${DEPLOY_BUILD_CPU:-0}"
 

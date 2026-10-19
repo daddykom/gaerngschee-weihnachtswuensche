@@ -1,39 +1,38 @@
-# Donations Capability Spec
+# Wunsch-Erfüllung Capability Spec
 
 ## Overview
 
-Spendenverwaltung für Mässpäggli.
+Verwaltung der Erfüllung einzelner Weihnachtswünsche durch Erfüller.
 
 ## Features
 
-### F1: Anzahl auswählen
+### F1: Wunsch auswählen
 
-- Spender wählt Anzahl Mässpäggli
-- Anzeige des Gesamtbetrags
+- Erfüller sieht verfügbare Weihnachtswünsche
+- Erfüller wählt genau einen Weihnachtswunsch aus
 
-### F2: Payrexx-Integration
+### F2: Erfüllung bestätigen
 
-- Weiterleitung zu Payrexx
-- Payment-Session erstellen
-- Status-Updates via Webhook
+- Erfüllung des ausgewählten Wunsches bestätigen
+- Wunsch als erfüllt markieren
+- Erfüllung dem Erfüller zuordnen
 
-### F3: Spenden-Erfassung
+### F3: Wunsch-Status
 
-- Erfassung erfolgreicher Spenden
-- Erhöhung der verfügbaren Mässpäggli
-- Spenden-ID und Betrag speichern
+- Verfügbare Wünsche anzeigen
+- Bereits erfüllte Wünsche aus der Auswahl entfernen
+- Statusänderungen nachvollziehbar speichern
 
 ## Data Model
 
 ### Donation
 
 ```typescript
-interface Donation {
+interface FulfilledWish {
   id: string;
-  amount: number;
-  maspaeggliCount: number;
-  status: 'pending' | 'completed' | 'refunded';
-  payrexxPaymentId: string;
+  wishId: string;
+  fulfillerId: string;
+  status: 'fulfilled';
   createdAt: string;
 }
 ```
@@ -42,21 +41,21 @@ interface Donation {
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/api/donations/session` | Create Payrexx payment session |
-| POST | `/api/donations/webhook` | Payrexx webhook (status update) |
-| GET | `/api/donations` | List donations (staff only) |
+| GET | `/api/wishes` | List available wishes |
+| POST | `/api/wishes/{wishId}/fulfill` | Fulfill one wish |
+| GET | `/api/wishes/fulfilled` | List fulfilled wishes (staff only) |
 
 ## Fachliche Regeln
 
-- Die Anwendung verarbeitet keine Zahlungen selbst
-- Zahlungsabwicklung erfolgt ausschliesslich über Payrexx
-- Nur erfolgreich bezahlte Spenden erhöhen die Anzahl verfügbarer Mässpäggli
+- Ein Wunsch darf nicht mehrfach erfüllt werden
+- Die Erfüllung wird nur nach ausdrücklicher Bestätigung gespeichert
+- Erfüller können nur verfügbare Wünsche auswählen
 
 ## Implementation Status
 
 | Component | Status |
 |-----------|--------|
-| Payrexx session creation | ✗ Not implemented |
-| Webhook handling | ✗ Not implemented |
-| Donation recording | ✗ Not implemented |
-| Available count update | ✗ Not implemented |
+| Wish selection | ✗ Not implemented |
+| Fulfillment confirmation | ✗ Not implemented |
+| Fulfillment recording | ✗ Not implemented |
+| Availability update | ✗ Not implemented |

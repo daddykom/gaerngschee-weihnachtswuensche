@@ -9,11 +9,11 @@ import { clientLoginGuard } from './client-login.guard';
 
 describe('clientLoginGuard', () => {
   const redirect = { url: '/start' };
-  const orderRedirect = { url: '/order/edit' };
+  const orderRedirect = { url: '/bestellung' };
   const router = {
     getCurrentNavigation: vi.fn(() => ({ initialUrl: { queryParams: { token: 'registration-token' } } })),
     url: '/client-login',
-    parseUrl: vi.fn((url: string) => url === '/order/edit' ? orderRedirect : redirect),
+    parseUrl: vi.fn((url: string) => url === '/bestellung' ? orderRedirect : redirect),
   };
   const store = { dispatch: vi.fn() };
   const response: RegistrationLoginResponse = {

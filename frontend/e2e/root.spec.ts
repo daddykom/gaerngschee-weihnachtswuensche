@@ -9,7 +9,7 @@ test.describe('Root route', () => {
         contentType: 'application/json',
         body: JSON.stringify([
           { variableName: 'campaign_year', value: '2026' },
-          { variableName: 'donation_url', value: 'https://donate.example/maesspaeggli' },
+          { variableName: 'donation_url', value: 'https://donate.example/weihnachtswuensche' },
           { variableName: 'campaign_start_date', value: '2000-01-01' },
           { variableName: 'campaign_end_date', value: '2999-01-01' },
         ]),
@@ -20,8 +20,8 @@ test.describe('Root route', () => {
     await expect(page.locator('app-root')).toBeVisible();
      await expectTranslatedText(page.locator('h1'), 'app.home.title');
      await expectTranslatedText(page.locator('.home__lead'), 'app.home.lead');
-    await expect(page.getByRole('link', { name: 'Jetzt spenden' })).toHaveAttribute('href', 'https://donate.example/maesspaeggli');
-    await expect(page.getByRole('link', { name: 'Mässpäggli anfragen' })).toHaveAttribute('href', '/start');
+    await expect(page.getByRole('link', { name: 'Jetzt spenden' })).toHaveAttribute('href', 'https://donate.example/weihnachtswuensche');
+    await expect(page.getByRole('link', { name: 'Weihnachtswünsche anfragen' })).toHaveAttribute('href', '/start');
     await expect(page.getByRole('link', { name: 'Anmelden' })).toHaveAttribute('href', '/login');
   });
 
@@ -40,7 +40,7 @@ test.describe('Root route', () => {
 
     await page.goto('/');
      await expectTranslatedText(page.locator('main'), 'app.home.receive.notStarted');
-    await expect(page.getByRole('link', { name: 'Mässpäggli anfragen' })).toHaveCount(0);
+    await expect(page.getByRole('link', { name: 'Weihnachtswünsche anfragen' })).toHaveCount(0);
   });
 
   test('shows logout for an authenticated user and returns home after logout', async ({ page }) => {

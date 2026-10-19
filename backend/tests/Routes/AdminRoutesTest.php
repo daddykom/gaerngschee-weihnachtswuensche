@@ -199,69 +199,6 @@ final class AdminRoutesTest extends TestCase
         self::assertFalse($lookupCalled);
     }
 
-    public function testAdminOverviewAggregatesOrdersByStatusAndRecentDate(): void
-    {
-        $admin = $this->repository->createUser('admin@example.com', 'secret', 'admin');
-        (new SessionService())->setUser($admin['id'], 'admin');
-        $year = (int) date('Y');
-        $this->pdo->prepare(
-            'INSERT INTO frontend_config (id, variable_name, value, description, access_group, update_group, label)
-             VALUES (?, ?, ?, ?, ?, ?, ?)',
-        )->execute([
-            'config-recent-days', 'provisional_order_recent_days', '14', 'Recent days', '["admin", "user"]', '["admin"]', 'Recent days',
-        ]);
-        $this->insertCampaignYear();
-        $definitiveUser = $this->repository->createUser('definitive@example.com', 'secret', 'user');
-        $oldUser = $this->repository->createUser('old@example.com', 'secret', 'user');
-        $recentUser = $this->repository->createUser('recent@example.com', 'secret', 'user');
-        $this->insertOrder('definitive-order', $definitiveUser['id'], $year, 'definitive', '2000-01-01 00:00:00', 2, 1);
-        $this->insertOrder('provisional-old', $oldUser['id'], $year, 'provisional', '2000-01-01 00:00:00', 1, 0);
-        $this->insertOrder('provisional-recent', $recentUser['id'], $year, 'provisional', date('Y-m-d H:i:s'), 3, 0);
-
-        $response = $this->createApp(
-            null,
-            null,
-            new OrderRepository($this->pdo),
-            new FrontendConfigRepository($this->pdo),
-        )->handle((new ServerRequestFactory())->createServerRequest('GET', '/admin/overview'));
-        $data = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
-
-        self::assertSame(200, $response->getStatusCode());
-        self::assertCount(7, $data['categories']);
-        self::assertSame(2, $data['orders']['provisional']);
-        self::assertSame(1, $data['orders']['recentProvisional']);
-        self::assertSame(1, $data['orders']['definitive']);
-        self::assertSame(4, $data['categories'][0]['provisional']);
-        self::assertSame(3, $data['categories'][0]['recentProvisional']);
-        self::assertSame(2, $data['categories'][0]['definitive']);
-        self::assertSame('catA', $data['categories'][0]['category']);
-    }
-
-    public function testAdminCanMarkDefinitiveOrdersForDelivery(): void
-    {
-        $admin = $this->repository->createUser('admin@example.com', 'secret', 'admin');
-        $customer = $this->repository->createUser('customer@example.com', 'secret', 'client');
-        (new SessionService())->setUser($admin['id'], 'admin');
-        $year = (int) date('Y');
-        $this->insertOrder('definitive-order', $customer['id'], $year, 'definitive', date('Y-m-d H:i:s'), 1, 0);
-        $this->insertOrder('provisional-order', $admin['id'], $year, 'provisional', date('Y-m-d H:i:s'), 1, 0);
-        $this->insertCampaignYear();
-        $configRepository = new FrontendConfigRepository($this->pdo);
-
-        $response = $this->createApp(
-            null,
-            null,
-            new OrderRepository($this->pdo),
-            $configRepository,
-        )->handle((new ServerRequestFactory())->createServerRequest('POST', '/admin/overview/deliver'));
-        $data = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
-
-        self::assertSame(200, $response->getStatusCode());
-        self::assertSame(1, $data['updated']);
-        self::assertSame('toDeliver', $this->pdo->query("SELECT status FROM orders WHERE id = 'definitive-order'")->fetchColumn());
-        self::assertSame('provisional', $this->pdo->query("SELECT status FROM orders WHERE id = 'provisional-order'")->fetchColumn());
-    }
-
     public function testAdminCanCreateUserAndEmailIsSentToNewAddress(): void
     {
         $admin = $this->repository->createUser('admin@example.com', 'secret', 'admin');
@@ -405,81 +342,6 @@ final class AdminRoutesTest extends TestCase
         self::assertSame(404, $response->getStatusCode());
     }
 
-    public function testAdminCanInspectCurrentClientOrderAndDeleteItWhenProvisional(): void
-    {
-        $admin = $this->repository->createUser('admin@example.com', 'secret', 'admin');
-        $client = $this->repository->createUser('client@example.com', 'secret', 'client');
-        $this->insertCampaignYear();
-        $this->insertOrder('current-order', $client['id'], (int) date('Y'), 'provisional', '2026-01-01 10:00:00', 2, 1);
-        (new SessionService())->setUser($admin['id'], 'admin');
-        $app = $this->createApp(null, null, new OrderRepository($this->pdo), new FrontendConfigRepository($this->pdo));
-
-        $lookup = $app->handle(
-            (new ServerRequestFactory())->createServerRequest('GET', '/admin/client-deletion?email=client%40example.com'),
-        );
-        $lookupData = json_decode((string) $lookup->getBody(), true, 512, JSON_THROW_ON_ERROR);
-
-        self::assertSame(200, $lookup->getStatusCode());
-        self::assertTrue($lookupData['canDelete']);
-        self::assertSame('provisional', $lookupData['order']['status']);
-        self::assertSame((int) date('Y'), $lookupData['year']);
-
-        $delete = $app->handle($this->request('DELETE', '/admin/client-deletion/' . $client['id']));
-
-        self::assertSame(200, $delete->getStatusCode());
-        self::assertNull((new OrderRepository($this->pdo))->findForYear($client['id'], (int) date('Y')));
-        self::assertNotNull($this->repository->findById($client['id']));
-    }
-
-    public function testAdminCannotDeleteClientOrderWithDeliveryStatus(): void
-    {
-        $admin = $this->repository->createUser('admin@example.com', 'secret', 'admin');
-        $client = $this->repository->createUser('client@example.com', 'secret', 'client');
-        $this->insertCampaignYear();
-        $this->insertOrder('delivery-order', $client['id'], (int) date('Y'), 'qrcode', '2026-01-01 10:00:00', 1, 0);
-        (new SessionService())->setUser($admin['id'], 'admin');
-        $app = $this->createApp(null, null, new OrderRepository($this->pdo), new FrontendConfigRepository($this->pdo));
-
-        $lookup = $app->handle(
-            (new ServerRequestFactory())->createServerRequest('GET', '/admin/client-deletion?email=client%40example.com'),
-        );
-        $lookupData = json_decode((string) $lookup->getBody(), true, 512, JSON_THROW_ON_ERROR);
-        $delete = $app->handle($this->request('DELETE', '/admin/client-deletion/' . $client['id']));
-
-        self::assertSame(200, $lookup->getStatusCode());
-        self::assertFalse($lookupData['canDelete']);
-        self::assertSame(409, $delete->getStatusCode());
-        self::assertNotNull((new OrderRepository($this->pdo))->findForYear($client['id'], (int) date('Y')));
-    }
-
-    public function testClientDeletionLookupDoesNotReturnAnOlderOrder(): void
-    {
-        $admin = $this->repository->createUser('admin@example.com', 'secret', 'admin');
-        $client = $this->repository->createUser('client@example.com', 'secret', 'client');
-        $this->insertCampaignYear();
-        $this->insertOrder('old-order', $client['id'], (int) date('Y') - 1, 'provisional', '2025-01-01 10:00:00', 1, 0);
-        (new SessionService())->setUser($admin['id'], 'admin');
-        $app = $this->createApp(null, null, new OrderRepository($this->pdo), new FrontendConfigRepository($this->pdo));
-
-        $response = $app->handle(
-            (new ServerRequestFactory())->createServerRequest('GET', '/admin/client-deletion?email=client%40example.com'),
-        );
-
-        self::assertSame(404, $response->getStatusCode());
-    }
-
-    public function testNormalUserCannotUseClientDeletionLookup(): void
-    {
-        $user = $this->repository->createUser('user@example.com', 'secret', 'user');
-        (new SessionService())->setUser($user['id'], 'user');
-
-        $response = $this->createApp()->handle(
-            (new ServerRequestFactory())->createServerRequest('GET', '/admin/client-deletion?email=client%40example.com'),
-        );
-
-        self::assertSame(404, $response->getStatusCode());
-    }
-
     private function createApp(
         ?EmailSenderInterface $emailSender = null,
         ?FairgateTestAction $fairgateTestAction = null,
@@ -492,22 +354,6 @@ final class AdminRoutesTest extends TestCase
         AdminRoutes::register($app, $this->repository, $emailSender, $fairgateTestAction, $orderRepository, $configRepository, null, $fairgateLookupAction);
 
         return $app;
-    }
-
-    private function insertOrder(string $id, string $userId, int $year, string $status, string $timestamp, int $catA, int $catB): void
-    {
-        $this->pdo->prepare(
-            'INSERT INTO orders (id, user_id, year, status, adults_count, children_count, created_at, updated_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-        )->execute([$id, $userId, $year, $status, $catA, $catB, $timestamp, $timestamp]);
-        $this->pdo->prepare(
-            'INSERT INTO order_items (id, order_id, person_type, category, quantity) VALUES (?, ?, ?, ?, ?)',
-        )->execute([$id . '-a', $id, 'adult', 'catA', $catA]);
-        if ($catB > 0) {
-            $this->pdo->prepare(
-                'INSERT INTO order_items (id, order_id, person_type, category, quantity) VALUES (?, ?, ?, ?, ?)',
-            )->execute([$id . '-b', $id, 'child', 'catB', $catB]);
-        }
     }
 
     private function insertCampaignYear(): void

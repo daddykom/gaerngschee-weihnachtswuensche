@@ -9,10 +9,8 @@ use App\Fairgate\Services\FairgateContactProvider;
 use App\Fairgate\Services\FairgateBatchContactProvider;
 use App\Fairgate\Services\FairgateOrderDataEvaluator;
 use App\Registration\Data\OrderEmailQueueRepository;
-use App\Registration\Data\OrderCategories;
 use App\Registration\Data\OrderRepository;
 use App\Registration\Data\RegistrationTokenRepository;
-use App\Registration\Services\QrCodeGenerator;
 use App\Shared\Mail\EmailSenderInterface;
 use App\Shared\Database\Database;
 use App\Shared\Logging\ExternalErrorLogRepository;
@@ -33,7 +31,6 @@ final class OrderBatchService
         private readonly FairgateContactProvider $fairgate,
         private readonly EmailSenderInterface $emails,
         private readonly RegistrationTokenRepository $tokens,
-        private readonly ?QrCodeGenerator $qrCodes = null,
         private readonly ?ExternalErrorLogRepository $externalErrors = null,
         private readonly ?FairgateOrderDataEvaluator $evaluator = null,
     ) {
@@ -71,8 +68,6 @@ final class OrderBatchService
                 $this->queue->remove($email['id']);
                 if ($email['email_type'] === 'order_confirmation') {
                     $this->orders->markBatchEmailSent($email['order_id']);
-                } elseif ($email['email_type'] === 'delivery_qrcode') {
-                    $this->orders->markQrCodeSent($email['order_id']);
                 } else {
                     $this->orders->markFairgateReminderSent($email['order_id']);
                 }
@@ -113,8 +108,7 @@ final class OrderBatchService
                 $children = $evaluation['childrenCount'];
                 $corrected = $adults !== $order['adultsCount'] || $children !== $order['childrenCount'];
                 if ($corrected) {
-                    $items = $this->correctItems($order['items'], $adults, $children);
-                    $this->orders->updateFromBatch($order['id'], $adults, $children, $items);
+                    $this->orders->updateCountsFromBatch($order['id'], $adults, $children);
                     $order = $this->orders->findForYear($order['userId'], $order['year']) ?? $order;
                     $order['correctionNotice'] = true;
                     $order['startUrl'] = rtrim(getenv('FRONTEND_BASE_URL') ?: 'http://localhost:4200', '/') . '/start';
@@ -126,43 +120,7 @@ final class OrderBatchService
             }
         }
 
-        foreach ($this->orders->findToDeliverWithUsers() as $entry) {
-            $result['loaded']++;
-            $order = $entry['order'];
-            if ($this->queue->hasPendingForOrder($order['id'])) {
-                continue;
-            }
-
-            try {
-                $token = is_string($order['deliveryToken']) && $order['deliveryToken'] !== ''
-                    ? $order['deliveryToken']
-                    : $this->createDeliveryToken($order['id']);
-                $deliveryUrl = rtrim(getenv('FRONTEND_BASE_URL') ?: 'http://localhost:4200', '/') . '/delivery?token=' . rawurlencode($token);
-                $qrDataUri = ($this->qrCodes ?? new QrCodeGenerator())->generateDataUri($deliveryUrl);
-                $message = $this->emails->renderDeliveryNotification($order, $deliveryUrl, $qrDataUri);
-                try {
-                    $this->emails->sendStoredEmail($entry['email'], $message['subject'], $message['html'], $message['text']);
-                    $this->orders->markQrCodeSent($order['id']);
-                    $result['sent']++;
-                } catch (Throwable $exception) {
-                    $this->queue->enqueue($order['id'], 'delivery_qrcode', $entry['email'], $message, $exception->getMessage());
-                    $this->log('Delivery notification failed and queued', $order['id'], $exception);
-                    $result['queued']++;
-                }
-            } catch (Throwable $exception) {
-                $this->log('Delivery batch failed', $order['id'], $exception);
-                $result['failed']++;
-            }
-        }
-
         return $result;
-    }
-
-    private function createDeliveryToken(string $orderId): string
-    {
-        $token = rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '=');
-        $this->orders->setDeliveryToken($orderId, $token);
-        return $token;
     }
 
     /** @return array<string, string>|null */
@@ -231,8 +189,7 @@ final class OrderBatchService
         string $status,
         ?DateTimeImmutable $reminderEndDate,
         DateTimeImmutable $now,
-    ): void
-    {
+    ): void {
         if (!$this->reminderAllowed($reminderEndDate, $now)) {
             return;
         }
@@ -261,48 +218,6 @@ final class OrderBatchService
         }
     }
 
-    /** @param list<array{personType: string, category: string, quantity: int}> $items */
-    private function correctItems(array $items, int $adults, int $children): array
-    {
-        $groups = ['adult' => [], 'child' => []];
-        foreach ($items as $item) {
-            $groups[$item['personType']][$item['category']] = $item['quantity'];
-        }
-        $targets = [
-            'adult' => $children > 0 ? 0 : $adults,
-            'child' => $children,
-        ];
-        $fallbacks = [
-            'adult' => OrderCategories::ADULT_FALLBACK,
-            'child' => OrderCategories::CHILD_FALLBACK,
-        ];
-        foreach ($targets as $type => $target) {
-            $current = array_sum($groups[$type]);
-            while ($current < $target) {
-                $fallback = $fallbacks[$type];
-                $groups[$type][$fallback] = ($groups[$type][$fallback] ?? 0) + 1;
-                $current++;
-            }
-            while ($current > $target) {
-                foreach (array_reverse(OrderCategories::ALL) as $category) {
-                    if (($groups[$type][$category] ?? 0) > 0) {
-                        $groups[$type][$category]--;
-                        $current--;
-                        break;
-                    }
-                }
-            }
-        }
-        $result = [];
-        foreach ($groups as $type => $categories) {
-            foreach ($categories as $category => $quantity) {
-                if ($quantity > 0) {
-                    $result[] = ['personType' => $type, 'category' => $category, 'quantity' => $quantity];
-                }
-            }
-        }
-        return $result;
-    }
 
     private function log(string $message, string $orderId, Throwable $exception): void
     {

@@ -7,8 +7,8 @@ test.describe('Integration client login', () => {
     const token = issueRegistrationToken(email);
 
     await page.goto(`/client-login?token=${encodeURIComponent(token)}`);
-    await page.waitForURL('**/order/edit');
-    await expect(page.locator('h2')).toHaveText('Mässpäggli anfordern');
+    await page.waitForURL('**/bestellung');
+    await expect(page.locator('h2')).toHaveText('Weihnachtswünsche');
   });
 
   test('rejects an already consumed registration token', async ({ page }) => {

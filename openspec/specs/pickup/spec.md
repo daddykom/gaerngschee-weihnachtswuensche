@@ -2,7 +2,7 @@
 
 ## Overview
 
-Ausgabe der Mässpäggli an Klienten.
+Ausgabe der Weihnachtswünsche an Klienten.
 
 ## Features
 
@@ -15,7 +15,7 @@ Ausgabe der Mässpäggli an Klienten.
 
 - Zeigt Klientendaten
 - Zeigt Anzahl Kinder
-- Zeigt bereits abgegebene Mässpäggli
+- Zeigt bereits abgegebene Weihnachtswünsche
 
 ### F3: Abgabe bestätigen
 
@@ -50,9 +50,9 @@ interface Pickup {
 ## Fachliche Regeln
 
 - Ein QR-Code identifiziert genau eine Anmeldung
-- Eine Anmeldung kann mehrere Mässpäggli enthalten
+- Eine Anmeldung kann mehrere Weihnachtswünsche enthalten
 - Eine teilweise Abgabe ist möglich
-- Bereits abgegebene Mässpäggli werden gekennzeichnet
+- Bereits abgegebene Weihnachtswünsche werden gekennzeichnet
 - Bestätigte Abgabe kann durch berechtigte Mitarbeitende rückgängig gemacht werden
 
 ## Implementation Status
