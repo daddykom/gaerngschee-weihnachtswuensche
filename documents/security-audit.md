@@ -82,7 +82,7 @@ gefunden:
 - Tokens sind zeitlich begrenzt und als Einmal-Tokens ausgelegt.
 - Backend-Routen verwenden zusätzlich zu Frontend-Guards Authentifizierungs- und Gruppenprüfungen.
 - Normale Angular-Interpolation wird überwiegend verwendet.
-- Externe Spendenlinks werden auf `https:` begrenzt und verwenden bei neuen Tabs `noopener noreferrer`.
+- Links zu externen Informationsseiten werden auf `https:` begrenzt und verwenden bei neuen Tabs `noopener noreferrer`.
 
 ## Empfohlene Reihenfolge
 
