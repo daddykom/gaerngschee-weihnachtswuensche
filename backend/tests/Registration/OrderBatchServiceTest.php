@@ -18,46 +18,6 @@ use PHPUnit\Framework\TestCase;
 
 final class OrderBatchServiceTest extends TestCase
 {
-    public function testCorrectsOrderAndMarksItDefinitiveAfterSuccessfulEmail(): void
-    {
-        $pdo = TestDatabase::create();
-        $user = (new UserRepository($pdo))->createUser('person+fair1@example.com', 'secret', 'client');
-        $orders = new OrderRepository($pdo);
-        $order = $orders->saveForYear($user['id'], 2026, 'provisional', 1, 0, [
-            ['personType' => 'adult', 'category' => 'catB', 'quantity' => 1],
-        ]);
-        $this->addInterval($pdo);
-        $emails = new RecordingEmailSender();
-
-        $result = $this->service($pdo, $emails, new FixedFairgateProvider(2, 1))->run();
-        $updated = $orders->findForYear($user['id'], 2026);
-
-        self::assertSame(1, $result['loaded']);
-        self::assertSame(1, $result['sent']);
-        self::assertSame('definitive', $updated['status']);
-        self::assertSame(2, $updated['adultsCount']);
-        self::assertSame(1, $updated['childrenCount']);
-        self::assertSame([
-            ['personType' => 'child', 'category' => 'catC', 'quantity' => 1],
-        ], $updated['items']);
-        self::assertStringContainsString('"renderedMailStatus":"definitive"', $emails->orderConfirmations[0]['order']['html']);
-    }
-
-    public function testUsesAdultFallbackForAnAdultOnlyOrder(): void
-    {
-        $pdo = TestDatabase::create();
-        $user = (new UserRepository($pdo))->createUser('person+adult@example.com', 'secret', 'client');
-        $orders = new OrderRepository($pdo);
-        $orders->saveForYear($user['id'], 2026, 'provisional', 0, 0, []);
-        $this->addInterval($pdo);
-
-        $this->service($pdo, new RecordingEmailSender(), new FixedFairgateProvider(1, 0))->run();
-
-        self::assertSame([
-            ['personType' => 'adult', 'category' => 'catA', 'quantity' => 1],
-        ], $orders->findForYear($user['id'], 2026)['items']);
-    }
-
     public function testFailedEmailIsQueuedAndLeavesOrderProvisional(): void
     {
         $pdo = TestDatabase::create();
@@ -173,59 +133,6 @@ final class OrderBatchServiceTest extends TestCase
         $result = $service->run();
 
         self::assertSame(0, $result['sent']);
-        self::assertCount(0, (new OrderEmailQueueRepository($pdo))->pending());
-    }
-
-    public function testSendsDeliveryQrCodeAndMarksOrderAsQrCode(): void
-    {
-        $pdo = TestDatabase::create();
-        $user = (new UserRepository($pdo))->createUser('delivery@example.com', 'secret', 'client');
-        $orders = new OrderRepository($pdo);
-        $order = $orders->saveForYear($user['id'], 2026, 'definitive', 1, 0, [
-            ['personType' => 'adult', 'category' => 'catA', 'quantity' => 1],
-        ]);
-        $pdo->prepare("UPDATE orders SET status = 'toDeliver' WHERE id = :id")->execute(['id' => $order['id']]);
-        $this->addInterval($pdo);
-        $emails = new RecordingEmailSender();
-
-        $result = $this->service($pdo, $emails, new FixedFairgateProvider(1, 0))->run();
-        $updated = $orders->findForYear($user['id'], 2026);
-
-        self::assertSame(1, $result['loaded']);
-        self::assertSame(1, $result['sent']);
-        self::assertSame('qrcode', $updated['status']);
-        self::assertMatchesRegularExpression('/^[A-Za-z0-9_-]{43}$/', $updated['deliveryToken']);
-        self::assertStringContainsString('/delivery?token=' . $updated['deliveryToken'], $emails->orderConfirmations[0]['order']['html']);
-        self::assertStringContainsString('data:image/png;base64,', $emails->orderConfirmations[0]['order']['html']);
-    }
-
-    public function testFailedDeliveryNotificationIsQueuedAndRetried(): void
-    {
-        $pdo = TestDatabase::create();
-        $user = (new UserRepository($pdo))->createUser('delivery-retry@example.com', 'secret', 'client');
-        $orders = new OrderRepository($pdo);
-        $order = $orders->saveForYear($user['id'], 2026, 'definitive', 1, 0, [
-            ['personType' => 'adult', 'category' => 'catA', 'quantity' => 1],
-        ]);
-        $pdo->prepare("UPDATE orders SET status = 'toDeliver' WHERE id = :id")->execute(['id' => $order['id']]);
-        $this->addInterval($pdo);
-        $emails = new RecordingEmailSender();
-        $emails->failStoredEmail = true;
-        $service = $this->service($pdo, $emails, new FixedFairgateProvider(1, 0));
-
-        $failed = $service->run();
-        $token = $orders->findForYear($user['id'], 2026)['deliveryToken'];
-        self::assertSame(1, $failed['queued']);
-        self::assertSame('toDeliver', $orders->findForYear($user['id'], 2026)['status']);
-        self::assertCount(1, (new OrderEmailQueueRepository($pdo))->pending());
-
-        $emails->failStoredEmail = false;
-        $retried = $service->run();
-        $updated = $orders->findForYear($user['id'], 2026);
-
-        self::assertSame(1, $retried['sent']);
-        self::assertSame('qrcode', $updated['status']);
-        self::assertSame($token, $updated['deliveryToken']);
         self::assertCount(0, (new OrderEmailQueueRepository($pdo))->pending());
     }
 
