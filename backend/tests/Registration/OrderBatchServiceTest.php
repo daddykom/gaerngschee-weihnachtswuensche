@@ -289,8 +289,8 @@ final class OrderBatchServiceTest extends TestCase
             $fairgate,
             $emails,
             new RegistrationTokenRepository($pdo),
-            null,
             new ExternalErrorLogRepository($pdo),
+            null,
         );
     }
 
