@@ -3,7 +3,7 @@ import { expectTranslatedText } from './support/assertions';
 
 test.describe('Configuration route', () => {
   test.beforeEach(async ({ page }) => {
-    await page.route('http://localhost:8080/auth/session-status', async (route) => {
+    await page.route('http://localhost:8083/auth/session-status', async (route) => {
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ expiresAt: '2099-01-01T00:00:00Z', secondsRemaining: 3600 }) });
     });
   });
@@ -19,10 +19,10 @@ test.describe('Configuration route', () => {
         salutation: null,
       }));
     });
-    await page.route('http://localhost:8080/auth/session-status', async (route) => {
+    await page.route('http://localhost:8083/auth/session-status', async (route) => {
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ expiresAt: '2099-01-01T00:00:00Z', secondsRemaining: 3600 }) });
     });
-    await page.route('http://localhost:8080/admin/configuration', async (route) => {
+    await page.route('http://localhost:8083/admin/configuration', async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -38,14 +38,14 @@ test.describe('Configuration route', () => {
         }]),
       });
     });
-    await page.route('http://localhost:8080/admin/configuration/config-1', async (route) => {
+    await page.route('http://localhost:8083/admin/configuration/config-1', async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({ id: 'config-1', variableName: 'SITE_TITLE', value: 'Neuer Titel' }),
       });
     });
-    await page.route('http://localhost:8080/public/configuration', async (route) => {
+    await page.route('http://localhost:8083/public/configuration', async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -72,7 +72,7 @@ test.describe('Configuration route', () => {
         salutation: null,
       }));
     });
-    await page.route('http://localhost:8080/admin/configuration', async (route) => {
+    await page.route('http://localhost:8083/admin/configuration', async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',

@@ -3,7 +3,7 @@ import { expectTranslatedText } from './support/assertions';
 
 test.describe('Client login route', () => {
   test.beforeEach(async ({ page }) => {
-    await page.route('http://localhost:8080/public/configuration', async (route) => {
+    await page.route('http://localhost:8083/public/configuration', async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -18,10 +18,10 @@ test.describe('Client login route', () => {
   });
 
   test('exchanges the registration token and navigates to the order page', async ({ page }) => {
-    await page.route('http://localhost:8080/auth/session-status', async (route) => {
+    await page.route('http://localhost:8083/auth/session-status', async (route) => {
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ expiresAt: '2099-01-01T00:00:00Z', secondsRemaining: 3600 }) });
     });
-    await page.route('http://localhost:8080/auth/registration-login', async (route) => {
+    await page.route('http://localhost:8083/auth/registration-login', async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -44,7 +44,7 @@ test.describe('Client login route', () => {
   });
 
   test('shows an error when the registration token is invalid', async ({ page }) => {
-    await page.route('http://localhost:8080/auth/registration-login', async (route) => {
+    await page.route('http://localhost:8083/auth/registration-login', async (route) => {
       await route.fulfill({
         status: 401,
         contentType: 'application/json',

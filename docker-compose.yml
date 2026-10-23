@@ -3,47 +3,21 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: gaerngschee-backend
+    container_name: gaerngschee-weihnachtswuensche-backend
     ports:
-      - "8080:80"
+      - "8083:80"
     volumes:
       - ./backend:/var/www/html
       - ./db:/var/www/db
     environment:
       - PHP_DISPLAY_ERRORS=1
       - APP_ENV=test
-      - DB_HOST=database
+      - DB_HOST=host.docker.internal
       - DB_PORT=3306
       - DB_NAME=gaerngschee_weihnachtswuensche
-      - DB_USER=gaerngschee
-      - DB_PASS=changeme
+      - DB_USER=gaerngschee_weihnachtswuensche
+      - DB_PASS=weihnachtswuensche-local-password
       - JWT_SECRET=${JWT_SECRET:-077d240281f5296af33a65436217ae966bd0a36a8281cd740ef6f7f0f7faca52}
 
-  database:
-    image: mariadb:10.11
-    container_name: gaerngschee-database
-    environment:
-      - MYSQL_ROOT_PASSWORD=rootpassword
-      - MYSQL_DATABASE=gaerngschee_weihnachtswuensche
-      - MYSQL_USER=gaerngschee
-      - MYSQL_PASSWORD=changeme
-    ports:
-      - "3306:3306"
-    volumes:
-      - db_data:/var/lib/mysql
-
-  phpmyadmin:
-    image: phpmyadmin:latest
-    container_name: gaerngschee-phpmyadmin
-    ports:
-      - "8081:80"
-    environment:
-      - PMA_HOST=database
-      - PMA_PORT=3306
-      - PMA_USER=gaerngschee
-      - PMA_PASSWORD=changeme
-    depends_on:
-      - database
-
-volumes:
-  db_data:
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

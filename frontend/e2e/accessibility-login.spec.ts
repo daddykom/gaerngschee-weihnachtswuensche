@@ -22,7 +22,7 @@ test.describe('Login route accessibility', () => {
   });
 
   test('keeps the invalid-login message in an assertive alert', async ({ page }) => {
-    await page.route('http://localhost:8080/auth/login', async (route) => {
+    await page.route('http://localhost:8083/auth/login', async (route) => {
       await route.fulfill({
         status: 401,
         contentType: 'application/json',

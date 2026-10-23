@@ -3,7 +3,7 @@ import { expectTranslatedText } from './support/assertions';
 
 test.describe('Root route', () => {
   test('shows the public campaign landing page', async ({ page }) => {
-    await page.route('http://localhost:8080/public/configuration', async (route) => {
+    await page.route('http://localhost:8083/public/configuration', async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -26,7 +26,7 @@ test.describe('Root route', () => {
   });
 
   test('shows the campaign start date instead of the receive link before launch', async ({ page }) => {
-    await page.route('http://localhost:8080/public/configuration', async (route) => {
+    await page.route('http://localhost:8083/public/configuration', async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -54,10 +54,10 @@ test.describe('Root route', () => {
         salutation: null,
       }));
     });
-    await page.route('http://localhost:8080/auth/session-status', async (route) => {
+    await page.route('http://localhost:8083/auth/session-status', async (route) => {
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ expiresAt: '2099-01-01T00:00:00Z', secondsRemaining: 3600 }) });
     });
-    await page.route('http://localhost:8080/public/configuration', async (route) => {
+    await page.route('http://localhost:8083/public/configuration', async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -68,7 +68,7 @@ test.describe('Root route', () => {
         ]),
       });
     });
-    await page.route('http://localhost:8080/auth/logout', async (route) => {
+    await page.route('http://localhost:8083/auth/logout', async (route) => {
       await route.fulfill({ status: 204 });
     });
 

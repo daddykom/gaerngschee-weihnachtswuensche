@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('Privacy route', () => {
   test('renders the static privacy content', async ({ page }) => {
-    await page.route('http://localhost:8080/public/configuration', async (route) => {
+    await page.route('http://localhost:8083/public/configuration', async (route) => {
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
     });
 

@@ -4,12 +4,12 @@
 
 | Container | Image | Status | Ports |
 |-----------|-------|--------|-------|
-| `gaerngschee-backend` | Custom (php:8.3-fpm-alpine) | Up | `8080→80` |
-| `gaerngschee-database` | mariadb:10.11 | Up | `3306→3306` |
+| `gaerngschee-weihnachtswuensche-backend` | Custom (php:8.3-fpm-alpine) | Up | `8083→80` |
+| `gaerngschee-database` (shared with maesspaeggli) | mariadb:10.11 | Up | `3306→3306` |
 
 ---
 
-## Backend-Container (`gaerngschee-backend`)
+## Backend-Container (`gaerngschee-weihnachtswuensche-backend`)
 
 **Image:** Custom Build aus `Dockerfile`
 
@@ -32,30 +32,27 @@
 
 **Environment:**
 ```
-DB_HOST=database
+DB_HOST=host.docker.internal
 DB_PORT=3306
-DB_NAME=gaerngschee_dev
-DB_USER=gaerngschee
-DB_PASS=changeme
+DB_NAME=gaerngschee_weihnachtswuensche
+DB_USER=gaerngschee_weihnachtswuensche
+DB_PASS=weihnachtswuensche-local-password
 PHP_DISPLAY_ERRORS=1
 ```
 
 ---
 
-## Database-Container (`gaerngschee-database`)
+## Gemeinsamer Database-Container (`gaerngschee-database`)
 
 **Image:** `mariadb:10.11`
 
-**Environment:**
-```
-MYSQL_ROOT_PASSWORD=rootpassword
-MYSQL_DATABASE=gaerngschee_dev
-MYSQL_USER=gaerngschee
-MYSQL_PASSWORD=changeme
-```
+Der MariaDB-Container wird vom `maesspaeggli`-Projekt betrieben. Das
+Weihnachtswünsche-Backend verwendet darin die eigene Datenbank
+`gaerngschee_weihnachtswuensche` und den eigenen Benutzer
+`gaerngschee_weihnachtswuensche`.
 
 **Volumes:**
-- `db_data:/var/lib/mysql` (persistent)
+- Die Datenbankdaten und das Volume werden vom `maesspaeggli`-Stack verwaltet.
 
 ---
 
@@ -69,15 +66,15 @@ docker compose up -d
 docker compose down
 
 # Einzelne Container
-docker restart gaerngschee-backend
+docker restart gaerngschee-weihnachtswuensche-backend
 docker restart gaerngschee-database
 
 # Logs anzeigen (live mit -f)
-docker logs gaerngschee-backend --tail=100 -f
+docker logs gaerngschee-weihnachtswuensche-backend --tail=100 -f
 docker logs gaerngschee-database --tail=100 -f
 
 # In Container rein shells
-docker exec -it gaerngschee-backend sh
+docker exec -it gaerngschee-weihnachtswuensche-backend sh
 docker exec -it gaerngschee-database mysql -u root -prootpassword
 ```
 
@@ -99,7 +96,7 @@ npm run db:setup
 npm run db:reset
 
 # Migration Status prüfen
-docker exec gaerngschee-backend vendor/bin/phinx status -c /var/www/db/phinx.php
+docker exec gaerngschee-weihnachtswuensche-backend vendor/bin/phinx status -c /var/www/db/phinx.php
 ```
 
 ---
@@ -124,17 +121,18 @@ docker exec gaerngschee-backend vendor/bin/phinx status -c /var/www/db/phinx.php
 
 | Service-Name (docker compose) | Container-Name (docker) |
 |-------------------------------|-------------------------|
-| `backend` | `gaerngschee-backend` |
-| `database` | `gaerngschee-database` |
+| `backend` | `gaerngschee-weihnachtswuensche-backend` |
+| externe MariaDB | `gaerngschee-database` |
 
-**Wichtig:** `docker compose exec` nutzt **Service-Namen** (`backend`, `database`), nicht Container-Namen!
+**Wichtig:** `docker compose exec` nutzt den Service-Namen `backend`. Die MariaDB
+läuft in diesem lokalen Stack extern im bestehenden `maesspaeggli`-Stack.
 
 ```bash
 # Richtig (Service-Name)
 docker compose exec backend ...
 
 # Falsch (Container-Name - funktioniert nicht!)
-docker compose exec gaerngschee-backend ...
+docker compose exec gaerngschee-weihnachtswuensche-backend ...
 ```
 
 ### Volume-Mapping
@@ -142,14 +140,14 @@ docker compose exec gaerngschee-backend ...
 Das Volume `./backend:/var/www/html` spiegelt den Container-`vendor/` auf den Host. Änderungen an `composer.json` müssen daher im Container ausgeführt werden:
 
 ```bash
-docker exec gaerngschee-backend composer update --working-dir=/var/www/html
+docker exec gaerngschee-weihnachtswuensche-backend composer update --working-dir=/var/www/html
 ```
 
 ### Troubleshooting
 
 | Problem | Lösung |
 |---------|--------|
-| CORS-Fehler im Browser | Backend-Exception prüfen: `docker logs gaerngschee-backend` |
+| CORS-Fehler im Browser | Backend-Exception prüfen: `docker logs gaerngschee-weihnachtswuensche-backend` |
 | Access denied für DB-User | User + Rechte erstellen (siehe `docker exec gaerngschee-database mysql -u root -prootpassword -e "GRANT ALL..."`) |
 | Tabelle existiert nicht | `npm run db:migrate` ausführen |
-| Phinx nicht gefunden | `docker exec gaerngschee-backend composer update --working-dir=/var/www/html` |
+| Phinx nicht gefunden | `docker exec gaerngschee-weihnachtswuensche-backend composer update --working-dir=/var/www/html` |

@@ -4,7 +4,7 @@ Diese Uebersicht beschreibt alle HTTP-Routen, die das Backend in `backend/src/Ap
 
 ## Basis
 
-Das Backend verwendet keinen globalen URL-Praefix. In der lokalen Docker-Umgebung ist es unter `http://localhost:8080` erreichbar.
+Das Backend verwendet keinen globalen URL-Praefix. In der lokalen Docker-Umgebung ist es unter `http://localhost:8083` erreichbar.
 
 Standardantworten werden als JSON geliefert. CORS ist global fuer alle nicht-`OPTIONS`-Antworten mit `Access-Control-Allow-Origin: *` aktiviert.
 

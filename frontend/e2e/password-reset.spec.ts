@@ -3,7 +3,7 @@ import { expect, test } from './support/test';
 test.describe('Password reset route', () => {
   test('sets a new password with the reset token', async ({ page }) => {
     let requestBody: unknown;
-    await page.route('http://localhost:8080/auth/password-reset', async (route) => {
+    await page.route('http://localhost:8083/auth/password-reset', async (route) => {
       requestBody = route.request().postDataJSON();
       await route.fulfill({
         status: 200,

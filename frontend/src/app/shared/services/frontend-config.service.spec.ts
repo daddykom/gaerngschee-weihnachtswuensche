@@ -21,7 +21,7 @@ describe('FrontendConfigService', () => {
     const response = [{ id: 'site_name' }];
     service.list().subscribe((value) => expect(value).toEqual(response));
 
-    const request = httpTesting.expectOne('http://localhost:8080/admin/configuration');
+    const request = httpTesting.expectOne('http://localhost:8083/admin/configuration');
     expect(request.request.method).toBe('GET');
     request.flush(response);
   });
@@ -30,7 +30,7 @@ describe('FrontendConfigService', () => {
     const response = [{ variableName: 'fairgate_url', value: 'https://fairgate.example' }];
     service.listPublic().subscribe((value) => expect(value).toEqual(response));
 
-    const request = httpTesting.expectOne('http://localhost:8080/public/configuration');
+    const request = httpTesting.expectOne('http://localhost:8083/public/configuration');
     expect(request.request.method).toBe('GET');
     request.flush(response);
   });
@@ -38,7 +38,7 @@ describe('FrontendConfigService', () => {
   it('updates a configuration value', () => {
     service.update('languages', ['de', 'fr']).subscribe();
 
-    const request = httpTesting.expectOne('http://localhost:8080/admin/configuration/languages');
+    const request = httpTesting.expectOne('http://localhost:8083/admin/configuration/languages');
     expect(request.request.method).toBe('PATCH');
     expect(request.request.body).toEqual({ value: ['de', 'fr'] });
     request.flush({ id: 'languages' });

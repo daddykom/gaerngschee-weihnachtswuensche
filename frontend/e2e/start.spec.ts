@@ -24,7 +24,7 @@ test.describe('Start route', () => {
 
   test('validates an invalid email without calling the backend', async ({ page }) => {
     let requestCalled = false;
-    await page.route('http://localhost:8080/public/start', async (route) => {
+    await page.route('http://localhost:8083/public/start', async (route) => {
       requestCalled = true;
       await route.continue();
     });
@@ -38,7 +38,7 @@ test.describe('Start route', () => {
   });
 
   test('submits the email request and shows the success page', async ({ page }) => {
-    await page.route('http://localhost:8080/public/start', async (route) => {
+    await page.route('http://localhost:8083/public/start', async (route) => {
       expect(route.request().postDataJSON()).toEqual({
         email: 'person@example.com',
         language: 'de',

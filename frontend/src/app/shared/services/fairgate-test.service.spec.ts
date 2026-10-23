@@ -21,7 +21,7 @@ describe('FairgateTestService', () => {
     const response = { email: 'person@example.com', fairgate: { success: true } };
     service.test().subscribe((value) => expect(value).toEqual(response));
 
-    const request = httpTesting.expectOne('http://localhost:8080/admin/fairgate/test');
+    const request = httpTesting.expectOne('http://localhost:8083/admin/fairgate/test');
     expect(request.request.method).toBe('GET');
     request.flush(response);
   });

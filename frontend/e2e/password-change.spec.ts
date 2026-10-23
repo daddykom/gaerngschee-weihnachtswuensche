@@ -19,7 +19,7 @@ test.describe('Password change route', () => {
   test('changes the password and navigates to the overview', async ({ page }) => {
     await loginAsUser(page);
     let requestReceived = false;
-    await page.route('http://localhost:8080/auth/password-change-authenticated', async (route) => {
+    await page.route('http://localhost:8083/auth/password-change-authenticated', async (route) => {
       requestReceived = true;
       expect(route.request().postDataJSON()).toEqual({ password: 'long-enough-secret' });
       await route.fulfill({
@@ -39,7 +39,7 @@ test.describe('Password change route', () => {
 
   test('shows a backend error notification', async ({ page }) => {
     await loginAsUser(page);
-    await page.route('http://localhost:8080/auth/password-change-authenticated', async (route) => {
+    await page.route('http://localhost:8083/auth/password-change-authenticated', async (route) => {
       await route.fulfill({
         status: 500,
         contentType: 'application/json',
@@ -56,10 +56,10 @@ test.describe('Password change route', () => {
 });
 
 async function loginAsUser(page: import('@playwright/test').Page): Promise<void> {
-  await page.route('http://localhost:8080/auth/session-status', async (route) => {
+  await page.route('http://localhost:8083/auth/session-status', async (route) => {
     await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ expiresAt: '2099-01-01T00:00:00Z', secondsRemaining: 3600 }) });
   });
-  await page.route('http://localhost:8080/auth/login', async (route) => {
+  await page.route('http://localhost:8083/auth/login', async (route) => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',

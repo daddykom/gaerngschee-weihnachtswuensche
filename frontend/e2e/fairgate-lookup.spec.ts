@@ -3,10 +3,10 @@ import { expectTranslatedText } from './support/assertions';
 
 test.describe('Fairgate lookup route', () => {
   test('loads the Fairgate response for the email query parameter', async ({ page }) => {
-    await page.route('http://localhost:8080/auth/session-status', async (route) => {
+    await page.route('http://localhost:8083/auth/session-status', async (route) => {
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ expiresAt: '2099-01-01T00:00:00Z', secondsRemaining: 3600 }) });
     });
-    await page.route('http://localhost:8080/auth/login', async (route) => {
+    await page.route('http://localhost:8083/auth/login', async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -17,7 +17,7 @@ test.describe('Fairgate lookup route', () => {
         }),
       });
     });
-    await page.route('http://localhost:8080/admin/fairgate-lookup**', async (route) => {
+    await page.route('http://localhost:8083/admin/fairgate-lookup**', async (route) => {
       expect(new URL(route.request().url()).searchParams.get('membership')).toBe('Aktivmitglied');
       await route.fulfill({
         status: 200,
@@ -46,7 +46,7 @@ test.describe('Fairgate lookup route', () => {
   });
 
   test('redirects to not-found when the backend hides the route', async ({ page }) => {
-    await page.route('http://localhost:8080/auth/login', async (route) => {
+    await page.route('http://localhost:8083/auth/login', async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -57,7 +57,7 @@ test.describe('Fairgate lookup route', () => {
         }),
       });
     });
-    await page.route('http://localhost:8080/admin/fairgate-lookup**', async (route) => {
+    await page.route('http://localhost:8083/admin/fairgate-lookup**', async (route) => {
       await route.fulfill({ status: 404, contentType: 'application/json', body: JSON.stringify({ error: { code: 'NOT_FOUND', details: [] } }) });
     });
 

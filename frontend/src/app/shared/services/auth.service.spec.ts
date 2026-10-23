@@ -33,7 +33,7 @@ describe('AuthService', () => {
       actualResponse = value;
     });
 
-    const request = httpTesting.expectOne('http://localhost:8080/auth/login');
+    const request = httpTesting.expectOne('http://localhost:8083/auth/login');
     expect(request.request.method).toBe('POST');
     expect(request.request.body).toEqual({ email: 'user@example.com', password: 'secret' });
     request.flush(response);
@@ -50,7 +50,7 @@ describe('AuthService', () => {
       },
     });
 
-    const request = httpTesting.expectOne('http://localhost:8080/auth/logout');
+    const request = httpTesting.expectOne('http://localhost:8083/auth/logout');
     expect(request.request.method).toBe('POST');
     expect(request.request.body).toEqual({});
     request.flush(null);
@@ -74,7 +74,7 @@ describe('AuthService', () => {
       actualResponse = value;
     });
 
-    const request = httpTesting.expectOne('http://localhost:8080/auth/registration-login');
+    const request = httpTesting.expectOne('http://localhost:8083/auth/registration-login');
     expect(request.request.method).toBe('POST');
     expect(request.request.body).toEqual({ token: 'registration-token' });
     request.flush(response);
@@ -92,7 +92,7 @@ describe('AuthService', () => {
       actualResponse = value;
     });
 
-    const request = httpTesting.expectOne('http://localhost:8080/auth/password-change-authenticated');
+    const request = httpTesting.expectOne('http://localhost:8083/auth/password-change-authenticated');
     expect(request.request.method).toBe('POST');
     expect(request.request.body).toEqual({ password: 'new-secret' });
     request.flush(response);

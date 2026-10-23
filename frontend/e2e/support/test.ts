@@ -2,7 +2,7 @@ import { expect, test as base, type Page } from '@playwright/test';
 
 export const test = base.extend({
   page: async ({ page }, use) => {
-    await page.route('http://localhost:8080/public/configuration**', async (route) => {
+    await page.route('http://localhost:8083/public/configuration**', async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -13,7 +13,7 @@ export const test = base.extend({
       });
     });
 
-    await page.route('http://localhost:8080/auth/email-check', async (route) => {
+    await page.route('http://localhost:8083/auth/email-check', async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
