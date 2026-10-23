@@ -149,53 +149,75 @@ final class PublicStartRoutesTest extends TestCase
                     {
                     }
 
-                      public function sendUserEmailChanged(string $recipient): void
-                      {
-                      }
+                    public function sendUserEmailChanged(string $recipient): void
+                    {
+                    }
 
-                      public function sendPasswordReset(string $recipient, string $resetUrl): void
-                      {
-                      }
+                    public function sendPasswordReset(string $recipient, string $resetUrl): void
+                    {
+                    }
 
-                      public function sendOrderConfirmation(string $recipient, array $order): void
-                      {
-                      }
+                    public function sendOrderConfirmation(string $recipient, array $order): void
+                    {
+                    }
 
-                        public function renderOrderConfirmation(array $order, string $mailStatus): array { return []; }
-                        public function renderDeliveryNotification(array $order, string $deliveryUrl, string $qrDataUri): array { return []; }
-                        public function renderFairgateReminder(string $fairgateUrl, string $status = 'not_found', ?string $documentEmail = null): array { return []; }
-                        public function sendStoredEmail(string $recipient, string $subject, string $html, string $text): void {}
-                 }
-                : new class () implements EmailSenderInterface {
-                 public function sendAnmeldung(string $recipient, \App\Registration\Services\AnmeldungMailVariant $variant, string $locale = 'de', ?string $loginUrl = null): void
-                 {
-                 }
+                    public function renderOrderConfirmation(array $order, string $mailStatus): array
+                    {
+                        return [];
+                    }
+                    public function renderDeliveryNotification(array $order, string $deliveryUrl, string $qrDataUri): array
+                    {
+                        return [];
+                    }
+                    public function renderFairgateReminder(string $fairgateUrl, string $status = 'not_found', ?string $documentEmail = null): array
+                    {
+                        return [];
+                    }
+                    public function sendStoredEmail(string $recipient, string $subject, string $html, string $text): void
+                    {
+                    }
+                }
+            : new class () implements EmailSenderInterface {
+                public function sendAnmeldung(string $recipient, \App\Registration\Services\AnmeldungMailVariant $variant, string $locale = 'de', ?string $loginUrl = null): void
+                {
+                }
 
-                 public function sendOrderStatus(string $recipient, string $status, string $locale = 'de'): void
-                 {
-                 }
+                public function sendOrderStatus(string $recipient, string $status, string $locale = 'de'): void
+                {
+                }
 
                 public function sendUserCreated(string $recipient, string $temporaryPassword): void
                 {
                 }
 
-                  public function sendUserEmailChanged(string $recipient): void
-                  {
-                  }
+                public function sendUserEmailChanged(string $recipient): void
+                {
+                }
 
-                  public function sendPasswordReset(string $recipient, string $resetUrl): void
-                  {
-                  }
+                public function sendPasswordReset(string $recipient, string $resetUrl): void
+                {
+                }
 
-                  public function sendOrderConfirmation(string $recipient, array $order): void
-                  {
-                  }
+                public function sendOrderConfirmation(string $recipient, array $order): void
+                {
+                }
 
-                    public function renderOrderConfirmation(array $order, string $mailStatus): array { return []; }
-                    public function renderDeliveryNotification(array $order, string $deliveryUrl, string $qrDataUri): array { return []; }
-                        public function renderFairgateReminder(string $fairgateUrl, string $status = 'not_found', ?string $documentEmail = null): array { return []; }
-                    public function sendStoredEmail(string $recipient, string $subject, string $html, string $text): void {}
-              },
+                public function renderOrderConfirmation(array $order, string $mailStatus): array
+                {
+                    return [];
+                }
+                public function renderDeliveryNotification(array $order, string $deliveryUrl, string $qrDataUri): array
+                {
+                    return [];
+                }
+                public function renderFairgateReminder(string $fairgateUrl, string $status = 'not_found', ?string $documentEmail = null): array
+                {
+                    return [];
+                }
+                public function sendStoredEmail(string $recipient, string $subject, string $html, string $text): void
+                {
+                }
+            },
         );
     }
 

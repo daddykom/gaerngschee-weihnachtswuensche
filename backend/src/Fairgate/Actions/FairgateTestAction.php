@@ -22,8 +22,7 @@ final class FairgateTestAction
     public function __construct(
         ?callable $lookup = null,
         private readonly ?FrontendConfigRepository $configs = null,
-    )
-    {
+    ) {
         $this->lookup = $lookup === null ? null : Closure::fromCallable($lookup);
     }
 

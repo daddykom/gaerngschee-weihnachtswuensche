@@ -76,8 +76,7 @@ final class UserRepository
         string $password,
         string $group = 'user',
         bool $requiredPasswordReset = false,
-    ): array
-    {
+    ): array {
         if (!in_array($group, self::USER_GROUPS, true)) {
             throw new \InvalidArgumentException('Invalid user group.');
         }
