@@ -6,7 +6,13 @@
   <button mat-button type="button" (click)="logout()">
     {{ 'app.navigation.logout' | translate }}
   </button>
-  <button mat-flat-button color="primary" type="button" [disabled]="refreshing()" (click)="staySignedIn()">
+  <button
+    mat-flat-button
+    color="primary"
+    type="button"
+    [disabled]="refreshing()"
+    (click)="staySignedIn()"
+  >
     {{ 'app.auth.staySignedIn' | translate }}
   </button>
 </mat-dialog-actions>

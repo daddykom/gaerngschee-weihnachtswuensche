@@ -1,42 +1,48 @@
 <section class="gl-stack gl-stack--group">
-    <h2>
-      {{ (isNew ? 'app.admin.users.createHeading' : 'app.admin.users.editHeading') | translate }}
-    </h2>
+  <h2>
+    {{ (isNew ? 'app.admin.users.createHeading' : 'app.admin.users.editHeading') | translate }}
+  </h2>
 
-    <form class="user-form gl-stack gl-stack--group" (submit)="$event.preventDefault(); onSubmit()">
+  <form class="user-form gl-stack gl-stack--group" (submit)="$event.preventDefault(); onSubmit()">
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'app.admin.users.emailLabel' | translate }}</mat-label>
+      <input matInput type="email" [formField]="form.email" />
+      <app-control-error
+        matError
+        [control]="form.email()"
+        translationPrefix="app.admin.users.errors.email"
+      />
+    </mat-form-field>
+
+    @if (isAdmin()) {
       <mat-form-field appearance="outline">
-        <mat-label>{{ 'app.admin.users.emailLabel' | translate }}</mat-label>
-        <input matInput type="email" [formField]="form.email" />
-        <app-control-error
-          matError
-          [control]="form.email()"
-          translationPrefix="app.admin.users.errors.email"
-        />
+        <mat-label>{{ 'app.admin.users.groupLabel' | translate }}</mat-label>
+        <mat-select [formField]="form.group">
+          <mat-option value="admin">{{ 'app.admin.users.groups.admin' | translate }}</mat-option>
+          <mat-option value="user">{{ 'app.admin.users.groups.user' | translate }}</mat-option>
+        </mat-select>
       </mat-form-field>
+    }
 
-      @if (isAdmin()) {
-        <mat-form-field appearance="outline">
-          <mat-label>{{ 'app.admin.users.groupLabel' | translate }}</mat-label>
-          <mat-select [formField]="form.group">
-            <mat-option value="admin">{{ 'app.admin.users.groups.admin' | translate }}</mat-option>
-            <mat-option value="user">{{ 'app.admin.users.groups.user' | translate }}</mat-option>
-          </mat-select>
-        </mat-form-field>
-      }
+    @if (isAdmin()) {
+      <mat-checkbox [formField]="form.requiredPasswordReset">
+        {{ 'app.admin.users.passwordResetRequired' | translate }}
+      </mat-checkbox>
+    }
 
-      @if (isAdmin()) {
-        <mat-checkbox [formField]="form.requiredPasswordReset">
-          {{ 'app.admin.users.passwordResetRequired' | translate }}
-        </mat-checkbox>
-      }
-
-      <div class="form-actions gl-cluster">
-        <button mat-button type="button" (click)="cancel()">
-          {{ 'app.admin.users.cancel' | translate }}
-        </button>
-        <button mat-flat-button color="primary" type="submit" [disabled]="saving()" (click)="$event.preventDefault(); onSubmit()">
-          {{ 'app.admin.users.save' | translate }}
-        </button>
-      </div>
-    </form>
+    <div class="form-actions gl-cluster">
+      <button mat-button type="button" (click)="cancel()">
+        {{ 'app.admin.users.cancel' | translate }}
+      </button>
+      <button
+        mat-flat-button
+        color="primary"
+        type="submit"
+        [disabled]="saving()"
+        (click)="$event.preventDefault(); onSubmit()"
+      >
+        {{ 'app.admin.users.save' | translate }}
+      </button>
+    </div>
+  </form>
 </section>

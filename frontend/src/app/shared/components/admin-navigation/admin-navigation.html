@@ -10,16 +10,34 @@
 
 <mat-menu #adminMenu="matMenu" xPosition="before">
   @if (email(); as currentEmail) {
-    <div mat-menu-item disabled class="admin-menu-identity">
-      <mat-icon aria-hidden="true">account_circle</mat-icon>
-      <span>{{ currentEmail }}</span>
-    </div>
+  <div mat-menu-item disabled class="admin-menu-identity">
+    <mat-icon aria-hidden="true">account_circle</mat-icon>
+    <span>{{ currentEmail }}</span>
+  </div>
   }
-  <a mat-menu-item routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">{{ 'app.navigation.home' | translate }}</a>
-  <a mat-menu-item routerLink="/start" routerLinkActive="active">{{ 'app.navigation.start' | translate }}</a>
-  <a mat-menu-item routerLink="/admin/overview" routerLinkActive="active">{{ 'app.navigation.adminOverview' | translate }}</a>
-  <a mat-menu-item routerLink="/admin/fairgate-test" routerLinkActive="active">{{ 'app.navigation.fairgateTest' | translate }}</a>
-  <a mat-menu-item routerLink="/admin/configuration" routerLinkActive="active">{{ 'app.navigation.configuration' | translate }}</a>
-  <a mat-menu-item routerLink="/admin/users" routerLinkActive="active">{{ 'app.navigation.userManagement' | translate }}</a>
-  <button mat-menu-item type="button" (click)="logout()">{{ 'app.navigation.logout' | translate }}</button>
+  <a
+    mat-menu-item
+    routerLink="/"
+    routerLinkActive="active"
+    [routerLinkActiveOptions]="{ exact: true }"
+    >{{ 'app.navigation.home' | translate }}</a
+  >
+  <a mat-menu-item routerLink="/start" routerLinkActive="active"
+    >{{ 'app.navigation.start' | translate }}</a
+  >
+  <a mat-menu-item routerLink="/admin/overview" routerLinkActive="active"
+    >{{ 'app.navigation.adminOverview' | translate }}</a
+  >
+  <a mat-menu-item routerLink="/admin/fairgate-test" routerLinkActive="active"
+    >{{ 'app.navigation.fairgateTest' | translate }}</a
+  >
+  <a mat-menu-item routerLink="/admin/configuration" routerLinkActive="active"
+    >{{ 'app.navigation.configuration' | translate }}</a
+  >
+  <a mat-menu-item routerLink="/admin/users" routerLinkActive="active"
+    >{{ 'app.navigation.userManagement' | translate }}</a
+  >
+  <button mat-menu-item type="button" (click)="logout()">
+    {{ 'app.navigation.logout' | translate }}
+  </button>
 </mat-menu>

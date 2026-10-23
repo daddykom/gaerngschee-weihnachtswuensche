@@ -1,6 +1,6 @@
 import { createFeature, createReducer, on } from '@ngrx/store';
 import { FairgateLookupActions } from './fairgate-lookup.actions';
-import { initialState, FairgateLookupState } from './fairgate-lookup.state';
+import { FairgateLookupState, initialState } from './fairgate-lookup.state';
 
 export const fairgateLookupFeature = createFeature({
   name: 'fairgateLookup',

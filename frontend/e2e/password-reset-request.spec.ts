@@ -1,5 +1,5 @@
-import { expect, test } from './support/test';
 import { expectTranslatedText } from './support/assertions';
+import { expect, test } from './support/test';
 
 test.describe('Password reset request route', () => {
   test('requests a password reset link without revealing account existence', async ({ page }) => {

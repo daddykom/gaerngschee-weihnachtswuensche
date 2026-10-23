@@ -2,8 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { UserGroup } from '../models/frontend-config.model';
 import { FairgateStatus } from '../models/fairgate.model';
+import { UserGroup } from '../models/frontend-config.model';
 
 export interface AuthUser {
   id: string;

@@ -1,12 +1,12 @@
 import { Location } from '@angular/common';
-import { type Mock } from 'vitest';
 import { TestBed } from '@angular/core/testing';
+import { Router } from '@angular/router';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { Action } from '@ngrx/store';
 import { Subject } from 'rxjs';
+import { type Mock } from 'vitest';
 import { NavigationActions } from './navigation.actions';
 import { navigationEffect } from './navigation.effects';
-import { Router } from '@angular/router';
 
 describe('navigationEffect', () => {
   let actions$: Subject<Action>;

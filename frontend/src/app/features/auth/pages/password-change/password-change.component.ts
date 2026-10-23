@@ -1,14 +1,16 @@
-import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { form, FormField, maxLength, minLength, required, validate } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { Store } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ControlErrorComponent } from '../../../../shared/components/control-error/control-error';
-import { AuthActions } from '../../../../store/auth/auth.actions';
-import { selectAuthPasswordChangeLoading } from '../../../../store/auth/auth.feature';
-import { selectAuthEmail } from '../../../../store/auth/auth.feature';
 import { inputLimits } from '../../../../shared/constants/input-limits';
+import { AuthActions } from '../../../../store/auth/auth.actions';
+import {
+  selectAuthEmail,
+  selectAuthPasswordChangeLoading,
+} from '../../../../store/auth/auth.feature';
 
 @Component({
   selector: 'app-password-change',

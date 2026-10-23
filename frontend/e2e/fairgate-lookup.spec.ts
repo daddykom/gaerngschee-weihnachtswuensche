@@ -1,10 +1,14 @@
-import { expect, test } from './support/test';
 import { expectTranslatedText } from './support/assertions';
+import { expect, test } from './support/test';
 
 test.describe('Fairgate lookup route', () => {
   test('loads the Fairgate response for the email query parameter', async ({ page }) => {
     await page.route('http://localhost:8083/auth/session-status', async (route) => {
-      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ expiresAt: '2099-01-01T00:00:00Z', secondsRemaining: 3600 }) });
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ expiresAt: '2099-01-01T00:00:00Z', secondsRemaining: 3600 }),
+      });
     });
     await page.route('http://localhost:8083/auth/login', async (route) => {
       await route.fulfill({
@@ -58,7 +62,11 @@ test.describe('Fairgate lookup route', () => {
       });
     });
     await page.route('http://localhost:8083/admin/fairgate-lookup**', async (route) => {
-      await route.fulfill({ status: 404, contentType: 'application/json', body: JSON.stringify({ error: { code: 'NOT_FOUND', details: [] } }) });
+      await route.fulfill({
+        status: 404,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: { code: 'NOT_FOUND', details: [] } }),
+      });
     });
 
     await page.goto('/login');

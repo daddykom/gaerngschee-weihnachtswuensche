@@ -1,6 +1,6 @@
+import { FairgateStatus } from '../../shared/models/fairgate.model';
 import { UserGroup } from '../../shared/models/frontend-config.model';
 import { loadPersistedAuthState } from '../../shared/services/auth-storage';
-import { FairgateStatus } from '../../shared/models/fairgate.model';
 
 const persistedAuth = loadPersistedAuthState();
 

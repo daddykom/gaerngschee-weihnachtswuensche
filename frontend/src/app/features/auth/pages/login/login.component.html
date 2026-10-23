@@ -1,50 +1,51 @@
 <section class="gl-stack gl-stack--group">
-    <h2>{{ 'app.login.heading' | translate }}</h2>
-    <form class="gl-stack gl-stack--group" (submit)="$event.preventDefault(); onSubmit()">
-        <div class="auth-field-group">
-          <mat-form-field appearance="outline" subscriptSizing="dynamic">
-           <mat-label>{{ 'app.login.emailLabel' | translate }}</mat-label>
-           <input matInput type="email" autocomplete="username" [formField]="loginForm.email" />
-           <app-control-error
-             matError
-             [control]="loginForm.email()"
-             translationPrefix="app.login.errors.email"
-           />
-          </mat-form-field>
-        </div>
-        @if (passwordRequired()) {
-        <div class="auth-field-group">
-          <mat-form-field appearance="outline" subscriptSizing="dynamic">
-            <mat-label>{{ 'app.login.passwordLabel' | translate }}</mat-label>
-           <input matInput type="password" autocomplete="current-password" [formField]="loginForm.password" />
-           <app-control-error
-             matError
-             [control]="loginForm.password()"
-             translationPrefix="app.login.errors.password"
-           />
-          </mat-form-field>
-        </div>
-        }
-        @if (passwordRequired()) {
-        <button mat-button
-          class="forgot-password-link"
-          type="button"
-          (click)="onForgotPassword()"
-        >
-          {{ 'app.login.forgotPassword' | translate }}
-        </button>
-        }
-        <div class="gl-cluster">
-          <button
-            mat-flat-button
-            color="primary"
-            type="submit"
-            (click)="$event.preventDefault(); onSubmit()"
-            [disabled]="loading() || emailCheckLoading()"
-            [attr.aria-busy]="loading() || emailCheckLoading()"
-          >
-            {{ (passwordRequired() ? 'app.login.submit' : 'app.login.continue') | translate }}
-          </button>
-        </div>
-    </form>
+  <h2>{{ 'app.login.heading' | translate }}</h2>
+  <form class="gl-stack gl-stack--group" (submit)="$event.preventDefault(); onSubmit()">
+    <div class="auth-field-group">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>{{ 'app.login.emailLabel' | translate }}</mat-label>
+        <input matInput type="email" autocomplete="username" [formField]="loginForm.email" />
+        <app-control-error
+          matError
+          [control]="loginForm.email()"
+          translationPrefix="app.login.errors.email"
+        />
+      </mat-form-field>
+    </div>
+    @if (passwordRequired()) {
+      <div class="auth-field-group">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>{{ 'app.login.passwordLabel' | translate }}</mat-label>
+          <input
+            matInput
+            type="password"
+            autocomplete="current-password"
+            [formField]="loginForm.password"
+          />
+          <app-control-error
+            matError
+            [control]="loginForm.password()"
+            translationPrefix="app.login.errors.password"
+          />
+        </mat-form-field>
+      </div>
+    }
+    @if (passwordRequired()) {
+      <button mat-button class="forgot-password-link" type="button" (click)="onForgotPassword()">
+        {{ 'app.login.forgotPassword' | translate }}
+      </button>
+    }
+    <div class="gl-cluster">
+      <button
+        mat-flat-button
+        color="primary"
+        type="submit"
+        (click)="$event.preventDefault(); onSubmit()"
+        [disabled]="loading() || emailCheckLoading()"
+        [attr.aria-busy]="loading() || emailCheckLoading()"
+      >
+        {{ (passwordRequired() ? 'app.login.submit' : 'app.login.continue') | translate }}
+      </button>
+    </div>
+  </form>
 </section>

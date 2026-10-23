@@ -5,19 +5,16 @@
     </p>
 
     <div class="home__choices gl-section-layout">
-      <section class="home-choice home-choice--donate gl-stack gl-stack--group" aria-labelledby="donate-heading">
+      <section
+        class="home-choice home-choice--donate gl-stack gl-stack--group"
+        aria-labelledby="donate-heading"
+      >
         <div class="home-choice__content gl-stack gl-stack--group">
           <h2 id="donate-heading">{{ 'app.home.donate.title' | translate }}</h2>
           <p>{{ 'app.home.donate.text' | translate: { year } }}</p>
         </div>
         @if (donationUrl(); as url) {
-          <a
-            mat-flat-button
-            color="primary"
-            [href]="url"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <a mat-flat-button color="primary" [href]="url" target="_blank" rel="noopener noreferrer">
             {{ 'app.home.donate.action' | translate }}
             <span class="visually-hidden">{{ 'app.home.externalLink' | translate }}</span>
           </a>
@@ -26,7 +23,10 @@
         }
       </section>
 
-      <section class="home-choice home-choice--receive gl-stack gl-stack--group" aria-labelledby="receive-heading">
+      <section
+        class="home-choice home-choice--receive gl-stack gl-stack--group"
+        aria-labelledby="receive-heading"
+      >
         <div class="home-choice__content gl-stack gl-stack--group">
           <h2 id="receive-heading">{{ 'app.home.receive.title' | translate }}</h2>
           <p>{{ 'app.home.receive.text' | translate: { year } }}</p>
@@ -49,7 +49,9 @@
 
     <p class="home__login">
       @if (authGroup()) {
-        <button mat-button type="button" (click)="logout()">{{ 'app.home.logout' | translate }}</button>
+        <button mat-button type="button" (click)="logout()">
+          {{ 'app.home.logout' | translate }}
+        </button>
       } @else {
         <a routerLink="/login">{{ 'app.home.login' | translate }}</a>
       }

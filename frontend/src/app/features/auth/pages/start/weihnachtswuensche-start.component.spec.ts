@@ -43,5 +43,4 @@ describe('WeihnachtswuenscheStartComponent', () => {
       StartActions.submit({ email: 'person@example.com', language: 'de' }),
     );
   });
-
 });

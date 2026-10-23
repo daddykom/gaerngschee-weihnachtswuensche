@@ -23,13 +23,17 @@ describe('publicConfigurationResolver', () => {
 
   it('loads and waits for the public configuration', async () => {
     const dispatch = vi.spyOn(store, 'dispatch');
-    const result = TestBed.runInInjectionContext(() => publicConfigurationResolver({} as never, {} as never)) as Observable<boolean>;
+    const result = TestBed.runInInjectionContext(() =>
+      publicConfigurationResolver({} as never, {} as never),
+    ) as Observable<boolean>;
     const resolved = firstValueFrom(result);
 
     expect(progress.start).toHaveBeenCalledTimes(1);
     expect(dispatch).toHaveBeenCalledWith(FrontendConfigActions.loadPublic());
 
-    store.setState({ frontendConfig: { ...initialState, publicStatus: 'loaded', publicConfigs: [] } });
+    store.setState({
+      frontendConfig: { ...initialState, publicStatus: 'loaded', publicConfigs: [] },
+    });
 
     await expect(resolved).resolves.toBe(true);
     expect(progress.stop).toHaveBeenCalledTimes(1);
@@ -39,7 +43,9 @@ describe('publicConfigurationResolver', () => {
     store.setState({ frontendConfig: { ...initialState, publicStatus: 'loaded' } });
     const dispatch = vi.spyOn(store, 'dispatch');
 
-    const result = TestBed.runInInjectionContext(() => publicConfigurationResolver({} as never, {} as never)) as Observable<boolean>;
+    const result = TestBed.runInInjectionContext(() =>
+      publicConfigurationResolver({} as never, {} as never),
+    ) as Observable<boolean>;
 
     await expect(firstValueFrom(result)).resolves.toBe(true);
     expect(dispatch).not.toHaveBeenCalled();

@@ -1,14 +1,14 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
 import { form, FormField, maxLength, minLength, required, validate } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ControlErrorComponent } from '../../../../shared/components/control-error/control-error';
+import { inputLimits } from '../../../../shared/constants/input-limits';
 import { AuthActions } from '../../../../store/auth/auth.actions';
 import { selectPasswordResetLoading } from '../../../../store/password-reset/password-reset.feature';
-import { inputLimits } from '../../../../shared/constants/input-limits';
 
 @Component({
   selector: 'app-password-reset',
@@ -57,6 +57,8 @@ export class PasswordResetComponent {
       return;
     }
 
-    this.store.dispatch(AuthActions.passwordReset({ token: this.token, password: this.model().newPassword }));
+    this.store.dispatch(
+      AuthActions.passwordReset({ token: this.token, password: this.model().newPassword }),
+    );
   }
 }

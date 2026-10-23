@@ -71,6 +71,8 @@ jobs:
         run: npm ci
       - name: Run lint
         run: npm run lint
+      - name: Check Prettier formatting
+        run: npx prettier --check . --ignore-path .prettierignore
 
   deployment-script-test:
     name: deployment-script-test

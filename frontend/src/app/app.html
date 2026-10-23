@@ -1,35 +1,35 @@
 <header class="app-header">
   <div class="gl-container">
     <div class="app-header__content gl-cluster">
-      <a routerLink="/" [attr.aria-label]="'app.navigation.home' | translate" class="header-logo-link">
+      <a
+        routerLink="/"
+        [attr.aria-label]="'app.navigation.home' | translate"
+        class="header-logo-link"
+      >
         <img src="/gaerngschee-logo.png" [alt]="'app.title' | translate" class="header-logo" />
       </a>
       <span class="app-header__title">{{ 'app.title' | translate }}</span>
 
-       @if (authEmail(); as email) {
-         <span class="app-header__email">{{ email }}</span>
-         <button
-           mat-icon-button
-           type="button"
-           class="app-header__account-button"
-           [attr.aria-label]="'app.navigation.openAccountMenu' | translate"
-           [matMenuTriggerFor]="accountMenu"
-         >
-           <mat-icon>account_circle</mat-icon>
-         </button>
-         <mat-menu #accountMenu="matMenu" xPosition="before">
-           <div mat-menu-item disabled class="app-header__account-entry">
-             <mat-icon aria-hidden="true">account_circle</mat-icon>
-             <span>{{ email }}</span>
-           </div>
-         </mat-menu>
-       }
-
-       @if (isAdmin()) {
-         @defer (when isAdmin()) {
-            <app-admin-navigation [email]="authEmail()" />
-         }
-       }
+      @if (authEmail(); as email) {
+      <span class="app-header__email">{{ email }}</span>
+      <button
+        mat-icon-button
+        type="button"
+        class="app-header__account-button"
+        [attr.aria-label]="'app.navigation.openAccountMenu' | translate"
+        [matMenuTriggerFor]="accountMenu"
+      >
+        <mat-icon>account_circle</mat-icon>
+      </button>
+      <mat-menu #accountMenu="matMenu" xPosition="before">
+        <div mat-menu-item disabled class="app-header__account-entry">
+          <mat-icon aria-hidden="true">account_circle</mat-icon>
+          <span>{{ email }}</span>
+        </div>
+      </mat-menu>
+      } @if (isAdmin()) { @defer (when isAdmin()) {
+      <app-admin-navigation [email]="authEmail()" />
+      } }
     </div>
   </div>
 </header>
@@ -38,23 +38,22 @@
   <div class="gl-container app-main-content">
     <div class="gl-stack gl-stack--section">
       @if (pageTitleKey(); as titleKey) {
-        <h1 class="mat-headline-5">{{ titleKey | translate }}</h1>
-      }
-
-      @if (notification(); as currentNotification) {
-         <div #notification class="app-notification" role="alert" aria-live="assertive">
-          <app-info-box [variant]="currentNotification.variant" [title]="currentNotification.titleKey | translate">
-            <span>{{ currentNotification.messageKey | translate: currentNotification.params }}</span>
-          </app-info-box>
-        </div>
-      }
-
-      @if (publicConfigStatus() === 'loading' || publicConfigStatus() === 'initial') {
-        <p role="status" aria-live="polite">{{ 'app.publicConfiguration.loading' | translate }}</p>
+      <h1 class="mat-headline-5">{{ titleKey | translate }}</h1>
+      } @if (notification(); as currentNotification) {
+      <div #notification class="app-notification" role="alert" aria-live="assertive">
+        <app-info-box
+          [variant]="currentNotification.variant"
+          [title]="currentNotification.titleKey | translate"
+        >
+          <span>{{ currentNotification.messageKey | translate: currentNotification.params }}</span>
+        </app-info-box>
+      </div>
+      } @if (publicConfigStatus() === 'loading' || publicConfigStatus() === 'initial') {
+      <p role="status" aria-live="polite">{{ 'app.publicConfiguration.loading' | translate }}</p>
       } @else if (publicConfigStatus() === 'error') {
-        <router-outlet></router-outlet>
+      <router-outlet></router-outlet>
       } @else {
-        <router-outlet></router-outlet>
+      <router-outlet></router-outlet>
       }
     </div>
   </div>
@@ -63,10 +62,15 @@
 <footer class="app-footer">
   <div class="gl-container">
     <div class="app-footer__content gl-stack">
-      <nav class="app-footer__links gl-cluster" [attr.aria-label]="'app.footer.navigationLabel' | translate">
+      <nav
+        class="app-footer__links gl-cluster"
+        [attr.aria-label]="'app.footer.navigationLabel' | translate"
+      >
         <a routerLink="/impressum">{{ 'app.footer.imprint' | translate }}</a>
         <a routerLink="/datenschutz">{{ 'app.footer.privacy' | translate }}</a>
-        <a href="https://gärngschee.ch" target="_blank" rel="noopener noreferrer">{{ 'app.footer.garngschee' | translate }}</a>
+        <a href="https://gärngschee.ch" target="_blank" rel="noopener noreferrer"
+          >{{ 'app.footer.garngschee' | translate }}</a
+        >
       </nav>
 
       <p class="app-footer__credit">
@@ -76,10 +80,13 @@
           href="https://github.com/daddykom/gaerngschee-weihnachtswuensche"
           target="_blank"
           rel="noopener noreferrer"
-        >{{ 'app.footer.openSource' | translate }}</a>
+          >{{ 'app.footer.openSource' | translate }}</a
+        >
         <span aria-hidden="true">·</span>
         <span>{{ 'app.footer.developedBy' | translate }}</span>
-        <a href="https://github.com/daddykom" target="_blank" rel="noopener noreferrer">Charley Collins</a>
+        <a href="https://github.com/daddykom" target="_blank" rel="noopener noreferrer"
+          >Charley Collins</a
+        >
       </p>
     </div>
   </div>

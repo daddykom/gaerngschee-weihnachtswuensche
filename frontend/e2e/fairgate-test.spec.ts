@@ -1,10 +1,14 @@
-import { expect, test } from './support/test';
 import { expectTranslatedText } from './support/assertions';
+import { test } from './support/test';
 
 test.describe('Fairgate test route', () => {
   test('rejects a normal user', async ({ page }) => {
     await page.route('http://localhost:8083/auth/session-status', async (route) => {
-      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ expiresAt: '2099-01-01T00:00:00Z', secondsRemaining: 3600 }) });
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ expiresAt: '2099-01-01T00:00:00Z', secondsRemaining: 3600 }),
+      });
     });
     await page.route('http://localhost:8083/auth/login', async (route) => {
       await route.fulfill({

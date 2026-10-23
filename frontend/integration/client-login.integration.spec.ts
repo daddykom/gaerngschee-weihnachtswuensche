@@ -22,13 +22,17 @@ test.describe('Integration client login', () => {
 
     await page.goto(`/client-login?token=${encodeURIComponent(token)}`);
     await expect(page).toHaveURL(/\/start$/);
-    await expect(page.locator('.info-box--error')).toContainText('Der Anmeldelink ist ungültig oder abgelaufen. Bitte fordere auf der Startseite einen neuen Link an.');
+    await expect(page.locator('.info-box--error')).toContainText(
+      'Der Anmeldelink ist ungültig oder abgelaufen. Bitte fordere auf der Startseite einen neuen Link an.',
+    );
   });
 
   test('rejects a missing registration token', async ({ page }) => {
     await page.goto('/client-login');
     await expect(page).toHaveURL(/\/start$/);
-    await expect(page.locator('.info-box--error')).toContainText('Der Anmeldelink ist ungültig oder abgelaufen. Bitte fordere auf der Startseite einen neuen Link an.');
+    await expect(page.locator('.info-box--error')).toContainText(
+      'Der Anmeldelink ist ungültig oder abgelaufen. Bitte fordere auf der Startseite einen neuen Link an.',
+    );
   });
 
   test('counts only eligible children from Fairgate data', async ({ page }) => {

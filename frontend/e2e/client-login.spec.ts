@@ -1,5 +1,5 @@
-import { expect, test } from './support/test';
 import { expectTranslatedText } from './support/assertions';
+import { expect, test } from './support/test';
 
 test.describe('Client login route', () => {
   test.beforeEach(async ({ page }) => {
@@ -19,7 +19,11 @@ test.describe('Client login route', () => {
 
   test('exchanges the registration token and navigates to the order page', async ({ page }) => {
     await page.route('http://localhost:8083/auth/session-status', async (route) => {
-      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ expiresAt: '2099-01-01T00:00:00Z', secondsRemaining: 3600 }) });
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ expiresAt: '2099-01-01T00:00:00Z', secondsRemaining: 3600 }),
+      });
     });
     await page.route('http://localhost:8083/auth/registration-login', async (route) => {
       await route.fulfill({
@@ -38,7 +42,7 @@ test.describe('Client login route', () => {
     });
 
     await page.goto('/client-login?token=registration-token');
-     await page.waitForURL('**/bestellung');
+    await page.waitForURL('**/bestellung');
     await expect(page.locator('.app-header__email')).toHaveText('client@example.com');
     await expectTranslatedText(page.locator('h1'), 'app.bestellung.pageTitle');
   });
@@ -56,7 +60,7 @@ test.describe('Client login route', () => {
 
     await page.goto('/client-login?token=invalid-token');
     await expect(page).toHaveURL(/\/start$/);
-     await expectTranslatedText(page.getByRole('alert'), 'app.anmeldung.errorTitle');
-     await expectTranslatedText(page.getByRole('alert'), 'app.anmeldung.registrationTokenError');
+    await expectTranslatedText(page.getByRole('alert'), 'app.anmeldung.errorTitle');
+    await expectTranslatedText(page.getByRole('alert'), 'app.anmeldung.registrationTokenError');
   });
 });

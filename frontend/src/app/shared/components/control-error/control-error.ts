@@ -1,4 +1,4 @@
-import { Component, computed, effect, input, signal, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, input, signal } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 import { FieldState } from '@angular/forms/signals';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -18,16 +18,16 @@ export class ControlErrorComponent {
 
   readonly firstErrorKey = computed(() => {
     this.statusVersion();
-      const control = this.control();
+    const control = this.control();
 
-      if (this.isSignalField(control)) {
-        if (!control.touched()) {
-          return null;
-        }
-
-        const errors = control.errors();
-        return errors[0]?.kind ?? (control.required() && !control.value() ? 'required' : null);
+    if (this.isSignalField(control)) {
+      if (!control.touched()) {
+        return null;
       }
+
+      const errors = control.errors();
+      return errors[0]?.kind ?? (control.required() && !control.value() ? 'required' : null);
+    }
 
     if (!control.touched || !control.errors) {
       return null;

@@ -17,8 +17,16 @@ export const passwordResetFeature = createFeature({
   name: 'passwordReset',
   reducer: createReducer(
     initialState,
-    on(AuthActions.passwordResetRequest, (state) => ({ ...state, requestLoading: true, requestSent: false })),
-    on(AuthActions.passwordResetRequestSuccess, (state) => ({ ...state, requestLoading: false, requestSent: true })),
+    on(AuthActions.passwordResetRequest, (state) => ({
+      ...state,
+      requestLoading: true,
+      requestSent: false,
+    })),
+    on(AuthActions.passwordResetRequestSuccess, (state) => ({
+      ...state,
+      requestLoading: false,
+      requestSent: true,
+    })),
     on(AuthActions.passwordResetRequestFailure, (state) => ({ ...state, requestLoading: false })),
     on(AuthActions.passwordReset, (state) => ({ ...state, loading: true })),
     on(AuthActions.passwordResetSuccess, (state) => ({ ...state, loading: false })),

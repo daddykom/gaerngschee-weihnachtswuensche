@@ -26,10 +26,12 @@ export class FairgateLookup {
 
   constructor() {
     if (this.email !== '') {
-      this.store.dispatch(FairgateLookupActions.lookup({
-        email: this.email,
-        ...(this.membership === '' ? {} : { membership: this.membership }),
-      }));
+      this.store.dispatch(
+        FairgateLookupActions.lookup({
+          email: this.email,
+          ...(this.membership === '' ? {} : { membership: this.membership }),
+        }),
+      );
     }
   }
 }

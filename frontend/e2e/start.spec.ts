@@ -1,5 +1,5 @@
-import { expect, test } from './support/test';
 import { expectTranslatedText } from './support/assertions';
+import { expect, test } from './support/test';
 
 test.describe('Start route', () => {
   test('displays the email form', async ({ page }) => {

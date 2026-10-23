@@ -6,7 +6,7 @@ import { groupGuard } from './group.guard';
 
 describe('groupGuard', () => {
   const router = {
-    parseUrl: vi.fn(() => ({ url: '/not-found' } as unknown as UrlTree)),
+    parseUrl: vi.fn(() => ({ url: '/not-found' }) as unknown as UrlTree),
   };
 
   const createGuardResult = (group: UserGroup | null, allowedGroups: UserGroup[]) => {
@@ -21,10 +21,9 @@ describe('groupGuard', () => {
       ],
     });
 
-    return TestBed.runInInjectionContext(() => groupGuard(allowedGroups)(
-      {} as ActivatedRouteSnapshot,
-      {} as RouterStateSnapshot,
-    ));
+    return TestBed.runInInjectionContext(() =>
+      groupGuard(allowedGroups)({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot),
+    );
   };
 
   beforeEach(() => {

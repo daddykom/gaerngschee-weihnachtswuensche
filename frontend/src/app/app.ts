@@ -1,19 +1,27 @@
-import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, ElementRef, inject, viewChild } from '@angular/core';
+import {
+  afterRenderEffect,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  ElementRef,
+  inject,
+  viewChild,
+} from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
 import { ActivatedRoute, NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, startWith } from 'rxjs';
+import { AdminNavigationComponent } from './shared/components/admin-navigation/admin-navigation';
 import { InfoBoxComponent } from './shared/components/info-box/info-box';
 import { AuthActions } from './store/auth/auth.actions';
 import { selectAuthEmail, selectAuthGroup } from './store/auth/auth.feature';
 import { SessionActions } from './store/auth/session.actions';
-import { selectNotification } from './store/notification/notification.feature';
 import { selectFrontendPublicConfigStatus } from './store/frontend-config/frontend-config.feature';
-import { AdminNavigationComponent } from './shared/components/admin-navigation/admin-navigation';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatMenuModule } from '@angular/material/menu';
+import { selectNotification } from './store/notification/notification.feature';
 
 @Component({
   imports: [
@@ -90,5 +98,4 @@ export class App {
 
     return route.snapshot.data['pageTitle'] as string | undefined;
   });
-
 }

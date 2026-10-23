@@ -15,25 +15,25 @@ describe('authReducer', () => {
       requiredPasswordReset: false,
       passwordChangeLoading: false,
       passwordChangeErrorCode: null,
-       loading: true,
-       emailCheckLoading: false,
-       emailCheckMode: null,
-       emailCheckEmail: null,
-       emailCheckYear: null,
-       emailCheckErrorCode: null,
-       errorCode: null,
+      loading: true,
+      emailCheckLoading: false,
+      emailCheckMode: null,
+      emailCheckEmail: null,
+      emailCheckYear: null,
+      emailCheckErrorCode: null,
+      errorCode: null,
       registrationLoginLoading: false,
-         registrationLoginErrorCode: null,
-         fairgateUserExists: null,
-         fairgateStatus: null,
-         childrenCount: null,
+      registrationLoginErrorCode: null,
+      fairgateUserExists: null,
+      fairgateStatus: null,
+      childrenCount: null,
       adultsCount: null,
-       salutation: null,
-       sessionExpiresAt: null,
-       sessionSecondsRemaining: null,
-       sessionWarningVisible: false,
-       sessionRefreshLoading: false,
-       email: null,
+      salutation: null,
+      sessionExpiresAt: null,
+      sessionSecondsRemaining: null,
+      sessionWarningVisible: false,
+      sessionRefreshLoading: false,
+      email: null,
     });
   });
 
@@ -41,8 +41,8 @@ describe('authReducer', () => {
     const state = authReducer(
       { ...initialState, loading: true },
       AuthActions.loginSuccess({
-         userId: 'user-123',
-         group: 'admin',
+        userId: 'user-123',
+        group: 'admin',
         requiredPasswordReset: false,
       }),
     );
@@ -53,25 +53,25 @@ describe('authReducer', () => {
       requiredPasswordReset: false,
       passwordChangeLoading: false,
       passwordChangeErrorCode: null,
-         loading: false,
-         emailCheckLoading: false,
-         emailCheckMode: null,
-         emailCheckEmail: null,
-         emailCheckYear: null,
-         emailCheckErrorCode: null,
-         errorCode: null,
+      loading: false,
+      emailCheckLoading: false,
+      emailCheckMode: null,
+      emailCheckEmail: null,
+      emailCheckYear: null,
+      emailCheckErrorCode: null,
+      errorCode: null,
       registrationLoginLoading: false,
-         registrationLoginErrorCode: null,
-         fairgateUserExists: null,
-         fairgateStatus: null,
-         childrenCount: null,
+      registrationLoginErrorCode: null,
+      fairgateUserExists: null,
+      fairgateStatus: null,
+      childrenCount: null,
       adultsCount: null,
-       salutation: null,
-       sessionExpiresAt: null,
-       sessionSecondsRemaining: null,
-       sessionWarningVisible: false,
-       sessionRefreshLoading: false,
-       email: null,
+      salutation: null,
+      sessionExpiresAt: null,
+      sessionSecondsRemaining: null,
+      sessionWarningVisible: false,
+      sessionRefreshLoading: false,
+      email: null,
     });
   });
 
@@ -87,25 +87,25 @@ describe('authReducer', () => {
       requiredPasswordReset: false,
       passwordChangeLoading: false,
       passwordChangeErrorCode: null,
-       loading: false,
-       emailCheckLoading: false,
-       emailCheckMode: null,
-       emailCheckEmail: null,
-       emailCheckYear: null,
-       emailCheckErrorCode: null,
-       errorCode: 'INVALID_CREDENTIALS',
+      loading: false,
+      emailCheckLoading: false,
+      emailCheckMode: null,
+      emailCheckEmail: null,
+      emailCheckYear: null,
+      emailCheckErrorCode: null,
+      errorCode: 'INVALID_CREDENTIALS',
       registrationLoginLoading: false,
-       registrationLoginErrorCode: null,
-       fairgateUserExists: null,
-       fairgateStatus: null,
-       childrenCount: null,
+      registrationLoginErrorCode: null,
+      fairgateUserExists: null,
+      fairgateStatus: null,
+      childrenCount: null,
       adultsCount: null,
-       salutation: null,
-       sessionExpiresAt: null,
-       sessionSecondsRemaining: null,
-       sessionWarningVisible: false,
-       sessionRefreshLoading: false,
-       email: null,
+      salutation: null,
+      sessionExpiresAt: null,
+      sessionSecondsRemaining: null,
+      sessionWarningVisible: false,
+      sessionRefreshLoading: false,
+      email: null,
     });
   });
 
@@ -116,27 +116,27 @@ describe('authReducer', () => {
         group: 'admin',
         requiredPasswordReset: false,
         passwordChangeLoading: false,
-         passwordChangeErrorCode: null,
-         loading: false,
-         emailCheckLoading: false,
-         emailCheckMode: null,
-         emailCheckEmail: null,
-         emailCheckYear: null,
-         emailCheckErrorCode: null,
-         errorCode: null,
+        passwordChangeErrorCode: null,
+        loading: false,
+        emailCheckLoading: false,
+        emailCheckMode: null,
+        emailCheckEmail: null,
+        emailCheckYear: null,
+        emailCheckErrorCode: null,
+        errorCode: null,
         registrationLoginLoading: false,
-         registrationLoginErrorCode: null,
-         fairgateUserExists: null,
-         fairgateStatus: null,
-         childrenCount: null,
+        registrationLoginErrorCode: null,
+        fairgateUserExists: null,
+        fairgateStatus: null,
+        childrenCount: null,
         adultsCount: null,
-         salutation: null,
-         sessionExpiresAt: null,
-         sessionSecondsRemaining: null,
-         sessionWarningVisible: false,
-         sessionRefreshLoading: false,
-         email: null,
-       },
+        salutation: null,
+        sessionExpiresAt: null,
+        sessionSecondsRemaining: null,
+        sessionWarningVisible: false,
+        sessionRefreshLoading: false,
+        email: null,
+      },
       AuthActions.logoutRequested(),
     );
 
@@ -144,26 +144,67 @@ describe('authReducer', () => {
   });
 
   it('stores registration login data and resets its loading state', () => {
-    const loading = authReducer(initialState, AuthActions.registrationLogin({ token: 'registration-token' }));
+    const loading = authReducer(
+      initialState,
+      AuthActions.registrationLogin({ token: 'registration-token' }),
+    );
     expect(loading.registrationLoginLoading).toBe(true);
     expect(loading.registrationLoginErrorCode).toBeNull();
 
-    const state = authReducer(loading, AuthActions.registrationLoginSuccess({
-       userId: 'client-1', email: 'client@example.com', group: 'client', fairgateUserExists: true,
-      childrenCount: 2, adultsCount: 2, salutation: 'Hallo',
-    }));
-    expect(state).toMatchObject({ userId: 'client-1', group: 'client', registrationLoginLoading: false, registrationLoginErrorCode: null, fairgateUserExists: true, childrenCount: 2, adultsCount: 2, salutation: 'Hallo' });
+    const state = authReducer(
+      loading,
+      AuthActions.registrationLoginSuccess({
+        userId: 'client-1',
+        email: 'client@example.com',
+        group: 'client',
+        fairgateUserExists: true,
+        childrenCount: 2,
+        adultsCount: 2,
+        salutation: 'Hallo',
+      }),
+    );
+    expect(state).toMatchObject({
+      userId: 'client-1',
+      group: 'client',
+      registrationLoginLoading: false,
+      registrationLoginErrorCode: null,
+      fairgateUserExists: true,
+      childrenCount: 2,
+      adultsCount: 2,
+      salutation: 'Hallo',
+    });
   });
 
   it('stores registration and password change errors', () => {
-    const registration = authReducer({ ...initialState, registrationLoginLoading: true }, AuthActions.registrationLoginFailure({ errorCode: 'TOKEN_EXPIRED' }));
-    expect(registration).toMatchObject({ userId: null, group: null, registrationLoginLoading: false, registrationLoginErrorCode: 'TOKEN_EXPIRED' });
+    const registration = authReducer(
+      { ...initialState, registrationLoginLoading: true },
+      AuthActions.registrationLoginFailure({ errorCode: 'TOKEN_EXPIRED' }),
+    );
+    expect(registration).toMatchObject({
+      userId: null,
+      group: null,
+      registrationLoginLoading: false,
+      registrationLoginErrorCode: 'TOKEN_EXPIRED',
+    });
 
     const changing = authReducer(initialState, AuthActions.passwordChange({ password: 'secret' }));
     expect(changing).toMatchObject({ passwordChangeLoading: true, passwordChangeErrorCode: null });
-    const failed = authReducer(changing, AuthActions.passwordChangeFailure({ errorCode: 'WEAK_PASSWORD' }));
-    expect(failed).toMatchObject({ passwordChangeLoading: false, passwordChangeErrorCode: 'WEAK_PASSWORD' });
-    const changed = authReducer({ ...failed, requiredPasswordReset: true }, AuthActions.passwordChangeSuccess());
-    expect(changed).toMatchObject({ requiredPasswordReset: false, passwordChangeLoading: false, passwordChangeErrorCode: null });
+    const failed = authReducer(
+      changing,
+      AuthActions.passwordChangeFailure({ errorCode: 'WEAK_PASSWORD' }),
+    );
+    expect(failed).toMatchObject({
+      passwordChangeLoading: false,
+      passwordChangeErrorCode: 'WEAK_PASSWORD',
+    });
+    const changed = authReducer(
+      { ...failed, requiredPasswordReset: true },
+      AuthActions.passwordChangeSuccess(),
+    );
+    expect(changed).toMatchObject({
+      requiredPasswordReset: false,
+      passwordChangeLoading: false,
+      passwordChangeErrorCode: null,
+    });
   });
 });

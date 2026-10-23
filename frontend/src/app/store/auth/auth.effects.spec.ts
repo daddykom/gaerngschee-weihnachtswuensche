@@ -1,20 +1,20 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { type Mock } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { Action } from '@ngrx/store';
 import { firstValueFrom, of, Subject, throwError } from 'rxjs';
+import { type Mock } from 'vitest';
 import { AuthService } from '../../shared/services/auth.service';
-import { AuthActions } from './auth.actions';
 import { NavigationActions } from '../navigation/navigation.actions';
 import { NotificationActions } from '../notification/notification.actions';
+import { AuthActions } from './auth.actions';
 import {
   authNotificationEffect,
   clearPersistedAuthEffect,
-  loginEffect,
-  navigateOnEmailCheckSuccessEffect,
   emailCheckSuccessNotificationEffect,
+  loginEffect,
   logoutEffect,
+  navigateOnEmailCheckSuccessEffect,
   navigateOnLoginSuccessEffect,
   navigateOnPasswordChangeSuccessEffect,
   passwordChangeEffect,
@@ -28,7 +28,12 @@ describe('loginEffect', () => {
 
   beforeEach(() => {
     actions$ = new Subject<Action>();
-    authService = { login: vi.fn(), registrationLogin: vi.fn(), logout: vi.fn(), changePassword: vi.fn() };
+    authService = {
+      login: vi.fn(),
+      registrationLogin: vi.fn(),
+      logout: vi.fn(),
+      changePassword: vi.fn(),
+    };
 
     TestBed.configureTestingModule({
       providers: [
@@ -39,12 +44,14 @@ describe('loginEffect', () => {
   });
 
   it('maps a successful login to a success action', async () => {
-    authService.login.mockReturnValue(of({
-      user: { id: 'user-123', email: 'user@example.com', group: 'admin' },
-         group: 'admin',
-         requiredPasswordReset: false,
-         email: 'user@example.com',
-    }));
+    authService.login.mockReturnValue(
+      of({
+        user: { id: 'user-123', email: 'user@example.com', group: 'admin' },
+        group: 'admin',
+        requiredPasswordReset: false,
+        email: 'user@example.com',
+      }),
+    );
     const effect$ = TestBed.runInInjectionContext(() => loginEffect());
     const result = firstValueFrom(effect$);
 
@@ -62,11 +69,13 @@ describe('loginEffect', () => {
   });
 
   it('uses the submitted email when the response does not provide one', async () => {
-    authService.login.mockReturnValue(of({
-      user: { id: 'user-123', email: '', group: 'admin' },
-      group: 'admin',
-      requiredPasswordReset: false,
-    }));
+    authService.login.mockReturnValue(
+      of({
+        user: { id: 'user-123', email: '', group: 'admin' },
+        group: 'admin',
+        requiredPasswordReset: false,
+      }),
+    );
     const effect$ = TestBed.runInInjectionContext(() => loginEffect());
     const result = firstValueFrom(effect$);
 
@@ -83,10 +92,15 @@ describe('loginEffect', () => {
   });
 
   it('maps a structured backend error to a failure action', async () => {
-    authService.login.mockReturnValue(throwError(() => new HttpErrorResponse({
-      status: 401,
-      error: { error: { code: 'INVALID_CREDENTIALS', details: [] } },
-    })));
+    authService.login.mockReturnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 401,
+            error: { error: { code: 'INVALID_CREDENTIALS', details: [] } },
+          }),
+      ),
+    );
     const effect$ = TestBed.runInInjectionContext(() => loginEffect());
     const result = firstValueFrom(effect$);
 
@@ -110,24 +124,30 @@ describe('loginEffect', () => {
     const effect$ = TestBed.runInInjectionContext(() => navigateOnLoginSuccessEffect());
     const result = firstValueFrom(effect$);
 
-    actions$.next(AuthActions.loginSuccess({
-      userId: 'user-123',
-      group: 'admin',
-      requiredPasswordReset: false,
-    }));
+    actions$.next(
+      AuthActions.loginSuccess({
+        userId: 'user-123',
+        group: 'admin',
+        requiredPasswordReset: false,
+      }),
+    );
 
-    await expect(result).resolves.toEqual(NavigationActions.navigate({ target: '/admin/overview' }));
+    await expect(result).resolves.toEqual(
+      NavigationActions.navigate({ target: '/admin/overview' }),
+    );
   });
 
   it('navigates clients to the start success page after an email check', async () => {
     const effect$ = TestBed.runInInjectionContext(() => navigateOnEmailCheckSuccessEffect());
     const result = firstValueFrom(effect$);
 
-    actions$.next(AuthActions.checkEmailSuccess({
-      email: 'client@example.com',
-      mode: 'email_sent',
-      processingYear: 2026,
-    }));
+    actions$.next(
+      AuthActions.checkEmailSuccess({
+        email: 'client@example.com',
+        mode: 'email_sent',
+        processingYear: 2026,
+      }),
+    );
 
     await expect(result).resolves.toEqual(NavigationActions.navigate({ target: '/start/success' }));
   });
@@ -136,16 +156,20 @@ describe('loginEffect', () => {
     const effect$ = TestBed.runInInjectionContext(() => navigateOnEmailCheckSuccessEffect());
     const result = firstValueFrom(effect$);
 
-    actions$.next(AuthActions.checkEmailSuccess({
-      email: 'admin@example.com',
-      mode: 'password',
-      processingYear: 2026,
-    }));
-    actions$.next(AuthActions.checkEmailSuccess({
-      email: 'client@example.com',
-      mode: 'info',
-      processingYear: 2026,
-    }));
+    actions$.next(
+      AuthActions.checkEmailSuccess({
+        email: 'admin@example.com',
+        mode: 'password',
+        processingYear: 2026,
+      }),
+    );
+    actions$.next(
+      AuthActions.checkEmailSuccess({
+        email: 'client@example.com',
+        mode: 'info',
+        processingYear: 2026,
+      }),
+    );
 
     await expect(result).resolves.toEqual(NavigationActions.navigate({ target: '/start/success' }));
   });
@@ -154,38 +178,50 @@ describe('loginEffect', () => {
     const effect$ = TestBed.runInInjectionContext(() => emailCheckSuccessNotificationEffect());
     const result = firstValueFrom(effect$);
 
-    actions$.next(AuthActions.checkEmailSuccess({
-      email: 'client@example.com',
-      mode: 'info',
-      processingYear: 2026,
-    }));
+    actions$.next(
+      AuthActions.checkEmailSuccess({
+        email: 'client@example.com',
+        mode: 'info',
+        processingYear: 2026,
+      }),
+    );
 
-    await expect(result).resolves.toEqual(NotificationActions.show({
-      variant: 'success',
-      titleKey: 'app.anmeldung.emailSentTitle',
-      messageKey: 'app.login.orderInfo',
-      params: { year: '2026' },
-      preserveOnRoutes: ['/start/success'],
-    }));
+    await expect(result).resolves.toEqual(
+      NotificationActions.show({
+        variant: 'success',
+        titleKey: 'app.anmeldung.emailSentTitle',
+        messageKey: 'app.login.orderInfo',
+        params: { year: '2026' },
+        preserveOnRoutes: ['/start/success'],
+      }),
+    );
   });
 
   it('dispatches navigation to password change when a reset is required', async () => {
     const effect$ = TestBed.runInInjectionContext(() => navigateOnLoginSuccessEffect());
     const result = firstValueFrom(effect$);
 
-    actions$.next(AuthActions.loginSuccess({
-      userId: 'user-123',
-      group: 'user',
-      requiredPasswordReset: true,
-    }));
+    actions$.next(
+      AuthActions.loginSuccess({
+        userId: 'user-123',
+        group: 'user',
+        requiredPasswordReset: true,
+      }),
+    );
 
-    await expect(result).resolves.toEqual(NavigationActions.navigate({ target: '/password-change' }));
+    await expect(result).resolves.toEqual(
+      NavigationActions.navigate({ target: '/password-change' }),
+    );
   });
 
   it('navigates after password change', async () => {
-    const password = firstValueFrom(TestBed.runInInjectionContext(() => navigateOnPasswordChangeSuccessEffect()));
+    const password = firstValueFrom(
+      TestBed.runInInjectionContext(() => navigateOnPasswordChangeSuccessEffect()),
+    );
     actions$.next(AuthActions.passwordChangeSuccess());
-    await expect(password).resolves.toEqual(NavigationActions.navigate({ target: '/admin/overview' }));
+    await expect(password).resolves.toEqual(
+      NavigationActions.navigate({ target: '/admin/overview' }),
+    );
   });
 
   it('maps password change success and errors', async () => {
@@ -198,7 +234,9 @@ describe('loginEffect', () => {
     authService.changePassword.mockReturnValue(throwError(() => new Error('failed')));
     const failure = firstValueFrom(TestBed.runInInjectionContext(() => passwordChangeEffect()));
     actions$.next(AuthActions.passwordChange({ password: 'bad-secret' }));
-    await expect(failure).resolves.toEqual(AuthActions.passwordChangeFailure({ errorCode: 'PASSWORD_CHANGE_FAILED' }));
+    await expect(failure).resolves.toEqual(
+      AuthActions.passwordChangeFailure({ errorCode: 'PASSWORD_CHANGE_FAILED' }),
+    );
   });
 
   it('calls the backend logout and dispatches navigation to home after success', async () => {
@@ -229,7 +267,14 @@ describe('loginEffect', () => {
     const clearResult = TestBed.runInInjectionContext(() => clearPersistedAuthEffect());
 
     const loginSubscription = persistResult.subscribe();
-    actions$.next(AuthActions.loginSuccess({ userId: 'user-1', email: 'admin@example.com', group: 'admin', requiredPasswordReset: false }));
+    actions$.next(
+      AuthActions.loginSuccess({
+        userId: 'user-1',
+        email: 'admin@example.com',
+        group: 'admin',
+        requiredPasswordReset: false,
+      }),
+    );
     expect(JSON.parse(localStorage.getItem('gaerngschee.auth') ?? '{}')).toEqual({
       userId: 'user-1',
       group: 'admin',
@@ -253,12 +298,27 @@ describe('loginEffect', () => {
     const effect$ = TestBed.runInInjectionContext(() => persistRegistrationLoginEffect());
     const subscription = effect$.subscribe();
 
-    actions$.next(AuthActions.registrationLoginSuccess({
-      userId: 'client-1', email: 'client@example.com', group: 'client', fairgateUserExists: true,
-      childrenCount: 1, adultsCount: 2, salutation: 'Hallo',
-    }));
+    actions$.next(
+      AuthActions.registrationLoginSuccess({
+        userId: 'client-1',
+        email: 'client@example.com',
+        group: 'client',
+        fairgateUserExists: true,
+        childrenCount: 1,
+        adultsCount: 2,
+        salutation: 'Hallo',
+      }),
+    );
 
-    expect(JSON.parse(localStorage.getItem('gaerngschee.auth') ?? '{}')).toEqual({ userId: 'client-1', email: 'client@example.com', group: 'client', fairgateUserExists: true, childrenCount: 1, adultsCount: 2, salutation: 'Hallo' });
+    expect(JSON.parse(localStorage.getItem('gaerngschee.auth') ?? '{}')).toEqual({
+      userId: 'client-1',
+      email: 'client@example.com',
+      group: 'client',
+      fairgateUserExists: true,
+      childrenCount: 1,
+      adultsCount: 2,
+      salutation: 'Hallo',
+    });
     subscription.unsubscribe();
   });
 
@@ -266,10 +326,22 @@ describe('loginEffect', () => {
     const effect$ = TestBed.runInInjectionContext(() => authNotificationEffect());
     const result = firstValueFrom(effect$);
     actions$.next(AuthActions.loginFailure({ errorCode: 'INVALID_CREDENTIALS' }));
-    await expect(result).resolves.toEqual(NotificationActions.show({ variant: 'error', titleKey: 'app.auth.loginErrorTitle', messageKey: 'app.auth.errors.INVALID_CREDENTIALS' }));
+    await expect(result).resolves.toEqual(
+      NotificationActions.show({
+        variant: 'error',
+        titleKey: 'app.auth.loginErrorTitle',
+        messageKey: 'app.auth.errors.INVALID_CREDENTIALS',
+      }),
+    );
 
     const passwordResult = firstValueFrom(effect$);
     actions$.next(AuthActions.passwordChangeFailure({ errorCode: 'WEAK_PASSWORD' }));
-    await expect(passwordResult).resolves.toEqual(NotificationActions.show({ variant: 'error', titleKey: 'app.passwordChange.heading', messageKey: 'app.passwordChange.errors.WEAK_PASSWORD' }));
+    await expect(passwordResult).resolves.toEqual(
+      NotificationActions.show({
+        variant: 'error',
+        titleKey: 'app.passwordChange.heading',
+        messageKey: 'app.passwordChange.errors.WEAK_PASSWORD',
+      }),
+    );
   });
 });

@@ -8,7 +8,9 @@ test.describe('Integration admin edge cases', () => {
     const response = await page.request.get('http://localhost:8082/admin/users');
 
     expect(response.status()).toBe(401);
-    await expect(response.json()).resolves.toEqual({ error: { code: 'SESSION_EXPIRED', details: [] } });
+    await expect(response.json()).resolves.toEqual({
+      error: { code: 'SESSION_EXPIRED', details: [] },
+    });
   });
 
   test('denies configuration changes for a normal user', async ({ page }) => {

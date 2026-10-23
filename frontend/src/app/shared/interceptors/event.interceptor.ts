@@ -1,4 +1,9 @@
-import { HttpErrorResponse, HttpEvent, HttpInterceptorFn, HttpResponse } from '@angular/common/http';
+import {
+  HttpErrorResponse,
+  HttpEvent,
+  HttpInterceptorFn,
+  HttpResponse,
+} from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { catchError, tap, throwError } from 'rxjs';

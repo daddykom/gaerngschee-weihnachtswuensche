@@ -1,7 +1,7 @@
-import { provideRouter } from '@angular/router';
-import { provideTranslateService } from '@ngx-translate/core';
-import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+import { MockStore, provideMockStore } from '@ngrx/store/testing';
+import { provideTranslateService } from '@ngx-translate/core';
 import { Login } from './login.component';
 
 describe('Login', () => {
@@ -25,11 +25,7 @@ describe('Login', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [Login],
-      providers: [
-        provideRouter([]),
-        provideTranslateService(),
-        provideMockStore({ initialState }),
-      ],
+      providers: [provideRouter([]), provideTranslateService(), provideMockStore({ initialState })],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Login);
@@ -41,7 +37,13 @@ describe('Login', () => {
 
   it('dispatches login credentials for a valid form', () => {
     component.loginModel.set({ email: 'user@example.com', password: 'secret' });
-    store.setState({ auth: { ...initialState.auth, emailCheckMode: 'password', emailCheckEmail: 'user@example.com' } });
+    store.setState({
+      auth: {
+        ...initialState.auth,
+        emailCheckMode: 'password',
+        emailCheckEmail: 'user@example.com',
+      },
+    });
     fixture.detectChanges();
 
     component.onSubmit();
@@ -78,7 +80,9 @@ describe('Login', () => {
   });
 
   it('dispatches forgot password when the link is clicked', () => {
-    store.setState({ auth: { ...initialState.auth, emailCheckMode: 'password', emailCheckEmail: '' } });
+    store.setState({
+      auth: { ...initialState.auth, emailCheckMode: 'password', emailCheckEmail: '' },
+    });
     fixture.detectChanges();
     const forgotPassword = fixture.nativeElement.querySelector('.forgot-password-link');
 

@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideTranslateService } from '@ngx-translate/core';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
+import { provideTranslateService } from '@ngx-translate/core';
 import { FairgateTestActions } from '../../../../store/fairgate-test/fairgate-test.actions';
 import { FairgateTestComponent } from './fairgate-test.component';
 
@@ -58,8 +58,12 @@ describe('FairgateTestComponent', () => {
     });
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('.fairgate-test-result').textContent).toContain('success');
-    expect(fixture.nativeElement.querySelector('.fairgate-test-result').textContent).toContain('contacts');
+    expect(fixture.nativeElement.querySelector('.fairgate-test-result').textContent).toContain(
+      'success',
+    );
+    expect(fixture.nativeElement.querySelector('.fairgate-test-result').textContent).toContain(
+      'contacts',
+    );
   });
 
   it('renders the loading state and disables the test button', () => {
@@ -80,6 +84,8 @@ describe('FairgateTestComponent', () => {
     });
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('.fairgate-test-result').textContent).toContain('false');
+    expect(fixture.nativeElement.querySelector('.fairgate-test-result').textContent).toContain(
+      'false',
+    );
   });
 });

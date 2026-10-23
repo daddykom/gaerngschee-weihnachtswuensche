@@ -133,11 +133,15 @@ describe('ConfigurationComponent', () => {
     component.onSubmit();
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('.control-error')?.textContent).toContain('app.admin.configuration.errors.pattern');
+    expect(fixture.nativeElement.querySelector('.control-error')?.textContent).toContain(
+      'app.admin.configuration.errors.pattern',
+    );
   });
 
   it('shows a pattern error on the field after entering an invalid value and leaving it', async () => {
-    const input = fixture.nativeElement.querySelector('input[placeholder="z. B. 120"]') as HTMLInputElement;
+    const input = fixture.nativeElement.querySelector(
+      'input[placeholder="z. B. 120"]',
+    ) as HTMLInputElement;
     input.value = 'not-a-number';
     input.dispatchEvent(new Event('input', { bubbles: true }));
     input.dispatchEvent(new Event('blur', { bubbles: true }));
@@ -148,7 +152,9 @@ describe('ConfigurationComponent', () => {
     const field = input.closest('mat-form-field');
 
     expect(component.model()[configs[0].id]).toBe('not-a-number');
-    expect(field?.querySelector('.control-error')?.textContent).toContain('app.admin.configuration.errors.pattern');
+    expect(field?.querySelector('.control-error')?.textContent).toContain(
+      'app.admin.configuration.errors.pattern',
+    );
   });
 
   it('validates the maximum length for configurations without a pattern', () => {
@@ -208,5 +214,4 @@ describe('ConfigurationComponent', () => {
     expect(component.model()[configs[1].id]).toBeUndefined();
     expect(component.model()[configs[0].id]).toBe('120');
   });
-
 });

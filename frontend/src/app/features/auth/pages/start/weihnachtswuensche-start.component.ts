@@ -8,8 +8,8 @@ import { Store } from '@ngrx/store';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ControlErrorComponent } from '../../../../shared/components/control-error/control-error';
 import { InfoBoxComponent } from '../../../../shared/components/info-box/info-box';
-import { StartActions } from '../../../../store/start/start.actions';
 import { inputLimits } from '../../../../shared/constants/input-limits';
+import { StartActions } from '../../../../store/start/start.actions';
 
 @Component({
   selector: 'app-weihnachtswuensche-start',

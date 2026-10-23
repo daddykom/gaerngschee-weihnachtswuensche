@@ -22,10 +22,7 @@ describe('startReducer', () => {
   });
 
   it('stores a failed response', () => {
-    const state = startReducer(
-      { loading: true, sent: null },
-      StartActions.submitFailure(),
-    );
+    const state = startReducer({ loading: true, sent: null }, StartActions.submitFailure());
 
     expect(state).toEqual({ loading: false, sent: false });
   });

@@ -1,5 +1,5 @@
-import { expect, test } from './support/test';
 import { expectTranslatedText } from './support/assertions';
+import { test } from './support/test';
 
 test.describe('Not-found route', () => {
   test('shows the not-found page for an unknown route', async ({ page }) => {
@@ -31,7 +31,9 @@ test.describe('Not-found route', () => {
     await expectTranslatedText(page.locator('h1'), 'app.notFound.pageTitle');
   });
 
-  test('shows the not-found page for the unauthenticated user administration route', async ({ page }) => {
+  test('shows the not-found page for the unauthenticated user administration route', async ({
+    page,
+  }) => {
     await page.goto('/admin/users');
     await page.waitForURL('**/not-found');
     await expectTranslatedText(page.locator('h1'), 'app.notFound.pageTitle');
@@ -39,7 +41,11 @@ test.describe('Not-found route', () => {
 
   test('shows the not-found page when a client opens an admin route', async ({ page }) => {
     await page.route('http://localhost:8083/auth/session-status', async (route) => {
-      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ expiresAt: '2099-01-01T00:00:00Z', secondsRemaining: 3600 }) });
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ expiresAt: '2099-01-01T00:00:00Z', secondsRemaining: 3600 }),
+      });
     });
     await page.route('http://localhost:8083/auth/login', async (route) => {
       await route.fulfill({

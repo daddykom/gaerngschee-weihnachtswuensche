@@ -1,7 +1,7 @@
 import { createFeature, createReducer, on } from '@ngrx/store';
 import { AuthActions } from './auth.actions';
-import { SessionActions } from './session.actions';
 import { AuthState, initialState, loggedOutState } from './auth.state';
+import { SessionActions } from './session.actions';
 
 export const authFeature = createFeature({
   name: 'auth',
@@ -126,7 +126,10 @@ export const authFeature = createFeature({
     })),
     on(SessionActions.refreshFailed, (state) => ({ ...state, sessionRefreshLoading: false })),
     on(SessionActions.countdownStarted, (state) => ({ ...state, sessionWarningVisible: true })),
-    on(SessionActions.countdownTick, (state, { secondsRemaining }) => ({ ...state, sessionSecondsRemaining: secondsRemaining })),
+    on(SessionActions.countdownTick, (state, { secondsRemaining }) => ({
+      ...state,
+      sessionSecondsRemaining: secondsRemaining,
+    })),
     on(SessionActions.countdownStopped, (state) => ({ ...state, sessionWarningVisible: false })),
   ),
 });

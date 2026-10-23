@@ -28,25 +28,39 @@ export class AdminUsersService {
   }
 
   get(userId: string): Observable<{ user: AdminUser }> {
-    return this.http.get<{ user: AdminUser }>(`${this.baseUrl}/${userId}`, { withCredentials: true });
+    return this.http.get<{ user: AdminUser }>(`${this.baseUrl}/${userId}`, {
+      withCredentials: true,
+    });
   }
 
   create(email: string, group: UserGroup): Observable<UserMutationResponse> {
-    return this.http.post<UserMutationResponse>(this.baseUrl, { email, group }, { withCredentials: true });
+    return this.http.post<UserMutationResponse>(
+      this.baseUrl,
+      { email, group },
+      { withCredentials: true },
+    );
   }
 
   update(
     userId: string,
     changes: Partial<Pick<AdminUser, 'email' | 'group' | 'required_password_reset'>>,
   ): Observable<UserMutationResponse> {
-    return this.http.patch<UserMutationResponse>(`${this.baseUrl}/${userId}`, changes, { withCredentials: true });
+    return this.http.patch<UserMutationResponse>(`${this.baseUrl}/${userId}`, changes, {
+      withCredentials: true,
+    });
   }
 
   delete(userId: string): Observable<{ deleted: boolean; userId: string }> {
-    return this.http.delete<{ deleted: boolean; userId: string }>(`${this.baseUrl}/${userId}`, { withCredentials: true });
+    return this.http.delete<{ deleted: boolean; userId: string }>(`${this.baseUrl}/${userId}`, {
+      withCredentials: true,
+    });
   }
 
   sendPasswordReset(userId: string): Observable<{ emailSentTo: string }> {
-    return this.http.post<{ emailSentTo: string }>(`${this.baseUrl}/${userId}/password-reset`, {}, { withCredentials: true });
+    return this.http.post<{ emailSentTo: string }>(
+      `${this.baseUrl}/${userId}/password-reset`,
+      {},
+      { withCredentials: true },
+    );
   }
 }

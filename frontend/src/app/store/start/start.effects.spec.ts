@@ -3,9 +3,9 @@ import { provideMockActions } from '@ngrx/effects/testing';
 import { Action } from '@ngrx/store';
 import { firstValueFrom, of, Subject, take, throwError, toArray } from 'rxjs';
 import { AnmeldungService } from '../../shared/services/anmeldung.service';
-import { StartActions } from './start.actions';
 import { NavigationActions } from '../navigation/navigation.actions';
 import { NotificationActions } from '../notification/notification.actions';
+import { StartActions } from './start.actions';
 import {
   showStartFailureNotificationEffect,
   showStartSuccessAndNavigateEffect,

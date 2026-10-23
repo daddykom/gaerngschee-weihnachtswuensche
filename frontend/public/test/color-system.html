@@ -1,222 +1,223 @@
 <!doctype html>
 <html lang="de">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Farbsystem</title>
-  <style>
-    :root {
-      color-scheme: light;
-      font-family: Arial, Helvetica, sans-serif;
-    }
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Farbsystem</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: Arial, Helvetica, sans-serif;
+      }
 
-    body {
-      margin: 0;
-      padding: 32px 16px;
-      background: #fff7fb;
-      color: #000000;
-    }
-
-    main {
-      max-width: 1120px;
-      margin: 0 auto;
-      padding: 32px;
-      background: #fff8fc;
-      border: 1px solid #8c7b85;
-      border-radius: 20px;
-    }
-
-    h1 {
-      margin: 0 0 12px;
-      font-size: 30px;
-    }
-
-    .intro {
-      max-width: 760px;
-      margin: 0 0 28px;
-      color: #6f6069;
-      line-height: 1.5;
-    }
-
-    .table-wrapper {
-      overflow-x: auto;
-      border: 1px solid #8c7b85;
-      border-radius: 14px;
-    }
-
-    table {
-      width: 100%;
-      min-width: 760px;
-      border-collapse: collapse;
-      text-align: left;
-    }
-
-    th,
-    td {
-      padding: 14px 16px;
-      border-bottom: 1px solid #8c7b85;
-      vertical-align: middle;
-    }
-
-    tr:last-child td {
-      border-bottom: 0;
-    }
-
-    th {
-      background: #f5b6d3;
-      color: #000000;
-      font-size: 14px;
-    }
-
-    td:first-child {
-      width: 180px;
-      font-weight: 700;
-    }
-
-    .hex {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      white-space: nowrap;
-    }
-
-    .preview {
-      width: 150px;
-      min-width: 150px;
-      height: 42px;
-      box-sizing: border-box;
-      padding: 11px 12px;
-      border: 1px solid #8c7b85;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    @media (max-width: 640px) {
       body {
-        padding: 16px 8px;
+        margin: 0;
+        padding: 32px 16px;
+        background: #fff7fb;
+        color: #000000;
       }
 
       main {
-        padding: 20px 16px;
-        border-radius: 14px;
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 32px;
+        background: #fff8fc;
+        border: 1px solid #8c7b85;
+        border-radius: 20px;
       }
 
       h1 {
-        font-size: 26px;
+        margin: 0 0 12px;
+        font-size: 30px;
       }
-    }
-  </style>
-</head>
-<body>
-  <main>
-    <h1>Farbsystem</h1>
-    <p class="intro">
-      Die verbindlichen Farbrollen des G&auml;rngschee-UI-Systems. Die letzte Spalte zeigt die jeweilige Farbe direkt als Vorschau.
-    </p>
 
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th scope="col">Rolle</th>
-            <th scope="col">Farbe</th>
-            <th scope="col">Verwendung</th>
-            <th scope="col">Vorschau</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Seitenhintergrund</td>
-            <td class="hex">#fff7fb</td>
-            <td>Globaler Seitenhintergrund</td>
-            <td><div class="preview" style="background:#fff7fb">#fff7fb</div></td>
-          </tr>
-          <tr>
-            <td>Oberfl&auml;che</td>
-            <td class="hex">#fff8fc</td>
-            <td>Karten, E-Mail-Fl&auml;chen und Inhaltsbereiche</td>
-            <td><div class="preview" style="background:#fff8fc">#fff8fc</div></td>
-          </tr>
-          <tr>
-            <td>Header / Prim&auml;rcontainer</td>
-            <td class="hex">#f5b6d3</td>
-            <td>E-Mail-Header und hervorgehobene Markenbereiche</td>
-            <td><div class="preview" style="background:#f5b6d3">#f5b6d3</div></td>
-          </tr>
-          <tr>
-            <td>Prim&auml;rfarbe</td>
-            <td class="hex">#8a2858</td>
-            <td>Links, Buttons und prim&auml;re Aktionen</td>
-            <td><div class="preview" style="background:#8a2858;color:#fff">#8a2858</div></td>
-          </tr>
-          <tr>
-            <td>Haupttext</td>
-            <td class="hex">#000000</td>
-            <td>&Uuml;berschriften und normale Textinhalte</td>
-            <td><div class="preview" style="background:#000000;color:#fff">#000000</div></td>
-          </tr>
-          <tr>
-            <td>Sekund&auml;rtext</td>
-            <td class="hex">#6f6069</td>
-            <td>Beschreibungen und erg&auml;nzende Informationen</td>
-            <td><div class="preview" style="background:#6f6069;color:#fff">#6f6069</div></td>
-          </tr>
-          <tr>
-            <td>Rahmen</td>
-            <td class="hex">#8c7b85</td>
-            <td>Grenzen und Trennlinien</td>
-            <td><div class="preview" style="background:#8c7b85;color:#fff">#8c7b85</div></td>
-          </tr>
-          <tr>
-            <td>Erfolg-Hintergrund</td>
-            <td class="hex">#dff4e8</td>
-            <td>Erfolgs- und Best&auml;tigungsbereiche</td>
-            <td><div class="preview" style="background:#dff4e8">#dff4e8</div></td>
-          </tr>
-          <tr>
-            <td>Erfolg-Text</td>
-            <td class="hex">#276749</td>
-            <td>Text und Hervorhebungen in Erfolgsbereichen</td>
-            <td><div class="preview" style="background:#276749;color:#fff">#276749</div></td>
-          </tr>
-          <tr>
-            <td>Warnung-Hintergrund</td>
-            <td class="hex">#fff2b7</td>
-            <td>Warnungen und offene Pr&uuml;fungen</td>
-            <td><div class="preview" style="background:#fff2b7">#fff2b7</div></td>
-          </tr>
-          <tr>
-            <td>Warnung-Text</td>
-            <td class="hex">#6b5700</td>
-            <td>Text in Warnungsbereichen</td>
-            <td><div class="preview" style="background:#6b5700;color:#fff">#6b5700</div></td>
-          </tr>
-          <tr>
-            <td>Information-Hintergrund</td>
-            <td class="hex">#d8e9f7</td>
-            <td>Neutrale Informationsbereiche</td>
-            <td><div class="preview" style="background:#d8e9f7">#d8e9f7</div></td>
-          </tr>
-          <tr>
-            <td>Information-Text</td>
-            <td class="hex">#2c5d78</td>
-            <td>Text in Informationsbereichen</td>
-            <td><div class="preview" style="background:#2c5d78;color:#fff">#2c5d78</div></td>
-          </tr>
-          <tr>
-            <td>Fehler-Hintergrund</td>
-            <td class="hex">#ffdad6</td>
-            <td>Fehlermeldungen und blockierende Probleme</td>
-            <td><div class="preview" style="background:#ffdad6">#ffdad6</div></td>
-          </tr>
-          <tr>
-            <td>Fehler-Text</td>
-            <td class="hex">#b3261e</td>
-            <td>Text, Rahmen und Hervorhebungen in Fehlerbereichen</td>
-            <td><div class="preview" style="background:#b3261e;color:#fff">#b3261e</div></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </main>
-</body>
+      .intro {
+        max-width: 760px;
+        margin: 0 0 28px;
+        color: #6f6069;
+        line-height: 1.5;
+      }
+
+      .table-wrapper {
+        overflow-x: auto;
+        border: 1px solid #8c7b85;
+        border-radius: 14px;
+      }
+
+      table {
+        width: 100%;
+        min-width: 760px;
+        border-collapse: collapse;
+        text-align: left;
+      }
+
+      th,
+      td {
+        padding: 14px 16px;
+        border-bottom: 1px solid #8c7b85;
+        vertical-align: middle;
+      }
+
+      tr:last-child td {
+        border-bottom: 0;
+      }
+
+      th {
+        background: #f5b6d3;
+        color: #000000;
+        font-size: 14px;
+      }
+
+      td:first-child {
+        width: 180px;
+        font-weight: 700;
+      }
+
+      .hex {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        white-space: nowrap;
+      }
+
+      .preview {
+        width: 150px;
+        min-width: 150px;
+        height: 42px;
+        box-sizing: border-box;
+        padding: 11px 12px;
+        border: 1px solid #8c7b85;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      @media (max-width: 640px) {
+        body {
+          padding: 16px 8px;
+        }
+
+        main {
+          padding: 20px 16px;
+          border-radius: 14px;
+        }
+
+        h1 {
+          font-size: 26px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Farbsystem</h1>
+      <p class="intro">
+        Die verbindlichen Farbrollen des G&auml;rngschee-UI-Systems. Die letzte Spalte zeigt die
+        jeweilige Farbe direkt als Vorschau.
+      </p>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Rolle</th>
+              <th scope="col">Farbe</th>
+              <th scope="col">Verwendung</th>
+              <th scope="col">Vorschau</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Seitenhintergrund</td>
+              <td class="hex">#fff7fb</td>
+              <td>Globaler Seitenhintergrund</td>
+              <td><div class="preview" style="background: #fff7fb">#fff7fb</div></td>
+            </tr>
+            <tr>
+              <td>Oberfl&auml;che</td>
+              <td class="hex">#fff8fc</td>
+              <td>Karten, E-Mail-Fl&auml;chen und Inhaltsbereiche</td>
+              <td><div class="preview" style="background: #fff8fc">#fff8fc</div></td>
+            </tr>
+            <tr>
+              <td>Header / Prim&auml;rcontainer</td>
+              <td class="hex">#f5b6d3</td>
+              <td>E-Mail-Header und hervorgehobene Markenbereiche</td>
+              <td><div class="preview" style="background: #f5b6d3">#f5b6d3</div></td>
+            </tr>
+            <tr>
+              <td>Prim&auml;rfarbe</td>
+              <td class="hex">#8a2858</td>
+              <td>Links, Buttons und prim&auml;re Aktionen</td>
+              <td><div class="preview" style="background: #8a2858; color: #fff">#8a2858</div></td>
+            </tr>
+            <tr>
+              <td>Haupttext</td>
+              <td class="hex">#000000</td>
+              <td>&Uuml;berschriften und normale Textinhalte</td>
+              <td><div class="preview" style="background: #000000; color: #fff">#000000</div></td>
+            </tr>
+            <tr>
+              <td>Sekund&auml;rtext</td>
+              <td class="hex">#6f6069</td>
+              <td>Beschreibungen und erg&auml;nzende Informationen</td>
+              <td><div class="preview" style="background: #6f6069; color: #fff">#6f6069</div></td>
+            </tr>
+            <tr>
+              <td>Rahmen</td>
+              <td class="hex">#8c7b85</td>
+              <td>Grenzen und Trennlinien</td>
+              <td><div class="preview" style="background: #8c7b85; color: #fff">#8c7b85</div></td>
+            </tr>
+            <tr>
+              <td>Erfolg-Hintergrund</td>
+              <td class="hex">#dff4e8</td>
+              <td>Erfolgs- und Best&auml;tigungsbereiche</td>
+              <td><div class="preview" style="background: #dff4e8">#dff4e8</div></td>
+            </tr>
+            <tr>
+              <td>Erfolg-Text</td>
+              <td class="hex">#276749</td>
+              <td>Text und Hervorhebungen in Erfolgsbereichen</td>
+              <td><div class="preview" style="background: #276749; color: #fff">#276749</div></td>
+            </tr>
+            <tr>
+              <td>Warnung-Hintergrund</td>
+              <td class="hex">#fff2b7</td>
+              <td>Warnungen und offene Pr&uuml;fungen</td>
+              <td><div class="preview" style="background: #fff2b7">#fff2b7</div></td>
+            </tr>
+            <tr>
+              <td>Warnung-Text</td>
+              <td class="hex">#6b5700</td>
+              <td>Text in Warnungsbereichen</td>
+              <td><div class="preview" style="background: #6b5700; color: #fff">#6b5700</div></td>
+            </tr>
+            <tr>
+              <td>Information-Hintergrund</td>
+              <td class="hex">#d8e9f7</td>
+              <td>Neutrale Informationsbereiche</td>
+              <td><div class="preview" style="background: #d8e9f7">#d8e9f7</div></td>
+            </tr>
+            <tr>
+              <td>Information-Text</td>
+              <td class="hex">#2c5d78</td>
+              <td>Text in Informationsbereichen</td>
+              <td><div class="preview" style="background: #2c5d78; color: #fff">#2c5d78</div></td>
+            </tr>
+            <tr>
+              <td>Fehler-Hintergrund</td>
+              <td class="hex">#ffdad6</td>
+              <td>Fehlermeldungen und blockierende Probleme</td>
+              <td><div class="preview" style="background: #ffdad6">#ffdad6</div></td>
+            </tr>
+            <tr>
+              <td>Fehler-Text</td>
+              <td class="hex">#b3261e</td>
+              <td>Text, Rahmen und Hervorhebungen in Fehlerbereichen</td>
+              <td><div class="preview" style="background: #b3261e; color: #fff">#b3261e</div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </body>
 </html>

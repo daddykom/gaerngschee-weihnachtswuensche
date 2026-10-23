@@ -7,20 +7,31 @@ import { eventInterceptor } from './event.interceptor';
 
 describe('eventInterceptor', () => {
   it('dispatches event values higher than the store value', async () => {
-    const store = { selectSignal: vi.fn(() => () => ({ 'order-status-change': 2 })), dispatch: vi.fn() };
+    const store = {
+      selectSignal: vi.fn(() => () => ({ 'order-status-change': 2 })),
+      dispatch: vi.fn(),
+    };
     TestBed.configureTestingModule({ providers: [{ provide: Store, useValue: store }] });
-    const response = new HttpResponse({ headers: new HttpHeaders({ 'X-Event-order-status-change': '3' }) });
+    const response = new HttpResponse({
+      headers: new HttpHeaders({ 'X-Event-order-status-change': '3' }),
+    });
 
-    await firstValueFrom(TestBed.runInInjectionContext(() => eventInterceptor(
-      new HttpRequest('GET', '/admin/overview'),
-      () => of(response),
-    )));
+    await firstValueFrom(
+      TestBed.runInInjectionContext(() =>
+        eventInterceptor(new HttpRequest('GET', '/admin/overview'), () => of(response)),
+      ),
+    );
 
-    expect(store.dispatch).toHaveBeenCalledWith(EventActions.received({ key: 'order-status-change', value: 3 }));
+    expect(store.dispatch).toHaveBeenCalledWith(
+      EventActions.received({ key: 'order-status-change', value: 3 }),
+    );
   });
 
   it('ignores equal, lower, and invalid event values', async () => {
-    const store = { selectSignal: vi.fn(() => () => ({ 'order-status-change': 3 })), dispatch: vi.fn() };
+    const store = {
+      selectSignal: vi.fn(() => () => ({ 'order-status-change': 3 })),
+      dispatch: vi.fn(),
+    };
     TestBed.configureTestingModule({ providers: [{ provide: Store, useValue: store }] });
     const response = new HttpResponse({
       headers: new HttpHeaders({
@@ -29,10 +40,11 @@ describe('eventInterceptor', () => {
       }),
     });
 
-    await firstValueFrom(TestBed.runInInjectionContext(() => eventInterceptor(
-      new HttpRequest('GET', '/admin/overview'),
-      () => of(response),
-    )));
+    await firstValueFrom(
+      TestBed.runInInjectionContext(() =>
+        eventInterceptor(new HttpRequest('GET', '/admin/overview'), () => of(response)),
+      ),
+    );
 
     expect(store.dispatch).not.toHaveBeenCalled();
   });

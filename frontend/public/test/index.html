@@ -1,64 +1,190 @@
 <!doctype html>
 <html lang="de">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>E-Mail-Vorschauen</title>
-  <style>
-    :root { color-scheme: light; font-family: Arial, Helvetica, sans-serif; }
-    body { margin: 0; padding: 32px 16px; background: #fff7fb; color: #000000; }
-    main { max-width: 640px; margin: 0 auto; padding: 32px; background: #fff8fc; border: 1px solid #8c7b85; border-radius: 20px; }
-    h1 { margin: 0 0 24px; font-size: 28px; }
-    h2 { margin: 40px 0 16px; font-size: 22px; }
-    ul { margin: 0; padding: 0; list-style: none; }
-    li + li { margin-top: 12px; }
-    a { display: block; padding: 14px 16px; color: #8a2858; background: #f5b6d3; border-radius: 12px; font-weight: 700; text-decoration: none; }
-    a:hover, a:focus-visible { background: #dff4e8; text-decoration: underline; }
-    .intro { margin: 0; color: #6f6069; line-height: 1.5; }
-    .palette { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; padding: 0; list-style: none; }
-    .swatch { overflow: hidden; border: 1px solid #8c7b85; border-radius: 12px; background: #fff8fc; }
-    .swatch-color { height: 56px; }
-    .swatch-label { padding: 10px 12px; }
-    .swatch-name { display: block; font-weight: 700; }
-    .swatch-value { color: #6f6069; font: 13px monospace; }
-    .demo { margin-top: 20px; overflow: hidden; border: 1px solid #8c7b85; border-radius: 16px; background: #fff8fc; }
-    .demo-header { padding: 20px; background: #f5b6d3; text-align: center; font-size: 21px; font-weight: 700; }
-    .demo-content { padding: 20px; }
-    .demo-content p { color: #6f6069; line-height: 1.5; }
-    .demo-content a { display: inline; padding: 0; background: none; color: #8a2858; }
-    .demo-button { display: inline-block; margin-top: 4px; padding: 11px 16px; border-radius: 999px; background: #8a2858; color: #fff; font-weight: 700; }
-    .demo-box { margin-top: 16px; padding: 14px; border-radius: 12px; line-height: 1.5; }
-    .demo-box strong { display: block; margin-bottom: 4px; }
-    .demo-success { background: #dff4e8; color: #276749; }
-    .demo-warning { background: #fff2b7; color: #6b5700; }
-    .demo-info { background: #d8e9f7; color: #2c5d78; }
-    .demo-error { background: #ffdad6; color: #b3261e; }
-  </style>
-</head>
-<body>
-  <main>
-    <h1>E-Mail-Vorschauen</h1>
-    <ul>
-      <li><a href="user-created.html">Benutzerkonto erstellt</a></li>
-      <li><a href="password-reset.html">Passwort zur&uuml;cksetzen</a></li>
-      <li><a href="order-confirmation-provisional.html">Bestellung vorl&auml;ufig gespeichert</a></li>
-      <li><a href="order-confirmation-provisional-expired.html">Bestellung vorl&auml;ufig gespeichert (Ausweis abgelaufen)</a></li>
-      <li><a href="order-confirmation-definitive.html">Bestellung definitiv best&auml;tigt</a></li>
-      <li><a href="user-email-changed.html">E-Mail-Adresse ge&auml;ndert</a></li>
-      <li><a href="anmeldung/client-order.html">Client-Anmeldung</a></li>
-      <li><a href="fairgate-reminder.html">Fairgate-Erinnerung</a></li>
-      <li><a href="fairgate-reminder-expired.html">Fairgate-Erinnerung (Ausweis abgelaufen)</a></li>
-    </ul>
-
-    <section aria-labelledby="color-concept">
-      <h2 id="color-concept">Unser Farbsystem</h2>
-      <p class="intro">Rosa ist die Grundfarbe. Dazu kommen ein dunkler Pflaumenton für gut lesbaren Text und Aktionen sowie klare Farben für Erfolg, Warnungen und Informationen.</p>
-
-      <ul class="palette" aria-label="Farbpalette">
-          <li><a href="color-system.html">Farbsystem</a></li>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>E-Mail-Vorschauen</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      body {
+        margin: 0;
+        padding: 32px 16px;
+        background: #fff7fb;
+        color: #000000;
+      }
+      main {
+        max-width: 640px;
+        margin: 0 auto;
+        padding: 32px;
+        background: #fff8fc;
+        border: 1px solid #8c7b85;
+        border-radius: 20px;
+      }
+      h1 {
+        margin: 0 0 24px;
+        font-size: 28px;
+      }
+      h2 {
+        margin: 40px 0 16px;
+        font-size: 22px;
+      }
+      ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      li + li {
+        margin-top: 12px;
+      }
+      a {
+        display: block;
+        padding: 14px 16px;
+        color: #8a2858;
+        background: #f5b6d3;
+        border-radius: 12px;
+        font-weight: 700;
+        text-decoration: none;
+      }
+      a:hover,
+      a:focus-visible {
+        background: #dff4e8;
+        text-decoration: underline;
+      }
+      .intro {
+        margin: 0;
+        color: #6f6069;
+        line-height: 1.5;
+      }
+      .palette {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 12px;
+        padding: 0;
+        list-style: none;
+      }
+      .swatch {
+        overflow: hidden;
+        border: 1px solid #8c7b85;
+        border-radius: 12px;
+        background: #fff8fc;
+      }
+      .swatch-color {
+        height: 56px;
+      }
+      .swatch-label {
+        padding: 10px 12px;
+      }
+      .swatch-name {
+        display: block;
+        font-weight: 700;
+      }
+      .swatch-value {
+        color: #6f6069;
+        font: 13px monospace;
+      }
+      .demo {
+        margin-top: 20px;
+        overflow: hidden;
+        border: 1px solid #8c7b85;
+        border-radius: 16px;
+        background: #fff8fc;
+      }
+      .demo-header {
+        padding: 20px;
+        background: #f5b6d3;
+        text-align: center;
+        font-size: 21px;
+        font-weight: 700;
+      }
+      .demo-content {
+        padding: 20px;
+      }
+      .demo-content p {
+        color: #6f6069;
+        line-height: 1.5;
+      }
+      .demo-content a {
+        display: inline;
+        padding: 0;
+        background: none;
+        color: #8a2858;
+      }
+      .demo-button {
+        display: inline-block;
+        margin-top: 4px;
+        padding: 11px 16px;
+        border-radius: 999px;
+        background: #8a2858;
+        color: #fff;
+        font-weight: 700;
+      }
+      .demo-box {
+        margin-top: 16px;
+        padding: 14px;
+        border-radius: 12px;
+        line-height: 1.5;
+      }
+      .demo-box strong {
+        display: block;
+        margin-bottom: 4px;
+      }
+      .demo-success {
+        background: #dff4e8;
+        color: #276749;
+      }
+      .demo-warning {
+        background: #fff2b7;
+        color: #6b5700;
+      }
+      .demo-info {
+        background: #d8e9f7;
+        color: #2c5d78;
+      }
+      .demo-error {
+        background: #ffdad6;
+        color: #b3261e;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>E-Mail-Vorschauen</h1>
+      <ul>
+        <li><a href="user-created.html">Benutzerkonto erstellt</a></li>
+        <li><a href="password-reset.html">Passwort zur&uuml;cksetzen</a></li>
+        <li>
+          <a href="order-confirmation-provisional.html">Bestellung vorl&auml;ufig gespeichert</a>
+        </li>
+        <li>
+          <a href="order-confirmation-provisional-expired.html"
+            >Bestellung vorl&auml;ufig gespeichert (Ausweis abgelaufen)</a
+          >
+        </li>
+        <li>
+          <a href="order-confirmation-definitive.html">Bestellung definitiv best&auml;tigt</a>
+        </li>
+        <li><a href="user-email-changed.html">E-Mail-Adresse ge&auml;ndert</a></li>
+        <li><a href="anmeldung/client-order.html">Client-Anmeldung</a></li>
+        <li><a href="fairgate-reminder.html">Fairgate-Erinnerung</a></li>
+        <li>
+          <a href="fairgate-reminder-expired.html">Fairgate-Erinnerung (Ausweis abgelaufen)</a>
+        </li>
       </ul>
 
-    </section>
-  </main>
-</body>
+      <section aria-labelledby="color-concept">
+        <h2 id="color-concept">Unser Farbsystem</h2>
+        <p class="intro">
+          Rosa ist die Grundfarbe. Dazu kommen ein dunkler Pflaumenton für gut lesbaren Text und
+          Aktionen sowie klare Farben für Erfolg, Warnungen und Informationen.
+        </p>
+
+        <ul class="palette" aria-label="Farbpalette">
+          <li><a href="color-system.html">Farbsystem</a></li>
+        </ul>
+      </section>
+    </main>
+  </body>
 </html>

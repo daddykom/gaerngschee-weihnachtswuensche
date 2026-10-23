@@ -40,7 +40,11 @@ test.describe('Logout flow', () => {
 
 async function loginAsAdmin(page: Page): Promise<void> {
   await page.route('http://localhost:8083/auth/session-status', async (route) => {
-    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ expiresAt: '2099-01-01T00:00:00Z', secondsRemaining: 3600 }) });
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ expiresAt: '2099-01-01T00:00:00Z', secondsRemaining: 3600 }),
+    });
   });
   await page.route('http://localhost:8083/auth/login', async (route) => {
     await route.fulfill({
@@ -48,13 +52,17 @@ async function loginAsAdmin(page: Page): Promise<void> {
       contentType: 'application/json',
       body: JSON.stringify({
         user: { id: '1', email: 'admin@example.com', group: 'admin' },
-          group: 'admin',
-          requiredPasswordReset: false,
+        group: 'admin',
+        requiredPasswordReset: false,
       }),
     });
   });
   await page.route('http://localhost:8083/admin/overview', async (route) => {
-    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ year: 2026, recentDays: 14, orders: {}, categories: [] }) });
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ year: 2026, recentDays: 14, orders: {}, categories: [] }),
+    });
   });
   await page.route('http://localhost:8083/public/configuration', async (route) => {
     await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });

@@ -4,7 +4,10 @@ import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AuthActions } from '../../../store/auth/auth.actions';
-import { selectAuthSessionRefreshLoading, selectAuthSessionSecondsRemaining } from '../../../store/auth/auth.feature';
+import {
+  selectAuthSessionRefreshLoading,
+  selectAuthSessionSecondsRemaining,
+} from '../../../store/auth/auth.feature';
 import { SessionActions } from '../../../store/auth/session.actions';
 
 @Component({

@@ -1,5 +1,5 @@
-import { expect, test } from './support/test';
 import { expectTranslatedText } from './support/assertions';
+import { expect, test } from './support/test';
 
 test.describe('Login route accessibility', () => {
   test('exposes named login controls and keyboard focus order', async ({ page }) => {

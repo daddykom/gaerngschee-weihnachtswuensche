@@ -5,9 +5,12 @@ import { MatInputModule } from '@angular/material/input';
 import { Store } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ControlErrorComponent } from '../../../../shared/components/control-error/control-error';
-import { AuthActions } from '../../../../store/auth/auth.actions';
-import { selectPasswordResetRequestLoading, selectPasswordResetRequestSent } from '../../../../store/password-reset/password-reset.feature';
 import { inputLimits } from '../../../../shared/constants/input-limits';
+import { AuthActions } from '../../../../store/auth/auth.actions';
+import {
+  selectPasswordResetRequestLoading,
+  selectPasswordResetRequestSent,
+} from '../../../../store/password-reset/password-reset.feature';
 
 @Component({
   selector: 'app-password-reset-request',

@@ -9,19 +9,37 @@ describe('authSessionInterceptor', () => {
   it('dispatches sessionExpired for the session expiration response', async () => {
     const store = { dispatch: vi.fn() };
     TestBed.configureTestingModule({ providers: [{ provide: Store, useValue: store }] });
-    const error = new HttpErrorResponse({ status: 401, error: { error: { code: 'SESSION_EXPIRED' } } });
+    const error = new HttpErrorResponse({
+      status: 401,
+      error: { error: { code: 'SESSION_EXPIRED' } },
+    });
     const request = new HttpRequest('GET', '/protected');
 
-    await expect(firstValueFrom(TestBed.runInInjectionContext(() => authSessionInterceptor(request, () => throwError(() => error))))).rejects.toBe(error);
+    await expect(
+      firstValueFrom(
+        TestBed.runInInjectionContext(() =>
+          authSessionInterceptor(request, () => throwError(() => error)),
+        ),
+      ),
+    ).rejects.toBe(error);
     expect(store.dispatch).toHaveBeenCalledWith(SessionActions.sessionExpired());
   });
 
   it('does not dispatch for other unauthorized responses', async () => {
     const store = { dispatch: vi.fn() };
     TestBed.configureTestingModule({ providers: [{ provide: Store, useValue: store }] });
-    const error = new HttpErrorResponse({ status: 401, error: { error: { code: 'INVALID_CREDENTIALS' } } });
+    const error = new HttpErrorResponse({
+      status: 401,
+      error: { error: { code: 'INVALID_CREDENTIALS' } },
+    });
 
-    await expect(firstValueFrom(TestBed.runInInjectionContext(() => authSessionInterceptor(new HttpRequest('GET', '/login'), () => throwError(() => error))))).rejects.toBe(error);
+    await expect(
+      firstValueFrom(
+        TestBed.runInInjectionContext(() =>
+          authSessionInterceptor(new HttpRequest('GET', '/login'), () => throwError(() => error)),
+        ),
+      ),
+    ).rejects.toBe(error);
     expect(store.dispatch).not.toHaveBeenCalled();
   });
 });

@@ -92,7 +92,9 @@ describe('AuthService', () => {
       actualResponse = value;
     });
 
-    const request = httpTesting.expectOne('http://localhost:8083/auth/password-change-authenticated');
+    const request = httpTesting.expectOne(
+      'http://localhost:8083/auth/password-change-authenticated',
+    );
     expect(request.request.method).toBe('POST');
     expect(request.request.body).toEqual({ password: 'new-secret' });
     request.flush(response);

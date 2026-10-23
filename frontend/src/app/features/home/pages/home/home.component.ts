@@ -25,7 +25,12 @@ export class HomeComponent {
   readonly campaignStatus = computed(() => {
     const startDate = this.campaignStartDate();
     const endDate = this.campaignEndDate();
-    if (startDate === null || endDate === null || !/^\d{4}-\d{2}-\d{2}$/.test(startDate) || !/^\d{4}-\d{2}-\d{2}$/.test(endDate)) {
+    if (
+      startDate === null ||
+      endDate === null ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(startDate) ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(endDate)
+    ) {
       return 'unavailable';
     }
 
@@ -56,7 +61,12 @@ export class HomeComponent {
 
     return Number.isNaN(date.getTime())
       ? null
-      : new Intl.DateTimeFormat('de-CH', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Europe/Zurich' }).format(date);
+      : new Intl.DateTimeFormat('de-CH', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          timeZone: 'Europe/Zurich',
+        }).format(date);
   });
   readonly donationUrl = computed(() => {
     const value = this.configValue('donation_url');
@@ -77,7 +87,9 @@ export class HomeComponent {
   }
 
   private configValue(variableName: string): string | null {
-    const value = this.publicConfigs().find((config) => config.variableName === variableName)?.value;
+    const value = this.publicConfigs().find(
+      (config) => config.variableName === variableName,
+    )?.value;
     return typeof value === 'string' && value.trim() !== '' ? value.trim() : null;
   }
 }

@@ -5,8 +5,11 @@ import { RouterLink } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog';
-import { selectAdminUsers, selectAdminUsersLoading } from '../../../../store/admin-users/admin-users.feature';
 import { AdminUsersActions } from '../../../../store/admin-users/admin-users.actions';
+import {
+  selectAdminUsers,
+  selectAdminUsersLoading,
+} from '../../../../store/admin-users/admin-users.feature';
 
 @Component({
   selector: 'app-admin-users',
@@ -45,5 +48,4 @@ export class UsersComponent {
   sendPasswordReset(userId: string): void {
     this.store.dispatch(AdminUsersActions.sendPasswordReset({ userId }));
   }
-
 }

@@ -1,8 +1,4 @@
-import {
-  clearPersistedAuthState,
-  loadPersistedAuthState,
-  persistAuthState,
-} from './auth-storage';
+import { clearPersistedAuthState, loadPersistedAuthState, persistAuthState } from './auth-storage';
 
 describe('auth storage', () => {
   beforeEach(() => {
@@ -57,16 +53,19 @@ describe('auth storage', () => {
   });
 
   it('clears legacy persisted state containing an application JWT', () => {
-    localStorage.setItem('gaerngschee.auth', JSON.stringify({
-      token: 'legacy-jwt',
-      userId: 'client-123',
-      group: 'client',
-      email: 'client@example.com',
-      fairgateUserExists: null,
-      childrenCount: null,
-      adultsCount: null,
-      salutation: null,
-    }));
+    localStorage.setItem(
+      'gaerngschee.auth',
+      JSON.stringify({
+        token: 'legacy-jwt',
+        userId: 'client-123',
+        group: 'client',
+        email: 'client@example.com',
+        fairgateUserExists: null,
+        childrenCount: null,
+        adultsCount: null,
+        salutation: null,
+      }),
+    );
 
     expect(loadPersistedAuthState()).toEqual({});
     expect(localStorage.getItem('gaerngschee.auth')).toBeNull();
@@ -85,14 +84,16 @@ describe('auth storage', () => {
       throw new Error('storage unavailable');
     });
 
-    expect(() => persistAuthState({
-      userId: 'client-123',
-      group: 'client',
-      fairgateUserExists: null,
-      childrenCount: null,
-      adultsCount: null,
-      salutation: null,
-    })).not.toThrow();
+    expect(() =>
+      persistAuthState({
+        userId: 'client-123',
+        group: 'client',
+        fairgateUserExists: null,
+        childrenCount: null,
+        adultsCount: null,
+        salutation: null,
+      }),
+    ).not.toThrow();
   });
 
   it('ignores errors while clearing state', () => {

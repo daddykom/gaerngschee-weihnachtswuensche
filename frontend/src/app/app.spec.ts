@@ -1,30 +1,31 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { DeferBlockState } from '@angular/core/testing';
-import { TestBed } from '@angular/core/testing';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { DeferBlockState, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
-import { provideTranslateService } from '@ngx-translate/core';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
+import { provideTranslateService } from '@ngx-translate/core';
 import { App } from './app';
-import { initialState as authInitialState } from './store/auth/auth.state';
 import { AuthActions } from './store/auth/auth.actions';
+import { initialState as authInitialState } from './store/auth/auth.state';
 import { initialState as frontendConfigInitialState } from './store/frontend-config/frontend-config.state';
 
-@Component({ changeDetection: ChangeDetectionStrategy.Eager,
- template: '' })
+@Component({ changeDetection: ChangeDetectionStrategy.Eager, template: '' })
 class TestPage {}
 
 describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [App, RouterTestingModule],
-      providers: [provideTranslateService(), provideMockStore({
-        initialState: {
-          auth: authInitialState,
-          frontendConfig: { ...frontendConfigInitialState, publicStatus: 'loaded' },
-          notification: { current: null },
-        },
-      })],
+      providers: [
+        provideTranslateService(),
+        provideMockStore({
+          initialState: {
+            auth: authInitialState,
+            frontendConfig: { ...frontendConfigInitialState, publicStatus: 'loaded' },
+            notification: { current: null },
+          },
+        }),
+      ],
     }).compileComponents();
   });
 
@@ -179,13 +180,18 @@ describe('App', () => {
             {
               path: 'admin/overview',
               component: TestPage,
-               data: { pageTitle: 'app.admin.overview.title' },
+              data: { pageTitle: 'app.admin.overview.title' },
             },
           ]),
         ],
         providers: [
           provideTranslateService(),
-           provideMockStore({ initialState: { auth: { ...authInitialState, group: 'admin', email: 'admin@example.com' }, notification: { current: null } } }),
+          provideMockStore({
+            initialState: {
+              auth: { ...authInitialState, group: 'admin', email: 'admin@example.com' },
+              notification: { current: null },
+            },
+          }),
         ],
       })
       .compileComponents();
@@ -199,7 +205,9 @@ describe('App', () => {
     fixture.detectChanges();
 
     expect(fixture.componentInstance.isAdmin()).toBe(true);
-    expect(fixture.nativeElement.querySelector('.app-header__email')?.textContent).toContain('admin@example.com');
+    expect(fixture.nativeElement.querySelector('.app-header__email')?.textContent).toContain(
+      'admin@example.com',
+    );
     expect(fixture.componentInstance.pageTitleKey()).toBe('app.admin.overview.title');
     expect(fixture.nativeElement.querySelector('.admin-menu-button')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('a[routerLink="/"]')).toBeTruthy();

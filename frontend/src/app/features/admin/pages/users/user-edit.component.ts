@@ -10,12 +10,12 @@ import { Store } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
 import { map, of } from 'rxjs';
 import { ControlErrorComponent } from '../../../../shared/components/control-error/control-error';
+import { inputLimits } from '../../../../shared/constants/input-limits';
 import { AdminUsersService } from '../../../../shared/services/admin-users.service';
 import { AdminUsersActions } from '../../../../store/admin-users/admin-users.actions';
 import { selectAdminUsersSaving } from '../../../../store/admin-users/admin-users.feature';
 import { selectAuthGroup } from '../../../../store/auth/auth.feature';
 import { NavigationActions } from '../../../../store/navigation/navigation.actions';
-import { inputLimits } from '../../../../shared/constants/input-limits';
 
 @Component({
   selector: 'app-admin-user-edit',

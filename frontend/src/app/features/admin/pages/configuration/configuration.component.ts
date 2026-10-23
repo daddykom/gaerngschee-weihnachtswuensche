@@ -1,11 +1,13 @@
+import { Component, effect, inject, signal, untracked } from '@angular/core';
 import {
-  Component,
-  effect,
-  inject,
-  signal,
-  untracked,
-} from '@angular/core';
-import { applyEach, FieldTree, form, FormField, maxLength, SchemaPath, validate } from '@angular/forms/signals';
+  applyEach,
+  FieldTree,
+  form,
+  FormField,
+  maxLength,
+  SchemaPath,
+  validate,
+} from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -23,7 +25,14 @@ import {
 
 @Component({
   selector: 'app-admin-configuration',
-  imports: [MatButtonModule, MatFormFieldModule, MatInputModule, FormField, TranslatePipe, ControlErrorComponent],
+  imports: [
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    FormField,
+    TranslatePipe,
+    ControlErrorComponent,
+  ],
   templateUrl: './configuration.component.html',
   styleUrl: './configuration.component.scss',
 })
@@ -42,15 +51,18 @@ export class ConfigurationComponent {
         applyEach(schema[config.id] as unknown as SchemaPath<string[]>, (item) => {
           maxLength(item, inputLimits.configurationValue);
           if (regex !== null) {
-            validate(item, ({ value }) => regex.test(value()) ? undefined : { kind: 'pattern' });
+            validate(item, ({ value }) => (regex.test(value()) ? undefined : { kind: 'pattern' }));
           }
         });
       } else {
-        maxLength(schema[config.id] as unknown as SchemaPath<string>, inputLimits.configurationValue);
+        maxLength(
+          schema[config.id] as unknown as SchemaPath<string>,
+          inputLimits.configurationValue,
+        );
         if (regex !== null) {
-          validate(schema[config.id] as unknown as SchemaPath<string>, ({ value }) => (
-            regex.test(value()) ? undefined : { kind: 'pattern' }
-          ));
+          validate(schema[config.id] as unknown as SchemaPath<string>, ({ value }) =>
+            regex.test(value()) ? undefined : { kind: 'pattern' },
+          );
         }
       }
     });
@@ -102,7 +114,9 @@ export class ConfigurationComponent {
     if (!this.form()['valid']()) {
       this.configs().forEach((config) => {
         if (this.isArray(config)) {
-          this.values(config).forEach((_, index) => this.arrayField(config, index)().markAsTouched());
+          this.values(config).forEach((_, index) =>
+            this.arrayField(config, index)().markAsTouched(),
+          );
         } else {
           this.field(config)().markAsTouched();
         }

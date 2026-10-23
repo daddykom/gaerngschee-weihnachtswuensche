@@ -1,5 +1,5 @@
-import { UserGroup } from '../models/frontend-config.model';
 import { FairgateStatus } from '../models/fairgate.model';
+import { UserGroup } from '../models/frontend-config.model';
 
 const STORAGE_KEY = 'gaerngschee.auth';
 
@@ -51,12 +51,16 @@ export function clearPersistedAuthState(): void {
 }
 
 function isValidPersistedState(state: Partial<PersistedAuthState>): state is PersistedAuthState {
-  return typeof state.userId === 'string'
-    && ['admin', 'user', 'client'].includes(state.group ?? '')
-    && (state.email === undefined || state.email === null || typeof state.email === 'string')
-    && (state.fairgateUserExists === null || typeof state.fairgateUserExists === 'boolean')
-    && (state.fairgateStatus === undefined || state.fairgateStatus === null || ['valid', 'not_found', 'expired'].includes(state.fairgateStatus))
-    && (state.childrenCount === null || typeof state.childrenCount === 'number')
-    && (state.adultsCount === null || typeof state.adultsCount === 'number')
-    && (state.salutation === null || typeof state.salutation === 'string');
+  return (
+    typeof state.userId === 'string' &&
+    ['admin', 'user', 'client'].includes(state.group ?? '') &&
+    (state.email === undefined || state.email === null || typeof state.email === 'string') &&
+    (state.fairgateUserExists === null || typeof state.fairgateUserExists === 'boolean') &&
+    (state.fairgateStatus === undefined ||
+      state.fairgateStatus === null ||
+      ['valid', 'not_found', 'expired'].includes(state.fairgateStatus)) &&
+    (state.childrenCount === null || typeof state.childrenCount === 'number') &&
+    (state.adultsCount === null || typeof state.adultsCount === 'number') &&
+    (state.salutation === null || typeof state.salutation === 'string')
+  );
 }

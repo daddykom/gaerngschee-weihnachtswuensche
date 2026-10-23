@@ -1,6 +1,6 @@
 import { createActionGroup, emptyProps, props } from '@ngrx/store';
-import { UserGroup } from '../../shared/models/frontend-config.model';
 import { FairgateStatus } from '../../shared/models/fairgate.model';
+import { UserGroup } from '../../shared/models/frontend-config.model';
 import { EmailCheckMode } from '../../shared/services/auth.service';
 
 export const AuthActions = createActionGroup({
@@ -10,15 +10,20 @@ export const AuthActions = createActionGroup({
     'Check Email Success': props<{ email: string; mode: EmailCheckMode; processingYear: number }>(),
     'Check Email Failure': props<{ errorCode: string }>(),
     Login: props<{ email: string; password: string }>(),
-    'Login Success': props<{ userId: string; group: UserGroup; requiredPasswordReset: boolean; email?: string }>(),
+    'Login Success': props<{
+      userId: string;
+      group: UserGroup;
+      requiredPasswordReset: boolean;
+      email?: string;
+    }>(),
     'Login Failure': props<{ errorCode: string }>(),
     'Registration Login': props<{ token: string }>(),
     'Registration Login Success': props<{
       userId: string;
       email: string;
-       group: UserGroup;
-       fairgateStatus?: FairgateStatus;
-       fairgateUserExists: boolean;
+      group: UserGroup;
+      fairgateStatus?: FairgateStatus;
+      fairgateUserExists: boolean;
       childrenCount: number;
       adultsCount: number;
       salutation: string;

@@ -1,10 +1,19 @@
-import { Component, computed, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { email, form, FormField, maxLength, required } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { ActivatedRoute } from '@angular/router';
-import { TranslatePipe } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
+import { TranslatePipe } from '@ngx-translate/core';
+import { ControlErrorComponent } from '../../../../shared/components/control-error/control-error';
+import { inputLimits } from '../../../../shared/constants/input-limits';
 import { AuthActions } from '../../../../store/auth/auth.actions';
 import {
   selectAuthEmailCheckEmail,
@@ -12,19 +21,11 @@ import {
   selectAuthEmailCheckMode,
   selectAuthLoading,
 } from '../../../../store/auth/auth.feature';
-import { ControlErrorComponent } from '../../../../shared/components/control-error/control-error';
 import { NavigationActions } from '../../../../store/navigation/navigation.actions';
-import { inputLimits } from '../../../../shared/constants/input-limits';
 
 @Component({
   selector: 'app-login',
-  imports: [
-    MatInputModule,
-    MatButtonModule,
-    FormField,
-    TranslatePipe,
-    ControlErrorComponent,
-  ],
+  imports: [MatInputModule, MatButtonModule, FormField, TranslatePipe, ControlErrorComponent],
   templateUrl: './login.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './login.component.scss',
@@ -47,8 +48,11 @@ export class Login implements OnInit {
     maxLength(schema.password, inputLimits.password);
   });
 
-  readonly passwordRequired = computed(() => this.emailCheckMode() === 'password'
-    && this.loginModel().email.trim().toLowerCase() === this.emailCheckEmail());
+  readonly passwordRequired = computed(
+    () =>
+      this.emailCheckMode() === 'password' &&
+      this.loginModel().email.trim().toLowerCase() === this.emailCheckEmail(),
+  );
 
   ngOnInit(): void {
     const email = this.route.snapshot.queryParamMap.get('email');

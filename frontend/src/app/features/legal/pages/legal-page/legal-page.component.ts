@@ -1,6 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { legalPages, LegalPageName } from '../../legal-pages';
+import { LegalPageName, legalPages } from '../../legal-pages';
 
 @Component({
   selector: 'app-legal-page',
