@@ -20,12 +20,16 @@ export class FairgateLookup {
   private readonly store = inject(Store);
 
   readonly email = this.route.snapshot.queryParamMap.get('email')?.trim().toLowerCase() ?? '';
+  readonly membership = this.route.snapshot.queryParamMap.get('membership')?.trim() ?? '';
   readonly result = this.store.selectSignal(selectFairgateLookupResult);
   readonly loading = this.store.selectSignal(selectFairgateLookupLoading);
 
   constructor() {
     if (this.email !== '') {
-      this.store.dispatch(FairgateLookupActions.lookup({ email: this.email }));
+      this.store.dispatch(FairgateLookupActions.lookup({
+        email: this.email,
+        ...(this.membership === '' ? {} : { membership: this.membership }),
+      }));
     }
   }
 }

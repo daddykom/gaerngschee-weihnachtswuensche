@@ -78,6 +78,32 @@ final class FairgateClientTest extends TestCase
         self::assertSame('/fsa/v2.0/contact/org-123/data/42', $history[2]['request']->getUri()->getPath());
     }
 
+    public function testFindContactDataByEmailPassesMembershipFilter(): void
+    {
+        $history = [];
+        $handler = HandlerStack::create(new MockHandler([
+            new Response(200, [], '{"success":true,"data":{"token":"test-token"}}'),
+            new Response(200, [], '{"success":true,"data":{"contacts":[]}}'),
+        ]));
+        $handler->push(Middleware::history($history));
+
+        $client = new FairgateClient(
+            new Client(['handler' => $handler, 'base_uri' => 'https://fsa-test.fairgate.ch']),
+            'https://fsa-test.fairgate.ch',
+            'org-123',
+            'access-key',
+            null,
+            static fn (string $token): bool => $token === 'test-token',
+        );
+
+        $client->findContactDataByEmail('person@example.com', 'Aktivmitglied');
+
+        self::assertSame(
+            'pageNo=1&pageLimit=1&primary_email=person%40example.com&membership%5B%5D=Aktivmitglied',
+            $history[1]['request']->getUri()->getQuery(),
+        );
+    }
+
     public function testFindAllContactsLoadsEmailAndContactIdWithoutEmailFilter(): void
     {
         $handler = HandlerStack::create(new MockHandler([

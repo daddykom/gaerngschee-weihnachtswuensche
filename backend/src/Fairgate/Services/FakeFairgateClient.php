@@ -11,7 +11,7 @@ final class FakeFairgateClient implements FairgateContactProvider
         return $this->profileForEmail($email) !== null;
     }
 
-    public function findContactDataByEmail(string $email): array
+    public function findContactDataByEmail(string $email, ?string $membership = null): array
     {
         $profile = $this->profileForEmail($email);
         if ($profile === null) {

@@ -137,15 +137,15 @@ final class AdminRoutesTest extends TestCase
         $admin = $this->repository->createUser('admin@example.com', 'secret', 'admin');
         $this->pdo->prepare('UPDATE users SET superuser = 1 WHERE id = ?')->execute([$admin['id']]);
         (new SessionService())->setUser($admin['id'], 'admin');
-        $app = $this->createApp(null, null, null, null, new FairgateLookupAction(static fn (string $email): array => [
+        $app = $this->createApp(null, null, null, null, new FairgateLookupAction(static fn (string $email, ?string $membership): array => [
             'success' => true,
-            'data' => ['email' => $email],
+            'data' => ['email' => $email, 'membership' => $membership],
         ]));
 
         $response = $app->handle(
             (new ServerRequestFactory())->createServerRequest(
                 'GET',
-                '/admin/fairgate-lookup?email=%20Person%40Example.com%20',
+                '/admin/fairgate-lookup?email=%20Person%40Example.com%20&membership=Aktivmitglied',
             ),
         );
 
@@ -154,7 +154,7 @@ final class AdminRoutesTest extends TestCase
             'email' => 'person@example.com',
             'fairgate' => [
                 'success' => true,
-                'data' => ['email' => 'person@example.com'],
+                'data' => ['email' => 'person@example.com', 'membership' => 'Aktivmitglied'],
             ],
         ], json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR));
     }
@@ -164,7 +164,7 @@ final class AdminRoutesTest extends TestCase
         $admin = $this->repository->createUser('admin@example.com', 'secret', 'admin');
         (new SessionService())->setUser($admin['id'], 'admin');
         $lookupCalled = false;
-        $app = $this->createApp(null, null, null, null, new FairgateLookupAction(static function () use (&$lookupCalled): array {
+        $app = $this->createApp(null, null, null, null, new FairgateLookupAction(static function (string $email, ?string $membership) use (&$lookupCalled): array {
             $lookupCalled = true;
             return [];
         }));
@@ -186,7 +186,7 @@ final class AdminRoutesTest extends TestCase
         $this->pdo->prepare('UPDATE users SET superuser = 1 WHERE id = ?')->execute([$admin['id']]);
         (new SessionService())->setUser($admin['id'], 'admin');
         $lookupCalled = false;
-        $app = $this->createApp(null, null, null, null, new FairgateLookupAction(static function () use (&$lookupCalled): array {
+        $app = $this->createApp(null, null, null, null, new FairgateLookupAction(static function (string $email, ?string $membership) use (&$lookupCalled): array {
             $lookupCalled = true;
             return [];
         }));

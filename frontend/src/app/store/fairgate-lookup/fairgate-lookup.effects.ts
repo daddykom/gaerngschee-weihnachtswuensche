@@ -13,7 +13,7 @@ const errorCode = (error: HttpErrorResponse): string =>
 export const fairgateLookupEffect = createEffect(
   (actions$ = inject(Actions), service = inject(FairgateLookupService)) => actions$.pipe(
     ofType(FairgateLookupActions.lookup),
-    exhaustMap(({ email }) => service.lookup(email).pipe(
+    exhaustMap(({ email, membership }) => service.lookup(email, membership).pipe(
       map((result) => FairgateLookupActions.lookupSuccess({ result })),
       catchError((error: HttpErrorResponse) => of(FairgateLookupActions.lookupFailure({ errorCode: errorCode(error) }))),
     )),

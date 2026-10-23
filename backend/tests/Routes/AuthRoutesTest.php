@@ -224,7 +224,7 @@ final class AuthRoutesTest extends TestCase
             $this->repository,
             new class () implements FairgateContactProvider {
                 public function hasContactByEmail(string $email): bool { return true; }
-                public function findContactDataByEmail(string $email): array
+                public function findContactDataByEmail(string $email, ?string $membership = null): array
                 {
                     return [
                         'success' => true,

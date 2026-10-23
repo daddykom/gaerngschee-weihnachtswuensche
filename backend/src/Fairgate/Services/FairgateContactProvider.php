@@ -9,5 +9,5 @@ interface FairgateContactProvider
     public function hasContactByEmail(string $email): bool;
 
     /** @return array<string, mixed> */
-    public function findContactDataByEmail(string $email): array;
+    public function findContactDataByEmail(string $email, ?string $membership = null): array;
 }
