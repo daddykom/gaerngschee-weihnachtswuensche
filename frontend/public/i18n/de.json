@@ -178,7 +178,8 @@
         "definitiveTitle": "Fairgate-Zugang gefunden",
         "definitiveMessage": "Deine Daten werden den Administratoren zur Prüfung vorgelegt.",
         "provisionalTitle": "Fairgate-Zugang noch nicht gefunden",
-        "provisionalMessage": "Sobald Du bei Fairgate angemeldet bist, senden wir dir eine E-Mail darüber, wie es weitergeht."
+        "provisionalMessage": "Sobald Du bei Fairgate angemeldet bist, senden wir dir eine E-Mail darüber, wie es weitergeht.",
+        "login": "Zur Login-Seite"
       },
       "errors": {
         "INVALID_ORDER": "Bitte prüfe deine Angaben.",

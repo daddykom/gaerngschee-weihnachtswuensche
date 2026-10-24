@@ -115,6 +115,7 @@ export const authFeature = createFeature({
       passwordChangeErrorCode: errorCode,
     })),
     on(AuthActions.logoutRequested, () => loggedOutState),
+    on(AuthActions.logoutRequestedWithRedirect, () => loggedOutState),
     on(SessionActions.statusLoaded, (state, { expiresAt, secondsRemaining }) => ({
       ...state,
       sessionExpiresAt: expiresAt,

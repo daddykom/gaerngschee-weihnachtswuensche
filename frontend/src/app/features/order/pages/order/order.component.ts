@@ -14,7 +14,6 @@ import { MatInputModule } from '@angular/material/input';
 import { Store } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ControlErrorComponent } from '../../../../shared/components/control-error/control-error';
-import { InfoBoxComponent } from '../../../../shared/components/info-box/info-box';
 import { OrderFormValue } from '../../../../shared/models/order.model';
 import { selectAuthFirstAccess } from '../../../../store/auth/auth.feature';
 import { OrderActions } from '../../../../store/order/order.actions';
@@ -36,7 +35,6 @@ import {
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
-    InfoBoxComponent,
     ControlErrorComponent,
   ],
   templateUrl: './order.component.html',

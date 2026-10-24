@@ -39,16 +39,6 @@
 
     <section class="gl-stack gl-stack--group" aria-labelledby="order-details-heading">
       <h2 id="order-details-heading">{{ 'app.order.details.title' | translate }}</h2>
-      @if (fairgateUserExists() === true) {
-        <app-info-box variant="success" [title]="'app.order.fairgate.validTitle' | translate">
-          {{ 'app.order.fairgate.validMessage' | translate }}
-        </app-info-box>
-      } @else {
-        <app-info-box variant="warning" [title]="'app.order.fairgate.manualTitle' | translate">
-          {{ 'app.order.fairgate.manualMessage' | translate }}
-        </app-info-box>
-      }
-
       <div class="gl-grid gl-grid--2">
         @if (fairgateUserExists() === true) {
           <mat-form-field appearance="outline" subscriptSizing="dynamic">

@@ -1,8 +1,8 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { Router } from '@angular/router';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { catchError, exhaustMap, map, of, tap } from 'rxjs';
+import { catchError, exhaustMap, map, of } from 'rxjs';
+import { AuthActions } from '../auth/auth.actions';
 import { OrderService } from '../../shared/services/order.service';
 import { NotificationActions } from '../notification/notification.actions';
 import { OrderActions } from './order.actions';
@@ -53,18 +53,54 @@ export const saveOrderEffect = createEffect(
   { functional: true },
 );
 
-export const navigateAfterOrderSaveEffect = createEffect(
-  (actions$ = inject(Actions), router = inject(Router)) =>
-    actions$.pipe(
-      ofType(OrderActions.saveSuccess),
-      map(({ result }) =>
-        router.createUrlTree(['/bestellung/bestaetigung'], {
-          queryParams: { status: result.status },
-        }),
-      ),
-      tap((urlTree) => void router.navigateByUrl(urlTree)),
-    ),
-  { functional: true, dispatch: false },
+export const logoutAfterOrderSaveEffect = createEffect(
+  (actions$ = inject(Actions)) => actions$.pipe(
+    ofType(OrderActions.saveSuccess),
+    map(({ result }) => AuthActions.logoutRequestedWithRedirect({
+      target: `/bestellung/bestaetigung?status=${result.status}`,
+    })),
+  ),
+  { functional: true },
+);
+
+export const orderFairgateNotificationEffect = createEffect(
+  (actions$ = inject(Actions)) => actions$.pipe(
+    ofType(OrderActions.loadSuccess),
+    map(({ overview }) => overview.fairgateUserExists
+      ? NotificationActions.show({
+        variant: 'info',
+        titleKey: 'app.order.fairgate.validTitle',
+        messageKey: 'app.order.fairgate.validMessage',
+        preserveOnRoutes: ['/bestellung'],
+      })
+      : NotificationActions.show({
+        variant: 'warning',
+        titleKey: 'app.order.fairgate.manualTitle',
+        messageKey: 'app.order.fairgate.manualMessage',
+        preserveOnRoutes: ['/bestellung'],
+      })),
+  ),
+  { functional: true },
+);
+
+export const orderSaveSuccessNotificationEffect = createEffect(
+  (actions$ = inject(Actions)) => actions$.pipe(
+    ofType(OrderActions.saveSuccess),
+    map(({ result }) => result.status === 'definitive'
+      ? NotificationActions.show({
+        variant: 'success',
+        titleKey: 'app.order.confirmation.definitiveTitle',
+        messageKey: 'app.order.confirmation.definitiveMessage',
+        preserveOnRoutes: ['/bestellung/bestaetigung'],
+      })
+      : NotificationActions.show({
+        variant: 'warning',
+        titleKey: 'app.order.confirmation.provisionalTitle',
+        messageKey: 'app.order.confirmation.provisionalMessage',
+        preserveOnRoutes: ['/bestellung/bestaetigung'],
+      })),
+  ),
+  { functional: true },
 );
 
 export const orderLoadFailureNotificationEffect = createEffect(
@@ -102,7 +138,9 @@ export const orderSaveFailureNotificationEffect = createEffect(
 export const orderEffects = {
   loadOrderEffect,
   saveOrderEffect,
-  navigateAfterOrderSaveEffect,
+  logoutAfterOrderSaveEffect,
+  orderFairgateNotificationEffect,
+  orderSaveSuccessNotificationEffect,
   orderLoadFailureNotificationEffect,
   orderSaveFailureNotificationEffect,
 };

@@ -3,6 +3,7 @@ import { expect, test } from './support/test';
 test.describe('Bestellung route', () => {
   test('saves the order and shows the definitive Fairgate confirmation', async ({ page }) => {
     let saveRequestReceived = false;
+    let logoutRequestReceived = false;
 
     await page.route('http://localhost:8083/auth/registration-login', async (route) => {
       await route.fulfill({
@@ -20,6 +21,10 @@ test.describe('Bestellung route', () => {
           salutation: 'Hallo',
         }),
       });
+    });
+    await page.route('http://localhost:8083/auth/logout', async (route) => {
+      logoutRequestReceived = true;
+      await route.fulfill({ status: 204 });
     });
     await page.route('http://localhost:8083/client/order', async (route) => {
       if (route.request().method() === 'GET') {
@@ -57,6 +62,9 @@ test.describe('Bestellung route', () => {
 
     await page.goto('/client-login?token=registration-token');
     await page.waitForURL('**/bestellung');
+    await expect(page.locator('.app-notification')).toContainText(
+      'Die Anzahl der Erwachsenen und Kinder wurde aus Fairgate übernommen.',
+    );
     await page.locator('input[type="password"]').first().fill('long-enough-password');
     await page.locator('input[type="password"]').nth(1).fill('long-enough-password');
     await page.locator('textarea').fill('Ich wünsche mir etwas Schönes.');
@@ -64,8 +72,10 @@ test.describe('Bestellung route', () => {
 
     await page.waitForURL('**/bestellung/bestaetigung?status=definitive');
     expect(saveRequestReceived).toBe(true);
-    await expect(page.locator('.info-box')).toContainText(
+    expect(logoutRequestReceived).toBe(true);
+    await expect(page.locator('.app-notification')).toContainText(
       'Deine Daten werden den Administratoren zur Prüfung vorgelegt.',
     );
+    await expect(page.getByRole('link', { name: 'Zur Login-Seite' })).toHaveAttribute('href', '/login');
   });
 });

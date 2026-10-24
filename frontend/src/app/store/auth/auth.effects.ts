@@ -147,7 +147,7 @@ export const persistRegistrationLoginEffect = createEffect(
 export const clearPersistedAuthEffect = createEffect(
   (actions$ = inject(Actions)) =>
     actions$.pipe(
-      ofType(AuthActions.logoutRequested),
+      ofType(AuthActions.logoutRequested, AuthActions.logoutRequestedWithRedirect),
       tap(() => {
         clearPersistedAuthState();
       }),
@@ -269,11 +269,11 @@ export const navigateOnPasswordChangeSuccessEffect = createEffect(
 export const logoutEffect = createEffect(
   (actions$ = inject(Actions), authService = inject(AuthService)) =>
     actions$.pipe(
-      ofType(AuthActions.logoutRequested),
-      exhaustMap(() =>
+      ofType(AuthActions.logoutRequested, AuthActions.logoutRequestedWithRedirect),
+      exhaustMap((action) =>
         authService.logout().pipe(
-          map(() => NavigationActions.navigate({ target: '/' })),
-          catchError(() => of(NavigationActions.navigate({ target: '/' }))),
+          map(() => NavigationActions.navigate({ target: 'target' in action ? action.target : '/' })),
+          catchError(() => of(NavigationActions.navigate({ target: 'target' in action ? action.target : '/' }))),
         ),
       ),
     ),

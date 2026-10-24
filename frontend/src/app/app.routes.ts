@@ -74,15 +74,15 @@ export const appRoutes: Routes = [
             loadComponent: () =>
               import('./features/order/pages/order/order.component').then((m) => m.OrderComponent),
           },
-          {
-            path: 'bestaetigung',
-            data: { pageTitle: 'app.order.confirmation.pageTitle' },
-            loadComponent: () =>
-              import('./features/order/pages/order-confirmation/order-confirmation.component').then(
-                (m) => m.OrderConfirmationComponent,
-              ),
-          },
         ],
+      },
+      {
+        path: 'bestellung/bestaetigung',
+        data: { pageTitle: 'app.order.confirmation.pageTitle' },
+        loadComponent: () =>
+          import('./features/order/pages/order-confirmation/order-confirmation.component').then(
+            (m) => m.OrderConfirmationComponent,
+          ),
       },
       {
         path: 'password-change',

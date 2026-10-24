@@ -40,5 +40,6 @@ export const AuthActions = createActionGroup({
     'Password Reset Success': emptyProps(),
     'Password Reset Failure': props<{ errorCode: string }>(),
     'Logout Requested': emptyProps(),
+    'Logout Requested With Redirect': props<{ target: string }>(),
   },
 });
