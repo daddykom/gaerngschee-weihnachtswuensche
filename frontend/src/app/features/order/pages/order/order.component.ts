@@ -111,7 +111,7 @@ export class OrderComponent {
       return;
     }
 
-    if (this.canEdit()) {
+    if (this.canEdit() && this.saving() !== 'loading') {
       this.store.dispatch(OrderActions.save({ form: this.formModel() }));
     }
   }
