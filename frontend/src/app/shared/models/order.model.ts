@@ -7,9 +7,19 @@ export type OrderItemStatus =
   | 'received'
   | 'completed';
 
+export type OrderItemCategory = 'voucher' | 'gift';
+
+export interface OrderItemFormValue {
+  id: string;
+  category: OrderItemCategory | null;
+  description: string;
+  reason: string;
+}
+
 export interface OrderItem {
   id: string;
   orderId: string;
+  category: OrderItemCategory;
   originalDescription: string;
   currentDescription: string;
   originalReason: string | null;
@@ -67,6 +77,7 @@ export interface OrderFormValue {
   adultsCount: number | null;
   childrenCount: number | null;
   text: string;
+  items: OrderItemFormValue[];
 }
 
 export interface SaveOrderResponse {

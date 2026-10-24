@@ -46,8 +46,10 @@ test.describe('Bestellung route', () => {
       saveRequestReceived = true;
       expect(route.request().postDataJSON()).toMatchObject({
         adultsCount: 2,
+        items: [],
         childrenCount: 2,
         text: 'Ich wünsche mir etwas Schönes.',
+        items: [{ category: 'gift', description: 'Ein schönes Geschenk', reason: 'Das würde mir Freude machen.' }],
       });
       await route.fulfill({
         status: 200,
@@ -68,6 +70,12 @@ test.describe('Bestellung route', () => {
     await page.locator('input[type="password"]').first().fill('long-enough-password');
     await page.locator('input[type="password"]').nth(1).fill('long-enough-password');
     await page.locator('textarea').fill('Ich wünsche mir etwas Schönes.');
+    await page.getByRole('button', { name: 'Wunsch hinzufügen' }).click();
+    await page.locator('mat-expansion-panel').last().locator('mat-expansion-panel-header').click();
+    await page.getByRole('combobox', { name: 'Kategorie' }).click();
+    await page.getByRole('option', { name: 'Geschenk' }).click();
+    await page.locator('textarea').nth(1).fill('Ein schönes Geschenk');
+    await page.locator('textarea').nth(2).fill('Das würde mir Freude machen.');
     await page.getByRole('button', { name: 'Weiter' }).click();
 
     await page.waitForURL('**/bestellung/bestaetigung?status=released');

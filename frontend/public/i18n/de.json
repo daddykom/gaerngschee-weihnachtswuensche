@@ -160,11 +160,24 @@
       },
       "items": {
         "title": "Deine Wünsche",
-        "caption": "Bestehende Wünsche",
-        "description": "Wunsch",
+        "caption": "Deine Wünsche",
+        "description": "Wunschbeschreibung",
         "reason": "Begründung",
-        "actions": "Aktionen",
-        "edit": "Bearbeiten",
+        "category": "Kategorie",
+        "new": "Wunsch hinzufügen",
+        "categories": {
+          "voucher": "Gutschein",
+          "gift": "Geschenk"
+        },
+        "statuses": {
+          "draft": "Entwurf",
+          "submitted": "Eingereicht",
+          "rejected": "Änderung erforderlich",
+          "approved": "Freigegeben",
+          "reserved": "Übernommen",
+          "received": "Eingegangen",
+          "completed": "Abgeschlossen"
+        },
         "delete": "Löschen",
         "empty": "Du hast bisher noch keinen Wunsch erfasst."
       },
@@ -217,6 +230,20 @@
         "text": {
           "required": "Bitte erzähl uns kurz, warum du dir das wünschst.",
           "maxLength": "Der Text darf höchstens 2000 Zeichen lang sein."
+        },
+        "items": {
+          "itemCount": "Bitte erfasse mindestens einen Wunsch und höchstens einen Wunsch pro Familienmitglied.",
+          "category": {
+            "required": "Bitte wähle eine Kategorie aus."
+          },
+          "description": {
+            "required": "Bitte beschreibe deinen Wunsch.",
+            "maxLength": "Die Wunschbeschreibung darf höchstens 2000 Zeichen lang sein."
+          },
+          "reason": {
+            "required": "Bitte begründe deinen Wunsch.",
+            "maxLength": "Die Begründung darf höchstens 2000 Zeichen lang sein."
+          }
         }
       },
       "summary": {
@@ -325,6 +352,7 @@
       "loginErrorTitle": "Anmeldung fehlgeschlagen",
       "errors": {
         "INVALID_CREDENTIALS": "E-Mail-Adresse oder Passwort ist ungültig.",
+        "RATE_LIMITED": "Zu viele Versuche. Bitte warte kurz und versuche es später erneut.",
         "LOGIN_FAILED": "Die Anmeldung konnte nicht durchgeführt werden. Bitte versuche es später erneut.",
         "INVALID_EMAIL": "Bitte prüfe deine E-Mail-Adresse.",
         "REQUEST_FAILED": "Die Anfrage konnte nicht durchgeführt werden. Bitte versuche es später erneut."

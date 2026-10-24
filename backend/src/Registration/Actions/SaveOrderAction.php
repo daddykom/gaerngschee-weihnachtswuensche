@@ -44,12 +44,13 @@ final class SaveOrderAction
         $adultsCount = $this->integer($body['adultsCount'] ?? null);
         $childrenCount = $this->integer($body['childrenCount'] ?? null);
         $text = $body['text'] ?? null;
+        $items = $this->items($body['items'] ?? null);
         $password = $body['password'] ?? null;
         if ($password === '') {
             $password = null;
         }
         if ($adultsCount === null || $childrenCount === null || $adultsCount < 0 || $childrenCount < 0
-            || !is_string($text) || trim($text) === '' || strlen($text) > 2000) {
+            || !is_string($text) || trim($text) === '' || strlen($text) > 2000 || $items === null) {
             return JsonResponse::error($response, 'INVALID_ORDER', 422);
         }
         if ($password !== null && (!is_string($password) || !PasswordPolicy::accepts($password))) {
@@ -82,6 +83,9 @@ final class SaveOrderAction
         $status = $evaluation['valid'] ? OrderStatus::RELEASED : OrderStatus::WAITING_FOR_FAIRGATE;
         $savedAdults = $evaluation['valid'] ? $evaluation['adultsCount'] : $adultsCount;
         $savedChildren = $evaluation['valid'] ? $evaluation['childrenCount'] : $childrenCount;
+        if (count($items) < 1 || count($items) > $savedAdults + $savedChildren) {
+            return JsonResponse::error($response, 'INVALID_ORDER_ITEMS', 422);
+        }
         if ($password !== null) {
             ($this->users ?? new UserRepository())->updatePassword($user['id'], $password);
         }
@@ -92,7 +96,7 @@ final class SaveOrderAction
             $status,
             $savedAdults,
             $savedChildren,
-            [],
+            $items,
             $evaluation['status'],
             $text,
         );
@@ -108,6 +112,39 @@ final class SaveOrderAction
     private function integer(mixed $value): ?int
     {
         return is_int($value) ? $value : (is_string($value) && filter_var($value, FILTER_VALIDATE_INT) !== false ? (int) $value : null);
+    }
+
+    /** @param mixed $value
+     *  @return list<array{id?: string, category: string, description: string, reason: string}>|null
+     */
+    private function items(mixed $value): ?array
+    {
+        if (!is_array($value)) {
+            return null;
+        }
+
+        $items = [];
+        foreach ($value as $item) {
+            if (!is_array($item)
+                || (isset($item['id']) && !is_string($item['id']))
+                || !in_array($item['category'] ?? null, ['voucher', 'gift'], true)
+                || !is_string($item['description'] ?? null)
+                || trim($item['description']) === ''
+                || strlen($item['description']) > 2000
+                || !is_string($item['reason'] ?? null)
+                || trim($item['reason']) === ''
+                || strlen($item['reason']) > 2000) {
+                return null;
+            }
+            $items[] = [
+                ...(isset($item['id']) && $item['id'] !== '' ? ['id' => $item['id']] : []),
+                'category' => $item['category'],
+                'description' => trim($item['description']),
+                'reason' => trim($item['reason']),
+            ];
+        }
+
+        return $items;
     }
 
     /** @param array<string, mixed> $data */

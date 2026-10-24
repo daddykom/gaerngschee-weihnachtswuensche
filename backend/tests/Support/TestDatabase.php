@@ -85,6 +85,7 @@ final class TestDatabase
             'CREATE TABLE order_items (
                 id TEXT PRIMARY KEY,
                 order_id TEXT NOT NULL,
+                category TEXT NOT NULL DEFAULT \'gift\',
                 original_description TEXT NOT NULL,
                 current_description TEXT NOT NULL,
                 original_reason TEXT NULL,

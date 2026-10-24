@@ -52,7 +52,7 @@ final class OrderRepository
     public function findItems(string $orderId): array
     {
         $statement = $this->pdo->prepare(
-            'SELECT id, order_id, original_description, current_description,
+            'SELECT id, order_id, category, original_description, current_description,
                     original_reason, current_reason, status, fulfiller_email,
                     reserved_at, due_at, received_at, created_at, updated_at
              FROM order_items WHERE order_id = :order_id ORDER BY created_at, id',
@@ -62,6 +62,7 @@ final class OrderRepository
         return array_map(static fn (array $item): array => [
             'id' => (string) $item['id'],
             'orderId' => (string) $item['order_id'],
+            'category' => (string) $item['category'],
             'originalDescription' => (string) $item['original_description'],
             'currentDescription' => (string) $item['current_description'],
             'originalReason' => $item['original_reason'],
@@ -189,12 +190,65 @@ final class OrderRepository
                 $insert->execute(['id' => $orderId, 'user_id' => $userId, 'year' => $year, 'status' => $status, 'adults_count' => $adultsCount, 'children_count' => $childrenCount, 'original_text' => $text, 'current_text' => $text, 'fairgate_status' => $fairgateStatus]);
                 $this->recordStatusChanges(1);
             }
+            if ($items === [] || (isset($items[0]['category'], $items[0]['description'], $items[0]['reason']))) {
+                $this->saveItems($orderId, $items);
+            }
             $this->pdo->commit();
         } catch (\Throwable $exception) {
             $this->pdo->rollBack();
             throw $exception;
         }
         return $this->findForYear($userId, $year) ?? throw new \RuntimeException('Order was not saved.');
+    }
+
+    /** @param list<array{id?: string, category: string, description: string, reason: string}> $items */
+    private function saveItems(string $orderId, array $items): void
+    {
+        $existing = $this->pdo->prepare('SELECT id FROM order_items WHERE order_id = :order_id');
+        $existing->execute(['order_id' => $orderId]);
+        $existingIds = array_map(static fn (array $row): string => (string) $row['id'], $existing->fetchAll());
+        $submittedIds = [];
+
+        foreach ($items as $item) {
+            $itemId = isset($item['id']) && $item['id'] !== '' ? $item['id'] : $this->createUuid();
+            $submittedIds[] = $itemId;
+            if (in_array($itemId, $existingIds, true)) {
+                $statement = $this->pdo->prepare(
+                    'UPDATE order_items SET category = :category, current_description = :description,
+                     current_reason = :reason, status = \'submitted\', updated_at = CURRENT_TIMESTAMP
+                     WHERE id = :id AND order_id = :order_id',
+                );
+                $statement->execute([
+                    'id' => $itemId,
+                    'order_id' => $orderId,
+                    'category' => $item['category'],
+                    'description' => $item['description'],
+                    'reason' => $item['reason'],
+                ]);
+                continue;
+            }
+
+            $statement = $this->pdo->prepare(
+                'INSERT INTO order_items
+                 (id, order_id, category, original_description, current_description, original_reason, current_reason, status)
+                 VALUES (:id, :order_id, :category, :original_description, :current_description,
+                         :original_reason, :current_reason, \'submitted\')',
+            );
+            $statement->execute([
+                'id' => $itemId,
+                'order_id' => $orderId,
+                'category' => $item['category'],
+                'original_description' => $item['description'],
+                'current_description' => $item['description'],
+                'original_reason' => $item['reason'],
+                'current_reason' => $item['reason'],
+            ]);
+        }
+
+        $delete = $this->pdo->prepare('DELETE FROM order_items WHERE order_id = :order_id AND id = :id');
+        foreach (array_diff($existingIds, $submittedIds) as $itemId) {
+            $delete->execute(['order_id' => $orderId, 'id' => $itemId]);
+        }
     }
 
     public function markConfirmationEmailSent(string $orderId): void
