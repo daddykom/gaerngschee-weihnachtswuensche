@@ -6,6 +6,7 @@
 |-----------|-------|--------|-------|
 | `gaerngschee-weihnachtswuensche-backend` | Custom (php:8.3-fpm-alpine) | Up | `8083→80` |
 | `gaerngschee-database` (shared with maesspaeggli) | mariadb:10.11 | Up | `3306→3306` |
+| project-local phpMyAdmin | phpmyadmin:latest | Up | `8084→80` |
 
 ---
 
@@ -50,6 +51,11 @@ Der MariaDB-Container wird vom `maesspaeggli`-Projekt betrieben. Das
 Weihnachtswünsche-Backend verwendet darin die eigene Datenbank
 `gaerngschee_weihnachtswuensche` und den eigenen Benutzer
 `gaerngschee_weihnachtswuensche`.
+
+Der lokale Weihnachtswünsche-phpMyAdmin ist unter `http://localhost:8084`
+erreichbar. Er verwendet das bestehende MariaDB-Netzwerk und ist fest mit dem
+separaten Weihnachtswünsche-Datenbankbenutzer verbunden. Dadurch verändert er
+den phpMyAdmin-Container von `maesspaeggli` nicht.
 
 **Volumes:**
 - Die Datenbankdaten und das Volume werden vom `maesspaeggli`-Stack verwaltet.
