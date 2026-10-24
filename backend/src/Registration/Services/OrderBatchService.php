@@ -67,7 +67,7 @@ final class OrderBatchService
                 $this->emails->sendStoredEmail($email['recipient'], $email['subject'], $email['html_body'], $email['text_body']);
                 $this->queue->remove($email['id']);
                 if ($email['email_type'] === 'order_confirmation') {
-                    $this->orders->markBatchEmailSent($email['order_id']);
+                    $this->orders->markReleased($email['order_id']);
                 } else {
                     $this->orders->markFairgateReminderSent($email['order_id']);
                 }
@@ -79,7 +79,7 @@ final class OrderBatchService
             }
         }
 
-        foreach ($this->orders->findProvisionalWithUsers() as $entry) {
+        foreach ($this->orders->findWaitingForFairgateWithUsers() as $entry) {
             $result['loaded']++;
             $order = $entry['order'];
             if ($this->queue->hasPendingForOrder($order['id'])) {
@@ -161,7 +161,7 @@ final class OrderBatchService
         if (($order['fairgateStatus'] ?? null) === 'expired') {
             $order['fairgateDocumentEmail'] = $this->documentEmail();
         }
-        $message = $this->emails->renderOrderConfirmation($order, 'definitive');
+        $message = $this->emails->renderOrderConfirmation($order, 'released');
         try {
             $this->emails->sendStoredEmail($email, $message['subject'], $message['html'], $message['text']);
         } catch (Throwable $exception) {
@@ -177,7 +177,7 @@ final class OrderBatchService
             return;
         }
 
-        $this->orders->markBatchEmailSent($order['id']);
+        $this->orders->markReleased($order['id']);
         $result['sent']++;
     }
 

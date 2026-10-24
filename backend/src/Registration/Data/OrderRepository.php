@@ -83,7 +83,7 @@ final class OrderRepository
                          orders.adults_count, orders.children_count,
                          orders.fairgate_status, orders.created_at
                   FROM orders INNER JOIN users ON users.id = orders.user_id
-                  WHERE orders.status = \'definitive\'';
+                  WHERE orders.status IN (\'released\', \'in_review\', \'definitive\', \'ready_for_pickup\', \'completed\')';
         $parameters = [];
         if ($year !== null) {
             $query .= ' AND orders.year = :year';
@@ -117,12 +117,12 @@ final class OrderRepository
     }
 
     /** @return list<array{order: array<string, mixed>, email: string}> */
-    public function findProvisionalWithUsers(): array
+    public function findWaitingForFairgateWithUsers(): array
     {
         $statement = $this->pdo->query(
             "SELECT orders.id, orders.user_id, users.email FROM orders
              INNER JOIN users ON users.id = orders.user_id
-             WHERE orders.status = 'provisional' ORDER BY orders.created_at, orders.id",
+              WHERE orders.status = 'waiting_for_fairgate' ORDER BY orders.created_at, orders.id",
         );
         $orders = [];
         foreach ($statement->fetchAll() as $row) {
@@ -138,16 +138,16 @@ final class OrderRepository
     {
         $statement = $this->pdo->prepare(
             "UPDATE orders SET adults_count = :adults_count, children_count = :children_count,
-             updated_at = CURRENT_TIMESTAMP WHERE id = :id AND status = 'provisional'",
+             updated_at = CURRENT_TIMESTAMP WHERE id = :id AND status = 'waiting_for_fairgate'",
         );
         $statement->execute(['id' => $orderId, 'adults_count' => $adultsCount, 'children_count' => $childrenCount]);
     }
 
-    public function markBatchEmailSent(string $orderId): void
+    public function markReleased(string $orderId): void
     {
         $statement = $this->pdo->prepare(
-            "UPDATE orders SET status = 'definitive', confirmation_email_sent_at = CURRENT_TIMESTAMP,
-             updated_at = CURRENT_TIMESTAMP WHERE id = :id AND status = 'provisional'",
+            "UPDATE orders SET status = 'released', confirmation_email_sent_at = CURRENT_TIMESTAMP,
+             updated_at = CURRENT_TIMESTAMP WHERE id = :id AND status = 'waiting_for_fairgate'",
         );
         $statement->execute(['id' => $orderId]);
         $this->recordStatusChanges($statement->rowCount());

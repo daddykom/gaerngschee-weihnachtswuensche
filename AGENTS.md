@@ -290,9 +290,12 @@ Für die Weiterverarbeitung gelten folgende Regeln:
 ### Bestellstatus
 
 - Bestellungen werden pro Kunde und Kalenderjahr gespeichert.
-- Die technischen Statuswerte lauten `provisional` und `definitive`.
-- `fairgateUserExists = true` ergibt beim Speichern den Status `definitive`.
-- Jeder andere Fairgate-Status ergibt beim Speichern den Status `provisional`.
+- Die fachlichen Statuswerte lauten `draft`, `waiting_for_fairgate`, `released`,
+  `family_size_exceeded`, `in_review`, `changes_requested`, `definitive`,
+  `ready_for_pickup` und `completed`.
+- `fairgateUserExists = true` ergibt beim Speichern den Status `released`.
+- Jeder andere Fairgate-Status ergibt beim Speichern den Status
+  `waiting_for_fairgate`.
 - Sichtbare Übersetzungen dürfen diese technischen Werte lokalisieren.
 
 ## Arbeitsweise & Verhaltensregeln

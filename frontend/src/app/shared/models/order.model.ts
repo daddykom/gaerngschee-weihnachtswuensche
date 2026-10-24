@@ -1,3 +1,12 @@
+export type OrderItemStatus =
+  | 'draft'
+  | 'submitted'
+  | 'rejected'
+  | 'approved'
+  | 'reserved'
+  | 'received'
+  | 'completed';
+
 export interface OrderItem {
   id: string;
   orderId: string;
@@ -5,7 +14,7 @@ export interface OrderItem {
   currentDescription: string;
   originalReason: string | null;
   currentReason: string | null;
-  status: string;
+  status: OrderItemStatus;
   fulfillerEmail: string | null;
   reservedAt: string | null;
   dueAt: string | null;
@@ -14,11 +23,22 @@ export interface OrderItem {
   updatedAt: string | null;
 }
 
+export type OrderStatus =
+  | 'draft'
+  | 'waiting_for_fairgate'
+  | 'released'
+  | 'family_size_exceeded'
+  | 'in_review'
+  | 'changes_requested'
+  | 'definitive'
+  | 'ready_for_pickup'
+  | 'completed';
+
 export interface Order {
   id: string;
   userId: string;
   year: number;
-  status: string;
+  status: OrderStatus;
   adultsCount: number;
   childrenCount: number;
   originalText: string | null;
@@ -38,6 +58,7 @@ export interface OrderOverviewResponse {
   fairgateUserExists: boolean;
   childrenCount: number | null;
   adultsCount: number | null;
+  canEdit: boolean;
 }
 
 export interface OrderFormValue {
@@ -50,6 +71,6 @@ export interface OrderFormValue {
 
 export interface SaveOrderResponse {
   order: Order;
-  status: 'provisional' | 'definitive';
+  status: OrderStatus;
   fairgateUserExists: boolean;
 }

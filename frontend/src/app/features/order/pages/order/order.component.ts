@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import {
   form,
   FormField,
@@ -14,7 +14,7 @@ import { MatInputModule } from '@angular/material/input';
 import { Store } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ControlErrorComponent } from '../../../../shared/components/control-error/control-error';
-import { OrderFormValue } from '../../../../shared/models/order.model';
+import { OrderFormValue, OrderStatus } from '../../../../shared/models/order.model';
 import { selectAuthFirstAccess } from '../../../../store/auth/auth.feature';
 import { OrderActions } from '../../../../store/order/order.actions';
 import {
@@ -51,6 +51,10 @@ export class OrderComponent {
   readonly fairgateChildrenCount = this.store.selectSignal(selectOrderChildrenCount);
   readonly firstAccess = this.store.selectSignal(selectAuthFirstAccess);
   readonly storeForm = this.store.selectSignal(selectOrderForm);
+  readonly canEdit = computed(() => {
+    const currentOrder = this.order();
+    return currentOrder === null || ['draft', 'family_size_exceeded', 'changes_requested'].includes(currentOrder.status as OrderStatus);
+  });
 
   readonly formModel = signal<OrderFormValue>({
     password: '',
@@ -107,7 +111,9 @@ export class OrderComponent {
       return;
     }
 
-    this.store.dispatch(OrderActions.save({ form: this.formModel() }));
+    if (this.canEdit()) {
+      this.store.dispatch(OrderActions.save({ form: this.formModel() }));
+    }
   }
 
   private isValidForSave(): boolean {

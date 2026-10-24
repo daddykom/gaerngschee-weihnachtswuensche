@@ -10,6 +10,7 @@ use App\Fairgate\Services\FairgateContactProviderFactory;
 use App\Fairgate\Services\FairgateOrderDataEvaluator;
 use App\Fairgate\Services\FairgateException;
 use App\Registration\Data\OrderRepository;
+use App\Registration\Services\OrderStatus;
 use App\Shared\Database\Database;
 use App\Shared\Http\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
@@ -61,6 +62,7 @@ final class OrderOverviewAction
             'fairgateUserExists' => $evaluation['valid'],
             'childrenCount' => $evaluation['valid'] ? $evaluation['childrenCount'] : null,
             'adultsCount' => $evaluation['valid'] ? $evaluation['adultsCount'] : null,
+            'canEdit' => $order === null || OrderStatus::canClientEdit((string) $order['status']),
         ];
 
         return JsonResponse::success($response, $payload);

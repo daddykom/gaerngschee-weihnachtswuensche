@@ -162,7 +162,7 @@ final class EmailSender implements EmailSenderInterface
     /** @return array{subject: string, html: string, text: string} */
     public function renderOrderConfirmation(array $order, string $mailStatus): array
     {
-        if (!in_array($mailStatus, ['definitive', 'provisional'], true)) {
+        if (!in_array($mailStatus, ['released', 'waiting_for_fairgate', 'definitive'], true)) {
             throw new \InvalidArgumentException('Invalid order confirmation mail status.');
         }
         $html = $this->twig->render('order-confirmation-' . $mailStatus . '.html.twig', [

@@ -98,7 +98,7 @@
       "no": "Nein",
       "noFairgate": {
         "title": "Lieber Besteller",
-        "messageBeforeLink": "Wir können Dich leider nicht bei Fairgate finden. Bitte melde Dich dort an, damit Du berechtigt bist, ein oder mehrere Weihnachtswünsche zu bestellen. Verwende dabei die E-Mail, die Du hier verwendet hast. Du kannst Dich trotzdem provisorisch anmelden, Du musst uns einfach die richtige Anzahl Erwachsene und Kinder angeben. Sobald wir deine Anmeldung bei Fairgate erhalten haben, wird deine Anmeldung automatisch definitiv. Anmelden kannst Du Dich",
+        "messageBeforeLink": "Wir können Dich leider nicht bei Fairgate finden. Bitte melde Dich dort an, damit Du berechtigt bist, ein oder mehrere Weihnachtswünsche zu bestellen. Verwende dabei die E-Mail, die Du hier verwendet hast. Du kannst deine Bestellung trotzdem speichern, musst uns aber die richtige Anzahl Erwachsene und Kinder angeben. Sobald wir deine Anmeldung bei Fairgate erhalten haben, wird deine Bestellung automatisch zur Prüfung freigegeben. Anmelden kannst Du Dich",
         "link": "hier",
         "messageAfterLink": "."
       },
@@ -175,16 +175,25 @@
       "confirmation": {
         "pageTitle": "Bestellung gespeichert",
         "title": "Deine Bestellung wurde gespeichert",
-        "definitiveTitle": "Fairgate-Zugang gefunden",
-        "definitiveMessage": "Deine Daten werden den Administratoren zur Prüfung vorgelegt.",
-        "provisionalTitle": "Fairgate-Zugang noch nicht gefunden",
-        "provisionalMessage": "Sobald Du bei Fairgate angemeldet bist, senden wir dir eine E-Mail darüber, wie es weitergeht.",
+        "releasedTitle": "Bestellung freigegeben",
+        "releasedMessage": "Deine Daten werden den Administratoren zur Prüfung vorgelegt.",
+        "waitingForFairgateTitle": "Fairgate-Zugang noch nicht gefunden",
+        "waitingForFairgateMessage": "Sobald Du bei Fairgate angemeldet bist, senden wir dir eine E-Mail darüber, wie es weitergeht.",
         "login": "Zur Login-Seite"
+      },
+      "status": {
+        "waiting_for_fairgate": { "title": "Warten auf Fairgate", "message": "Deine Anmeldung wird bearbeitet, sobald du bei Fairgate gefunden wurdest." },
+        "released": { "title": "Zur Prüfung freigegeben", "message": "Deine Anmeldung wurde zur administrativen Prüfung freigegeben." },
+        "in_review": { "title": "In Prüfung", "message": "Deine Anmeldung wird derzeit administrativ geprüft." },
+        "definitive": { "title": "Anmeldung bestätigt", "message": "Deine Anmeldung wurde definitiv bestätigt und kann nicht mehr geändert werden." },
+        "ready_for_pickup": { "title": "Bereit zur Abholung", "message": "Deine Geschenke sind bereit zur Abholung." },
+        "completed": { "title": "Abgeschlossen", "message": "Deine Anmeldung ist abgeschlossen." }
       },
       "errors": {
         "INVALID_ORDER": "Bitte prüfe deine Angaben.",
         "WEAK_PASSWORD": "Das Passwort erfüllt die Anforderungen nicht.",
         "FAIRGATE_LOOKUP_FAILED": "Die Fairgate-Daten konnten nicht geprüft werden.",
+        "ORDER_NOT_EDITABLE": "Diese Bestellung kann in ihrem aktuellen Status nicht mehr geändert werden.",
         "ORDER_SAVE_FAILED": "Bitte versuche es später erneut.",
         "password": {
           "required": "Bitte gib ein Passwort ein.",
@@ -216,7 +225,7 @@
         "description": "Deine Bestellung für das Jahr {{year}}.",
         "status": "Status",
         "statuses": {
-          "provisional": "Provisorisch",
+          "waiting_for_fairgate": "Wartet auf Fairgate",
           "definitive": "Definitiv"
         },
         "back": "Zurück",
@@ -381,14 +390,14 @@
         "title": "Admin-Übersicht",
         "loading": "Übersicht wird geladen ...",
         "definitiveTitle": "Definitive Bestellungen",
-        "provisionalTitle": "Provisorische Bestellungen",
-        "recentProvisionalTitle": "Provisorische Bestellungen in den letzten {{ days }} Tagen",
+        "waiting_for_fairgateTitle": "Bestellungen warten auf Fairgate",
+        "recentProvisionalTitle": "Bestellungen warten in den letzten {{ days }} Tagen auf Fairgate",
         "orderCount": "Anzahl Bestellungen",
         "category": "Bestellungen/Kategorie",
         "orders": "Bestellungen",
-        "provisional": "Provisorisch",
-        "provisionalShort": "Prov.",
-        "recentProvisional": "Provisorisch letzte {{ days }} Tage",
+        "waiting_for_fairgate": "Wartet",
+        "waiting_for_fairgateShort": "Prov.",
+        "recentProvisional": "Wartet letzte {{ days }} Tage",
         "recentProvisionalShort": "P. {{ days }} Tg",
         "definitive": "Definitiv",
         "definitiveShort": "Def.",
@@ -402,8 +411,8 @@
         "empty": "Keine Bestellungen vorhanden.",
         "legend": {
           "title": "Legende",
-          "provisional": "Provisorische Bestellungen, noch nicht bei Fairgate vorhanden",
-          "recentProvisional": "Provisorische Bestellungen der letzten {{ days }} Tage",
+          "waiting_for_fairgate": "Bestellungen, deren Person noch nicht bei Fairgate gefunden wurde",
+          "recentProvisional": "Bestellungen, die in den letzten {{ days }} Tagen auf Fairgate warten",
           "definitive": "Definitive Bestellungen",
           "toDeliver": "Zur Auslieferung gekennzeichnet",
           "qrcode": "QR-Code per E-Mail versandt",
@@ -556,7 +565,21 @@
             "adults": "Erwachsene:",
             "children": "Kinder:"
           },
-          "provisional": {
+          "released": {
+            "subject": "Deine Weihnachtswünsche-Anmeldung wurde freigegeben",
+            "title": "Deine Weihnachtswünsche-Anmeldung wurde freigegeben",
+            "highlight": "Danke für deine Geduld.",
+            "body": "Vielen Dank für deine Geduld! Deine Anmeldung für das Weihnachtswünsche {{year}} wurde erfolgreich geprüft und zur administrativen Prüfung freigegeben.",
+            "nextTitle": "Wie geht es weiter?",
+            "nextText": "Wir informieren dich per E-Mail, sobald deine Anmeldung definitiv bestätigt wurde.",
+            "correction": "Wir haben die Anzahl der Erwachsenen und Kinder anhand der Angaben in Fairgate angepasst. Bitte prüfe deine Bestellübersicht.",
+            "correctionLink": "Anmeldung prüfen oder anpassen",
+            "overviewTitle": "Bestellübersicht",
+            "year": "Jahr:",
+            "adults": "Erwachsene:",
+            "children": "Kinder:"
+          },
+          "waiting_for_fairgate": {
             "subject": "Fast geschafft!",
             "title": "Fast geschafft!",
             "highlight": "Danke für deine Anmeldung zum Weihnachtswünsche {{year}}.",

@@ -155,14 +155,14 @@ final class EmailSenderTest extends TestCase
 
         $message = $sender->renderOrderConfirmation([
             'year' => 2026,
-            'status' => 'provisional',
+            'status' => 'waiting_for_fairgate',
             'adultsCount' => 1,
             'childrenCount' => 0,
             'fairgateUrl' => 'https://fairgate.example/login',
             'items' => [
                 ['personType' => 'adult', 'category' => 'catA', 'quantity' => 1],
             ],
-        ], 'provisional');
+        ], 'waiting_for_fairgate');
 
         self::assertStringContainsString('https://fairgate.example/login', $message['html']);
         self::assertStringContainsString('Weihnachtswünsche 2026', $message['html']);

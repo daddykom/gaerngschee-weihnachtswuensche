@@ -12,6 +12,7 @@ use App\Fairgate\Services\FairgateException;
 use App\Fairgate\Services\FairgateOrderDataEvaluator;
 use App\Registration\Data\OrderRepository;
 use App\Registration\Services\ClientRegistrationLoginService;
+use App\Registration\Services\OrderStatus;
 use App\Shared\Database\Database;
 use App\Shared\Http\JsonRequest;
 use App\Shared\Http\JsonResponse;
@@ -59,6 +60,10 @@ final class SaveOrderAction
         $orders = $this->orders ?? new OrderRepository(Database::getConnection());
         $fairgate = $this->fairgate ?? FairgateContactProviderFactory::create();
         $year = $config->findCampaignYear();
+        $existingOrder = $orders->findForYear($user['id'], $year);
+        if ($existingOrder !== null && !OrderStatus::canClientEdit((string) $existingOrder['status'])) {
+            return JsonResponse::error($response, 'ORDER_NOT_EDITABLE', 409);
+        }
 
         try {
             $data = $fairgate->findContactDataByEmail($user['email'], ClientRegistrationLoginService::MEMBERSHIP)['data'] ?? null;
@@ -74,7 +79,7 @@ final class SaveOrderAction
             )
             : ['status' => 'not_found', 'valid' => false, 'childrenCount' => 0, 'adultsCount' => 1];
 
-        $status = $evaluation['valid'] ? 'definitive' : 'provisional';
+        $status = $evaluation['valid'] ? OrderStatus::RELEASED : OrderStatus::WAITING_FOR_FAIRGATE;
         $savedAdults = $evaluation['valid'] ? $evaluation['adultsCount'] : $adultsCount;
         $savedChildren = $evaluation['valid'] ? $evaluation['childrenCount'] : $childrenCount;
         if ($password !== null) {

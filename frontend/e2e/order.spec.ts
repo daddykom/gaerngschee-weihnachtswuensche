@@ -1,7 +1,7 @@
 import { expect, test } from './support/test';
 
 test.describe('Bestellung route', () => {
-  test('saves the order and shows the definitive Fairgate confirmation', async ({ page }) => {
+  test('saves the order and shows the released Fairgate confirmation', async ({ page }) => {
     let saveRequestReceived = false;
     let logoutRequestReceived = false;
 
@@ -53,8 +53,8 @@ test.describe('Bestellung route', () => {
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({
-          order: { id: 'order-1', status: 'definitive' },
-          status: 'definitive',
+          order: { id: 'order-1', status: 'released' },
+          status: 'released',
           fairgateUserExists: true,
         }),
       });
@@ -70,7 +70,7 @@ test.describe('Bestellung route', () => {
     await page.locator('textarea').fill('Ich wünsche mir etwas Schönes.');
     await page.getByRole('button', { name: 'Weiter' }).click();
 
-    await page.waitForURL('**/bestellung/bestaetigung?status=definitive');
+    await page.waitForURL('**/bestellung/bestaetigung?status=released');
     expect(saveRequestReceived).toBe(true);
     expect(logoutRequestReceived).toBe(true);
     await expect(page.locator('.app-notification')).toContainText(

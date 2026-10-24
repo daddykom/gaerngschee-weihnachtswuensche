@@ -18,12 +18,12 @@ use PHPUnit\Framework\TestCase;
 
 final class OrderBatchServiceTest extends TestCase
 {
-    public function testFailedEmailIsQueuedAndLeavesOrderProvisional(): void
+    public function testFailedEmailIsQueuedAndLeavesOrderWaitingForFairgate(): void
     {
         $pdo = TestDatabase::create();
         $user = (new UserRepository($pdo))->createUser('person+fair1@example.com', 'secret', 'wunschbesteller');
         $orders = new OrderRepository($pdo);
-        $orders->saveForYear($user['id'], 2026, 'provisional', 1, 0, [
+        $orders->saveForYear($user['id'], 2026, 'waiting_for_fairgate', 1, 0, [
             ['personType' => 'adult', 'category' => 'catA', 'quantity' => 1],
         ]);
         $this->addInterval($pdo);
@@ -34,7 +34,7 @@ final class OrderBatchServiceTest extends TestCase
 
         self::assertSame(0, $result['failed']);
         self::assertSame(1, $result['queued']);
-        self::assertSame('provisional', $orders->findForYear($user['id'], 2026)['status']);
+        self::assertSame('waiting_for_fairgate', $orders->findForYear($user['id'], 2026)['status']);
         self::assertCount(1, (new OrderEmailQueueRepository($pdo))->pending());
     }
 
@@ -43,7 +43,7 @@ final class OrderBatchServiceTest extends TestCase
         $pdo = TestDatabase::create();
         $user = (new UserRepository($pdo))->createUser('person+fair1@example.com', 'secret', 'wunschbesteller');
         $orders = new OrderRepository($pdo);
-        $orders->saveForYear($user['id'], 2026, 'provisional', 1, 0, [
+        $orders->saveForYear($user['id'], 2026, 'waiting_for_fairgate', 1, 0, [
             ['personType' => 'adult', 'category' => 'catA', 'quantity' => 1],
         ]);
         $this->addInterval($pdo);
@@ -57,7 +57,7 @@ final class OrderBatchServiceTest extends TestCase
 
         self::assertSame(1, $result['sent']);
         self::assertSame(0, $result['loaded']);
-        self::assertSame('definitive', $orders->findForYear($user['id'], 2026)['status']);
+        self::assertSame('released', $orders->findForYear($user['id'], 2026)['status']);
         self::assertCount(0, (new OrderEmailQueueRepository($pdo))->pending());
     }
 
@@ -66,7 +66,7 @@ final class OrderBatchServiceTest extends TestCase
         $pdo = TestDatabase::create();
         $user = (new UserRepository($pdo))->createUser('person+reminder@example.com', 'secret', 'wunschbesteller');
         $orders = new OrderRepository($pdo);
-        $order = $orders->saveForYear($user['id'], 2026, 'provisional', 1, 0, [
+        $order = $orders->saveForYear($user['id'], 2026, 'waiting_for_fairgate', 1, 0, [
             ['personType' => 'adult', 'category' => 'catA', 'quantity' => 1],
         ]);
         $pdo->prepare('UPDATE orders SET created_at = :created_at WHERE id = :id')->execute([
@@ -90,7 +90,7 @@ final class OrderBatchServiceTest extends TestCase
         $pdo = TestDatabase::create();
         $user = (new UserRepository($pdo))->createUser('person+reminder-end@example.com', 'secret', 'wunschbesteller');
         $orders = new OrderRepository($pdo);
-        $order = $orders->saveForYear($user['id'], 2026, 'provisional', 1, 0, [
+        $order = $orders->saveForYear($user['id'], 2026, 'waiting_for_fairgate', 1, 0, [
             ['personType' => 'adult', 'category' => 'catA', 'quantity' => 1],
         ]);
         $pdo->prepare('UPDATE orders SET created_at = :created_at WHERE id = :id')->execute([
@@ -113,7 +113,7 @@ final class OrderBatchServiceTest extends TestCase
         $pdo = TestDatabase::create();
         $user = (new UserRepository($pdo))->createUser('person+reminder-queue-end@example.com', 'secret', 'wunschbesteller');
         $orders = new OrderRepository($pdo);
-        $order = $orders->saveForYear($user['id'], 2026, 'provisional', 1, 0, [
+        $order = $orders->saveForYear($user['id'], 2026, 'waiting_for_fairgate', 1, 0, [
             ['personType' => 'adult', 'category' => 'catA', 'quantity' => 1],
         ]);
         $pdo->prepare('UPDATE orders SET created_at = :created_at WHERE id = :id')->execute([
@@ -141,7 +141,7 @@ final class OrderBatchServiceTest extends TestCase
         $pdo = TestDatabase::create();
         $user = (new UserRepository($pdo))->createUser('reminder-retry@example.com', 'secret', 'wunschbesteller');
         $orders = new OrderRepository($pdo);
-        $order = $orders->saveForYear($user['id'], 2026, 'provisional', 1, 0, [
+        $order = $orders->saveForYear($user['id'], 2026, 'waiting_for_fairgate', 1, 0, [
             ['personType' => 'adult', 'category' => 'catA', 'quantity' => 1],
         ]);
         $pdo->prepare('UPDATE orders SET created_at = :created_at WHERE id = :id')->execute([
@@ -171,7 +171,7 @@ final class OrderBatchServiceTest extends TestCase
         $pdo = TestDatabase::create();
         $user = (new UserRepository($pdo))->createUser('idempotent@example.com', 'secret', 'wunschbesteller');
         $orders = new OrderRepository($pdo);
-        $orders->saveForYear($user['id'], 2026, 'provisional', 1, 0, [
+        $orders->saveForYear($user['id'], 2026, 'waiting_for_fairgate', 1, 0, [
             ['personType' => 'adult', 'category' => 'catA', 'quantity' => 1],
         ]);
         $this->addInterval($pdo);
