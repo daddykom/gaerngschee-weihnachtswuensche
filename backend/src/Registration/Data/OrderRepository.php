@@ -163,7 +163,7 @@ final class OrderRepository
     }
 
     /** @param list<array<string, mixed>> $items Kept for compatibility with historical callers. */
-    public function saveForYear(string $userId, int $year, string $status, int $adultsCount, int $childrenCount, array $items = [], ?string $fairgateStatus = null): array
+    public function saveForYear(string $userId, int $year, string $status, int $adultsCount, int $childrenCount, array $items = [], ?string $fairgateStatus = null, ?string $text = null): array
     {
         $this->pdo->beginTransaction();
         try {
@@ -174,15 +174,19 @@ final class OrderRepository
             if (is_array($existing)) {
                 $update = $this->pdo->prepare(
                     'UPDATE orders SET status = :status, adults_count = :adults_count, children_count = :children_count,
-                     fairgate_status = :fairgate_status, confirmation_email_sent_at = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = :id',
+                     current_text = :current_text, fairgate_status = :fairgate_status, confirmation_email_sent_at = NULL,
+                     updated_at = CURRENT_TIMESTAMP WHERE id = :id',
                 );
-                $update->execute(['id' => $orderId, 'status' => $status, 'adults_count' => $adultsCount, 'children_count' => $childrenCount, 'fairgate_status' => $fairgateStatus]);
+                $update->execute(['id' => $orderId, 'status' => $status, 'adults_count' => $adultsCount, 'children_count' => $childrenCount, 'current_text' => $text, 'fairgate_status' => $fairgateStatus]);
+                if ((string) $existing['status'] !== $status) {
+                    $this->recordStatusChanges(1);
+                }
             } else {
                 $insert = $this->pdo->prepare(
-                    'INSERT INTO orders (id, user_id, year, status, adults_count, children_count, fairgate_status)
-                     VALUES (:id, :user_id, :year, :status, :adults_count, :children_count, :fairgate_status)',
+                    'INSERT INTO orders (id, user_id, year, status, adults_count, children_count, original_text, current_text, fairgate_status)
+                     VALUES (:id, :user_id, :year, :status, :adults_count, :children_count, :original_text, :current_text, :fairgate_status)',
                 );
-                $insert->execute(['id' => $orderId, 'user_id' => $userId, 'year' => $year, 'status' => $status, 'adults_count' => $adultsCount, 'children_count' => $childrenCount, 'fairgate_status' => $fairgateStatus]);
+                $insert->execute(['id' => $orderId, 'user_id' => $userId, 'year' => $year, 'status' => $status, 'adults_count' => $adultsCount, 'children_count' => $childrenCount, 'original_text' => $text, 'current_text' => $text, 'fairgate_status' => $fairgateStatus]);
                 $this->recordStatusChanges(1);
             }
             $this->pdo->commit();

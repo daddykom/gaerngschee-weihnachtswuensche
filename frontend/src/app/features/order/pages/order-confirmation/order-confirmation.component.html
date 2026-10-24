@@ -1,0 +1,13 @@
+<section class="gl-stack gl-stack--section" aria-labelledby="confirmation-heading">
+  <h2 id="confirmation-heading">{{ 'app.order.confirmation.title' | translate }}</h2>
+
+  @if (definitive) {
+    <app-info-box variant="success" [title]="'app.order.confirmation.definitiveTitle' | translate">
+      {{ 'app.order.confirmation.definitiveMessage' | translate }}
+    </app-info-box>
+  } @else {
+    <app-info-box variant="warning" [title]="'app.order.confirmation.provisionalTitle' | translate">
+      {{ 'app.order.confirmation.provisionalMessage' | translate }}
+    </app-info-box>
+  }
+</section>

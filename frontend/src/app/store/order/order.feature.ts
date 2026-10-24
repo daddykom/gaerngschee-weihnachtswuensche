@@ -33,6 +33,18 @@ export const orderFeature = createFeature({
       ...state,
       form: { ...state.form, ...changes },
     })),
+    on(OrderActions.save, (state) => ({ ...state, saveStatus: 'loading', saveErrorCode: null })),
+    on(OrderActions.saveSuccess, (state, { result }) => ({
+      ...state,
+      order: result.order,
+      saveStatus: 'success',
+      saveErrorCode: null,
+    })),
+    on(OrderActions.saveFailure, (state, { errorCode }) => ({
+      ...state,
+      saveStatus: 'error',
+      saveErrorCode: errorCode,
+    })),
   ),
 });
 
@@ -48,4 +60,6 @@ export const {
   selectAdultsCount: selectOrderAdultsCount,
   selectForm: selectOrderForm,
   selectErrorCode: selectOrderErrorCode,
+  selectSaveStatus: selectOrderSaveStatus,
+  selectSaveErrorCode: selectOrderSaveErrorCode,
 } = orderFeature;

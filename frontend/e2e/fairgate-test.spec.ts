@@ -27,7 +27,7 @@ test.describe('Fairgate test route', () => {
     await page.getByRole('button', { name: 'Weiter' }).click();
     await page.locator('input[type="password"]').fill('secret');
     await page.locator('button[type="submit"]').click();
-    await page.waitForURL('**/bestellung');
+    await page.waitForURL('**/admin/overview');
     await page.goto('/admin/fairgate-test');
     await page.waitForURL('**/not-found');
     await expectTranslatedText(page.locator('h1'), 'app.notFound.pageTitle');

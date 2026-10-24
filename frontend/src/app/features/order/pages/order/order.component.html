@@ -50,32 +50,35 @@
       }
 
       <div class="gl-grid gl-grid--2">
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>{{ 'app.order.adults' | translate }}</mat-label>
-          @if (fairgateUserExists() === true) {
+        @if (fairgateUserExists() === true) {
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>{{ 'app.order.adults' | translate }}</mat-label>
             <input matInput type="number" [value]="fairgateAdultsCount()" readonly />
-          } @else {
+          </mat-form-field>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>{{ 'app.order.children' | translate }}</mat-label>
+            <input matInput type="number" [value]="fairgateChildrenCount()" readonly />
+          </mat-form-field>
+        } @else {
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>{{ 'app.order.adults' | translate }}</mat-label>
             <input matInput type="number" [formField]="orderForm.adultsCount" />
             <app-control-error
               matError
               [control]="orderForm.adultsCount()"
               translationPrefix="app.order.errors.adultsCount"
             />
-          }
-        </mat-form-field>
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>{{ 'app.order.children' | translate }}</mat-label>
-          @if (fairgateUserExists() === true) {
-            <input matInput type="number" [value]="fairgateChildrenCount()" readonly />
-          } @else {
+          </mat-form-field>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>{{ 'app.order.children' | translate }}</mat-label>
             <input matInput type="number" [formField]="orderForm.childrenCount" />
             <app-control-error
               matError
               [control]="orderForm.childrenCount()"
               translationPrefix="app.order.errors.childrenCount"
             />
-          }
-        </mat-form-field>
+          </mat-form-field>
+        }
       </div>
 
       <mat-form-field appearance="outline" subscriptSizing="dynamic">
@@ -136,7 +139,13 @@
       <button mat-stroked-button type="button" disabled>
         {{ 'app.order.actions.newItem' | translate }}
       </button>
-      <button mat-flat-button color="primary" type="button" disabled>
+      <button
+        mat-flat-button
+        color="primary"
+        type="button"
+        [disabled]="saving() === 'loading'"
+        (click)="save()"
+      >
         {{ 'app.order.actions.continue' | translate }}
       </button>
     </div>

@@ -1,6 +1,7 @@
 import { Order, OrderFormValue } from '../../shared/models/order.model';
 
 export type OrderLoadStatus = 'initial' | 'loading' | 'loaded' | 'error';
+export type OrderSaveStatus = 'initial' | 'loading' | 'success' | 'error';
 
 export interface OrderState {
   status: OrderLoadStatus;
@@ -12,6 +13,8 @@ export interface OrderState {
   adultsCount: number | null;
   form: OrderFormValue;
   errorCode: string | null;
+  saveStatus: OrderSaveStatus;
+  saveErrorCode: string | null;
 }
 
 export const initialState: OrderState = {
@@ -30,4 +33,6 @@ export const initialState: OrderState = {
     text: '',
   },
   errorCode: null,
+  saveStatus: 'initial',
+  saveErrorCode: null,
 };

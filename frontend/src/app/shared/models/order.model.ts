@@ -47,3 +47,9 @@ export interface OrderFormValue {
   childrenCount: number | null;
   text: string;
 }
+
+export interface SaveOrderResponse {
+  order: Order;
+  status: 'provisional' | 'definitive';
+  fairgateUserExists: boolean;
+}

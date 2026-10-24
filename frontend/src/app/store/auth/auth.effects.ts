@@ -257,7 +257,9 @@ export const navigateOnPasswordChangeSuccessEffect = createEffect(
       map(() =>
         NavigationActions.navigate({
           target:
-            store?.selectSignal(selectAuthGroup)() === 'user' ? '/bestellung' : '/admin/overview',
+            store?.selectSignal(selectAuthGroup)() === 'wunschbesteller'
+              ? '/bestellung'
+              : '/admin/overview',
         }),
       ),
     ),

@@ -177,5 +177,5 @@ async function login(
   await page.getByRole('button', { name: 'Weiter' }).click();
   await page.locator('input[type="password"]').fill('secret');
   await page.getByRole('button', { name: 'Anmelden' }).click();
-  await page.waitForURL(group === 'user' ? '**/bestellung' : '**/admin/overview');
+  await page.waitForURL('**/admin/overview');
 }

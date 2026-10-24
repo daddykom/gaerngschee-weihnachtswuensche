@@ -67,9 +67,22 @@ export const appRoutes: Routes = [
         canActivate: [groupGuard(['wunschbesteller'])],
         providers: [provideState(orderFeature), provideEffects(orderEffects)],
         resolve: { order: orderResolver },
-        data: { pageTitle: 'app.bestellung.pageTitle' },
-        loadComponent: () =>
-          import('./features/order/pages/order/order.component').then((m) => m.OrderComponent),
+        children: [
+          {
+            path: '',
+            data: { pageTitle: 'app.order.pageTitle' },
+            loadComponent: () =>
+              import('./features/order/pages/order/order.component').then((m) => m.OrderComponent),
+          },
+          {
+            path: 'bestaetigung',
+            data: { pageTitle: 'app.order.confirmation.pageTitle' },
+            loadComponent: () =>
+              import('./features/order/pages/order-confirmation/order-confirmation.component').then(
+                (m) => m.OrderConfirmationComponent,
+              ),
+          },
+        ],
       },
       {
         path: 'password-change',

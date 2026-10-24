@@ -24,6 +24,7 @@ import {
   selectOrderChildrenCount,
   selectOrderFairgateUserExists,
   selectOrderForm,
+  selectOrderSaveStatus,
   selectOrderStatus,
 } from '../../../../store/order/order.feature';
 
@@ -45,6 +46,7 @@ import {
 export class OrderComponent {
   private readonly store = inject(Store);
   readonly status = this.store.selectSignal(selectOrderStatus);
+  readonly saving = this.store.selectSignal(selectOrderSaveStatus);
   readonly order = this.store.selectSignal(selectOrder);
   readonly fairgateUserExists = this.store.selectSignal(selectOrderFairgateUserExists);
   readonly fairgateAdultsCount = this.store.selectSignal(selectOrderAdultsCount);
@@ -99,5 +101,34 @@ export class OrderComponent {
 
   markTouched(): void {
     this.orderForm().markAsTouched();
+  }
+
+  save(): void {
+    if (!this.isValidForSave()) {
+      this.markTouched();
+      return;
+    }
+
+    this.store.dispatch(OrderActions.save({ form: this.formModel() }));
+  }
+
+  private isValidForSave(): boolean {
+    if (this.firstAccess()) {
+      return this.orderForm().valid();
+    }
+
+    const { adultsCount, childrenCount, text } = this.formModel();
+    if (adultsCount === null || childrenCount === null) {
+      return false;
+    }
+
+    return (
+      Number.isInteger(adultsCount) &&
+      adultsCount >= 0 &&
+      Number.isInteger(childrenCount) &&
+      childrenCount >= 0 &&
+      text.trim() !== '' &&
+      text.length <= 2000
+    );
   }
 }
