@@ -114,7 +114,7 @@ final class StartRegistrationActionTest extends TestCase
             'variable_name' => 'campaign_start_date',
             'value' => json_encode($startDate, JSON_THROW_ON_ERROR),
             'description' => '',
-            'access_group' => json_encode(['admin', 'client'], JSON_THROW_ON_ERROR),
+            'access_group' => json_encode(['admin', 'wunschbesteller'], JSON_THROW_ON_ERROR),
             'update_group' => json_encode(['admin'], JSON_THROW_ON_ERROR),
             'label' => '',
         ]);
@@ -127,7 +127,7 @@ final class StartRegistrationActionTest extends TestCase
             'variable_name' => 'campaign_end_date',
             'value' => json_encode($endDate, JSON_THROW_ON_ERROR),
             'description' => '',
-            'access_group' => json_encode(['admin', 'client'], JSON_THROW_ON_ERROR),
+            'access_group' => json_encode(['admin', 'wunschbesteller'], JSON_THROW_ON_ERROR),
             'update_group' => json_encode(['admin'], JSON_THROW_ON_ERROR),
             'label' => '',
         ]);
@@ -140,7 +140,7 @@ final class StartRegistrationActionTest extends TestCase
             'variable_name' => 'campaign_year',
             'value' => json_encode('2026', JSON_THROW_ON_ERROR),
             'description' => '',
-            'access_group' => json_encode(['admin', 'client'], JSON_THROW_ON_ERROR),
+            'access_group' => json_encode(['admin', 'wunschbesteller'], JSON_THROW_ON_ERROR),
             'update_group' => json_encode(['admin'], JSON_THROW_ON_ERROR),
             'label' => '',
         ]);

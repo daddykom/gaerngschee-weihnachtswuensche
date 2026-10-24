@@ -38,7 +38,7 @@ final class EmailCheckAction
         $email = strtolower(trim($email));
         $users = $this->users ?? new UserRepository();
         $user = $users->findByEmail($email);
-        if (is_array($user) && in_array($user['group'] ?? null, ['admin', 'user'], true)) {
+        if (is_array($user) && in_array($user['group'] ?? null, ['admin', 'user', 'wunschbesteller', 'wunscherfueller'], true)) {
             return JsonResponse::success($response, ['mode' => 'password']);
         }
 

@@ -17,6 +17,7 @@ export const authFeature = createFeature({
       childrenCount: null,
       adultsCount: null,
       salutation: null,
+      firstAccess: false,
     })),
     on(AuthActions.checkEmail, (state) => ({
       ...state,
@@ -48,6 +49,7 @@ export const authFeature = createFeature({
       loading: false,
       errorCode: null,
       email: email ?? state.email,
+      firstAccess: false,
     })),
     on(AuthActions.loginFailure, (state, { errorCode }) => ({
       ...state,
@@ -80,6 +82,7 @@ export const authFeature = createFeature({
       childrenCount: result.childrenCount,
       adultsCount: result.adultsCount,
       salutation: result.salutation,
+      firstAccess: result.firstAccess,
     })),
     on(AuthActions.registrationLoginFailure, (state, { errorCode }) => ({
       ...state,
@@ -92,12 +95,14 @@ export const authFeature = createFeature({
       childrenCount: null,
       adultsCount: null,
       salutation: null,
+      firstAccess: false,
     })),
     on(AuthActions.passwordChangeSuccess, (state) => ({
       ...state,
       requiredPasswordReset: false,
       passwordChangeLoading: false,
       passwordChangeErrorCode: null,
+      firstAccess: false,
     })),
     on(AuthActions.passwordChange, (state) => ({
       ...state,
@@ -147,6 +152,7 @@ export const {
   selectErrorCode: selectAuthErrorCode,
   selectRegistrationLoginLoading: selectAuthRegistrationLoginLoading,
   selectRegistrationLoginErrorCode: selectAuthRegistrationLoginErrorCode,
+  selectFirstAccess: selectAuthFirstAccess,
   selectFairgateUserExists: selectAuthFairgateUserExists,
   selectFairgateStatus: selectAuthFairgateStatus,
   selectChildrenCount: selectAuthChildrenCount,

@@ -13,7 +13,7 @@ Public and protected endpoints are separated by URL:
 |-----|--------|
 | `/public/*` | Public access without authentication |
 | `/auth/*` | Authentication endpoints |
-| `/client/*` | Authenticated users in group `client` |
+| `/client/*` | Authenticated users in group `wunschbesteller` |
 | `/user/*` | Authenticated users in group `user` |
 | `/admin/*` | Authenticated users in group `admin` |
 
@@ -23,16 +23,16 @@ group receives `404`.
 
 ## Benutzergruppen
 
-There are exactly three authenticated user groups. Each user belongs to one
-group:
+There are four authenticated user groups. Each user belongs to one group:
 
 | Gruppe | Beschreibung |
 |--------|--------------|
-| `client` | Personen, die Weihnachtswünsche anfragen oder ihre Registrierung verwalten |
+| `wunschbesteller` | Personen, die Weihnachtswünsche anfragen oder ihre Bestellung verwalten |
 | `user` | Authenticated platform users |
 | `admin` | System administration and user management |
+| `wunscherfueller` | Personen, die einzelne Wünsche erfüllen |
 
-Public registration always creates users in group `client`. The client cannot
+Public registration always creates users in group `wunschbesteller`. The client cannot
 choose or submit a different group.
 
 ## Backend Implementation
@@ -44,7 +44,7 @@ choose or submit a different group.
 - Lookup by ID and email without returning the password hash
 - Password verification with `password_verify()`
 - User creation with `password_hash()` and `PASSWORD_DEFAULT`
-- Validation of the groups `client`, `user`, and `admin`
+- Validation of the groups `wunschbesteller`, `wunscherfueller`, `user`, and `admin`
 
 ### JWT and sessions
 

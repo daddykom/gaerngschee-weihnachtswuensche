@@ -9,7 +9,7 @@ use PDO;
 
 final class UserRepository
 {
-    private const USER_GROUPS = ['user', 'admin', 'client'];
+    private const USER_GROUPS = ['user', 'admin', 'wunschbesteller', 'wunscherfueller'];
 
     private PDO $pdo;
 

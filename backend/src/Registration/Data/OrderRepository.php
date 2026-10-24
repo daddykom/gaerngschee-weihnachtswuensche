@@ -19,7 +19,7 @@ final class OrderRepository
     public function findForYear(string $userId, int $year): ?array
     {
         $statement = $this->pdo->prepare(
-            'SELECT id, user_id, year, status, adults_count, children_count,
+            'SELECT id, user_id, year, status, adults_count, children_count, original_text, current_text,
                     fairgate_status, confirmation_email_sent_at, fairgate_reminder_email_sent_at,
                     created_at, updated_at
              FROM orders WHERE user_id = :user_id AND year = :year',
@@ -37,12 +37,43 @@ final class OrderRepository
             'status' => $order['status'],
             'adultsCount' => (int) $order['adults_count'],
             'childrenCount' => (int) $order['children_count'],
+            'originalText' => $order['original_text'],
+            'currentText' => $order['current_text'],
+            'items' => $this->findItems((string) $order['id']),
             'fairgateStatus' => $order['fairgate_status'],
             'confirmationEmailSentAt' => $order['confirmation_email_sent_at'],
             'fairgateReminderEmailSentAt' => $order['fairgate_reminder_email_sent_at'],
             'createdAt' => $order['created_at'],
             'updatedAt' => $order['updated_at'],
         ];
+    }
+
+    /** @return list<array<string, mixed>> */
+    public function findItems(string $orderId): array
+    {
+        $statement = $this->pdo->prepare(
+            'SELECT id, order_id, original_description, current_description,
+                    original_reason, current_reason, status, fulfiller_email,
+                    reserved_at, due_at, received_at, created_at, updated_at
+             FROM order_items WHERE order_id = :order_id ORDER BY created_at, id',
+        );
+        $statement->execute(['order_id' => $orderId]);
+
+        return array_map(static fn (array $item): array => [
+            'id' => (string) $item['id'],
+            'orderId' => (string) $item['order_id'],
+            'originalDescription' => (string) $item['original_description'],
+            'currentDescription' => (string) $item['current_description'],
+            'originalReason' => $item['original_reason'],
+            'currentReason' => $item['current_reason'],
+            'status' => (string) $item['status'],
+            'fulfillerEmail' => $item['fulfiller_email'],
+            'reservedAt' => $item['reserved_at'],
+            'dueAt' => $item['due_at'],
+            'receivedAt' => $item['received_at'],
+            'createdAt' => $item['created_at'],
+            'updatedAt' => $item['updated_at'],
+        ], $statement->fetchAll());
     }
 
     /** @return list<array{orderId: string, email: string, year: int, status: string, adultsCount: int, childrenCount: int, fairgateStatus: ?string, createdAt: ?string}> */

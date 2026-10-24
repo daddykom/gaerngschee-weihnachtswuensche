@@ -43,7 +43,7 @@ export class UserEditComponent {
   readonly isNew = this.route.snapshot.routeConfig?.path === 'new';
   readonly model = signal<{
     email: string;
-    group: 'admin' | 'user' | 'client';
+    group: 'admin' | 'user';
     requiredPasswordReset: boolean;
   }>({
     email: '',
@@ -64,7 +64,7 @@ export class UserEditComponent {
             this.model.update((model) => ({
               ...model,
               email: user.email,
-              group: user.group,
+              group: user.group === 'admin' ? 'admin' : 'user',
               requiredPasswordReset: user.required_password_reset,
             }));
             return false;

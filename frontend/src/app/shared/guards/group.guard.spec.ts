@@ -36,7 +36,7 @@ describe('groupGuard', () => {
   });
 
   it('rejects the client group', () => {
-    expect(createGuardResult('client', ['user', 'admin'])).toEqual({ url: '/not-found' });
+    expect(createGuardResult('wunschbesteller', ['user', 'admin'])).toEqual({ url: '/not-found' });
     expect(router.parseUrl).toHaveBeenCalledWith('/not-found');
   });
 

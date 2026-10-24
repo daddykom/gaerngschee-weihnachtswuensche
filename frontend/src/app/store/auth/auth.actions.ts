@@ -27,6 +27,7 @@ export const AuthActions = createActionGroup({
       childrenCount: number;
       adultsCount: number;
       salutation: string;
+      firstAccess: boolean;
     }>(),
     'Registration Login Failure': props<{ errorCode: string }>(),
     'Password Change': props<{ password: string }>(),

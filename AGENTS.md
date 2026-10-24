@@ -282,7 +282,7 @@ Für die Weiterverarbeitung gelten folgende Regeln:
 - Die Route erstellt einen einmaligen Registrierungstoken und versendet einen Link an die angegebene E-Mail-Adresse.
 - Registrierungstoken werden in der separaten Tabelle `registration_tokens` gespeichert, nur gehasht abgelegt und sind zehn Minuten gültig.
 - `POST /auth/registration-login` konsumiert den Token.
-- Erst beim erfolgreichen Token-Login wird ein neuer Benutzer mit der Gruppe `client` angelegt, falls noch keiner existiert.
+- Erst beim erfolgreichen Token-Login wird ein neuer Benutzer mit der Gruppe `wunschbesteller` angelegt, falls noch keiner existiert.
 - Bestehende `admin`- und `user`-Konten werden nicht in Client-Konten umgewandelt; die Antwort bleibt aus Sicherheitsgründen neutral.
 - Nach dem Token-Login werden JWT, Client-Gruppe und die berechneten Fairgate-Werte an das Frontend geliefert.
 - Das Frontend verarbeitet den Link unter `/client-login` und navigiert nach erfolgreichem Login zu `/order`.

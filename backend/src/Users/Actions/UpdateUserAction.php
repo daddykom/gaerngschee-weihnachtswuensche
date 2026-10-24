@@ -32,7 +32,7 @@ final class UpdateUserAction
 
         $repository = $this->users ?? new UserRepository();
         $current = $repository->findById($userId);
-        if ($current === null || $current['group'] === 'client') {
+        if ($current === null || in_array($current['group'], ['wunschbesteller', 'wunscherfueller'], true)) {
             return JsonResponse::error($response, 'NOT_FOUND', 404);
         }
 

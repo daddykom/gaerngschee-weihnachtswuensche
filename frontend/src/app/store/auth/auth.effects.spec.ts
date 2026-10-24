@@ -302,7 +302,8 @@ describe('loginEffect', () => {
       AuthActions.registrationLoginSuccess({
         userId: 'client-1',
         email: 'client@example.com',
-        group: 'client',
+        group: 'wunschbesteller',
+        firstAccess: true,
         fairgateUserExists: true,
         childrenCount: 1,
         adultsCount: 2,
@@ -313,7 +314,7 @@ describe('loginEffect', () => {
     expect(JSON.parse(localStorage.getItem('gaerngschee.auth') ?? '{}')).toEqual({
       userId: 'client-1',
       email: 'client@example.com',
-      group: 'client',
+      group: 'wunschbesteller',
       fairgateUserExists: true,
       childrenCount: 1,
       adultsCount: 2,

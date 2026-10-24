@@ -30,7 +30,7 @@ final class FairgateOrderDataEvaluatorTest extends TestCase
         self::assertSame('valid', $result['status']);
     }
 
-    public function testValidityDateBeforeOrderDateIsInvalid(): void
+    public function testValidityDateBeforeOrderDateDoesNotInvalidateMembership(): void
     {
         $result = $this->evaluator->evaluate(
             ['gultig_bis' => '2026-05-31'],
@@ -38,11 +38,11 @@ final class FairgateOrderDataEvaluatorTest extends TestCase
             2026,
         );
 
-        self::assertFalse($result['valid']);
-        self::assertSame('expired', $result['status']);
+        self::assertTrue($result['valid']);
+        self::assertSame('valid', $result['status']);
     }
 
-    public function testInvalidValidityDateIsInvalid(): void
+    public function testInvalidValidityDateDoesNotInvalidateMembership(): void
     {
         $result = $this->evaluator->evaluate(
             ['gultig_bis' => '2026-02-30'],
@@ -50,8 +50,8 @@ final class FairgateOrderDataEvaluatorTest extends TestCase
             2026,
         );
 
-        self::assertFalse($result['valid']);
-        self::assertSame('expired', $result['status']);
+        self::assertTrue($result['valid']);
+        self::assertSame('valid', $result['status']);
     }
 
     public function testChildrenRequireNameBirthDateAndAgeUnderEighteenAtStartOfYear(): void

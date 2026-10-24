@@ -53,7 +53,7 @@ export function clearPersistedAuthState(): void {
 function isValidPersistedState(state: Partial<PersistedAuthState>): state is PersistedAuthState {
   return (
     typeof state.userId === 'string' &&
-    ['admin', 'user', 'client'].includes(state.group ?? '') &&
+    ['admin', 'user', 'wunschbesteller', 'wunscherfueller'].includes(state.group ?? '') &&
     (state.email === undefined || state.email === null || typeof state.email === 'string') &&
     (state.fairgateUserExists === null || typeof state.fairgateUserExists === 'boolean') &&
     (state.fairgateStatus === undefined ||

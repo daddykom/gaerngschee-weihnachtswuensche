@@ -142,7 +142,7 @@ final class OrderBatchService
     private function contactData(string $email, ?array $contacts): ?array
     {
         if ($contacts === null) {
-            $data = $this->fairgate->findContactDataByEmail($email)['data'] ?? null;
+            $data = $this->fairgate->findContactDataByEmail($email, ClientRegistrationLoginService::MEMBERSHIP)['data'] ?? null;
             return is_array($data) ? $data : null;
         }
 

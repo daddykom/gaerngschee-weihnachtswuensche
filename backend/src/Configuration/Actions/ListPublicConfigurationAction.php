@@ -20,6 +20,6 @@ final class ListPublicConfigurationAction
     {
         $configs = $this->configs ?? new FrontendConfigRepository(Database::getConnection());
 
-        return JsonResponse::success($response, $configs->findValuesForGroup('client'));
+        return JsonResponse::success($response, $configs->findValuesForGroup('wunschbesteller'));
     }
 }

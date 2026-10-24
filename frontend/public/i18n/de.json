@@ -137,6 +137,66 @@
         }
       },
       "submit": "Weiter",
+      "password": {
+        "title": "Passwort festlegen",
+        "description": "Lege für zukünftige Anmeldungen ein persönliches Passwort fest.",
+        "label": "Passwort"
+      },
+      "passwordConfirmation": {
+        "label": "Passwort wiederholen"
+      },
+      "details": {
+        "title": "Deine Bestellung"
+      },
+      "fairgate": {
+        "validTitle": "Fairgate-Zugang gefunden",
+        "validMessage": "Die Anzahl der Erwachsenen und Kinder wurde aus Fairgate übernommen.",
+        "manualTitle": "Angaben zur Familie",
+        "manualMessage": "Wir konnten keinen gültigen Fairgate-Zugang finden. Bitte gib die Anzahl der Erwachsenen und Kinder selbst ein."
+      },
+      "publicText": {
+        "label": "Erzähl uns etwas kleines warum du dir das wünschst (‼️ Bitte beachte, diese Informationen werden ÖFFENTLICH PUBLIZIERT ‼️)",
+        "hint": "Bitte teile keine privaten oder vertraulichen Informationen."
+      },
+      "items": {
+        "title": "Deine Wünsche",
+        "caption": "Bestehende Wünsche",
+        "description": "Wunsch",
+        "reason": "Begründung",
+        "actions": "Aktionen",
+        "edit": "Bearbeiten",
+        "delete": "Löschen",
+        "empty": "Du hast bisher noch keinen Wunsch erfasst."
+      },
+      "actions": {
+        "newItem": "Neuen Wunsch aufnehmen",
+        "continue": "Weiter"
+      },
+      "errors": {
+        "password": {
+          "required": "Bitte gib ein Passwort ein.",
+          "minLength": "Das Passwort muss mindestens 12 Zeichen lang sein.",
+          "maxLength": "Das Passwort darf höchstens 128 Zeichen lang sein."
+        },
+        "passwordConfirmation": {
+          "required": "Bitte wiederhole das Passwort.",
+          "minLength": "Das Passwort muss mindestens 12 Zeichen lang sein.",
+          "maxLength": "Das Passwort darf höchstens 128 Zeichen lang sein.",
+          "passwordsDoNotMatch": "Die Passwörter stimmen nicht überein."
+        },
+        "adultsCount": {
+          "required": "Bitte gib die Anzahl der Erwachsenen ein.",
+          "min": "Die Anzahl darf nicht negativ sein."
+        },
+        "childrenCount": {
+          "required": "Bitte gib die Anzahl der Kinder ein.",
+          "min": "Die Anzahl darf nicht negativ sein."
+        },
+        "text": {
+          "required": "Bitte erzähl uns kurz, warum du dir das wünschst.",
+          "maxLength": "Der Text darf höchstens 2000 Zeichen lang sein."
+        }
+      },
       "summary": {
         "pageTitle": "Bestellübersicht",
         "title": "Bestellübersicht",
@@ -154,6 +214,7 @@
         "successTitle": "Bestellung gespeichert",
         "success": "Deine Bestellung wurde erfolgreich gespeichert.",
         "loadErrorTitle": "Bestellung konnte nicht geladen werden",
+        "loadError": "Die Daten für deine Bestellung konnten nicht geladen werden.",
         "errorTitle": "Bestellung konnte nicht gespeichert werden",
         "errors": {
           "REQUEST_FAILED": "Die Bestellung konnte nicht gespeichert werden."

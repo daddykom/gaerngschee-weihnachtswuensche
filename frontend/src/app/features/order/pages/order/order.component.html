@@ -1,4 +1,144 @@
-<section class="gl-stack gl-stack--group" aria-labelledby="bestellung-heading">
-  <h2 id="bestellung-heading">{{ 'app.bestellung.title' | translate }}</h2>
-  <p>{{ 'app.bestellung.message' | translate }}</p>
-</section>
+@if (status() === 'loaded') {
+  <div class="gl-stack gl-stack--section">
+    @if (firstAccess()) {
+      <section class="gl-stack gl-stack--group" aria-labelledby="password-heading">
+        <h2 id="password-heading">{{ 'app.order.password.title' | translate }}</h2>
+        <p>{{ 'app.order.password.description' | translate }}</p>
+        <div class="gl-grid gl-grid--2">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>{{ 'app.order.password.label' | translate }}</mat-label>
+            <input
+              matInput
+              type="password"
+              autocomplete="new-password"
+              [formField]="orderForm.password"
+            />
+            <app-control-error
+              matError
+              [control]="orderForm.password()"
+              translationPrefix="app.order.errors.password"
+            />
+          </mat-form-field>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>{{ 'app.order.passwordConfirmation.label' | translate }}</mat-label>
+            <input
+              matInput
+              type="password"
+              autocomplete="new-password"
+              [formField]="orderForm.passwordConfirmation"
+            />
+            <app-control-error
+              matError
+              [control]="orderForm.passwordConfirmation()"
+              translationPrefix="app.order.errors.passwordConfirmation"
+            />
+          </mat-form-field>
+        </div>
+      </section>
+    }
+
+    <section class="gl-stack gl-stack--group" aria-labelledby="order-details-heading">
+      <h2 id="order-details-heading">{{ 'app.order.details.title' | translate }}</h2>
+      @if (fairgateUserExists() === true) {
+        <app-info-box variant="success" [title]="'app.order.fairgate.validTitle' | translate">
+          {{ 'app.order.fairgate.validMessage' | translate }}
+        </app-info-box>
+      } @else {
+        <app-info-box variant="warning" [title]="'app.order.fairgate.manualTitle' | translate">
+          {{ 'app.order.fairgate.manualMessage' | translate }}
+        </app-info-box>
+      }
+
+      <div class="gl-grid gl-grid--2">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>{{ 'app.order.adults' | translate }}</mat-label>
+          @if (fairgateUserExists() === true) {
+            <input matInput type="number" [value]="fairgateAdultsCount()" readonly />
+          } @else {
+            <input matInput type="number" [formField]="orderForm.adultsCount" />
+            <app-control-error
+              matError
+              [control]="orderForm.adultsCount()"
+              translationPrefix="app.order.errors.adultsCount"
+            />
+          }
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>{{ 'app.order.children' | translate }}</mat-label>
+          @if (fairgateUserExists() === true) {
+            <input matInput type="number" [value]="fairgateChildrenCount()" readonly />
+          } @else {
+            <input matInput type="number" [formField]="orderForm.childrenCount" />
+            <app-control-error
+              matError
+              [control]="orderForm.childrenCount()"
+              translationPrefix="app.order.errors.childrenCount"
+            />
+          }
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>{{ 'app.order.publicText.label' | translate }}</mat-label>
+        <textarea matInput rows="6" [formField]="orderForm.text"></textarea>
+        <mat-hint>{{ 'app.order.publicText.hint' | translate }}</mat-hint>
+        <app-control-error
+          matError
+          [control]="orderForm.text()"
+          translationPrefix="app.order.errors.text"
+        />
+      </mat-form-field>
+    </section>
+
+    <section class="gl-stack gl-stack--group" aria-labelledby="items-heading">
+      <h2 id="items-heading">{{ 'app.order.items.title' | translate }}</h2>
+      @if (order()?.items?.length) {
+        <div class="order-table-wrapper">
+          <table>
+            <caption class="visually-hidden">
+              {{
+                'app.order.items.caption' | translate
+              }}
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">{{ 'app.order.items.description' | translate }}</th>
+                <th scope="col">{{ 'app.order.items.reason' | translate }}</th>
+                <th scope="col">{{ 'app.order.items.actions' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of order()?.items ?? []; track item.id) {
+                <tr>
+                  <td>{{ item.currentDescription }}</td>
+                  <td>{{ item.currentReason || '—' }}</td>
+                  <td>
+                    <div class="gl-cluster">
+                      <button mat-button type="button" disabled>
+                        {{ 'app.order.items.edit' | translate }}
+                      </button>
+                      <button mat-button type="button" disabled>
+                        {{ 'app.order.items.delete' | translate }}
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <p>{{ 'app.order.items.empty' | translate }}</p>
+      }
+    </section>
+
+    <div class="gl-cluster order-actions">
+      <button mat-stroked-button type="button" disabled>
+        {{ 'app.order.actions.newItem' | translate }}
+      </button>
+      <button mat-flat-button color="primary" type="button" disabled>
+        {{ 'app.order.actions.continue' | translate }}
+      </button>
+    </div>
+  </div>
+}

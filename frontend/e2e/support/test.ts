@@ -32,6 +32,21 @@ export const test = base.extend({
       });
     });
 
+    await page.route('**/client/order', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          order: null,
+          year: 2026,
+          fairgateStatus: 'valid',
+          fairgateUserExists: true,
+          childrenCount: 2,
+          adultsCount: 2,
+        }),
+      });
+    });
+
     await use(page);
   },
 });

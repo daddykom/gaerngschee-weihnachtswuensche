@@ -69,14 +69,33 @@ final class TestDatabase
                 user_id TEXT NOT NULL,
                 year INTEGER NOT NULL,
                 status TEXT NOT NULL,
-                 adults_count INTEGER NOT NULL DEFAULT 0,
-                 children_count INTEGER NOT NULL DEFAULT 0,
+                  adults_count INTEGER NOT NULL DEFAULT 0,
+                  children_count INTEGER NOT NULL DEFAULT 0,
+                  original_text TEXT NULL,
+                  current_text TEXT NULL,
                  fairgate_status TEXT NULL,
                  confirmation_email_sent_at TEXT NULL,
                  fairgate_reminder_email_sent_at TEXT NULL,
                   created_at TEXT,
                 updated_at TEXT,
                 UNIQUE (user_id, year)
+            )',
+        );
+        $pdo->exec(
+            'CREATE TABLE order_items (
+                id TEXT PRIMARY KEY,
+                order_id TEXT NOT NULL,
+                original_description TEXT NOT NULL,
+                current_description TEXT NOT NULL,
+                original_reason TEXT NULL,
+                current_reason TEXT NULL,
+                status TEXT NOT NULL,
+                fulfiller_email TEXT NULL,
+                reserved_at TEXT NULL,
+                due_at TEXT NULL,
+                received_at TEXT NULL,
+                created_at TEXT,
+                updated_at TEXT
             )',
         );
         $pdo->exec(

@@ -3,6 +3,7 @@ import { provideEffects } from '@ngrx/effects';
 import { provideState } from '@ngrx/store';
 import { configurationResolver } from './features/admin/pages/configuration/configuration.resolver';
 import { clientLoginGuard } from './features/auth/guards/client-login.guard';
+import { orderResolver } from './features/order/pages/order/order.resolver';
 import { publicConfigurationResolver } from './features/public-configuration/public-configuration.resolver';
 import { groupGuard } from './shared/guards/group.guard';
 import { adminUsersEffects } from './store/admin-users/admin-users.effects';
@@ -11,6 +12,8 @@ import { fairgateLookupEffects } from './store/fairgate-lookup/fairgate-lookup.e
 import { fairgateLookupFeature } from './store/fairgate-lookup/fairgate-lookup.feature';
 import { fairgateTestEffects } from './store/fairgate-test/fairgate-test.effects';
 import { fairgateTestFeature } from './store/fairgate-test/fairgate-test.feature';
+import { orderEffects } from './store/order/order.effects';
+import { orderFeature } from './store/order/order.feature';
 import { passwordResetFeature } from './store/password-reset/password-reset.feature';
 import { startEffects } from './store/start/start.effects';
 import { startFeature } from './store/start/start.feature';
@@ -61,6 +64,9 @@ export const appRoutes: Routes = [
       },
       {
         path: 'bestellung',
+        canActivate: [groupGuard(['wunschbesteller'])],
+        providers: [provideState(orderFeature), provideEffects(orderEffects)],
+        resolve: { order: orderResolver },
         data: { pageTitle: 'app.bestellung.pageTitle' },
         loadComponent: () =>
           import('./features/order/pages/order/order.component').then((m) => m.OrderComponent),

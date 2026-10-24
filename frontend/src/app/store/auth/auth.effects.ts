@@ -163,7 +163,7 @@ export const navigateOnLoginSuccessEffect = createEffect(
         NavigationActions.navigate({
           target: requiredPasswordReset
             ? '/password-change'
-            : group === 'user'
+            : group === 'wunschbesteller'
               ? '/bestellung'
               : '/admin/overview',
         }),

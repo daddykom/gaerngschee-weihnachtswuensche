@@ -60,8 +60,8 @@ describe('AuthService', () => {
 
   it('exchanges a registration token for a client session', () => {
     const response = {
-      user: { id: 'client-123', email: 'person@example.com', group: 'client' as const },
-      group: 'client' as const,
+      user: { id: 'client-123', email: 'person@example.com', group: 'wunschbesteller' as const },
+      group: 'wunschbesteller' as const,
       requiredPasswordReset: false,
       fairgateUserExists: true,
       childrenCount: 2,

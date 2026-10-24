@@ -19,6 +19,7 @@ export interface AuthState {
   errorCode: string | null;
   registrationLoginLoading: boolean;
   registrationLoginErrorCode: string | null;
+  firstAccess: boolean;
   fairgateUserExists: boolean | null;
   fairgateStatus: FairgateStatus | null;
   childrenCount: number | null;
@@ -46,6 +47,7 @@ export const initialState: AuthState = {
   errorCode: null,
   registrationLoginLoading: false,
   registrationLoginErrorCode: null,
+  firstAccess: false,
   fairgateUserExists: persistedAuth.fairgateUserExists ?? null,
   fairgateStatus: persistedAuth.fairgateStatus ?? null,
   childrenCount: persistedAuth.childrenCount ?? null,
@@ -63,6 +65,7 @@ export const loggedOutState: AuthState = {
   userId: null,
   group: null,
   requiredPasswordReset: false,
+  firstAccess: false,
   fairgateUserExists: null,
   fairgateStatus: null,
   childrenCount: null,

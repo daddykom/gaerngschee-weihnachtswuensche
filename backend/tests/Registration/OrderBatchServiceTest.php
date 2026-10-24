@@ -21,7 +21,7 @@ final class OrderBatchServiceTest extends TestCase
     public function testFailedEmailIsQueuedAndLeavesOrderProvisional(): void
     {
         $pdo = TestDatabase::create();
-        $user = (new UserRepository($pdo))->createUser('person+fair1@example.com', 'secret', 'client');
+        $user = (new UserRepository($pdo))->createUser('person+fair1@example.com', 'secret', 'wunschbesteller');
         $orders = new OrderRepository($pdo);
         $orders->saveForYear($user['id'], 2026, 'provisional', 1, 0, [
             ['personType' => 'adult', 'category' => 'catA', 'quantity' => 1],
@@ -41,7 +41,7 @@ final class OrderBatchServiceTest extends TestCase
     public function testNextBatchRunRetriesFailedEmail(): void
     {
         $pdo = TestDatabase::create();
-        $user = (new UserRepository($pdo))->createUser('person+fair1@example.com', 'secret', 'client');
+        $user = (new UserRepository($pdo))->createUser('person+fair1@example.com', 'secret', 'wunschbesteller');
         $orders = new OrderRepository($pdo);
         $orders->saveForYear($user['id'], 2026, 'provisional', 1, 0, [
             ['personType' => 'adult', 'category' => 'catA', 'quantity' => 1],
@@ -64,7 +64,7 @@ final class OrderBatchServiceTest extends TestCase
     public function testSendsFirstFairgateReminderAfterTheConfiguredInterval(): void
     {
         $pdo = TestDatabase::create();
-        $user = (new UserRepository($pdo))->createUser('person+reminder@example.com', 'secret', 'client');
+        $user = (new UserRepository($pdo))->createUser('person+reminder@example.com', 'secret', 'wunschbesteller');
         $orders = new OrderRepository($pdo);
         $order = $orders->saveForYear($user['id'], 2026, 'provisional', 1, 0, [
             ['personType' => 'adult', 'category' => 'catA', 'quantity' => 1],
@@ -88,7 +88,7 @@ final class OrderBatchServiceTest extends TestCase
     public function testDoesNotSendFairgateReminderAfterConfiguredEndDate(): void
     {
         $pdo = TestDatabase::create();
-        $user = (new UserRepository($pdo))->createUser('person+reminder-end@example.com', 'secret', 'client');
+        $user = (new UserRepository($pdo))->createUser('person+reminder-end@example.com', 'secret', 'wunschbesteller');
         $orders = new OrderRepository($pdo);
         $order = $orders->saveForYear($user['id'], 2026, 'provisional', 1, 0, [
             ['personType' => 'adult', 'category' => 'catA', 'quantity' => 1],
@@ -111,7 +111,7 @@ final class OrderBatchServiceTest extends TestCase
     public function testRemovesQueuedFairgateReminderAfterConfiguredEndDate(): void
     {
         $pdo = TestDatabase::create();
-        $user = (new UserRepository($pdo))->createUser('person+reminder-queue-end@example.com', 'secret', 'client');
+        $user = (new UserRepository($pdo))->createUser('person+reminder-queue-end@example.com', 'secret', 'wunschbesteller');
         $orders = new OrderRepository($pdo);
         $order = $orders->saveForYear($user['id'], 2026, 'provisional', 1, 0, [
             ['personType' => 'adult', 'category' => 'catA', 'quantity' => 1],
@@ -139,7 +139,7 @@ final class OrderBatchServiceTest extends TestCase
     public function testFailedFairgateReminderIsQueuedAndRetried(): void
     {
         $pdo = TestDatabase::create();
-        $user = (new UserRepository($pdo))->createUser('reminder-retry@example.com', 'secret', 'client');
+        $user = (new UserRepository($pdo))->createUser('reminder-retry@example.com', 'secret', 'wunschbesteller');
         $orders = new OrderRepository($pdo);
         $order = $orders->saveForYear($user['id'], 2026, 'provisional', 1, 0, [
             ['personType' => 'adult', 'category' => 'catA', 'quantity' => 1],
@@ -169,7 +169,7 @@ final class OrderBatchServiceTest extends TestCase
     public function testSuccessfulOrderIsNotSentAgainOnTheNextBatchRun(): void
     {
         $pdo = TestDatabase::create();
-        $user = (new UserRepository($pdo))->createUser('idempotent@example.com', 'secret', 'client');
+        $user = (new UserRepository($pdo))->createUser('idempotent@example.com', 'secret', 'wunschbesteller');
         $orders = new OrderRepository($pdo);
         $orders->saveForYear($user['id'], 2026, 'provisional', 1, 0, [
             ['personType' => 'adult', 'category' => 'catA', 'quantity' => 1],
@@ -221,7 +221,7 @@ final class OrderBatchServiceTest extends TestCase
             'id' => 'config-campaign-year',
             'name' => 'campaign_year',
             'value' => json_encode('2026', JSON_THROW_ON_ERROR),
-            'access' => json_encode(['admin', 'client'], JSON_THROW_ON_ERROR),
+            'access' => json_encode(['admin', 'wunschbesteller'], JSON_THROW_ON_ERROR),
             'update' => json_encode(['admin'], JSON_THROW_ON_ERROR),
             'label' => 'Campaign Year',
         ]);

@@ -1,4 +1,4 @@
-export type UserGroup = 'admin' | 'user' | 'client';
+export type UserGroup = 'admin' | 'user' | 'wunschbesteller' | 'wunscherfueller';
 
 export interface FrontendConfig {
   id: string;
