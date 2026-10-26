@@ -17,8 +17,8 @@ export class AdminOrdersService {
 
   list(statuses: string[], categories: string[]): Observable<AdminOrderListResponse> {
     let params = new HttpParams();
-    statuses.forEach((status) => (params = params.append('status', status)));
-    categories.forEach((category) => (params = params.append('category', category)));
+    statuses.forEach((status) => (params = params.append('status[]', status)));
+    categories.forEach((category) => (params = params.append('category[]', category)));
     return this.http.get<AdminOrderListResponse>(this.baseUrl, { params, withCredentials: true });
   }
 
