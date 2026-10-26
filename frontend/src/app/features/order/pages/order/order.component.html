@@ -143,25 +143,27 @@
       </div>
     </section>
 
-    <div class="gl-cluster order-actions">
-      <button
-        mat-stroked-button
-        type="button"
-        [attr.aria-disabled]="canAddItem() ? null : 'true'"
-        (click)="addItem()"
-      >
-        {{ 'app.order.items.new' | translate }}
-      </button>
-      <button
-        mat-flat-button
-        color="primary"
-        type="button"
-        [attr.aria-disabled]="canEdit() && saving() !== 'loading' ? null : 'true'"
-        [attr.aria-busy]="saving() === 'loading' ? 'true' : null"
-        (click)="save()"
-      >
-        {{ 'app.order.actions.save' | translate }}
-      </button>
-    </div>
+    @if (canEdit()) {
+      <div class="gl-cluster order-actions">
+        <button
+          mat-stroked-button
+          type="button"
+          [attr.aria-disabled]="canAddItem() ? null : 'true'"
+          (click)="addItem()"
+        >
+          {{ 'app.order.items.new' | translate }}
+        </button>
+        <button
+          mat-flat-button
+          color="primary"
+          type="button"
+          [attr.aria-disabled]="saving() !== 'loading' ? null : 'true'"
+          [attr.aria-busy]="saving() === 'loading' ? 'true' : null"
+          (click)="save()"
+        >
+          {{ 'app.order.actions.save' | translate }}
+        </button>
+      </div>
+    }
   </div>
 }

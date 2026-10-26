@@ -8,6 +8,8 @@ use App\Users\Data\UserRepository;
 use App\Fairgate\Actions\FairgateTestAction;
 use App\Fairgate\Actions\FairgateLookupAction;
 use App\Registration\Data\OrderRepository;
+use App\Registration\Actions\AdminOrderListAction;
+use App\Registration\Actions\AdminOrderUpdateAction;
 use App\Configuration\Data\FrontendConfigRepository;
 use App\Middleware\AuthMiddleware;
 use App\Middleware\GroupMiddleware;
@@ -35,8 +37,16 @@ final class AdminRoutes
         ?FrontendConfigRepository $configRepository = null,
         ?RateLimitService $rateLimitService = null,
         ?FairgateLookupAction $fairgateLookupAction = null,
+        ?AdminOrderListAction $adminOrderListAction = null,
+        ?AdminOrderUpdateAction $adminOrderUpdateAction = null,
     ): void {
-        $app->group('/admin', function (RouteCollectorProxy $group) use ($userRepository, $emailSender, $fairgateTestAction, $orderRepository, $configRepository, $rateLimitService, $fairgateLookupAction): void {
+        $app->group('/admin', function (RouteCollectorProxy $group) use ($userRepository, $emailSender, $fairgateTestAction, $orderRepository, $configRepository, $rateLimitService, $fairgateLookupAction, $adminOrderListAction, $adminOrderUpdateAction): void {
+
+            $orders = $group->get('/orders', $adminOrderListAction ?? new AdminOrderListAction($orderRepository));
+            $orders->add(new GroupMiddleware(['admin'], $userRepository))->add(new AuthMiddleware());
+
+            $orderUpdate = $group->patch('/orders/{orderId}', $adminOrderUpdateAction ?? new AdminOrderUpdateAction($orderRepository));
+            $orderUpdate->add(new GroupMiddleware(['admin'], $userRepository))->add(new AuthMiddleware());
 
             $list = $group->get('/users', new ListUsersAction($userRepository));
             $list->add(new GroupMiddleware(['admin'], $userRepository))->add(new AuthMiddleware());

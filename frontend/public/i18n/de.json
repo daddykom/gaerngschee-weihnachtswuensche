@@ -378,12 +378,12 @@
       "staySignedIn": "Angemeldet bleiben"
     },
     "admin": {
-      "overview": {
+       "overview": {
         "stub": {
           "title": "Übersicht",
           "message": "Die Übersicht für Weihnachtswünsche wird derzeit vorbereitet."
         },
-        "title": "Admin-Übersicht"
+         "title": "Admin-Übersicht"
       },
       "fairgateTest": {
         "title": "Fairgate-Test",
@@ -428,8 +428,42 @@
           "REQUEST_FAILED": "Die Anfrage konnte nicht durchgeführt werden."
         }
       },
-      "overview": {
-        "title": "Admin-Übersicht",
+       "overview": {
+         "title": "Admin-Übersicht",
+         "filters": {
+           "title": "Filter",
+           "status": "Status",
+           "category": "Kategorie",
+           "active": "Aktive Filter",
+           "removeStatus": "Statusfilter entfernen",
+           "removeCategory": "Kategoriefilter entfernen"
+         },
+         "statuses": {
+           "released": "Freigegeben",
+           "in_review": "In Prüfung",
+           "changes_requested": "Änderungen verlangt",
+           "definitive": "Definitiv",
+           "ready_for_pickup": "Bereit zur Abholung",
+           "completed": "Abgeschlossen"
+         },
+         "ordersTitle": "Bestellungen",
+         "itemCount": "{{ count }} Wünsche",
+         "open": "Bestellung öffnen",
+         "editTitle": "Bestellung bearbeiten",
+         "currentText": "Aktueller Order-Text",
+         "originalText": "Ursprünglicher Order-Text",
+         "adminNotes": "Interne Bemerkungen zur Order",
+         "itemsTitle": "Wünsche",
+         "originalDescription": "Ursprüngliche Wunschbeschreibung",
+         "originalReason": "Ursprüngliche Begründung",
+         "rejectionReason": "Begründung der Zurückweisung",
+         "accept": "Wunsch akzeptieren",
+         "reject": "Wunsch zurückweisen",
+         "rejectOrder": "Zurückweisen",
+         "release": "Freigeben",
+         "cancel": "Abbrechen",
+         "successTitle": "Erfolgreich",
+         "saved": "Die Bestellung wurde gespeichert.",
         "loading": "Übersicht wird geladen ...",
         "definitiveTitle": "Definitive Bestellungen",
         "waiting_for_fairgateTitle": "Bestellungen warten auf Fairgate",
@@ -471,7 +505,13 @@
         "successTitle": "Erfolgreich",
         "deliveredMessage": "{{ updated }} definitive Bestellungen wurden zur Auslieferung markiert.",
         "errorTitle": "Übersicht konnte nicht geladen werden",
-        "errors": {
+         "errors": {
+           "INVALID_ORDER_DATA": "Die Bestelldaten sind ungültig.",
+           "ORDER_NOT_FOUND": "Die Bestellung wurde nicht gefunden.",
+           "REJECTION_REASON_REQUIRED": "Für eine Zurückweisung ist eine Begründung erforderlich.",
+           "ITEMS_NOT_ACCEPTED": "Alle Wünsche müssen zuerst akzeptiert werden.",
+           "ITEM_REJECTION_REQUIRED": "Mindestens ein Wunsch muss zurückgewiesen werden.",
+           "ORDER_UPDATE_FAILED": "Die Bestellung konnte nicht gespeichert werden.",
           "INVALID_OVERVIEW_CONFIGURATION": "Die Konfiguration für die Übersicht ist ungültig.",
           "REQUEST_FAILED": "Die Übersicht konnte nicht geladen werden.",
           "DELIVERY_FAILED": "Die definitiven Bestellungen konnten nicht zur Auslieferung markiert werden."

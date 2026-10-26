@@ -25,7 +25,7 @@ test.describe('Password change route', () => {
     );
   });
 
-  test('changes the password and navigates to the overview', async ({ page }) => {
+  test('changes the password and cannot access the admin overview as a normal user', async ({ page }) => {
     await loginAsUser(page);
     let requestReceived = false;
     await page.route('http://localhost:8083/auth/password-change-authenticated', async (route) => {
@@ -42,7 +42,7 @@ test.describe('Password change route', () => {
     await page.locator('input[type="password"]').nth(1).fill('long-enough-secret');
     await page.getByRole('button', { name: 'Passwort ändern' }).click();
 
-    await page.waitForURL('**/admin/overview');
+    await page.waitForURL('**/not-found');
     expect(requestReceived).toBe(true);
   });
 

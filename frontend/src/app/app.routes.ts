@@ -8,6 +8,8 @@ import { publicConfigurationResolver } from './features/public-configuration/pub
 import { groupGuard } from './shared/guards/group.guard';
 import { adminUsersEffects } from './store/admin-users/admin-users.effects';
 import { adminUsersFeature } from './store/admin-users/admin-users.feature';
+import { adminOrdersEffects } from './store/admin-orders/admin-orders.effects';
+import { adminOrdersFeature } from './store/admin-orders/admin-orders.feature';
 import { fairgateLookupEffects } from './store/fairgate-lookup/fairgate-lookup.effects';
 import { fairgateLookupFeature } from './store/fairgate-lookup/fairgate-lookup.feature';
 import { fairgateTestEffects } from './store/fairgate-test/fairgate-test.effects';
@@ -154,14 +156,16 @@ export const appRoutes: Routes = [
         path: 'admin',
         canActivate: [groupGuard(['user', 'admin'])],
         providers: [
-          provideState(adminUsersFeature),
+           provideState(adminUsersFeature),
+           provideState(adminOrdersFeature),
           provideState(fairgateTestFeature),
           provideState(fairgateLookupFeature),
-          provideEffects(adminUsersEffects, fairgateTestEffects, fairgateLookupEffects),
+           provideEffects(adminUsersEffects, adminOrdersEffects, fairgateTestEffects, fairgateLookupEffects),
         ],
         children: [
           {
             path: 'overview',
+            canActivate: [groupGuard(['admin'])],
             data: { pageTitle: 'app.admin.overview.title' },
             loadComponent: () =>
               import('./features/admin/pages/overview/admin-overview.component').then(

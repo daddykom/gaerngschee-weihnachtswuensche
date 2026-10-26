@@ -1,3 +1,27 @@
 :host {
   display: block;
 }
+
+.order-list,
+.item-editor {
+  display: grid;
+  gap: var(--gl-space-md);
+}
+
+.order-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gl-space-md);
+  padding: var(--gl-space-md);
+  border: 1px solid #8c7b85;
+  background: #fff8fc;
+}
+
+.original-text {
+  padding: var(--gl-space-md);
+  border-left: 0.25rem solid #8c7b85;
+  background: #fff8fc;
+  white-space: pre-wrap;
+}

@@ -47,6 +47,14 @@ export const test = base.extend({
       });
     });
 
+    await page.route('**/admin/orders**', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ orders: [], statuses: ['released', 'in_review'], categories: [] }),
+      });
+    });
+
     await use(page);
   },
 });
