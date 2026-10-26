@@ -3,7 +3,7 @@
 }
 
 .order-table-wrapper {
-  overflow-x: auto;
+  width: 100%;
 }
 
 table {
@@ -17,6 +17,10 @@ td {
   border-bottom: 1px solid #8c7b85;
   text-align: left;
   vertical-align: top;
+}
+
+.table-actions {
+  min-width: 11rem;
 }
 
 .order-actions {

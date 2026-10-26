@@ -74,6 +74,22 @@ export const appRoutes: Routes = [
             loadComponent: () =>
               import('./features/order/pages/order/order.component').then((m) => m.OrderComponent),
           },
+          {
+            path: 'wunsch/neu',
+            data: { pageTitle: 'app.order.itemEditor.newTitle' },
+            loadComponent: () =>
+              import('./features/order/pages/item-editor/item-editor.component').then(
+                (m) => m.ItemEditorComponent,
+              ),
+          },
+          {
+            path: 'wunsch/:itemId',
+            data: { pageTitle: 'app.order.itemEditor.editTitle' },
+            loadComponent: () =>
+              import('./features/order/pages/item-editor/item-editor.component').then(
+                (m) => m.ItemEditorComponent,
+              ),
+          },
         ],
       },
       {

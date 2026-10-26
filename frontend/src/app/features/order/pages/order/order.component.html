@@ -96,74 +96,54 @@
     <section class="gl-stack gl-stack--group" aria-labelledby="items-heading">
       <h2 id="items-heading">{{ 'app.order.items.title' | translate }}</h2>
       <p>{{ 'app.order.items.description' | translate }}</p>
-      <mat-accordion>
-        @for (item of storeForm().items; track item.id; let index = $index) {
-          <mat-expansion-panel>
-            <mat-expansion-panel-header>
-              <mat-panel-title>
-                {{ item.category ? (categoryLabel(item.category) | translate) : ('app.order.items.new' | translate) }}
-              </mat-panel-title>
-              <mat-panel-description>
-                {{ ('app.order.items.statuses.' + itemStatus(item.id)) | translate }}
-              </mat-panel-description>
-            </mat-expansion-panel-header>
-
-            @if (canEdit()) {
-              <div class="gl-stack gl-stack--group">
-                <mat-form-field appearance="outline" subscriptSizing="dynamic">
-                  <mat-label>{{ 'app.order.items.category' | translate }}</mat-label>
-                  <mat-select [formField]="orderForm.items[index].category">
-                    <mat-option value="voucher">{{ 'app.order.items.categories.voucher' | translate }}</mat-option>
-                    <mat-option value="gift">{{ 'app.order.items.categories.gift' | translate }}</mat-option>
-                  </mat-select>
-                  <app-control-error
-                    matError
-                    [control]="orderForm.items[index].category()"
-                    translationPrefix="app.order.errors.items.category"
-                  />
-                </mat-form-field>
-                <mat-form-field appearance="outline" subscriptSizing="dynamic">
-                  <mat-label>{{ 'app.order.items.description' | translate }}</mat-label>
-                  <textarea matInput rows="3" [formField]="orderForm.items[index].description"></textarea>
-                  <app-control-error
-                    matError
-                    [control]="orderForm.items[index].description()"
-                    translationPrefix="app.order.errors.items.description"
-                  />
-                </mat-form-field>
-                <mat-form-field appearance="outline" subscriptSizing="dynamic">
-                  <mat-label>{{ 'app.order.items.reason' | translate }}</mat-label>
-                  <textarea matInput rows="3" [formField]="orderForm.items[index].reason"></textarea>
-                  <app-control-error
-                    matError
-                    [control]="orderForm.items[index].reason()"
-                    translationPrefix="app.order.errors.items.reason"
-                  />
-                </mat-form-field>
-                <div class="gl-cluster">
-                  <button
-                    mat-button
-                    type="button"
-                    [attr.aria-disabled]="storeForm().items.length > 1 ? null : 'true'"
-                    (click)="removeItem(item.id)"
-                  >
-                    {{ 'app.order.items.delete' | translate }}
-                  </button>
-                </div>
-              </div>
-            } @else {
-              <dl>
-                <dt>{{ 'app.order.items.category' | translate }}</dt>
-                <dd>{{ categoryLabel(item.category) | translate }}</dd>
-                <dt>{{ 'app.order.items.description' | translate }}</dt>
-                <dd>{{ item.description }}</dd>
-                <dt>{{ 'app.order.items.reason' | translate }}</dt>
-                <dd>{{ item.reason }}</dd>
-              </dl>
+      <div class="order-table-wrapper">
+        <table>
+          <caption class="visually-hidden">{{ 'app.order.items.caption' | translate }}</caption>
+          <thead>
+            <tr>
+              <th scope="col">{{ 'app.order.items.category' | translate }}</th>
+              <th scope="col">{{ 'app.order.items.description' | translate }}</th>
+              <th scope="col">{{ 'app.order.items.reason' | translate }}</th>
+              <th scope="col">{{ 'app.order.items.status' | translate }}</th>
+              <th scope="col">{{ 'app.order.items.actions' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of storeForm().items; track item.id) {
+              <tr>
+                <td>{{ ('app.order.items.categories.' + item.category) | translate }}</td>
+                <td>{{ item.description }}</td>
+                <td>{{ item.reason }}</td>
+                <td>{{ ('app.order.items.statuses.' + itemStatus(item.id)) | translate }}</td>
+                <td>
+                  @if (canEdit()) {
+                    <div class="gl-cluster table-actions">
+                      <button mat-button type="button" (click)="editItem(item.id)">
+                        {{ 'app.order.items.edit' | translate }}
+                      </button>
+                      <button
+                        mat-button
+                        type="button"
+                        [attr.aria-disabled]="storeForm().items.length > 1 ? null : 'true'"
+                        (click)="removeItem(item.id)"
+                      >
+                        {{ 'app.order.items.delete' | translate }}
+                      </button>
+                    </div>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5">{{ 'app.order.items.empty' | translate }}</td>
+              </tr>
             }
-          </mat-expansion-panel>
-        }
-      </mat-accordion>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="gl-cluster order-actions">
       <button
         mat-stroked-button
         type="button"
@@ -172,10 +152,6 @@
       >
         {{ 'app.order.items.new' | translate }}
       </button>
-      <app-control-error [control]="orderForm.items()" translationPrefix="app.order.errors.items" />
-    </section>
-
-    <div class="gl-cluster order-actions">
       <button
         mat-flat-button
         color="primary"
@@ -184,7 +160,7 @@
         [attr.aria-busy]="saving() === 'loading' ? 'true' : null"
         (click)="save()"
       >
-        {{ 'app.order.actions.continue' | translate }}
+        {{ 'app.order.actions.save' | translate }}
       </button>
     </div>
   </div>

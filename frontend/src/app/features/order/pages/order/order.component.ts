@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } 
 import {
   form,
   FormField,
-  applyEach,
   applyWhen,
   maxLength,
   min,
@@ -13,13 +12,15 @@ import {
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatExpansionModule } from '@angular/material/expansion';
-import { MatSelectModule } from '@angular/material/select';
+import { MatDialog } from '@angular/material/dialog';
+import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
+import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog';
 import { ControlErrorComponent } from '../../../../shared/components/control-error/control-error';
-import { OrderFormValue, OrderItemCategory, OrderStatus } from '../../../../shared/models/order.model';
+import { OrderFormValue, OrderItemStatus, OrderStatus } from '../../../../shared/models/order.model';
 import { selectAuthFirstAccess } from '../../../../store/auth/auth.feature';
+import { NotificationActions } from '../../../../store/notification/notification.actions';
 import { OrderActions } from '../../../../store/order/order.actions';
 import {
   selectOrder,
@@ -39,8 +40,6 @@ import {
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
-    MatExpansionModule,
-    MatSelectModule,
     ControlErrorComponent,
   ],
   templateUrl: './order.component.html',
@@ -49,6 +48,8 @@ import {
 })
 export class OrderComponent {
   private readonly store = inject(Store);
+  private readonly router = inject(Router);
+  private readonly dialog = inject(MatDialog);
   readonly status = this.store.selectSignal(selectOrderStatus);
   readonly saving = this.store.selectSignal(selectOrderSaveStatus);
   readonly order = this.store.selectSignal(selectOrder);
@@ -97,19 +98,6 @@ export class OrderComponent {
     min(schema.childrenCount, 0);
     required(schema.text);
     maxLength(schema.text, 2000);
-    applyEach(schema.items, (itemSchema) => {
-      required(itemSchema.category);
-      required(itemSchema.description);
-      maxLength(itemSchema.description, 2000);
-      required(itemSchema.reason);
-      maxLength(itemSchema.reason, 2000);
-    });
-    validate(schema.items, ({ valueOf }) => {
-      const items = valueOf(schema.items);
-      return items.length >= 1 && items.length <= this.maxItems()
-        ? undefined
-        : { kind: 'itemCount' };
-    });
   });
 
   constructor() {
@@ -134,8 +122,22 @@ export class OrderComponent {
   }
 
   save(): void {
+    const itemCount = this.storeForm().items.length;
+    if (itemCount < 1 || itemCount > this.maxItems()) {
+      this.store.dispatch(NotificationActions.show({
+        variant: 'error',
+        titleKey: 'app.order.errors.INVALID_ORDER',
+        messageKey: 'app.order.errors.items.itemCount',
+        preserveOnRoutes: ['/bestellung'],
+      }));
+    }
+
     if (!this.orderForm().valid()) {
       this.markTouched();
+      return;
+    }
+
+    if (itemCount < 1 || itemCount > this.maxItems()) {
       return;
     }
 
@@ -148,10 +150,7 @@ export class OrderComponent {
     if (!this.canAddItem()) {
       return;
     }
-    this.formModel.update((model) => ({
-      ...model,
-      items: [...model.items, { id: crypto.randomUUID(), category: null, description: '', reason: '' }],
-    }));
+    void this.router.navigate(['/bestellung/wunsch/neu']);
   }
 
   removeItem(id: string): void {
@@ -159,15 +158,30 @@ export class OrderComponent {
     if (!this.canEdit() || items.length <= 1) {
       return;
     }
-    this.formModel.update((model) => ({ ...model, items: model.items.filter((item) => item.id !== id) }));
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'app.order.items.deleteTitle',
+        message: 'app.order.items.deleteMessage',
+        confirmLabel: 'app.order.items.deleteConfirm',
+        cancelLabel: 'app.order.items.cancel',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        this.store.dispatch(OrderActions.formChanged({
+          changes: { items: this.storeForm().items.filter((item) => item.id !== id) },
+        }));
+      }
+    });
   }
 
-  itemStatus(id: string): string {
+  editItem(id: string): void {
+    void this.router.navigate(['/bestellung/wunsch', id]);
+  }
+
+  itemStatus(id: string): OrderItemStatus {
     return this.order()?.items.find((item) => item.id === id)?.status ?? 'draft';
-  }
-
-  categoryLabel(category: OrderItemCategory | null): string {
-    return category === 'voucher' ? 'app.order.items.categories.voucher' : 'app.order.items.categories.gift';
   }
 
   private cloneFormValue(value: OrderFormValue): OrderFormValue {

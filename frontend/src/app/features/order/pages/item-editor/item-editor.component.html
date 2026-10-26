@@ -1,0 +1,50 @@
+<main class="gl-stack gl-stack--section">
+  <section class="gl-stack gl-stack--group" aria-labelledby="item-heading">
+    <h1 id="item-heading">
+      {{ (isNew ? 'app.order.itemEditor.newTitle' : 'app.order.itemEditor.editTitle') | translate }}
+    </h1>
+    <p>{{ 'app.order.itemEditor.description' | translate }}</p>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>{{ 'app.order.items.category' | translate }}</mat-label>
+      <mat-select [formField]="itemForm.category">
+        <mat-option value="voucher">{{ 'app.order.items.categories.voucher' | translate }}</mat-option>
+        <mat-option value="gift">{{ 'app.order.items.categories.gift' | translate }}</mat-option>
+      </mat-select>
+      <app-control-error
+        matError
+        [control]="itemForm.category()"
+        translationPrefix="app.order.errors.items.category"
+      />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>{{ 'app.order.items.description' | translate }}</mat-label>
+      <textarea matInput rows="4" [formField]="itemForm.description"></textarea>
+      <app-control-error
+        matError
+        [control]="itemForm.description()"
+        translationPrefix="app.order.errors.items.description"
+      />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>{{ 'app.order.items.reason' | translate }}</mat-label>
+      <textarea matInput rows="4" [formField]="itemForm.reason"></textarea>
+      <app-control-error
+        matError
+        [control]="itemForm.reason()"
+        translationPrefix="app.order.errors.items.reason"
+      />
+    </mat-form-field>
+  </section>
+
+  <div class="gl-cluster item-editor-actions">
+    <button mat-button type="button" (click)="back()">
+      {{ 'app.order.itemEditor.back' | translate }}
+    </button>
+    <button mat-flat-button color="primary" type="button" (click)="save()">
+      {{ 'app.order.itemEditor.save' | translate }}
+    </button>
+  </div>
+</main>

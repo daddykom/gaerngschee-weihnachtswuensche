@@ -179,11 +179,25 @@
           "completed": "Abgeschlossen"
         },
         "delete": "Löschen",
+        "edit": "Ändern",
+        "status": "Status",
+        "actions": "Aktionen",
+        "deleteTitle": "Wunsch löschen",
+        "deleteMessage": "Möchtest du diesen Wunsch wirklich löschen?",
+        "deleteConfirm": "Löschen",
+        "cancel": "Abbrechen",
         "empty": "Du hast bisher noch keinen Wunsch erfasst."
+      },
+      "itemEditor": {
+        "newTitle": "Wunsch hinzufügen",
+        "editTitle": "Wunsch ändern",
+        "description": "Bitte erfasse deinen Wunsch.",
+        "back": "Zurück",
+        "save": "Speichern"
       },
       "actions": {
         "newItem": "Neuen Wunsch aufnehmen",
-        "continue": "Weiter"
+        "save": "Speichern"
       },
       "confirmation": {
         "pageTitle": "Bestellung gespeichert",
