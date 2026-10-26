@@ -209,12 +209,12 @@
         "login": "Zur Login-Seite"
       },
       "status": {
-        "waiting_for_fairgate": { "title": "Warten auf Fairgate", "message": "Deine Anmeldung wird bearbeitet, sobald du bei Fairgate gefunden wurdest." },
-        "released": { "title": "Zur Prüfung freigegeben", "message": "Deine Anmeldung wurde zur administrativen Prüfung freigegeben." },
-        "in_review": { "title": "In Prüfung", "message": "Deine Anmeldung wird derzeit administrativ geprüft." },
-        "definitive": { "title": "Anmeldung bestätigt", "message": "Deine Anmeldung wurde definitiv bestätigt und kann nicht mehr geändert werden." },
-        "ready_for_pickup": { "title": "Bereit zur Abholung", "message": "Deine Geschenke sind bereit zur Abholung." },
-        "completed": { "title": "Abgeschlossen", "message": "Deine Anmeldung ist abgeschlossen." }
+        "waiting_for_fairgate": { "title": "Warten auf Fairgate", "message": "Deine Anmeldung wird bearbeitet, sobald du bei Fairgate gefunden wurdest. Darum kann sie gerade nicht verändert werden." },
+        "released": { "title": "Zur Prüfung freigegeben", "message": "Deine Anmeldung wurde zur administrativen Prüfung freigegeben. Darum kann sie gerade nicht verändert werden." },
+        "in_review": { "title": "In Prüfung", "message": "Deine Anmeldung wird derzeit administrativ geprüft. Darum kann sie gerade nicht verändert werden." },
+        "definitive": { "title": "Anmeldung bestätigt", "message": "Deine Anmeldung wurde definitiv bestätigt. Darum kann sie gerade nicht verändert werden." },
+        "ready_for_pickup": { "title": "Bereit zur Abholung", "message": "Deine Geschenke sind bereit zur Abholung. Darum kann sie gerade nicht verändert werden." },
+        "completed": { "title": "Abgeschlossen", "message": "Deine Anmeldung ist abgeschlossen. Darum kann sie gerade nicht verändert werden." }
       },
       "errors": {
         "INVALID_ORDER": "Bitte prüfe deine Angaben.",
