@@ -1,4 +1,4 @@
-import { AdminOrder } from '../../shared/models/admin-order.model';
+import { AdminOrder, AdminOrderFormValue } from '../../shared/models/admin-order.model';
 
 export type AdminOrdersLoadStatus = 'initial' | 'loading' | 'loaded' | 'error';
 export type AdminOrdersSaveStatus = 'initial' | 'loading' | 'success' | 'error';
@@ -10,6 +10,8 @@ export interface AdminOrdersState {
   loadStatus: AdminOrdersLoadStatus;
   saveStatus: AdminOrdersSaveStatus;
   errorCode: string | null;
+  activeOrderId: string | null;
+  form: AdminOrderFormValue | null;
 }
 
 export const initialState: AdminOrdersState = {
@@ -19,4 +21,6 @@ export const initialState: AdminOrdersState = {
   loadStatus: 'initial',
   saveStatus: 'initial',
   errorCode: null,
+  activeOrderId: null,
+  form: null,
 };

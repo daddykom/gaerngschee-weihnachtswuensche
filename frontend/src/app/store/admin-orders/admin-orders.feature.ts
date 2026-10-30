@@ -29,6 +29,19 @@ export const adminOrdersFeature = createFeature({
       ...state,
       orders: state.orders.map((current) => (current.id === order.id ? order : current)),
     })),
+    on(AdminOrdersActions.formLoaded, (state, { orderId, form }) => ({
+      ...state,
+      activeOrderId: orderId,
+      form,
+    })),
+    on(AdminOrdersActions.formChanged, (state, { orderId, changes }) =>
+      state.activeOrderId !== orderId || state.form === null
+        ? state
+        : {
+            ...state,
+            form: { ...state.form, ...changes },
+          },
+    ),
     on(AdminOrdersActions.saveSuccess, (state, { order }) => ({
       ...state,
       orders: state.orders.map((current) => (current.id === order.id ? order : current)),
@@ -48,4 +61,6 @@ export const {
   selectCategories: selectAdminOrderCategories,
   selectLoadStatus: selectAdminOrdersLoadStatus,
   selectSaveStatus: selectAdminOrdersSaveStatus,
+  selectActiveOrderId: selectAdminOrdersActiveOrderId,
+  selectForm: selectAdminOrdersForm,
 } = adminOrdersFeature;

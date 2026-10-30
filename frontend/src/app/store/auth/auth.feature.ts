@@ -7,8 +7,13 @@ export const authFeature = createFeature({
   name: 'auth',
   reducer: createReducer<AuthState>(
     initialState,
-    on(AuthActions.login, (state) => ({
+    on(AuthActions.loginFormChanged, (state, { changes }) => ({
       ...state,
+      loginForm: { ...state.loginForm, ...changes },
+    })),
+    on(AuthActions.login, (state, { email, password }) => ({
+      ...state,
+      loginForm: { email, password },
       loading: true,
       errorCode: null,
       email: null,
@@ -104,6 +109,10 @@ export const authFeature = createFeature({
       passwordChangeErrorCode: null,
       firstAccess: false,
     })),
+    on(AuthActions.passwordChangeFormChanged, (state, { changes }) => ({
+      ...state,
+      passwordChangeForm: { ...state.passwordChangeForm, ...changes },
+    })),
     on(AuthActions.passwordChange, (state) => ({
       ...state,
       passwordChangeLoading: true,
@@ -164,6 +173,8 @@ export const {
   selectSessionWarningVisible: selectAuthSessionWarningVisible,
   selectSessionRefreshLoading: selectAuthSessionRefreshLoading,
   selectEmail: selectAuthEmail,
+  selectLoginForm: selectAuthLoginForm,
+  selectPasswordChangeForm: selectAuthPasswordChangeForm,
 } = authFeature;
 
 export const selectAuthEmailCheckLoading = authFeature.selectEmailCheckLoading;

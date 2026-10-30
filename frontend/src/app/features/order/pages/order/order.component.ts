@@ -130,19 +130,25 @@ export class OrderComponent {
 
   constructor() {
     let initialized = false;
+    let previousForm: OrderFormValue | null = null;
     effect(() => {
       const status = this.status();
       if (status === 'loaded' && !initialized) {
-        this.formModel.set(this.cloneFormValue(this.storeForm()));
+        const currentForm = this.storeForm();
+        this.formModel.set(this.cloneFormValue(currentForm));
+        previousForm = this.cloneFormValue(currentForm);
         initialized = true;
       }
     });
 
     effect(() => {
       if (initialized) {
-        this.store.dispatch(
-          OrderActions.formChanged({ changes: this.cloneFormValue(this.formModel()) }),
-        );
+        const currentForm = this.formModel();
+        const changes = this.formChanges(previousForm, currentForm);
+        if (Object.keys(changes).length > 0) {
+          this.store.dispatch(OrderActions.formChanged({ changes }));
+          previousForm = this.cloneFormValue(currentForm);
+        }
       }
     });
   }
@@ -174,7 +180,7 @@ export class OrderComponent {
     }
 
     if (this.canEdit() && this.saving() !== 'loading') {
-      this.store.dispatch(OrderActions.save({ form: this.formModel() }));
+      this.store.dispatch(OrderActions.save({ form: this.storeForm() }));
     }
   }
 
@@ -223,5 +229,53 @@ export class OrderComponent {
       ...value,
       items: value.items.map((item) => ({ ...item })),
     };
+  }
+
+  private formChanges(
+    previous: OrderFormValue | null,
+    current: OrderFormValue,
+  ): Partial<OrderFormValue> {
+    if (previous === null) {
+      return {};
+    }
+
+    const changes: Partial<OrderFormValue> = {};
+    if (previous.password !== current.password) {
+      changes.password = current.password;
+    }
+    if (previous.passwordConfirmation !== current.passwordConfirmation) {
+      changes.passwordConfirmation = current.passwordConfirmation;
+    }
+    if (previous.adultsCount !== current.adultsCount) {
+      changes.adultsCount = current.adultsCount;
+    }
+    if (previous.childrenCount !== current.childrenCount) {
+      changes.childrenCount = current.childrenCount;
+    }
+    if (previous.text !== current.text) {
+      changes.text = current.text;
+    }
+    if (!this.itemsEqual(previous.items, current.items)) {
+      changes.items = current.items.map((item) => ({ ...item }));
+    }
+    return changes;
+  }
+
+  private itemsEqual(
+    previous: OrderFormValue['items'],
+    current: OrderFormValue['items'],
+  ): boolean {
+    return (
+      previous.length === current.length &&
+      previous.every((item, index) => {
+        const currentItem = current[index];
+        return (
+          item.id === currentItem.id &&
+          item.category === currentItem.category &&
+          item.description === currentItem.description &&
+          item.reason === currentItem.reason
+        );
+      })
+    );
   }
 }

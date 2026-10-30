@@ -10,6 +10,8 @@ describe('authReducer', () => {
     );
 
     expect(state).toEqual({
+      loginForm: { email: 'user@example.com', password: 'secret' },
+      passwordChangeForm: { newPassword: '', passwordConfirmation: '' },
       userId: null,
       group: null,
       requiredPasswordReset: false,
@@ -49,6 +51,8 @@ describe('authReducer', () => {
     );
 
     expect(state).toEqual({
+      loginForm: { email: '', password: '' },
+      passwordChangeForm: { newPassword: '', passwordConfirmation: '' },
       userId: 'user-123',
       group: 'admin',
       requiredPasswordReset: false,
@@ -84,6 +88,8 @@ describe('authReducer', () => {
     );
 
     expect(state).toEqual({
+      loginForm: { email: '', password: '' },
+      passwordChangeForm: { newPassword: '', passwordConfirmation: '' },
       userId: null,
       group: null,
       requiredPasswordReset: false,
@@ -115,6 +121,8 @@ describe('authReducer', () => {
   it('clears authentication data on logout', () => {
     const state = authReducer(
       {
+        loginForm: { email: '', password: '' },
+        passwordChangeForm: { newPassword: '', passwordConfirmation: '' },
         userId: 'user-123',
         group: 'admin',
         requiredPasswordReset: false,

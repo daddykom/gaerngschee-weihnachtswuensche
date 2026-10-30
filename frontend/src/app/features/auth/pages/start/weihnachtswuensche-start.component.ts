@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, effect, inject, signal, untracked } from '@angular/core';
 import { email, form, FormField, maxLength, required } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -10,6 +10,7 @@ import { ControlErrorComponent } from '../../../../shared/components/control-err
 import { InfoBoxComponent } from '../../../../shared/components/info-box/info-box';
 import { inputLimits } from '../../../../shared/constants/input-limits';
 import { StartActions } from '../../../../store/start/start.actions';
+import { selectStartForm } from '../../../../store/start/start.feature';
 
 @Component({
   selector: 'app-weihnachtswuensche-start',
@@ -30,6 +31,7 @@ import { StartActions } from '../../../../store/start/start.actions';
 export class WeihnachtswuenscheStartComponent {
   private readonly store = inject(Store);
   private readonly translate = inject(TranslateService);
+  private readonly storeForm = this.store.selectSignal(selectStartForm);
 
   readonly model = signal({
     email: '',
@@ -40,17 +42,36 @@ export class WeihnachtswuenscheStartComponent {
     maxLength(schema.email, inputLimits.email);
   });
 
+  constructor() {
+    let initialized = false;
+    let previousEmail = '';
+    effect(() => {
+      const storeForm = this.storeForm();
+      if (!initialized && storeForm !== undefined) {
+        this.model.set({ email: storeForm.email });
+        previousEmail = storeForm.email;
+        initialized = true;
+      }
+    });
+    effect(() => {
+      if (!initialized) {
+        return;
+      }
+      const emailValue = this.model().email;
+      if (emailValue !== previousEmail) {
+        this.store.dispatch(StartActions.formChanged({ changes: { email: emailValue } }));
+        previousEmail = emailValue;
+      }
+    });
+  }
+
   submit(): void {
     if (!this.form().valid()) {
       this.form.email().markAsTouched();
       return;
     }
 
-    this.store.dispatch(
-      StartActions.submit({
-        email: this.model().email,
-        language: this.translate.getCurrentLang() ?? 'de',
-      }),
-    );
+    const email = this.storeForm()?.email ?? untracked(this.model).email;
+    this.store.dispatch(StartActions.submit({ email, language: this.translate.getCurrentLang() ?? 'de' }));
   }
 }

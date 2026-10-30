@@ -40,6 +40,15 @@ export const orderFeature = createFeature({
       ...state,
       form: { ...state.form, ...changes },
     })),
+    on(OrderActions.itemFormChanged, (state, { itemId, changes }) => ({
+      ...state,
+      form: {
+        ...state.form,
+        items: state.form.items.map((item) =>
+          item.id === itemId ? { ...item, ...changes } : item,
+        ),
+      },
+    })),
     on(OrderActions.save, (state) => ({ ...state, saveStatus: 'loading', saveErrorCode: null })),
     on(OrderActions.saveSuccess, (state, { result }) => ({
       ...state,

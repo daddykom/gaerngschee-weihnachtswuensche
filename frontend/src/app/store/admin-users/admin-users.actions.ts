@@ -1,6 +1,7 @@
 import { createActionGroup, emptyProps, props } from '@ngrx/store';
 import { UserGroup } from '../../shared/models/frontend-config.model';
 import { AdminUser } from '../../shared/services/admin-users.service';
+import { AdminUserForm } from './admin-users.state';
 
 export const AdminUsersActions = createActionGroup({
   source: 'Admin Users',
@@ -12,6 +13,8 @@ export const AdminUsersActions = createActionGroup({
     'Load Profile': emptyProps(),
     'Load User Success': props<{ user: AdminUser }>(),
     'Load User Failure': props<{ errorCode: string }>(),
+    'Form Loaded': props<{ form: AdminUserForm }>(),
+    'Form Changed': props<{ changes: Partial<AdminUserForm> }>(),
     Create: props<{ email: string; group: UserGroup }>(),
     'Create Success': props<{ user: AdminUser; emailSentTo: string }>(),
     'Create Failure': props<{ errorCode: string }>(),

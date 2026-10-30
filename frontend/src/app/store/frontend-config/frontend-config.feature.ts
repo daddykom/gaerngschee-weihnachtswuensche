@@ -1,6 +1,6 @@
 import { createFeature, createReducer, on } from '@ngrx/store';
 import { FrontendConfigActions } from './frontend-config.actions';
-import { FrontendConfigState, initialState } from './frontend-config.state';
+import { FrontendConfigForm, FrontendConfigState, initialState } from './frontend-config.state';
 
 export const frontendConfigFeature = createFeature({
   name: 'frontendConfig',
@@ -14,12 +14,23 @@ export const frontendConfigFeature = createFeature({
     on(FrontendConfigActions.loadSuccess, (state, { configs }) => ({
       ...state,
       configs,
+      form: configs.reduce<FrontendConfigForm>(
+        (form, config) => ({
+          ...form,
+          [config.id]: Array.isArray(config.value) ? [...config.value] : (config.value ?? ''),
+        }),
+        {},
+      ),
       loadStatus: 'success',
     })),
     on(FrontendConfigActions.loadFailure, (state, { errorCode }) => ({
       ...state,
       loadStatus: 'error',
       errorCode,
+    })),
+    on(FrontendConfigActions.formChanged, (state, { changes }) => ({
+      ...state,
+      form: { ...state.form, ...changes },
     })),
     on(FrontendConfigActions.save, (state) => ({
       ...state,
@@ -29,6 +40,13 @@ export const frontendConfigFeature = createFeature({
     on(FrontendConfigActions.saveSuccess, (state, { configs }) => ({
       ...state,
       configs,
+      form: configs.reduce<FrontendConfigForm>(
+        (form, config) => ({
+          ...form,
+          [config.id]: Array.isArray(config.value) ? [...config.value] : (config.value ?? ''),
+        }),
+        {},
+      ),
       saveStatus: 'success',
     })),
     on(FrontendConfigActions.saveFailure, (state, { errorCode }) => ({
@@ -59,6 +77,7 @@ export const {
   name: frontendConfigFeatureName,
   reducer: frontendConfigReducer,
   selectConfigs: selectFrontendConfigs,
+  selectForm: selectFrontendConfigForm,
   selectPublicConfigs: selectFrontendPublicConfigs,
   selectLoadStatus: selectFrontendConfigLoadStatus,
   selectSaveStatus: selectFrontendConfigSaveStatus,

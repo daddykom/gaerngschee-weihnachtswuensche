@@ -5,6 +5,8 @@ import { loadPersistedAuthState } from '../../shared/services/auth-storage';
 const persistedAuth = loadPersistedAuthState();
 
 export interface AuthState {
+  loginForm: { email: string; password: string };
+  passwordChangeForm: { newPassword: string; passwordConfirmation: string };
   userId: string | null;
   group: UserGroup | null;
   requiredPasswordReset: boolean;
@@ -33,6 +35,8 @@ export interface AuthState {
 }
 
 export const initialState: AuthState = {
+  loginForm: { email: '', password: '' },
+  passwordChangeForm: { newPassword: '', passwordConfirmation: '' },
   userId: persistedAuth.userId ?? null,
   group: persistedAuth.group ?? null,
   requiredPasswordReset: false,

@@ -48,25 +48,25 @@ export class ItemEditorComponent {
     maxLength(schema.reason, 2000);
   });
 
-  private readonly otherItems: OrderItemFormValue[];
   private initialized = false;
+  private previousItem: OrderItemFormValue | null = null;
 
   constructor() {
     const item = this.orderFormState().items.find((candidate) => candidate.id === this.itemId);
-    this.otherItems = this.orderFormState().items.filter(
-      (candidate) => candidate.id !== this.itemId,
-    );
     if (item) {
       this.formModel.set({ ...item });
+      this.previousItem = { ...item };
     } else if (!this.isNew) {
       void this.router.navigate(['/bestellung']);
       return;
     } else {
+      const newItem = this.formModel();
       this.store.dispatch(
         OrderActions.formChanged({
-          changes: { items: [...this.orderFormState().items, this.formModel()] },
+          changes: { items: [...this.orderFormState().items, newItem] },
         }),
       );
+      this.previousItem = { ...newItem };
     }
 
     this.initialized = true;
@@ -75,9 +75,11 @@ export class ItemEditorComponent {
       if (!this.initialized) {
         return;
       }
-      this.store.dispatch(
-        OrderActions.formChanged({ changes: { items: [...this.otherItems, { ...itemValue }] } }),
-      );
+      const changes = this.itemChanges(this.previousItem, itemValue);
+      if (Object.keys(changes).length > 0) {
+        this.store.dispatch(OrderActions.itemFormChanged({ itemId: this.itemId, changes }));
+        this.previousItem = { ...itemValue };
+      }
     });
   }
 
@@ -87,11 +89,7 @@ export class ItemEditorComponent {
       return;
     }
 
-    this.store.dispatch(
-      OrderActions.formChanged({
-        changes: { items: [...this.otherItems, { ...this.formModel() }] },
-      }),
-    );
+    this.syncItem();
     void this.router.navigate(['/bestellung']);
   }
 
@@ -99,10 +97,42 @@ export class ItemEditorComponent {
     if (this.isNew) {
       this.store.dispatch(
         OrderActions.formChanged({
-          changes: { items: this.otherItems },
+          changes: {
+            items: this.orderFormState().items.filter((item) => item.id !== this.itemId),
+          },
         }),
       );
     }
     void this.router.navigate(['/bestellung']);
+  }
+
+  private syncItem(): void {
+    const currentItem = this.formModel();
+    const changes = this.itemChanges(this.previousItem, currentItem);
+    if (Object.keys(changes).length > 0) {
+      this.store.dispatch(OrderActions.itemFormChanged({ itemId: this.itemId, changes }));
+      this.previousItem = { ...currentItem };
+    }
+  }
+
+  private itemChanges(
+    previous: OrderItemFormValue | null,
+    current: OrderItemFormValue,
+  ): Partial<OrderItemFormValue> {
+    if (previous === null) {
+      return {};
+    }
+
+    const changes: Partial<OrderItemFormValue> = {};
+    if (previous.category !== current.category) {
+      changes.category = current.category;
+    }
+    if (previous.description !== current.description) {
+      changes.description = current.description;
+    }
+    if (previous.reason !== current.reason) {
+      changes.reason = current.reason;
+    }
+    return changes;
   }
 }

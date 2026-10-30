@@ -6,6 +6,14 @@ export const adminUsersFeature = createFeature({
   name: 'adminUsers',
   reducer: createReducer<AdminUsersState>(
     initialState,
+    on(AdminUsersActions.formLoaded, (state, { form }) => ({
+      ...state,
+      form,
+    })),
+    on(AdminUsersActions.formChanged, (state, { changes }) => ({
+      ...state,
+      form: { ...state.form, ...changes },
+    })),
     on(AdminUsersActions.load, (state) => ({
       ...state,
       loadStatus: 'loading',
@@ -94,6 +102,7 @@ export const {
   selectDetailStatus: selectAdminUsersDetailStatus,
   selectLoadStatus: selectAdminUsersLoadStatus,
   selectSaveStatus: selectAdminUsersSaveStatus,
+  selectForm: selectAdminUsersForm,
 } = adminUsersFeature;
 
 export const selectAdminUsersLoading = (state: { adminUsers: AdminUsersState }): boolean =>

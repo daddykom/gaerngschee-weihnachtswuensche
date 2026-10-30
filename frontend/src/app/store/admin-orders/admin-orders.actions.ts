@@ -1,5 +1,5 @@
 import { createActionGroup, emptyProps, props } from '@ngrx/store';
-import { AdminOrder } from '../../shared/models/admin-order.model';
+import { AdminOrder, AdminOrderFormValue } from '../../shared/models/admin-order.model';
 import type { AdminOrderAction } from '../../shared/services/admin-orders.service';
 
 export const AdminOrdersActions = createActionGroup({
@@ -11,6 +11,8 @@ export const AdminOrdersActions = createActionGroup({
     'Load Failure': props<{ errorCode: string }>(),
     Save: props<{ order: AdminOrder; action?: AdminOrderAction }>(),
     'Draft Changed': props<{ order: AdminOrder }>(),
+    'Form Loaded': props<{ orderId: string; form: AdminOrderFormValue }>(),
+    'Form Changed': props<{ orderId: string; changes: Partial<AdminOrderFormValue> }>(),
     'Save Success': props<{ order: AdminOrder }>(),
     'Save Failure': props<{ errorCode: string }>(),
   },

@@ -32,3 +32,16 @@ export interface AdminOrder {
   createdAt: string | null;
   updatedAt: string | null;
 }
+
+export interface AdminOrderFormValue {
+  currentText: string;
+  adminNotes: string;
+  adultsCount: number;
+  childrenCount: number;
+  items: Array<
+    AdminOrderItem & {
+      currentReason: string;
+      adminNotes: string;
+    }
+  >;
+}
