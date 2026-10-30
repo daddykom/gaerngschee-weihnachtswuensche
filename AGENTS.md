@@ -464,6 +464,14 @@ Als Leitlinie gilt:
 
 ## Coding Rules
 
+### 4a. Prettier-Formatierung
+
+- Nach jeder Änderung an formatierbaren Frontend-Dateien muss Prettier auf den
+  geänderten Dateien ausgeführt werden.
+- Vor dem Abschluss ist die Formatierung mit `npx prettier --check .` im
+  Verzeichnis `frontend/` zu prüfen.
+- Die projektspezifische Konfiguration in `frontend/.prettierrc` ist verbindlich.
+
 ### 5. Immer Signal Forms verwenden
 
 Alle Formulare in Angular MÜSSEN mit Angular Signal Forms (`form`, `FieldTree`, `FormField`) erstellt werden. Reactive Forms (`FormGroup`, `FormControl`, `FormArray`, `FormBuilder`) sind nicht erlaubt. Template-driven Forms sowie `ngModel` sind ebenfalls nicht erlaubt.

@@ -69,8 +69,8 @@ final class AuthRoutes
 
             $login = $group->post('/login', new LoginAction($userRepository, $sessionService));
             if ($rateLimitService !== null) {
-                $login->add(new RateLimitMiddleware(5, 900, static fn ($request): string => RateLimitMiddleware::ipAndEmail($request), $rateLimitService));
-                $login->add(new RateLimitMiddleware(30, 900, static fn ($request): string => RateLimitMiddleware::ip($request), $rateLimitService));
+                $login->add(new RateLimitMiddleware(10, 900, static fn ($request): string => RateLimitMiddleware::ipAndEmail($request), $rateLimitService));
+                $login->add(new RateLimitMiddleware(50, 900, static fn ($request): string => RateLimitMiddleware::ip($request), $rateLimitService));
             }
             $emailCheck = $group->post('/email-check', $emailCheckAction ?? new EmailCheckAction());
             if ($rateLimitService !== null) {
