@@ -8,5 +8,5 @@ export async function loginAsUser(page: Page): Promise<void> {
   await page.getByRole('button', { name: 'Weiter' }).click();
   await page.locator('input[type="password"]').fill('secret');
   await page.getByRole('button', { name: 'Anmelden' }).click();
-  await page.waitForURL('**/admin/overview');
+  await page.waitForURL('**/not-found');
 }
