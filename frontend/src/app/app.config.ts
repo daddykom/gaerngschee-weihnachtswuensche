@@ -42,7 +42,7 @@ export const appConfig: ApplicationConfig = {
       notificationEffects,
       sessionEffects,
     ),
-    provideStoreDevtools(),
+    ...(isDevMode() ? [provideStoreDevtools()] : []),
     provideAnimations(),
     provideTranslateService({
       fallbackLang: 'de',
