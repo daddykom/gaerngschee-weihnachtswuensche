@@ -21,7 +21,7 @@ describe('HomeComponent', () => {
                 { variableName: 'campaign_year', value: '2026' },
                 {
                   variableName: 'donation_url',
-                  value: 'https://donate.example/weihnachtswuensche',
+                  value: 'https://aktionen.gaerngschee.ch/weihnachtswuensche',
                 },
                 { variableName: 'campaign_start_date', value: '2000-01-01' },
                 { variableName: 'campaign_end_date', value: '2999-01-01' },
@@ -40,7 +40,7 @@ describe('HomeComponent', () => {
     const component = fixture.componentInstance;
 
     expect(component.campaignYear()).toBe('2026');
-    expect(component.donationUrl()).toBe('https://donate.example/weihnachtswuensche');
+    expect(component.donationUrl()).toBe('https://aktionen.gaerngschee.ch/weihnachtswuensche');
   });
 
   it('does not expose an insecure donation URL', () => {
@@ -51,6 +51,18 @@ describe('HomeComponent', () => {
           { variableName: 'campaign_year', value: '2026' },
           { variableName: 'donation_url', value: 'http://donate.example' },
         ],
+      },
+    });
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.donationUrl()).toBeNull();
+  });
+
+  it('does not expose donation URLs outside the allowlist', () => {
+    const store = TestBed.inject(MockStore);
+    store.setState({
+      frontendConfig: {
+        publicConfigs: [{ variableName: 'donation_url', value: 'https://donate.example' }],
       },
     });
     fixture.detectChanges();

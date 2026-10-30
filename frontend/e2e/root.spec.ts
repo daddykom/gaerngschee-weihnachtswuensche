@@ -9,7 +9,10 @@ test.describe('Root route', () => {
         contentType: 'application/json',
         body: JSON.stringify([
           { variableName: 'campaign_year', value: '2026' },
-          { variableName: 'donation_url', value: 'https://donate.example/weihnachtswuensche' },
+          {
+            variableName: 'donation_url',
+            value: 'https://aktionen.gaerngschee.ch/weihnachtswuensche',
+          },
           { variableName: 'campaign_start_date', value: '2000-01-01' },
           { variableName: 'campaign_end_date', value: '2999-01-01' },
         ]),
@@ -22,7 +25,7 @@ test.describe('Root route', () => {
     await expectTranslatedText(page.locator('.home__lead'), 'app.home.lead');
     await expect(page.getByRole('link', { name: 'Jetzt spenden' })).toHaveAttribute(
       'href',
-      'https://donate.example/weihnachtswuensche',
+      'https://aktionen.gaerngschee.ch/weihnachtswuensche',
     );
     await expect(page.getByRole('link', { name: 'Weihnachtswünsche anfragen' })).toHaveAttribute(
       'href',

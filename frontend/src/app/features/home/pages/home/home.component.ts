@@ -3,6 +3,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
+import { isAllowedExternalUrl } from '../../../../shared/security/external-url';
 import { AuthActions } from '../../../../store/auth/auth.actions';
 import { selectAuthGroup } from '../../../../store/auth/auth.feature';
 import { selectFrontendPublicConfigs } from '../../../../store/frontend-config/frontend-config.feature';
@@ -76,7 +77,7 @@ export class HomeComponent {
 
     try {
       const url = new URL(value);
-      return url.protocol === 'https:' ? url.toString() : null;
+      return isAllowedExternalUrl(value) ? url.toString() : null;
     } catch {
       return null;
     }
