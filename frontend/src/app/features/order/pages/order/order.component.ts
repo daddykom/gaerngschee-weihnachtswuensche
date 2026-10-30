@@ -261,10 +261,7 @@ export class OrderComponent {
     return changes;
   }
 
-  private itemsEqual(
-    previous: OrderFormValue['items'],
-    current: OrderFormValue['items'],
-  ): boolean {
+  private itemsEqual(previous: OrderFormValue['items'], current: OrderFormValue['items']): boolean {
     return (
       previous.length === current.length &&
       previous.every((item, index) => {

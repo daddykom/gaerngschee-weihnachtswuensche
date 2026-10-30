@@ -18,9 +18,9 @@ import { inputLimits } from '../../../../shared/constants/input-limits';
 import { FrontendConfig } from '../../../../shared/models/frontend-config.model';
 import { FrontendConfigActions } from '../../../../store/frontend-config/frontend-config.actions';
 import {
+  selectFrontendConfigForm,
   selectFrontendConfigLoading,
   selectFrontendConfigs,
-  selectFrontendConfigForm,
   selectFrontendConfigSaving,
 } from '../../../../store/frontend-config/frontend-config.feature';
 
@@ -83,7 +83,8 @@ export class ConfigurationComponent {
         (model, config) => ({
           ...model,
           [config.id]:
-            source[config.id] ?? (Array.isArray(config.value) ? [...config.value] : (config.value ?? '')),
+            source[config.id] ??
+            (Array.isArray(config.value) ? [...config.value] : (config.value ?? '')),
         }),
         {},
       );
@@ -193,9 +194,7 @@ export class ConfigurationComponent {
     );
   }
 
-  private cloneModel(
-    model: Record<string, string | string[]>,
-  ): Record<string, string | string[]> {
+  private cloneModel(model: Record<string, string | string[]>): Record<string, string | string[]> {
     return Object.fromEntries(
       Object.entries(model).map(([id, value]) => [id, Array.isArray(value) ? [...value] : value]),
     );

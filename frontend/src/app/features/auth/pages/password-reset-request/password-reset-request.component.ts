@@ -8,9 +8,9 @@ import { ControlErrorComponent } from '../../../../shared/components/control-err
 import { inputLimits } from '../../../../shared/constants/input-limits';
 import { AuthActions } from '../../../../store/auth/auth.actions';
 import {
+  selectPasswordResetRequestForm,
   selectPasswordResetRequestLoading,
   selectPasswordResetRequestSent,
-  selectPasswordResetRequestForm,
 } from '../../../../store/password-reset/password-reset.feature';
 
 @Component({

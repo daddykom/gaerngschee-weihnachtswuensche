@@ -10,13 +10,13 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { ControlErrorComponent } from '../../../../shared/components/control-error/control-error';
 import { inputLimits } from '../../../../shared/constants/input-limits';
 import { AdminUsersActions } from '../../../../store/admin-users/admin-users.actions';
-import { AdminUserForm } from '../../../../store/admin-users/admin-users.state';
 import {
   selectAdminUsersDetailLoading,
+  selectAdminUsersForm,
   selectAdminUsersSaving,
   selectAdminUsersSelectedUser,
-  selectAdminUsersForm,
 } from '../../../../store/admin-users/admin-users.feature';
+import { AdminUserForm } from '../../../../store/admin-users/admin-users.state';
 import { selectAuthGroup } from '../../../../store/auth/auth.feature';
 import { NavigationActions } from '../../../../store/navigation/navigation.actions';
 

@@ -72,6 +72,8 @@ export class WeihnachtswuenscheStartComponent {
     }
 
     const email = this.storeForm()?.email ?? untracked(this.model).email;
-    this.store.dispatch(StartActions.submit({ email, language: this.translate.getCurrentLang() ?? 'de' }));
+    this.store.dispatch(
+      StartActions.submit({ email, language: this.translate.getCurrentLang() ?? 'de' }),
+    );
   }
 }

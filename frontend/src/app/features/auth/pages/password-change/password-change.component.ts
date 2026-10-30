@@ -9,8 +9,8 @@ import { inputLimits } from '../../../../shared/constants/input-limits';
 import { AuthActions } from '../../../../store/auth/auth.actions';
 import {
   selectAuthEmail,
-  selectAuthPasswordChangeLoading,
   selectAuthPasswordChangeForm,
+  selectAuthPasswordChangeLoading,
 } from '../../../../store/auth/auth.feature';
 
 @Component({

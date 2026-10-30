@@ -215,7 +215,8 @@ export class AdminOrderEditComponent {
     if (previous.currentText !== current.currentText) changes.currentText = current.currentText;
     if (previous.adminNotes !== current.adminNotes) changes.adminNotes = current.adminNotes;
     if (previous.adultsCount !== current.adultsCount) changes.adultsCount = current.adultsCount;
-    if (previous.childrenCount !== current.childrenCount) changes.childrenCount = current.childrenCount;
+    if (previous.childrenCount !== current.childrenCount)
+      changes.childrenCount = current.childrenCount;
     if (JSON.stringify(previous.items) !== JSON.stringify(current.items)) {
       changes.items = current.items.map((item) => ({ ...item }));
     }

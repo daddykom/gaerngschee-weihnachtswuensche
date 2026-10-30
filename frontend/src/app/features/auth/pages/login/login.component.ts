@@ -69,7 +69,8 @@ export class Login implements OnInit {
       const currentModel = this.loginModel();
       const changes: Partial<typeof currentModel> = {};
       if (currentModel.email !== previousModel.email) changes.email = currentModel.email;
-      if (currentModel.password !== previousModel.password) changes.password = currentModel.password;
+      if (currentModel.password !== previousModel.password)
+        changes.password = currentModel.password;
       if (Object.keys(changes).length > 0) {
         this.store.dispatch(AuthActions.loginFormChanged({ changes }));
         previousModel = { ...currentModel };
