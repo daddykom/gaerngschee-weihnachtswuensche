@@ -5,6 +5,7 @@ export type AdminPublicationStatus = 'draft' | 'submitted' | 'rejected' | 'appro
 export interface AdminOrderItem {
   id: string;
   orderId: string;
+  itemNumber?: number | null;
   category: OrderItemCategory;
   originalDescription: string;
   currentDescription: string;
@@ -20,6 +21,7 @@ export interface AdminOrder {
   userId: string;
   requesterEmail: string;
   year: number;
+  orderNumber?: number | null;
   status: OrderStatus;
   adultsCount: number;
   childrenCount: number;

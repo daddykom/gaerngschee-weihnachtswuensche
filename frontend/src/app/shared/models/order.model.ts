@@ -19,6 +19,7 @@ export interface OrderItemFormValue {
 export interface OrderItem {
   id: string;
   orderId: string;
+  itemNumber?: number | null;
   category: OrderItemCategory;
   originalDescription: string;
   currentDescription: string;
@@ -48,6 +49,7 @@ export interface Order {
   id: string;
   userId: string;
   year: number;
+  orderNumber?: number | null;
   status: OrderStatus;
   adultsCount: number;
   childrenCount: number;

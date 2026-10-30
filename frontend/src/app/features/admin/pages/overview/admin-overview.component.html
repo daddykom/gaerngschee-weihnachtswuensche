@@ -39,78 +39,31 @@
     </mat-chip-set>
   </section>
 
-  @if (loadStatus() === 'loading') {
-    <p>{{ 'app.admin.overview.loading' | translate }}</p>
-  } @else {
-    <section class="gl-stack gl-stack--group" aria-labelledby="orders-heading">
-      <h2 id="orders-heading">{{ 'app.admin.overview.ordersTitle' | translate }}</h2>
-      <div class="order-list" role="list">
+  <section class="gl-stack gl-stack--group" aria-labelledby="orders-heading">
+    <h2 id="orders-heading">{{ 'app.admin.overview.ordersTitle' | translate }}</h2>
+    @if (loadStatus() === 'loading') {
+      <p>{{ 'app.admin.overview.loading' | translate }}</p>
+    } @else {
+      <div class="order-list" role="table" [attr.aria-label]="'app.admin.overview.tableCaption' | translate">
+        <div class="order-list__row order-list__row--header" role="row">
+          <span role="columnheader">{{ 'app.admin.overview.orderNumber' | translate }}</span>
+          <span role="columnheader">{{ 'app.admin.overview.email' | translate }}</span>
+          <span role="columnheader">{{ 'app.admin.overview.status' | translate }}</span>
+          <span role="columnheader">{{ 'app.admin.overview.itemCountHeader' | translate }}</span>
+          <span role="columnheader">{{ 'app.admin.overview.actions' | translate }}</span>
+        </div>
         @for (order of orders(); track order.id) {
-          <article class="order-row" role="listitem">
-            <div class="order-row__details gl-stack">
-              <strong>{{ order.requesterEmail }}</strong>
-              <span>{{ ('app.admin.overview.statuses.' + order.status) | translate }}</span>
-              <span>{{ 'app.admin.overview.itemCount' | translate:{ count: order.items.length } }}</span>
-            </div>
-            <button mat-button type="button" (click)="openOrder(order)">{{ 'app.admin.overview.open' | translate }}</button>
-          </article>
+          <div class="order-list__row" role="row">
+            <span role="cell" [attr.data-label]="'app.admin.overview.orderNumber' | translate">{{ order.orderNumber ?? '—' }}</span>
+            <span role="cell" [attr.data-label]="'app.admin.overview.email' | translate">{{ order.requesterEmail }}</span>
+            <span role="cell" [attr.data-label]="'app.admin.overview.status' | translate">{{ ('app.admin.overview.statuses.' + order.status) | translate }}</span>
+            <span role="cell" [attr.data-label]="'app.admin.overview.itemCountHeader' | translate">{{ 'app.admin.overview.itemCount' | translate:{ count: order.items.length } }}</span>
+            <span role="cell" [attr.data-label]="'app.admin.overview.actions' | translate"><a mat-button [routerLink]="['/admin/orders', order.id, 'edit']">{{ 'app.admin.overview.process' | translate }}</a></span>
+          </div>
         } @empty {
           <p>{{ 'app.admin.overview.empty' | translate }}</p>
         }
       </div>
-    </section>
-  }
-
-  @if (selectedOrder(); as order) {
-    <section class="gl-stack gl-stack--group" aria-labelledby="edit-order-heading">
-      <h2 id="edit-order-heading">{{ 'app.admin.overview.editTitle' | translate }}</h2>
-      <p>{{ order.requesterEmail }}</p>
-      <mat-form-field appearance="outline" subscriptSizing="dynamic">
-        <mat-label>{{ 'app.admin.overview.currentText' | translate }}</mat-label>
-        <textarea matInput rows="5" [formField]="orderForm.currentText"></textarea>
-      </mat-form-field>
-      <p><strong>{{ 'app.admin.overview.originalText' | translate }}</strong></p>
-      <p class="original-text">{{ order.originalText }}</p>
-      <mat-form-field appearance="outline" subscriptSizing="dynamic">
-        <mat-label>{{ 'app.admin.overview.adminNotes' | translate }}</mat-label>
-        <textarea matInput rows="3" [formField]="orderForm.adminNotes"></textarea>
-      </mat-form-field>
-
-      <div class="gl-stack gl-stack--group">
-        <h3>{{ 'app.admin.overview.itemsTitle' | translate }}</h3>
-        @for (item of formModel().items; track item.id; let index = $index) {
-          <article class="item-editor">
-            <h4>{{ ('app.order.items.categories.' + item.category) | translate }}</h4>
-            <p><strong>{{ 'app.admin.overview.originalDescription' | translate }}</strong></p>
-            <p class="original-text">{{ item.originalDescription }}</p>
-            <mat-form-field appearance="outline" subscriptSizing="dynamic">
-              <mat-label>{{ 'app.order.items.description' | translate }}</mat-label>
-              <textarea matInput rows="3" [formField]="orderForm.items[index].currentDescription"></textarea>
-            </mat-form-field>
-            <p><strong>{{ 'app.admin.overview.originalReason' | translate }}</strong></p>
-            <p class="original-text">{{ item.originalReason }}</p>
-            <mat-form-field appearance="outline" subscriptSizing="dynamic">
-              <mat-label>{{ 'app.order.items.reason' | translate }}</mat-label>
-              <textarea matInput rows="2" [formField]="orderForm.items[index].currentReason"></textarea>
-            </mat-form-field>
-            @if (item.publicationStatus === 'rejected') {
-              <mat-form-field appearance="outline" subscriptSizing="dynamic">
-                <mat-label>{{ 'app.admin.overview.rejectionReason' | translate }}</mat-label>
-                <textarea matInput rows="2" [formField]="orderForm.items[index].adminNotes"></textarea>
-              </mat-form-field>
-            }
-            <div class="gl-cluster">
-              <button mat-button type="button" (click)="setItemStatus(item.id, 'approved')" [attr.aria-pressed]="item.publicationStatus === 'approved'">{{ 'app.admin.overview.accept' | translate }}</button>
-              <button mat-button type="button" (click)="setItemStatus(item.id, 'rejected')" [attr.aria-pressed]="item.publicationStatus === 'rejected'">{{ 'app.admin.overview.reject' | translate }}</button>
-            </div>
-          </article>
-        }
-      </div>
-      <div class="gl-cluster">
-        <button mat-button type="button" (click)="closeOrder()">{{ 'app.admin.overview.cancel' | translate }}</button>
-        <button mat-stroked-button type="button" [disabled]="!canRejectOrder() || saveStatus() === 'loading'" (click)="save('changes_requested')">{{ 'app.admin.overview.rejectOrder' | translate }}</button>
-        <button mat-flat-button color="primary" type="button" [disabled]="hasUnacceptedItems() || saveStatus() === 'loading'" (click)="save('definitive')">{{ 'app.admin.overview.release' | translate }}</button>
-      </div>
-    </section>
-  }
+    }
+  </section>
 </div>

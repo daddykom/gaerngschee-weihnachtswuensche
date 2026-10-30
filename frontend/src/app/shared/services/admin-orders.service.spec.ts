@@ -28,4 +28,47 @@ describe('AdminOrdersService', () => {
     expect(request.request.params.getAll('category')).toBeNull();
     request.flush({ orders: [], statuses: [], categories: [] });
   });
+
+  it('serializes the complete order draft and action for updates', () => {
+    const order = {
+      id: 'order-1',
+      status: 'definitive',
+      currentText: 'Aktueller Text',
+      adminNotes: 'Geprüft',
+      adultsCount: 2,
+      childrenCount: 1,
+      items: [{
+        id: 'item-1',
+        currentDescription: 'Beschreibung',
+        currentReason: 'Begründung',
+        publicationStatus: 'approved',
+        adminNotes: null,
+      }],
+    } as never;
+
+    service.update(order, 'release').subscribe();
+
+    const request = httpTesting.expectOne('http://localhost:8083/admin/orders/order-1');
+    expect(request.request.method).toBe('PATCH');
+    expect(request.request.withCredentials).toBe(true);
+    expect(request.request.body).toEqual({
+      order: {
+        id: 'order-1',
+        status: 'definitive',
+        currentText: 'Aktueller Text',
+        adminNotes: 'Geprüft',
+        adultsCount: 2,
+        childrenCount: 1,
+      },
+      items: [{
+        id: 'item-1',
+        currentDescription: 'Beschreibung',
+        currentReason: 'Begründung',
+        publicationStatus: 'approved',
+        adminNotes: null,
+      }],
+      action: 'release',
+    });
+    request.flush({ order });
+  });
 });

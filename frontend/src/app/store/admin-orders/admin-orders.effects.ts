@@ -4,6 +4,7 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { catchError, map, of, switchMap } from 'rxjs';
 import { AdminOrdersService } from '../../shared/services/admin-orders.service';
 import { NotificationActions } from '../notification/notification.actions';
+import { NavigationActions } from '../navigation/navigation.actions';
 import { AdminOrdersActions } from './admin-orders.actions';
 
 const errorCode = (error: HttpErrorResponse): string =>
@@ -22,10 +23,17 @@ export const loadAdminOrdersEffect = createEffect(
 export const saveAdminOrderEffect = createEffect(
   (actions$ = inject(Actions), service = inject(AdminOrdersService)) => actions$.pipe(
     ofType(AdminOrdersActions.save),
-    switchMap(({ order }) => service.update(order).pipe(
+    switchMap(({ order, action }) => service.update(order, action).pipe(
       map(({ order: savedOrder }) => AdminOrdersActions.saveSuccess({ order: savedOrder })),
       catchError((error: HttpErrorResponse) => of(AdminOrdersActions.saveFailure({ errorCode: errorCode(error) }))),
     )),
+  ), { functional: true },
+);
+
+export const navigateBackAfterAdminOrderSaveEffect = createEffect(
+  (actions$ = inject(Actions)) => actions$.pipe(
+    ofType(AdminOrdersActions.saveSuccess),
+    map(() => NavigationActions.navigate({ target: 'back' })),
   ), { functional: true },
 );
 
@@ -34,8 +42,20 @@ export const adminOrdersNotificationEffect = createEffect(
     ofType(AdminOrdersActions.saveSuccess, AdminOrdersActions.saveFailure, AdminOrdersActions.loadFailure),
     map((action) => action.type === AdminOrdersActions.saveSuccess.type
       ? NotificationActions.show({ variant: 'success', titleKey: 'app.admin.overview.successTitle', messageKey: 'app.admin.overview.saved', preserveOnRoutes: ['/admin/overview'] })
-      : NotificationActions.show({ variant: 'error', titleKey: 'app.admin.overview.errorTitle', messageKey: `app.admin.overview.errors.${action.errorCode}`, preserveOnRoutes: ['/admin/overview'] })),
+      : NotificationActions.show({
+          variant: 'error',
+          titleKey: action.type === AdminOrdersActions.saveFailure.type
+            ? 'app.admin.overview.saveErrorTitle'
+            : 'app.admin.overview.errorTitle',
+          messageKey: `app.admin.overview.errors.${action.errorCode}`,
+          preserveOnRoutes: ['/admin/overview', '/admin/orders'],
+        })),
   ), { functional: true },
 );
 
-export const adminOrdersEffects = { loadAdminOrdersEffect, saveAdminOrderEffect, adminOrdersNotificationEffect };
+export const adminOrdersEffects = {
+  loadAdminOrdersEffect,
+  saveAdminOrderEffect,
+  navigateBackAfterAdminOrderSaveEffect,
+  adminOrdersNotificationEffect,
+};

@@ -23,6 +23,7 @@ final class AdminOrderUpdateAction
         $orderId = (string) ($args['orderId'] ?? '');
         $order = is_array($data['order'] ?? null) ? $data['order'] : null;
         $items = is_array($data['items'] ?? null) ? $data['items'] : null;
+        $action = is_string($data['action'] ?? null) ? $data['action'] : 'save';
         if ($order === null || $items === null || ($order['id'] ?? null) !== $orderId) {
             return JsonResponse::error($response, 'INVALID_ORDER_DATA', 422);
         }
@@ -33,7 +34,8 @@ final class AdminOrderUpdateAction
             return JsonResponse::error($response, 'ORDER_NOT_FOUND', 404);
         }
 
-        if (!in_array($order['status'] ?? null, ['in_review', 'changes_requested', 'definitive'], true)) {
+        if (!in_array($action, ['save', 'release', 'rejectOrder', 'acceptItem', 'rejectItem'], true)
+            || !in_array($order['status'] ?? null, ['released', 'in_review', 'changes_requested', 'definitive'], true)) {
             return JsonResponse::error($response, 'INVALID_ORDER_DATA', 422);
         }
 
@@ -66,17 +68,24 @@ final class AdminOrderUpdateAction
         }
 
         $requestedStatus = is_string($order['status'] ?? null) ? $order['status'] : $current['status'];
-        if ($requestedStatus === 'definitive' && !$allApproved) {
+        if ($requestedStatus === 'definitive' && $action !== 'release') {
+            return JsonResponse::error($response, 'INVALID_ORDER_DATA', 422);
+        }
+        if ($action === 'release' && !$allApproved) {
             return JsonResponse::error($response, 'ITEMS_NOT_ACCEPTED', 422);
         }
-        if (!$allApproved && $requestedStatus === 'definitive') {
-            $requestedStatus = 'changes_requested';
+        if ($action === 'release') {
+            $requestedStatus = 'definitive';
         }
         if (in_array('rejected', array_column($normalizedItems, 'publicationStatus'), true)) {
             $requestedStatus = 'changes_requested';
         }
-        if ($requestedStatus === 'changes_requested' && !in_array('rejected', array_column($normalizedItems, 'publicationStatus'), true)) {
-            return JsonResponse::error($response, 'ITEM_REJECTION_REQUIRED', 422);
+        if ($action === 'rejectOrder' && !in_array('rejected', array_column($normalizedItems, 'publicationStatus'), true)
+            && (!is_string($order['adminNotes'] ?? null) || trim($order['adminNotes']) === '')) {
+            return JsonResponse::error($response, 'ORDER_REJECTION_REASON_REQUIRED', 422);
+        }
+        if ($action === 'rejectOrder') {
+            $requestedStatus = 'changes_requested';
         }
 
         try {

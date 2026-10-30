@@ -1,0 +1,51 @@
+@if (order(); as currentOrder) {
+  <div class="gl-stack gl-stack--section">
+    <section class="gl-stack gl-stack--group" aria-labelledby="edit-order-heading">
+      <div class="gl-cluster">
+        <h2 id="edit-order-heading">{{ 'app.admin.overview.editTitle' | translate }}</h2>
+          <button mat-button type="button" (click)="cancel()">{{ 'app.admin.overview.cancel' | translate }}</button>
+      </div>
+      <p>{{ currentOrder.requesterEmail }}</p>
+      <p><strong>{{ 'app.admin.overview.originalText' | translate }}</strong></p>
+      <p class="original-text">{{ currentOrder.originalText }}</p>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>{{ 'app.admin.overview.currentText' | translate }}</mat-label>
+        <textarea matInput rows="5" [formField]="orderForm.currentText"></textarea>
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>{{ 'app.admin.overview.adminNotes' | translate }}</mat-label>
+        <textarea matInput rows="3" [formField]="orderForm.adminNotes"></textarea>
+      </mat-form-field>
+    </section>
+
+    <section class="gl-stack gl-stack--group" aria-labelledby="edit-items-heading">
+      <h3 id="edit-items-heading">{{ 'app.admin.overview.itemsTitle' | translate }}</h3>
+      @for (item of formModel().items; track item.id) {
+        <article class="item-editor">
+          <div class="item-editor__category">
+            <strong>{{ ('app.order.items.categories.' + item.category) | translate }}</strong>
+            <span>{{ ('app.order.items.statuses.' + item.publicationStatus) | translate }}</span>
+          </div>
+          <div class="item-editor__text">
+            <strong>{{ 'app.order.items.description' | translate }}</strong>
+            <span>{{ item.currentDescription }}</span>
+          </div>
+          <div class="item-editor__text">
+            <strong>{{ 'app.order.items.reason' | translate }}</strong>
+            <span>{{ item.currentReason }}</span>
+          </div>
+          <a mat-button [routerLink]="['item', item.id]">{{ 'app.admin.overview.change' | translate }}</a>
+        </article>
+      }
+    </section>
+
+    <div class="gl-cluster">
+      <button mat-button type="button" (click)="cancel()">{{ 'app.admin.overview.cancel' | translate }}</button>
+      <button mat-flat-button color="primary" type="button" [disabled]="saveStatus() === 'loading'" (click)="save()">{{ 'app.admin.overview.save' | translate }}</button>
+      <button mat-stroked-button type="button" [disabled]="saveStatus() === 'loading' || !canRejectOrder()" (click)="rejectOrder()">{{ 'app.admin.overview.rejectOrder' | translate }}</button>
+      <button mat-flat-button color="primary" type="button" [disabled]="saveStatus() === 'loading' || !allItemsApproved()" (click)="releaseOrder()">{{ 'app.admin.overview.release' | translate }}</button>
+    </div>
+  </div>
+} @else {
+  <p>{{ 'app.admin.overview.orderNotFound' | translate }}</p>
+}

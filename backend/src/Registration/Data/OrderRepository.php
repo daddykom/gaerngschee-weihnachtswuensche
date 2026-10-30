@@ -19,7 +19,7 @@ final class OrderRepository
     public function findForYear(string $userId, int $year): ?array
     {
         $statement = $this->pdo->prepare(
-            'SELECT id, user_id, year, status, adults_count, children_count, original_text, current_text,
+            'SELECT id, user_id, year, order_number, status, adults_count, children_count, original_text, current_text,
                     admin_notes, fairgate_adults_count, fairgate_children_count, processing_year,
                     released_at, definitive_at, fairgate_status, confirmation_email_sent_at, fairgate_reminder_email_sent_at,
                     created_at, updated_at
@@ -35,6 +35,7 @@ final class OrderRepository
             'id' => $order['id'],
             'userId' => $order['user_id'],
             'year' => (int) $order['year'],
+            'orderNumber' => $order['order_number'] === null ? null : (int) $order['order_number'],
             'status' => $order['status'],
             'adultsCount' => (int) $order['adults_count'],
             'childrenCount' => (int) $order['children_count'],
@@ -59,7 +60,7 @@ final class OrderRepository
     public function findItems(string $orderId): array
     {
         $statement = $this->pdo->prepare(
-            'SELECT id, order_id, category, original_description, current_description,
+            'SELECT id, order_id, item_number, category, original_description, current_description,
                     original_reason, current_reason, status, publication_status, fulfillment_status, admin_notes, fulfiller_email,
                     reserved_at, due_at, received_at, created_at, updated_at
              FROM order_items WHERE order_id = :order_id ORDER BY created_at, id',
@@ -69,6 +70,7 @@ final class OrderRepository
         return array_map(static fn (array $item): array => [
             'id' => (string) $item['id'],
             'orderId' => (string) $item['order_id'],
+            'itemNumber' => $item['item_number'] === null ? null : (int) $item['item_number'],
             'category' => (string) $item['category'],
             'originalDescription' => (string) $item['original_description'],
             'currentDescription' => (string) $item['current_description'],
@@ -112,7 +114,7 @@ final class OrderRepository
         }
         $where = $conditions === [] ? '' : 'WHERE ' . implode(' AND ', $conditions);
         $statement = $this->pdo->prepare(
-            'SELECT orders.id, orders.user_id, users.email, orders.year, orders.status,
+            'SELECT orders.id, orders.user_id, users.email, orders.year, orders.order_number, orders.status,
                     orders.adults_count, orders.children_count, orders.original_text, orders.current_text,
                     orders.admin_notes, orders.created_at, orders.updated_at
              FROM orders INNER JOIN users ON users.id = orders.user_id
@@ -126,6 +128,7 @@ final class OrderRepository
                 'userId' => (string) $row['user_id'],
                 'requesterEmail' => (string) $row['email'],
                 'year' => (int) $row['year'],
+                'orderNumber' => $row['order_number'] === null ? null : (int) $row['order_number'],
                 'status' => (string) $row['status'],
                 'adultsCount' => (int) $row['adults_count'],
                 'childrenCount' => (int) $row['children_count'],
@@ -148,7 +151,7 @@ final class OrderRepository
             $statement = $this->pdo->prepare(
                 'UPDATE orders SET current_text = :current_text, admin_notes = :admin_notes,
                  adults_count = :adults_count, children_count = :children_count,
-                 status = :status, definitive_at = CASE WHEN :status = \'definitive\' THEN COALESCE(definitive_at, CURRENT_TIMESTAMP) ELSE definitive_at END,
+                  status = :status, definitive_at = CASE WHEN :is_definitive = 1 THEN COALESCE(definitive_at, CURRENT_TIMESTAMP) ELSE definitive_at END,
                  updated_at = CURRENT_TIMESTAMP WHERE id = :id',
             );
             $statement->execute([
@@ -158,6 +161,7 @@ final class OrderRepository
                 'adults_count' => $order['adultsCount'] ?? 0,
                 'children_count' => $order['childrenCount'] ?? 0,
                 'status' => $order['status'],
+                'is_definitive' => $order['status'] === 'definitive' ? 1 : 0,
             ]);
             foreach ($items as $item) {
                 $itemStatement = $this->pdo->prepare(
@@ -175,6 +179,9 @@ final class OrderRepository
                     'admin_notes' => $item['adminNotes'] ?? null,
                 ]);
             }
+            if ($order['status'] === 'definitive') {
+                $this->assignDefinitiveNumbers((string) $order['id']);
+            }
             $this->pdo->commit();
         } catch (\Throwable $exception) {
             $this->pdo->rollBack();
@@ -182,6 +189,34 @@ final class OrderRepository
         }
         $result = $this->findById((string) $order['id']);
         return $result ?? throw new \RuntimeException('Order was not saved.');
+    }
+
+    private function assignDefinitiveNumbers(string $orderId): void
+    {
+        $orderStatement = $this->pdo->prepare('SELECT year, order_number FROM orders WHERE id = :id');
+        $orderStatement->execute(['id' => $orderId]);
+        $order = $orderStatement->fetch();
+        if (!is_array($order)) {
+            throw new \RuntimeException('Order was not found.');
+        }
+
+        if ($order['order_number'] === null) {
+            $next = $this->pdo->prepare('SELECT COALESCE(MAX(order_number), 0) + 1 FROM orders WHERE year = :year');
+            $next->execute(['year' => $order['year']]);
+            $update = $this->pdo->prepare('UPDATE orders SET order_number = :order_number WHERE id = :id');
+            $update->execute(['order_number' => (int) $next->fetchColumn(), 'id' => $orderId]);
+        }
+
+        $items = $this->pdo->prepare('SELECT id, item_number FROM order_items WHERE order_id = :order_id ORDER BY created_at, id');
+        $items->execute(['order_id' => $orderId]);
+        $rows = $items->fetchAll();
+        $hasUnnumbered = array_filter($rows, static fn (array $row): bool => $row['item_number'] === null) !== [];
+        if ($hasUnnumbered) {
+            $update = $this->pdo->prepare('UPDATE order_items SET item_number = :item_number WHERE id = :id AND order_id = :order_id');
+            foreach ($rows as $index => $row) {
+                $update->execute(['item_number' => $index + 1, 'id' => $row['id'], 'order_id' => $orderId]);
+            }
+        }
     }
 
     /** @return array<string, mixed>|null */

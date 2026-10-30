@@ -154,7 +154,7 @@ export const appRoutes: Routes = [
       },
       {
         path: 'admin',
-        canActivate: [groupGuard(['user', 'admin'])],
+         canActivate: [groupGuard(['admin'])],
         providers: [
            provideState(adminUsersFeature),
            provideState(adminOrdersFeature),
@@ -171,6 +171,18 @@ export const appRoutes: Routes = [
               import('./features/admin/pages/overview/admin-overview.component').then(
                 (m) => m.AdminOverviewComponent,
               ),
+          },
+          {
+            path: 'orders/:orderId/edit/item/:itemId',
+            canActivate: [groupGuard(['admin'])],
+            data: { pageTitle: 'app.admin.overview.itemEditTitle' },
+            loadComponent: () => import('./features/admin/pages/order-item-edit/admin-order-item-edit.component').then((m) => m.AdminOrderItemEditComponent),
+          },
+          {
+            path: 'orders/:orderId/edit',
+            canActivate: [groupGuard(['admin'])],
+            data: { pageTitle: 'app.admin.overview.editTitle' },
+            loadComponent: () => import('./features/admin/pages/order-edit/admin-order-edit.component').then((m) => m.AdminOrderEditComponent),
           },
           {
             path: 'fairgate-test',

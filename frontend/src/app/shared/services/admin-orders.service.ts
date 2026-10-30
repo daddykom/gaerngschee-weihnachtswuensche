@@ -10,6 +10,8 @@ export interface AdminOrderListResponse {
   categories: string[];
 }
 
+export type AdminOrderAction = 'save' | 'release' | 'rejectOrder' | 'acceptItem' | 'rejectItem';
+
 @Injectable({ providedIn: 'root' })
 export class AdminOrdersService {
   private readonly http = inject(HttpClient);
@@ -22,7 +24,7 @@ export class AdminOrdersService {
     return this.http.get<AdminOrderListResponse>(this.baseUrl, { params, withCredentials: true });
   }
 
-  update(order: AdminOrder): Observable<{ order: AdminOrder }> {
+  update(order: AdminOrder, action: AdminOrderAction = 'save'): Observable<{ order: AdminOrder }> {
     return this.http.patch<{ order: AdminOrder }>(`${this.baseUrl}/${order.id}`, {
       order: {
         id: order.id,
@@ -39,6 +41,7 @@ export class AdminOrdersService {
         publicationStatus: item.publicationStatus,
         adminNotes: item.adminNotes,
       })),
+      action,
     }, { withCredentials: true });
   }
 }

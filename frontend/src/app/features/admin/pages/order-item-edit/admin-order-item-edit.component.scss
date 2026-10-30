@@ -1,0 +1,10 @@
+:host {
+  display: block;
+}
+
+.original-text {
+  padding: var(--gl-space-md);
+  border-left: 0.25rem solid #8c7b85;
+  background: #fff8fc;
+  white-space: pre-wrap;
+}

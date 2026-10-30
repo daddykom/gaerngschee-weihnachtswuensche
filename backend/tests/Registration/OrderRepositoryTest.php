@@ -68,8 +68,52 @@ final class OrderRepositoryTest extends TestCase
         ]]);
 
         self::assertSame('definitive', $updated['status']);
+        self::assertSame(1, $updated['orderNumber']);
+        self::assertSame(1, $updated['items'][0]['itemNumber']);
         self::assertSame('Korrigiertes Spiel', $updated['items'][0]['currentDescription']);
         self::assertSame('approved', $updated['items'][0]['publicationStatus']);
         self::assertSame('Spiel', $updated['items'][0]['originalDescription']);
+    }
+
+    public function testAssignsStableNumbersPerCampaignYearOnlyWhenDefinitive(): void
+    {
+        $pdo = TestDatabase::create();
+        $users = new UserRepository($pdo);
+        $orders = new OrderRepository($pdo);
+        $firstUser = $users->createUser('number-one@example.com', 'secret', 'wunschbesteller');
+        $secondUser = $users->createUser('number-two@example.com', 'secret', 'wunschbesteller');
+
+        $first = $orders->saveForYear($firstUser['id'], 2026, 'released', 1, 0, [[
+            'category' => 'gift', 'description' => 'Erster Wunsch', 'reason' => 'Grund',
+        ]]);
+        $second = $orders->saveForYear($secondUser['id'], 2026, 'released', 1, 0, [[
+            'category' => 'gift', 'description' => 'Zweiter Wunsch', 'reason' => 'Grund',
+        ]]);
+
+        $save = static function (OrderRepository $repository, array $order): array {
+            return $repository->saveAdministration([
+                'id' => $order['id'],
+                'status' => 'definitive',
+                'currentText' => $order['currentText'],
+                'adminNotes' => null,
+                'adultsCount' => 1,
+                'childrenCount' => 0,
+            ], [[
+                'id' => $order['items'][0]['id'],
+                'currentDescription' => $order['items'][0]['currentDescription'],
+                'currentReason' => $order['items'][0]['currentReason'],
+                'publicationStatus' => 'approved',
+                'adminNotes' => null,
+            ]]);
+        };
+
+        $firstDefinitive = $save($orders, $first);
+        $secondDefinitive = $save($orders, $second);
+        $firstAgain = $save($orders, $firstDefinitive);
+
+        self::assertSame(1, $firstDefinitive['orderNumber']);
+        self::assertSame(2, $secondDefinitive['orderNumber']);
+        self::assertSame(1, $firstAgain['orderNumber']);
+        self::assertSame(1, $firstDefinitive['items'][0]['itemNumber']);
     }
 }

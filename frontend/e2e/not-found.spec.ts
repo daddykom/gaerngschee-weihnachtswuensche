@@ -10,6 +10,13 @@ test.describe('Not-found route', () => {
     await expectTranslatedText(page.locator('main'), 'app.notFound.heading');
   });
 
+  test('shows the not-found page for the removed admin order detail route', async ({ page }) => {
+    await page.unroute('**/admin/orders**');
+    await page.goto('/admin/orders/order-1');
+    await page.waitForURL('**/not-found');
+    await expectTranslatedText(page.locator('h1'), 'app.notFound.pageTitle');
+  });
+
   test('links to the login page', async ({ page }) => {
     await page.goto('/not-found');
     await page.getByRole('link', { name: 'Anmelden' }).click();
