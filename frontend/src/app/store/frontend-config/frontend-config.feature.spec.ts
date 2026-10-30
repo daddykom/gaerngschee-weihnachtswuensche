@@ -15,8 +15,8 @@ describe('frontendConfigFeature', () => {
         ...initialState,
         configs: [{ id: 'site_name' } as never],
         publicConfigs: [{ variableName: 'fairgate_url', value: 'https://fairgate.example' }],
-        loading: true,
-        saving: true,
+        loadStatus: 'loading' as const,
+        saveStatus: 'loading' as const,
       },
     };
     expect(selectFrontendConfigs(state)).toEqual([{ id: 'site_name' }]);
@@ -29,36 +29,34 @@ describe('frontendConfigFeature', () => {
 
   it('updates configs and loading/saving flags for all actions', () => {
     const config = { id: 'site_name' } as never;
-    expect(frontendConfigFeature.reducer(initialState, FrontendConfigActions.load).loading).toBe(
-      true,
-    );
+    expect(frontendConfigFeature.reducer(initialState, FrontendConfigActions.load).loadStatus).toBe('loading');
     expect(
       frontendConfigFeature.reducer(
-        { ...initialState, loading: true },
+        { ...initialState, loadStatus: 'loading' },
         FrontendConfigActions.loadSuccess({ configs: [config] }),
       ).configs,
     ).toEqual([config]);
     expect(
       frontendConfigFeature.reducer(
-        { ...initialState, loading: true },
+        { ...initialState, loadStatus: 'loading' },
         FrontendConfigActions.loadFailure({ errorCode: 'FAILED' }),
-      ).loading,
-    ).toBe(false);
+      ).loadStatus,
+    ).toBe('error');
     expect(
       frontendConfigFeature.reducer(initialState, FrontendConfigActions.save({ configs: [] }))
-        .saving,
-    ).toBe(true);
+        .saveStatus,
+    ).toBe('loading');
     expect(
       frontendConfigFeature.reducer(
-        { ...initialState, saving: true },
+        { ...initialState, saveStatus: 'loading' },
         FrontendConfigActions.saveSuccess({ configs: [config] }),
       ).configs,
     ).toEqual([config]);
     expect(
       frontendConfigFeature.reducer(
-        { ...initialState, saving: true },
+        { ...initialState, saveStatus: 'loading' },
         FrontendConfigActions.saveFailure({ errorCode: 'FAILED' }),
-      ).saving,
-    ).toBe(false);
+      ).saveStatus,
+    ).toBe('error');
   });
 });

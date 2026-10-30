@@ -76,10 +76,11 @@ Implemented routes:
   invalid requests return `404`.
 - `GroupMiddleware` resolves the user through the user ID and enforces the
   allowed groups.
-- Administrator routes are protected by both middleware layers and allow the
-  `admin` and `user` groups. Other groups return `404`.
-- Client and user route groups have no concrete endpoints yet; the middleware
-  is ready for their future routes.
+- `/admin/*` routes are protected by both middleware layers and allow only the
+  `admin` group.
+- `/user/*` routes are protected by both middleware layers and allow the
+  `user` and `admin` groups. Administrators therefore have all user rights.
+- `/client/*` routes allow only the `wunschbesteller` group.
 
 ## Security Considerations
 
@@ -106,8 +107,8 @@ Implemented routes:
 | Authentication middleware | Implemented |
 | Group middleware | Implemented |
 | Admin user route | Implemented |
-| Client routes | Not implemented |
-| User routes | Not implemented |
+| Client routes | Implemented |
+| User profile routes | Implemented |
 | CSRF protection | Not implemented |
 | Rate limiting | Not implemented |
 

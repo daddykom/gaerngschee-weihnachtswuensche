@@ -1,5 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { email, form, FormField, maxLength, required } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -8,12 +7,14 @@ import { MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
-import { map, of } from 'rxjs';
 import { ControlErrorComponent } from '../../../../shared/components/control-error/control-error';
 import { inputLimits } from '../../../../shared/constants/input-limits';
-import { AdminUsersService } from '../../../../shared/services/admin-users.service';
 import { AdminUsersActions } from '../../../../store/admin-users/admin-users.actions';
-import { selectAdminUsersSaving } from '../../../../store/admin-users/admin-users.feature';
+import {
+  selectAdminUsersDetailLoading,
+  selectAdminUsersSaving,
+  selectAdminUsersSelectedUser,
+} from '../../../../store/admin-users/admin-users.feature';
 import { selectAuthGroup } from '../../../../store/auth/auth.feature';
 import { NavigationActions } from '../../../../store/navigation/navigation.actions';
 
@@ -34,12 +35,14 @@ import { NavigationActions } from '../../../../store/navigation/navigation.actio
 export class UserEditComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly store = inject(Store);
-  private readonly service = inject(AdminUsersService);
 
   private readonly authGroup = this.store.selectSignal(selectAuthGroup);
   readonly isAdmin = computed(() => this.authGroup() === 'admin');
   readonly saving = this.store.selectSignal(selectAdminUsersSaving);
+  readonly loading = this.store.selectSignal(selectAdminUsersDetailLoading);
+  readonly selectedUser = this.store.selectSignal(selectAdminUsersSelectedUser);
   readonly userId = this.route.snapshot.paramMap.get('userId');
+  readonly isProfile = this.route.snapshot.routeConfig?.path === 'user/profile';
   readonly isNew = this.route.snapshot.routeConfig?.path === 'new';
   readonly model = signal<{
     email: string;
@@ -56,22 +59,19 @@ export class UserEditComponent {
     maxLength(schema.email, inputLimits.email);
     required(schema.group);
   });
-  readonly loading = toSignal(
-    this.isNew || this.userId === null
-      ? of(false)
-      : this.service.get(this.userId).pipe(
-          map(({ user }) => {
-            this.model.update((model) => ({
-              ...model,
-              email: user.email,
-              group: user.group === 'admin' ? 'admin' : 'user',
-              requiredPasswordReset: user.required_password_reset,
-            }));
-            return false;
-          }),
-        ),
-    { initialValue: !this.isNew },
-  );
+  constructor() {
+    effect(() => {
+      const user = this.selectedUser();
+      if (user === null || this.isNew) {
+        return;
+      }
+      this.model.set({
+        email: user.email,
+        group: user.group === 'admin' ? 'admin' : 'user',
+        requiredPasswordReset: user.required_password_reset,
+      });
+    });
+  }
 
   onSubmit(): void {
     if (!this.form().valid()) {
@@ -86,11 +86,11 @@ export class UserEditComponent {
       return;
     }
 
-    if (this.userId === null) {
+    if (this.userId === null && !this.isProfile) {
       return;
     }
 
-    const changes = this.isAdmin()
+    const changes = this.isAdmin() && !this.isProfile
       ? {
           email: value.email,
           group: value.group,
@@ -98,12 +98,12 @@ export class UserEditComponent {
         }
       : { email: value.email };
 
-    this.store.dispatch(
-      AdminUsersActions.update({
-        userId: this.userId,
-        changes,
-      }),
-    );
+    if (this.isProfile) {
+      this.store.dispatch(AdminUsersActions.updateProfile({ changes: { email: value.email } }));
+      return;
+    }
+
+    this.store.dispatch(AdminUsersActions.update({ userId: this.userId as string, changes }));
   }
 
   cancel(): void {

@@ -33,6 +33,12 @@ export class AdminUsersService {
     });
   }
 
+  getProfile(): Observable<{ user: AdminUser }> {
+    return this.http.get<{ user: AdminUser }>(`${environment.apiUrl}/user/profile`, {
+      withCredentials: true,
+    });
+  }
+
   create(email: string, group: UserGroup): Observable<UserMutationResponse> {
     return this.http.post<UserMutationResponse>(
       this.baseUrl,
@@ -46,6 +52,12 @@ export class AdminUsersService {
     changes: Partial<Pick<AdminUser, 'email' | 'group' | 'required_password_reset'>>,
   ): Observable<UserMutationResponse> {
     return this.http.patch<UserMutationResponse>(`${this.baseUrl}/${userId}`, changes, {
+      withCredentials: true,
+    });
+  }
+
+  updateProfile(changes: Pick<AdminUser, 'email'>): Observable<UserMutationResponse> {
+    return this.http.patch<UserMutationResponse>(`${environment.apiUrl}/user/profile`, changes, {
       withCredentials: true,
     });
   }

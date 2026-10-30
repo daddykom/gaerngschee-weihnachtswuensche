@@ -30,14 +30,6 @@ export class AdminOverviewComponent {
   readonly statusOptions = ['released', 'in_review', 'changes_requested', 'definitive', 'ready_for_pickup', 'completed'];
   readonly categoryOptions = ['gift', 'voucher'];
 
-  constructor() {
-    this.load();
-  }
-
-  load(): void {
-    this.store.dispatch(AdminOrdersActions.load());
-  }
-
   statusChanged(statuses: string[]): void {
     this.store.dispatch(AdminOrdersActions.filtersChanged({ statuses, categories: this.selectedCategories() }));
   }

@@ -1,5 +1,5 @@
 import { provideHttpClient, withInterceptors, withXhr } from '@angular/common/http';
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { ApplicationConfig, provideBrowserGlobalErrorListeners, isDevMode } from '@angular/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 import { provideEffects } from '@ngrx/effects';
@@ -20,6 +20,7 @@ import { frontendConfigFeature } from './store/frontend-config/frontend-config.f
 import { navigationEffects } from './store/navigation/navigation.effects';
 import { notificationEffects } from './store/notification/notification.effects';
 import { notificationFeature } from './store/notification/notification.feature';
+import { provideServiceWorker } from '@angular/service-worker';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -50,6 +51,9 @@ export const appConfig: ApplicationConfig = {
         prefix: './i18n/',
         suffix: '.json',
       }),
-    }),
+    }), provideServiceWorker('ngsw-worker.js', {
+            enabled: !isDevMode(),
+            registrationStrategy: 'registerWhenStable:30000'
+          }),
   ],
 };

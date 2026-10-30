@@ -5,6 +5,10 @@ import { configurationResolver } from './features/admin/pages/configuration/conf
 import { clientLoginGuard } from './features/auth/guards/client-login.guard';
 import { orderResolver } from './features/order/pages/order/order.resolver';
 import { publicConfigurationResolver } from './features/public-configuration/public-configuration.resolver';
+import { usersResolver } from './features/admin/pages/users/users.resolver';
+import { userEditResolver } from './features/admin/pages/users/user-edit.resolver';
+import { adminOverviewResolver } from './features/admin/pages/overview/admin-overview.resolver';
+import { adminOrdersResolver } from './features/admin/pages/order-edit/admin-orders.resolver';
 import { groupGuard } from './shared/guards/group.guard';
 import { adminUsersEffects } from './store/admin-users/admin-users.effects';
 import { adminUsersFeature } from './store/admin-users/admin-users.feature';
@@ -56,8 +60,17 @@ export const appRoutes: Routes = [
       {
         path: 'login',
         data: { pageTitle: 'app.login.pageTitle' },
+          loadComponent: () =>
+            import('./features/auth/pages/login/login.component').then((m) => m.Login),
+      },
+      {
+        path: 'user/profile',
+        canActivate: [groupGuard(['user', 'admin'])],
+        providers: [provideState(adminUsersFeature), provideEffects(adminUsersEffects)],
+        resolve: { user: userEditResolver },
+        data: { pageTitle: 'app.user.profile.title' },
         loadComponent: () =>
-          import('./features/auth/pages/login/login.component').then((m) => m.Login),
+          import('./features/admin/pages/users/user-edit.component').then((m) => m.UserEditComponent),
       },
       {
         path: 'client-login',
@@ -130,7 +143,7 @@ export const appRoutes: Routes = [
       },
       {
         path: 'impressum',
-        data: { legalPage: 'impressum' },
+        data: { legalPage: 'impressum', pageTitle: 'app.legal.imprintPageTitle' },
         loadComponent: () =>
           import('./features/legal/pages/legal-page/legal-page.component').then(
             (m) => m.LegalPageComponent,
@@ -138,7 +151,7 @@ export const appRoutes: Routes = [
       },
       {
         path: 'datenschutz',
-        data: { legalPage: 'datenschutz' },
+        data: { legalPage: 'datenschutz', pageTitle: 'app.legal.privacyPageTitle' },
         loadComponent: () =>
           import('./features/legal/pages/legal-page/legal-page.component').then(
             (m) => m.LegalPageComponent,
@@ -166,6 +179,7 @@ export const appRoutes: Routes = [
           {
             path: 'overview',
             canActivate: [groupGuard(['admin'])],
+            resolve: { orders: adminOverviewResolver },
             data: { pageTitle: 'app.admin.overview.title' },
             loadComponent: () =>
               import('./features/admin/pages/overview/admin-overview.component').then(
@@ -173,16 +187,22 @@ export const appRoutes: Routes = [
               ),
           },
           {
-            path: 'orders/:orderId/edit/item/:itemId',
-            canActivate: [groupGuard(['admin'])],
-            data: { pageTitle: 'app.admin.overview.itemEditTitle' },
-            loadComponent: () => import('./features/admin/pages/order-item-edit/admin-order-item-edit.component').then((m) => m.AdminOrderItemEditComponent),
-          },
-          {
-            path: 'orders/:orderId/edit',
-            canActivate: [groupGuard(['admin'])],
-            data: { pageTitle: 'app.admin.overview.editTitle' },
-            loadComponent: () => import('./features/admin/pages/order-edit/admin-order-edit.component').then((m) => m.AdminOrderEditComponent),
+            path: 'orders',
+            resolve: { orders: adminOrdersResolver },
+            children: [
+              {
+                path: ':orderId/edit/item/:itemId',
+                canActivate: [groupGuard(['admin'])],
+                data: { pageTitle: 'app.admin.overview.itemEditTitle' },
+                loadComponent: () => import('./features/admin/pages/order-item-edit/admin-order-item-edit.component').then((m) => m.AdminOrderItemEditComponent),
+              },
+              {
+                path: ':orderId/edit',
+                canActivate: [groupGuard(['admin'])],
+                data: { pageTitle: 'app.admin.overview.editTitle' },
+                loadComponent: () => import('./features/admin/pages/order-edit/admin-order-edit.component').then((m) => m.AdminOrderEditComponent),
+              },
+            ],
           },
           {
             path: 'fairgate-test',
@@ -212,8 +232,9 @@ export const appRoutes: Routes = [
               ),
           },
           {
-            path: 'users',
-            children: [
+        path: 'users',
+        resolve: { users: usersResolver },
+        children: [
               {
                 path: 'new',
                 canActivate: [groupGuard(['admin'])],
@@ -225,8 +246,9 @@ export const appRoutes: Routes = [
               },
               {
                 path: ':userId',
-                canActivate: [groupGuard(['user', 'admin'])],
-                data: { pageTitle: 'app.admin.users.editTitle' },
+                canActivate: [groupGuard(['admin'])],
+                  data: { pageTitle: 'app.admin.users.editTitle' },
+                  resolve: { user: userEditResolver },
                 loadComponent: () =>
                   import('./features/admin/pages/users/user-edit.component').then(
                     (m) => m.UserEditComponent,

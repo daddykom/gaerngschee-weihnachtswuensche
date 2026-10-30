@@ -22,10 +22,10 @@ final class UpdateUserAction
     ) {
     }
 
-    public function __invoke(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
+    public function __invoke(ServerRequestInterface $request, ResponseInterface $response, array $args = []): ResponseInterface
     {
-        $userId = (string) ($args['userId'] ?? '');
         $actor = $request->getAttribute('user');
+        $userId = (string) ($args['userId'] ?? (is_array($actor) ? ($actor['id'] ?? '') : ''));
         if (!$this->isAdmin($actor) && (!is_array($actor) || ($actor['id'] ?? null) !== $userId)) {
             return JsonResponse::error($response, 'NOT_FOUND', 404);
         }

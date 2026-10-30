@@ -1,12 +1,14 @@
 import { FrontendConfig, PublicFrontendConfig } from '../../shared/models/frontend-config.model';
 
 export type PublicConfigStatus = 'initial' | 'loading' | 'loaded' | 'error';
+export type ConfigRequestStatus = 'initial' | 'loading' | 'success' | 'error';
 
 export interface FrontendConfigState {
   configs: FrontendConfig[];
   publicConfigs: PublicFrontendConfig[];
-  loading: boolean;
-  saving: boolean;
+  loadStatus: ConfigRequestStatus;
+  saveStatus: ConfigRequestStatus;
+  errorCode: string | null;
   publicStatus: PublicConfigStatus;
   publicErrorCode: string | null;
 }
@@ -14,8 +16,9 @@ export interface FrontendConfigState {
 export const initialState: FrontendConfigState = {
   configs: [],
   publicConfigs: [],
-  loading: false,
-  saving: false,
+  loadStatus: 'initial',
+  saveStatus: 'initial',
+  errorCode: null,
   publicStatus: 'initial',
   publicErrorCode: null,
 };

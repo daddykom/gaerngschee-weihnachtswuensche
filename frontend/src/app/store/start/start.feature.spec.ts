@@ -9,21 +9,21 @@ describe('startReducer', () => {
       StartActions.submit({ email: 'person@example.com', language: 'de' }),
     );
 
-    expect(state).toEqual({ loading: true, sent: null });
+    expect(state).toEqual({ status: 'loading', sent: null });
   });
 
   it('stores a successful response', () => {
     const state = startReducer(
-      { loading: true, sent: null },
+      { status: 'loading', sent: null },
       StartActions.submitSuccess({ sent: true }),
     );
 
-    expect(state).toEqual({ loading: false, sent: true });
+    expect(state).toEqual({ status: 'success', sent: true });
   });
 
   it('stores a failed response', () => {
-    const state = startReducer({ loading: true, sent: null }, StartActions.submitFailure());
+    const state = startReducer({ status: 'loading', sent: null }, StartActions.submitFailure());
 
-    expect(state).toEqual({ loading: false, sent: false });
+    expect(state).toEqual({ status: 'error', sent: false });
   });
 });

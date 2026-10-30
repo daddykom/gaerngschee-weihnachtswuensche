@@ -52,13 +52,13 @@ final class AdminRoutes
             $list->add(new GroupMiddleware(['admin'], $userRepository))->add(new AuthMiddleware());
 
             $detail = $group->get('/users/{userId}', new GetUserAction($userRepository));
-            $detail->add(new GroupMiddleware(['admin', 'user'], $userRepository))->add(new AuthMiddleware());
+            $detail->add(new GroupMiddleware(['admin'], $userRepository))->add(new AuthMiddleware());
 
             $create = $group->post('/users', new CreateUserAction($userRepository, $emailSender));
             $create->add(new GroupMiddleware(['admin'], $userRepository))->add(new AuthMiddleware());
 
             $update = $group->patch('/users/{userId}', new UpdateUserAction($userRepository, $emailSender));
-            $update->add(new GroupMiddleware(['admin', 'user'], $userRepository))->add(new AuthMiddleware());
+            $update->add(new GroupMiddleware(['admin'], $userRepository))->add(new AuthMiddleware());
 
             $passwordReset = $group->post('/users/{userId}/password-reset', new SendPasswordResetLinkAction($userRepository, null, $emailSender));
             if ($rateLimitService !== null) {

@@ -233,7 +233,7 @@ final class AdminRoutesTest extends TestCase
         self::assertNull($this->repository->findByEmail('client@example.com'));
     }
 
-    public function testUserCanUpdateOwnEmailButNotAnotherUser(): void
+    public function testUserCannotUpdateUsersThroughAdminRoutes(): void
     {
         $user = $this->repository->createUser('user@example.com', 'secret', 'user');
         $other = $this->repository->createUser('other@example.com', 'secret', 'user');
@@ -248,9 +248,9 @@ final class AdminRoutesTest extends TestCase
             'email' => 'blocked@example.com',
         ]));
 
-        self::assertSame(200, $ownResponse->getStatusCode());
-        self::assertSame('changed@example.com', $emailSender->changedRecipient);
+        self::assertSame(404, $ownResponse->getStatusCode());
         self::assertSame(404, $otherResponse->getStatusCode());
+        self::assertNull($emailSender->changedRecipient);
     }
 
     public function testAdminCanUpdateUserGroupAndPasswordResetFlag(): void

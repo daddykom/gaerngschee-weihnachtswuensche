@@ -1,9 +1,9 @@
 export interface StartState {
-  loading: boolean;
+  status: 'initial' | 'loading' | 'success' | 'error';
   sent: boolean | null;
 }
 
 export const initialState: StartState = {
-  loading: false,
+  status: 'initial',
   sent: null,
 };

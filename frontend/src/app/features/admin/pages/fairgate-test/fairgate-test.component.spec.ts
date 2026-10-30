@@ -18,7 +18,7 @@ describe('FairgateTestComponent', () => {
           initialState: {
             fairgateTest: {
               result: null,
-              loading: false,
+              status: 'initial',
               errorCode: null,
             },
           },
@@ -52,7 +52,7 @@ describe('FairgateTestComponent', () => {
           email: 'isabelle.joss@gaerngschee.ch',
           fairgate: { success: true, data: { contacts: [] } },
         },
-        loading: false,
+        status: 'loaded',
         errorCode: null,
       },
     });
@@ -67,7 +67,7 @@ describe('FairgateTestComponent', () => {
   });
 
   it('renders the loading state and disables the test button', () => {
-    store.setState({ fairgateTest: { result: null, loading: true, errorCode: null } });
+    store.setState({ fairgateTest: { result: null, status: 'loading', errorCode: null } });
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('button').disabled).toBe(true);
@@ -78,7 +78,7 @@ describe('FairgateTestComponent', () => {
     store.setState({
       fairgateTest: {
         result: { email: '', fairgate: { success: false, data: null } },
-        loading: false,
+        status: 'loaded',
         errorCode: null,
       },
     });

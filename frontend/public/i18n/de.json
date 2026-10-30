@@ -10,6 +10,12 @@
       "garngschee": "Gärngschee",
       "navigationLabel": "Rechtliche und weiterführende Links"
     },
+    "legal": {
+      "imprintTitle": "Impressum",
+      "privacyTitle": "Datenschutzerklärung",
+      "imprintPageTitle": "Impressum",
+      "privacyPageTitle": "Datenschutz – Gärngschee Weihnachtswünsche"
+    },
     "home": {
       "title": "Weihnachtswünsche",
       "lead": "Gemeinsam machen wir einen Herbstmess-Besuch möglich - auch wenn das Geld knapp ist.",
@@ -60,6 +66,12 @@
       "privacyTitle": "Warum brauchen wir deine E-Mail-Adresse?",
       "privacyText": "Wir schicken dir per E-Mail einen persönlichen Link für deine Anmeldung zur Weihnachtswünsche-Aktion.\n\nBei der Anmeldung prüfen wir bei Fairgate, ob du bei Gärngschee registriert bist und wie viele Erwachsene und Kinder zu deiner Anmeldung gehören.\n\nWir speichern nur deine E-Mail-Adresse und die Anzahl Erwachsene und Kinder.",
       "privacyLink": "Mehr zum Datenschutz"
+    },
+    "user": {
+      "profile": {
+        "title": "Mein Profil",
+        "heading": "Mein Profil"
+      }
     },
     "login": {
       "pageTitle": "Weihnachtswünsche verwalten",

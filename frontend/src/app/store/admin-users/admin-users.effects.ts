@@ -47,6 +47,38 @@ export const createAdminUserEffect = createEffect(
   { functional: true },
 );
 
+export const loadAdminUserEffect = createEffect(
+  (actions$ = inject(Actions), service = inject(AdminUsersService)) =>
+    actions$.pipe(
+      ofType(AdminUsersActions.loadUser),
+      exhaustMap(({ userId }) =>
+        service.get(userId).pipe(
+          map(({ user }) => AdminUsersActions.loadUserSuccess({ user })),
+          catchError((error: HttpErrorResponse) =>
+            of(AdminUsersActions.loadUserFailure({ errorCode: errorCode(error) })),
+          ),
+        ),
+      ),
+    ),
+  { functional: true },
+);
+
+export const loadAdminUserProfileEffect = createEffect(
+  (actions$ = inject(Actions), service = inject(AdminUsersService)) =>
+    actions$.pipe(
+      ofType(AdminUsersActions.loadProfile),
+      exhaustMap(() =>
+        service.getProfile().pipe(
+          map(({ user }) => AdminUsersActions.loadUserSuccess({ user })),
+          catchError((error: HttpErrorResponse) =>
+            of(AdminUsersActions.loadUserFailure({ errorCode: errorCode(error) })),
+          ),
+        ),
+      ),
+    ),
+  { functional: true },
+);
+
 export const updateAdminUserEffect = createEffect(
   (actions$ = inject(Actions), service = inject(AdminUsersService)) =>
     actions$.pipe(
@@ -81,6 +113,24 @@ export const deleteAdminUserEffect = createEffect(
   { functional: true },
 );
 
+export const updateAdminUserProfileEffect = createEffect(
+  (actions$ = inject(Actions), service = inject(AdminUsersService)) =>
+    actions$.pipe(
+      ofType(AdminUsersActions.updateProfile),
+      exhaustMap(({ changes }) =>
+        service.updateProfile(changes).pipe(
+          map(({ user, emailSentTo }) =>
+            AdminUsersActions.updateProfileSuccess({ user, emailSentTo: emailSentTo ?? null }),
+          ),
+          catchError((error: HttpErrorResponse) =>
+            of(AdminUsersActions.updateProfileFailure({ errorCode: errorCode(error) })),
+          ),
+        ),
+      ),
+    ),
+  { functional: true },
+);
+
 export const sendPasswordResetEffect = createEffect(
   (actions$ = inject(Actions), service = inject(AdminUsersService)) =>
     actions$.pipe(
@@ -100,7 +150,7 @@ export const sendPasswordResetEffect = createEffect(
 export const navigateBackAfterUserMutationEffect = createEffect(
   (actions$ = inject(Actions)) =>
     actions$.pipe(
-      ofType(AdminUsersActions.createSuccess, AdminUsersActions.updateSuccess),
+      ofType(AdminUsersActions.createSuccess, AdminUsersActions.updateSuccess, AdminUsersActions.updateProfileSuccess),
       map(() => NavigationActions.navigate({ target: 'back' })),
     ),
   { functional: true },
@@ -112,10 +162,12 @@ export const adminUsersNotificationEffect = createEffect(
       ofType(
         AdminUsersActions.createSuccess,
         AdminUsersActions.updateSuccess,
+        AdminUsersActions.updateProfileSuccess,
         AdminUsersActions.deleteSuccess,
         AdminUsersActions.sendPasswordResetSuccess,
         AdminUsersActions.createFailure,
         AdminUsersActions.updateFailure,
+        AdminUsersActions.updateProfileFailure,
         AdminUsersActions.deleteFailure,
         AdminUsersActions.sendPasswordResetFailure,
       ),
@@ -130,7 +182,7 @@ export const adminUsersNotificationEffect = createEffect(
           });
         }
 
-        if (action.type === AdminUsersActions.updateSuccess.type) {
+        if (action.type === AdminUsersActions.updateSuccess.type || action.type === AdminUsersActions.updateProfileSuccess.type) {
           return NotificationActions.show({
             variant: 'success',
             titleKey: 'app.admin.users.successTitle',
@@ -138,7 +190,7 @@ export const adminUsersNotificationEffect = createEffect(
               ? 'app.admin.users.updatedWithEmail'
               : 'app.admin.users.updated',
             params: action.emailSentTo ? { recipient: action.emailSentTo } : {},
-            preserveOnRoutes: ['/admin/users'],
+            preserveOnRoutes: action.type === AdminUsersActions.updateProfileSuccess.type ? ['/user/profile'] : ['/admin/users'],
           });
         }
 
@@ -174,8 +226,11 @@ export const adminUsersNotificationEffect = createEffect(
 
 export const adminUsersEffects = {
   loadAdminUsersEffect,
+  loadAdminUserEffect,
+  loadAdminUserProfileEffect,
   createAdminUserEffect,
   updateAdminUserEffect,
+  updateAdminUserProfileEffect,
   deleteAdminUserEffect,
   sendPasswordResetEffect,
   navigateBackAfterUserMutationEffect,

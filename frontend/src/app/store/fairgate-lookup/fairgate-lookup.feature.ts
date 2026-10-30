@@ -8,18 +8,18 @@ export const fairgateLookupFeature = createFeature({
     initialState,
     on(FairgateLookupActions.lookup, (state) => ({
       ...state,
-      loading: true,
+      status: 'loading',
       errorCode: null,
     })),
     on(FairgateLookupActions.lookupSuccess, (state, { result }) => ({
       ...state,
       result,
-      loading: false,
+      status: 'loaded',
       errorCode: null,
     })),
     on(FairgateLookupActions.lookupFailure, (state, { errorCode }) => ({
       ...state,
-      loading: false,
+      status: 'error',
       errorCode,
     })),
   ),
@@ -27,6 +27,9 @@ export const fairgateLookupFeature = createFeature({
 
 export const {
   selectResult: selectFairgateLookupResult,
-  selectLoading: selectFairgateLookupLoading,
+  selectStatus: selectFairgateLookupStatus,
   selectErrorCode: selectFairgateLookupErrorCode,
 } = fairgateLookupFeature;
+
+export const selectFairgateLookupLoading = (state: { fairgateLookup: FairgateLookupState }): boolean =>
+  state.fairgateLookup.status === 'loading';
