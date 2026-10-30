@@ -13,12 +13,17 @@ final class JwtService
 {
     private const DEFAULT_ALGORITHM = 'HS256';
     private const DEFAULT_TTL = 3600;
+    private const ALLOWED_ALGORITHMS = ['HS256', 'HS384', 'HS512'];
 
-    public function createToken(string $userId): string
+    public function createToken(string $userId, int $tokenVersion = 0): string
     {
         $issuedAt = time();
         $payload = [
             'sub' => $userId,
+            'token_version' => $tokenVersion,
+            'iss' => $this->getIssuer(),
+            'aud' => $this->getAudience(),
+            'jti' => bin2hex(random_bytes(16)),
             'iat' => $issuedAt,
             'exp' => $issuedAt + $this->getTtl(),
         ];
@@ -37,7 +42,25 @@ final class JwtService
             return null;
         }
 
-        return (array) $payload;
+        $claims = (array) $payload;
+        if (($claims['iss'] ?? null) !== $this->getIssuer()) {
+            return null;
+        }
+
+        $audience = $claims['aud'] ?? null;
+        if (!is_string($audience) || $audience !== $this->getAudience()) {
+            return null;
+        }
+
+        if (!is_string($claims['jti'] ?? null) || $claims['jti'] === '') {
+            return null;
+        }
+
+        if (!is_int($claims['token_version'] ?? null) || $claims['token_version'] < 0) {
+            return null;
+        }
+
+        return $claims;
     }
 
     public function getUserIdFromToken(string $token): ?string
@@ -74,7 +97,22 @@ final class JwtService
 
     private function getAlgorithm(): string
     {
-        return getenv('JWT_ALGORITHM') ?: self::DEFAULT_ALGORITHM;
+        $algorithm = getenv('JWT_ALGORITHM') ?: self::DEFAULT_ALGORITHM;
+        if (!in_array($algorithm, self::ALLOWED_ALGORITHMS, true)) {
+            throw new \RuntimeException('JWT_ALGORITHM is not allowed.');
+        }
+
+        return $algorithm;
+    }
+
+    private function getIssuer(): string
+    {
+        return getenv('JWT_ISSUER') ?: 'gaerngschee';
+    }
+
+    private function getAudience(): string
+    {
+        return getenv('JWT_AUDIENCE') ?: 'gaerngschee-frontend';
     }
 
     private function getTtl(): int
