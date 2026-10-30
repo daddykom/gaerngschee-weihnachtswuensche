@@ -20,7 +20,9 @@ describe('AdminOrdersService', () => {
   it('serializes multiple filters as query parameter arrays', () => {
     service.list(['released', 'in_review'], ['gift', 'voucher']).subscribe();
 
-    const request = httpTesting.expectOne((candidate) => candidate.url === 'http://localhost:8083/admin/orders');
+    const request = httpTesting.expectOne(
+      (candidate) => candidate.url === 'http://localhost:8083/admin/orders',
+    );
     expect(request.request.method).toBe('GET');
     expect(request.request.params.getAll('status[]')).toEqual(['released', 'in_review']);
     expect(request.request.params.getAll('category[]')).toEqual(['gift', 'voucher']);
@@ -37,13 +39,15 @@ describe('AdminOrdersService', () => {
       adminNotes: 'Geprüft',
       adultsCount: 2,
       childrenCount: 1,
-      items: [{
-        id: 'item-1',
-        currentDescription: 'Beschreibung',
-        currentReason: 'Begründung',
-        publicationStatus: 'approved',
-        adminNotes: null,
-      }],
+      items: [
+        {
+          id: 'item-1',
+          currentDescription: 'Beschreibung',
+          currentReason: 'Begründung',
+          publicationStatus: 'approved',
+          adminNotes: null,
+        },
+      ],
     } as never;
 
     service.update(order, 'release').subscribe();
@@ -60,13 +64,15 @@ describe('AdminOrdersService', () => {
         adultsCount: 2,
         childrenCount: 1,
       },
-      items: [{
-        id: 'item-1',
-        currentDescription: 'Beschreibung',
-        currentReason: 'Begründung',
-        publicationStatus: 'approved',
-        adminNotes: null,
-      }],
+      items: [
+        {
+          id: 'item-1',
+          currentDescription: 'Beschreibung',
+          currentReason: 'Begründung',
+          publicationStatus: 'approved',
+          adminNotes: null,
+        },
+      ],
       action: 'release',
     });
     request.flush({ order });

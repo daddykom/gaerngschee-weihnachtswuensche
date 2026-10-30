@@ -1,6 +1,13 @@
 <section class="gl-stack gl-stack--group">
   <h2>
-    {{ (isProfile ? 'app.user.profile.heading' : (isNew ? 'app.admin.users.createHeading' : 'app.admin.users.editHeading')) | translate }}
+    {{
+      (isProfile
+        ? 'app.user.profile.heading'
+        : isNew
+          ? 'app.admin.users.createHeading'
+          : 'app.admin.users.editHeading'
+      ) | translate
+    }}
   </h2>
 
   <form class="user-form gl-stack gl-stack--group" (submit)="$event.preventDefault(); onSubmit()">

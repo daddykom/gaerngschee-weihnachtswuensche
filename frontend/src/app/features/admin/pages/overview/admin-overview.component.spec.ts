@@ -45,9 +45,11 @@ describe('AdminOverviewComponent', () => {
 
     component.statusChanged(['completed']);
 
-    expect(dispatch).toHaveBeenLastCalledWith(AdminOrdersActions.filtersChanged({
-      statuses: ['completed'],
-      categories: ['gift'],
-    }));
+    expect(dispatch).toHaveBeenLastCalledWith(
+      AdminOrdersActions.filtersChanged({
+        statuses: ['completed'],
+        categories: ['gift'],
+      }),
+    );
   });
 });

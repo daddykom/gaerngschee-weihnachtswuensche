@@ -8,21 +8,37 @@ export const adminOrdersFeature = createFeature({
     initialState,
     on(AdminOrdersActions.load, (state) => ({ ...state, loadStatus: 'loading', errorCode: null })),
     on(AdminOrdersActions.filtersChanged, (state, { statuses, categories }) => ({
-      ...state, statuses, categories, loadStatus: 'loading', errorCode: null,
+      ...state,
+      statuses,
+      categories,
+      loadStatus: 'loading',
+      errorCode: null,
     })),
-    on(AdminOrdersActions.loadSuccess, (state, { orders }) => ({ ...state, orders, loadStatus: 'loaded' })),
-    on(AdminOrdersActions.loadFailure, (state, { errorCode }) => ({ ...state, loadStatus: 'error', errorCode })),
+    on(AdminOrdersActions.loadSuccess, (state, { orders }) => ({
+      ...state,
+      orders,
+      loadStatus: 'loaded',
+    })),
+    on(AdminOrdersActions.loadFailure, (state, { errorCode }) => ({
+      ...state,
+      loadStatus: 'error',
+      errorCode,
+    })),
     on(AdminOrdersActions.save, (state) => ({ ...state, saveStatus: 'loading', errorCode: null })),
     on(AdminOrdersActions.draftChanged, (state, { order }) => ({
       ...state,
-      orders: state.orders.map((current) => current.id === order.id ? order : current),
+      orders: state.orders.map((current) => (current.id === order.id ? order : current)),
     })),
     on(AdminOrdersActions.saveSuccess, (state, { order }) => ({
       ...state,
-      orders: state.orders.map((current) => current.id === order.id ? order : current),
+      orders: state.orders.map((current) => (current.id === order.id ? order : current)),
       saveStatus: 'success',
     })),
-    on(AdminOrdersActions.saveFailure, (state, { errorCode }) => ({ ...state, saveStatus: 'error', errorCode })),
+    on(AdminOrdersActions.saveFailure, (state, { errorCode }) => ({
+      ...state,
+      saveStatus: 'error',
+      errorCode,
+    })),
   ),
 });
 

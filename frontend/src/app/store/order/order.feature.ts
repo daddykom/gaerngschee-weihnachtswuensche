@@ -21,12 +21,13 @@ export const orderFeature = createFeature({
         adultsCount: overview.order?.adultsCount ?? overview.adultsCount,
         childrenCount: overview.order?.childrenCount ?? overview.childrenCount,
         text: overview.order?.currentText ?? '',
-        items: overview.order?.items.map((item) => ({
-          id: item.id,
-          category: item.category,
-          description: item.currentDescription,
-          reason: item.currentReason ?? '',
-        })) ?? [],
+        items:
+          overview.order?.items.map((item) => ({
+            id: item.id,
+            category: item.category,
+            description: item.currentDescription,
+            reason: item.currentReason ?? '',
+          })) ?? [],
       },
       errorCode: null,
     })),

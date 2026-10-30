@@ -1,5 +1,5 @@
-import { expect, test } from './support/test';
 import { loginAsAdmin, mockOrders, orderFixture } from './support/admin-orders';
+import { expect, test } from './support/test';
 
 test.describe('Admin order overview route', () => {
   test('opens an order for processing', async ({ page }) => {
@@ -19,7 +19,11 @@ test.describe('Admin order overview route', () => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ orders: [orderFixture()], statuses: ['definitive'], categories: ['gift'] }),
+        body: JSON.stringify({
+          orders: [orderFixture()],
+          statuses: ['definitive'],
+          categories: ['gift'],
+        }),
       });
     });
     await page.goto('/admin/overview');

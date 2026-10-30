@@ -31,5 +31,6 @@ export const {
   selectErrorCode: selectFairgateLookupErrorCode,
 } = fairgateLookupFeature;
 
-export const selectFairgateLookupLoading = (state: { fairgateLookup: FairgateLookupState }): boolean =>
-  state.fairgateLookup.status === 'loading';
+export const selectFairgateLookupLoading = (state: {
+  fairgateLookup: FairgateLookupState;
+}): boolean => state.fairgateLookup.status === 'loading';

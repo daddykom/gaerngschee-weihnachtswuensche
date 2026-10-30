@@ -20,7 +20,14 @@ interface ItemFormValue {
 
 @Component({
   selector: 'app-admin-order-item-edit',
-  imports: [TranslatePipe, FormField, ControlErrorComponent, MatButtonModule, MatFormFieldModule, MatInputModule],
+  imports: [
+    TranslatePipe,
+    FormField,
+    ControlErrorComponent,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+  ],
   templateUrl: './admin-order-item-edit.component.html',
   styleUrl: './admin-order-item-edit.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -32,11 +39,19 @@ export class AdminOrderItemEditComponent {
   readonly order = signal<AdminOrder | null>(null);
   readonly item = signal<AdminOrderItem | null>(null);
   readonly decision = signal<'accept' | 'reject' | null>(null);
-  readonly formModel = signal<ItemFormValue>({ currentDescription: '', currentReason: '', adminNotes: '' });
+  readonly formModel = signal<ItemFormValue>({
+    currentDescription: '',
+    currentReason: '',
+    adminNotes: '',
+  });
   readonly itemForm = form(this.formModel, (schema) => {
     required(schema.currentDescription);
     required(schema.currentReason);
-    validate(schema.adminNotes, ({ valueOf }) => this.decision() === 'reject' && valueOf(schema.adminNotes).trim() === '' ? { kind: 'required' } : undefined);
+    validate(schema.adminNotes, ({ valueOf }) =>
+      this.decision() === 'reject' && valueOf(schema.adminNotes).trim() === ''
+        ? { kind: 'required' }
+        : undefined,
+    );
   });
 
   cancel(): void {
@@ -83,13 +98,19 @@ export class AdminOrderItemEditComponent {
       this.itemForm().markAsTouched();
       return;
     }
-    this.store.dispatch(AdminOrdersActions.draftChanged({
-      order: {
-        ...order,
-        status: status === 'rejected' ? 'changes_requested' : order.status,
-        items: order.items.map((current) => current.id === item.id ? { ...current, ...model, publicationStatus: status } : { ...current }),
-      },
-    }));
+    this.store.dispatch(
+      AdminOrdersActions.draftChanged({
+        order: {
+          ...order,
+          status: status === 'rejected' ? 'changes_requested' : order.status,
+          items: order.items.map((current) =>
+            current.id === item.id
+              ? { ...current, ...model, publicationStatus: status }
+              : { ...current },
+          ),
+        },
+      }),
+    );
     this.store.dispatch(NavigationActions.navigate({ target: 'back' }));
   }
 }

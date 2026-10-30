@@ -9,9 +9,7 @@
   "targets": {
     "build": {
       "executor": "@angular/build:application",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
         "outputPath": "dist/frontend",
@@ -24,9 +22,7 @@
             "input": "public"
           }
         ],
-        "styles": [
-          "./src/styles.scss"
-        ]
+        "styles": ["./src/styles.scss"]
       },
       "configurations": {
         "production": {
@@ -93,16 +89,12 @@
     "lint": {
       "executor": "@nx/eslint:lint",
       "options": {
-        "lintFilePatterns": [
-          "./src"
-        ]
+        "lintFilePatterns": ["./src"]
       }
     },
     "test": {
       "executor": "@angular/build:unit-test",
-      "outputs": [
-        "{workspaceRoot}/coverage/{projectName}"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/{projectName}"],
       "options": {
         "buildTarget": "frontend:build:development",
         "runner": "vitest",

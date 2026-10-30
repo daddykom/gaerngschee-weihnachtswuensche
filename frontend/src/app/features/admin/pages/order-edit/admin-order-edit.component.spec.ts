@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
-import { provideMockStore, MockStore } from '@ngrx/store/testing';
+import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { provideTranslateService } from '@ngx-translate/core';
 import { AdminOrder } from '../../../../shared/models/admin-order.model';
 import { AdminOrdersActions } from '../../../../store/admin-orders/admin-orders.actions';
@@ -24,19 +24,21 @@ describe('AdminOrderEditComponent', () => {
     originalText: 'Original',
     currentText: 'Aktuell',
     adminNotes: null,
-    items: [{
-      id: 'item-1',
-      orderId: 'order-1',
-      itemNumber: null,
-      category: 'gift',
-      originalDescription: 'Originaler Wunsch',
-      currentDescription: 'Aktueller Wunsch',
-      originalReason: 'Originaler Grund',
-      currentReason: 'Aktueller Grund',
-      publicationStatus: 'submitted',
-      fulfillmentStatus: 'available',
-      adminNotes: null,
-    }],
+    items: [
+      {
+        id: 'item-1',
+        orderId: 'order-1',
+        itemNumber: null,
+        category: 'gift',
+        originalDescription: 'Originaler Wunsch',
+        currentDescription: 'Aktueller Wunsch',
+        originalReason: 'Originaler Grund',
+        currentReason: 'Aktueller Grund',
+        publicationStatus: 'submitted',
+        fulfillmentStatus: 'available',
+        adminNotes: null,
+      },
+    ],
     createdAt: null,
     updatedAt: null,
   };
@@ -46,8 +48,24 @@ describe('AdminOrderEditComponent', () => {
       imports: [AdminOrderEditComponent],
       providers: [
         provideTranslateService(),
-        provideMockStore({ initialState: { adminOrders: { orders: [order], statuses: [], categories: [], loadStatus: 'loaded', saveStatus: 'initial', errorCode: null } } }),
-        { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => 'order-1' }, queryParamMap: { get: () => null } } } },
+        provideMockStore({
+          initialState: {
+            adminOrders: {
+              orders: [order],
+              statuses: [],
+              categories: [],
+              loadStatus: 'loaded',
+              saveStatus: 'initial',
+              errorCode: null,
+            },
+          },
+        }),
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: { paramMap: { get: () => 'order-1' }, queryParamMap: { get: () => null } },
+          },
+        },
       ],
     }).compileComponents();
 
@@ -71,11 +89,13 @@ describe('AdminOrderEditComponent', () => {
 
     component.save();
 
-    expect(dispatch).toHaveBeenCalledWith(expect.objectContaining({
-      type: AdminOrdersActions.save.type,
-      action: 'save',
-      order: expect.objectContaining({ id: 'order-1', items: expect.any(Array) }),
-    }));
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: AdminOrdersActions.save.type,
+        action: 'save',
+        order: expect.objectContaining({ id: 'order-1', items: expect.any(Array) }),
+      }),
+    );
   });
 
   it('requires an order reason when rejecting without a rejected wish', () => {
@@ -83,17 +103,26 @@ describe('AdminOrderEditComponent', () => {
 
     component.rejectOrder();
 
-    expect(dispatch).not.toHaveBeenCalledWith(expect.objectContaining({ type: AdminOrdersActions.save.type }));
+    expect(dispatch).not.toHaveBeenCalledWith(
+      expect.objectContaining({ type: AdminOrdersActions.save.type }),
+    );
   });
 
   it('releases only when every wish is approved', () => {
     const dispatch = vi.spyOn(store, 'dispatch');
     component.releaseOrder();
-    expect(dispatch).not.toHaveBeenCalledWith(expect.objectContaining({ type: AdminOrdersActions.save.type }));
+    expect(dispatch).not.toHaveBeenCalledWith(
+      expect.objectContaining({ type: AdminOrdersActions.save.type }),
+    );
 
-    component.formModel.update((model) => ({ ...model, items: model.items.map((item) => ({ ...item, publicationStatus: 'approved' })) }));
+    component.formModel.update((model) => ({
+      ...model,
+      items: model.items.map((item) => ({ ...item, publicationStatus: 'approved' })),
+    }));
     component.releaseOrder();
 
-    expect(dispatch).toHaveBeenCalledWith(expect.objectContaining({ type: AdminOrdersActions.save.type, action: 'release' }));
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({ type: AdminOrdersActions.save.type, action: 'release' }),
+    );
   });
 });

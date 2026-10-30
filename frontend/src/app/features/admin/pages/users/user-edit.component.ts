@@ -90,13 +90,14 @@ export class UserEditComponent {
       return;
     }
 
-    const changes = this.isAdmin() && !this.isProfile
-      ? {
-          email: value.email,
-          group: value.group,
-          required_password_reset: value.requiredPasswordReset,
-        }
-      : { email: value.email };
+    const changes =
+      this.isAdmin() && !this.isProfile
+        ? {
+            email: value.email,
+            group: value.group,
+            required_password_reset: value.requiredPasswordReset,
+          }
+        : { email: value.email };
 
     if (this.isProfile) {
       this.store.dispatch(AdminUsersActions.updateProfile({ changes: { email: value.email } }));

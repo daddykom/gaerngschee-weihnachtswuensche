@@ -23,12 +23,21 @@ describe('AdminOrderItemEditComponent', () => {
     originalText: 'Original',
     currentText: 'Aktuell',
     adminNotes: null,
-    items: [{
-      id: 'item-1', orderId: 'order-1', category: 'gift', itemNumber: null,
-      originalDescription: 'Originaler Wunsch', currentDescription: 'Aktueller Wunsch',
-      originalReason: 'Originaler Grund', currentReason: 'Aktueller Grund',
-      publicationStatus: 'submitted', fulfillmentStatus: 'available', adminNotes: null,
-    }],
+    items: [
+      {
+        id: 'item-1',
+        orderId: 'order-1',
+        category: 'gift',
+        itemNumber: null,
+        originalDescription: 'Originaler Wunsch',
+        currentDescription: 'Aktueller Wunsch',
+        originalReason: 'Originaler Grund',
+        currentReason: 'Aktueller Grund',
+        publicationStatus: 'submitted',
+        fulfillmentStatus: 'available',
+        adminNotes: null,
+      },
+    ],
     createdAt: null,
     updatedAt: null,
   } as AdminOrder;
@@ -38,8 +47,26 @@ describe('AdminOrderItemEditComponent', () => {
       imports: [AdminOrderItemEditComponent],
       providers: [
         provideTranslateService(),
-        provideMockStore({ initialState: { adminOrders: { orders: [order], statuses: [], categories: [], loadStatus: 'loaded', saveStatus: 'initial', errorCode: null } } }),
-        { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: (name: string) => name === 'orderId' ? 'order-1' : 'item-1' } } } },
+        provideMockStore({
+          initialState: {
+            adminOrders: {
+              orders: [order],
+              statuses: [],
+              categories: [],
+              loadStatus: 'loaded',
+              saveStatus: 'initial',
+              errorCode: null,
+            },
+          },
+        }),
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              paramMap: { get: (name: string) => (name === 'orderId' ? 'order-1' : 'item-1') },
+            },
+          },
+        },
       ],
     }).compileComponents();
 
@@ -55,7 +82,10 @@ describe('AdminOrderItemEditComponent', () => {
 
     component.accept();
 
-    expect(dispatch).toHaveBeenNthCalledWith(1, expect.objectContaining({ type: AdminOrdersActions.draftChanged.type }));
+    expect(dispatch).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ type: AdminOrdersActions.draftChanged.type }),
+    );
     expect(dispatch).toHaveBeenNthCalledWith(2, NavigationActions.navigate({ target: 'back' }));
   });
 
@@ -73,7 +103,10 @@ describe('AdminOrderItemEditComponent', () => {
 
     component.reject();
 
-    expect(dispatch).toHaveBeenNthCalledWith(1, expect.objectContaining({ type: AdminOrdersActions.draftChanged.type }));
+    expect(dispatch).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ type: AdminOrdersActions.draftChanged.type }),
+    );
     expect(dispatch).toHaveBeenNthCalledWith(2, NavigationActions.navigate({ target: 'back' }));
   });
 });

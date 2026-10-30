@@ -1,5 +1,5 @@
-import { expect, test, type Page } from './support/test';
 import { expectTranslatedText } from './support/assertions';
+import { expect, test, type Page } from './support/test';
 
 test.describe('Bestellung route', () => {
   test('saves the order and shows the released Fairgate confirmation', async ({ page }) => {
@@ -45,11 +45,17 @@ test.describe('Bestellung route', () => {
       }
 
       saveRequestReceived = true;
-        expect(route.request().postDataJSON()).toMatchObject({
-          adultsCount: 2,
-          childrenCount: 2,
-          text: 'Ich wünsche mir etwas Schönes.',
-          items: [{ category: 'gift', description: 'Ein schönes Geschenk', reason: 'Das würde mir Freude machen.' }],
+      expect(route.request().postDataJSON()).toMatchObject({
+        adultsCount: 2,
+        childrenCount: 2,
+        text: 'Ich wünsche mir etwas Schönes.',
+        items: [
+          {
+            category: 'gift',
+            description: 'Ein schönes Geschenk',
+            reason: 'Das würde mir Freude machen.',
+          },
+        ],
       });
       await route.fulfill({
         status: 200,
@@ -86,13 +92,18 @@ test.describe('Bestellung route', () => {
     await expect(page.locator('.app-notification')).toContainText(
       'Deine Daten werden den Administratoren zur Prüfung vorgelegt.',
     );
-    await expect(page.getByRole('link', { name: 'Zur Login-Seite' })).toHaveAttribute('href', '/login');
+    await expect(page.getByRole('link', { name: 'Zur Login-Seite' })).toHaveAttribute(
+      'href',
+      '/login',
+    );
   });
 
   test('edits an existing item before saving the order', async ({ page }) => {
     let savedItems: unknown;
     await mockClientLogin(page, {
-      order: orderWithItems('draft', [orderItem('item-1', 'gift', 'Alte Beschreibung', 'Alte Begründung')]),
+      order: orderWithItems('draft', [
+        orderItem('item-1', 'gift', 'Alte Beschreibung', 'Alte Begründung'),
+      ]),
       onSave: async (route) => {
         savedItems = route.request().postDataJSON().items;
         await fulfillSavedOrder(route);
@@ -161,10 +172,15 @@ test.describe('Bestellung route', () => {
 
   test('hides mutations and explains the read-only order status', async ({ page }) => {
     await mockClientLogin(page, {
-      order: orderWithItems('released', [orderItem('item-1', 'gift', 'Freigegebener Wunsch', 'Begründung')]),
+      order: orderWithItems('released', [
+        orderItem('item-1', 'gift', 'Freigegebener Wunsch', 'Begründung'),
+      ]),
     });
 
-    await expectTranslatedText(page.locator('.app-notification'), 'app.order.status.released.message');
+    await expectTranslatedText(
+      page.locator('.app-notification'),
+      'app.order.status.released.message',
+    );
     await expect(page.getByRole('button', { name: 'Ändern' })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Löschen' })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Wunsch hinzufügen' })).toHaveCount(0);

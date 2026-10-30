@@ -25,23 +25,27 @@ export class AdminOrdersService {
   }
 
   update(order: AdminOrder, action: AdminOrderAction = 'save'): Observable<{ order: AdminOrder }> {
-    return this.http.patch<{ order: AdminOrder }>(`${this.baseUrl}/${order.id}`, {
-      order: {
-        id: order.id,
-        status: order.status,
-        currentText: order.currentText,
-        adminNotes: order.adminNotes,
-        adultsCount: order.adultsCount,
-        childrenCount: order.childrenCount,
+    return this.http.patch<{ order: AdminOrder }>(
+      `${this.baseUrl}/${order.id}`,
+      {
+        order: {
+          id: order.id,
+          status: order.status,
+          currentText: order.currentText,
+          adminNotes: order.adminNotes,
+          adultsCount: order.adultsCount,
+          childrenCount: order.childrenCount,
+        },
+        items: order.items.map((item) => ({
+          id: item.id,
+          currentDescription: item.currentDescription,
+          currentReason: item.currentReason,
+          publicationStatus: item.publicationStatus,
+          adminNotes: item.adminNotes,
+        })),
+        action,
       },
-      items: order.items.map((item) => ({
-        id: item.id,
-        currentDescription: item.currentDescription,
-        currentReason: item.currentReason,
-        publicationStatus: item.publicationStatus,
-        adminNotes: item.adminNotes,
-      })),
-      action,
-    }, { withCredentials: true });
+      { withCredentials: true },
+    );
   }
 }

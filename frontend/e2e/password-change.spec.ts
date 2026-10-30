@@ -25,7 +25,9 @@ test.describe('Password change route', () => {
     );
   });
 
-  test('changes the password and cannot access the admin overview as a normal user', async ({ page }) => {
+  test('changes the password and cannot access the admin overview as a normal user', async ({
+    page,
+  }) => {
     await loginAsUser(page);
     let requestReceived = false;
     await page.route('http://localhost:8083/auth/password-change-authenticated', async (route) => {

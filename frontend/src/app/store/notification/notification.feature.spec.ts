@@ -1,6 +1,6 @@
 import { NotificationActions } from './notification.actions';
-import { initialState } from './notification.state';
 import { notificationReducer } from './notification.feature';
+import { initialState } from './notification.state';
 
 describe('notificationReducer', () => {
   const notification = {

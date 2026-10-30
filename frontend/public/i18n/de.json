@@ -221,12 +221,30 @@
         "login": "Zur Login-Seite"
       },
       "status": {
-        "waiting_for_fairgate": { "title": "Warten auf Fairgate", "message": "Deine Anmeldung wird bearbeitet, sobald du bei Fairgate gefunden wurdest. Darum kann sie gerade nicht verändert werden." },
-        "released": { "title": "Zur Prüfung freigegeben", "message": "Deine Anmeldung wurde zur administrativen Prüfung freigegeben. Darum kann sie gerade nicht verändert werden." },
-        "in_review": { "title": "In Prüfung", "message": "Deine Anmeldung wird derzeit administrativ geprüft. Darum kann sie gerade nicht verändert werden." },
-        "definitive": { "title": "Anmeldung bestätigt", "message": "Deine Anmeldung wurde definitiv bestätigt. Darum kann sie gerade nicht verändert werden." },
-        "ready_for_pickup": { "title": "Bereit zur Abholung", "message": "Deine Geschenke sind bereit zur Abholung. Darum kann sie gerade nicht verändert werden." },
-        "completed": { "title": "Abgeschlossen", "message": "Deine Anmeldung ist abgeschlossen. Darum kann sie gerade nicht verändert werden." }
+        "waiting_for_fairgate": {
+          "title": "Warten auf Fairgate",
+          "message": "Deine Anmeldung wird bearbeitet, sobald du bei Fairgate gefunden wurdest. Darum kann sie gerade nicht verändert werden."
+        },
+        "released": {
+          "title": "Zur Prüfung freigegeben",
+          "message": "Deine Anmeldung wurde zur administrativen Prüfung freigegeben. Darum kann sie gerade nicht verändert werden."
+        },
+        "in_review": {
+          "title": "In Prüfung",
+          "message": "Deine Anmeldung wird derzeit administrativ geprüft. Darum kann sie gerade nicht verändert werden."
+        },
+        "definitive": {
+          "title": "Anmeldung bestätigt",
+          "message": "Deine Anmeldung wurde definitiv bestätigt. Darum kann sie gerade nicht verändert werden."
+        },
+        "ready_for_pickup": {
+          "title": "Bereit zur Abholung",
+          "message": "Deine Geschenke sind bereit zur Abholung. Darum kann sie gerade nicht verändert werden."
+        },
+        "completed": {
+          "title": "Abgeschlossen",
+          "message": "Deine Anmeldung ist abgeschlossen. Darum kann sie gerade nicht verändert werden."
+        }
       },
       "errors": {
         "INVALID_ORDER": "Bitte prüfe deine Angaben.",
@@ -390,12 +408,12 @@
       "staySignedIn": "Angemeldet bleiben"
     },
     "admin": {
-       "overview": {
+      "overview": {
         "stub": {
           "title": "Übersicht",
           "message": "Die Übersicht für Weihnachtswünsche wird derzeit vorbereitet."
         },
-         "title": "Admin-Übersicht"
+        "title": "Admin-Übersicht"
       },
       "fairgateTest": {
         "title": "Fairgate-Test",
@@ -440,54 +458,54 @@
           "REQUEST_FAILED": "Die Anfrage konnte nicht durchgeführt werden."
         }
       },
-       "overview": {
-         "title": "Admin-Übersicht",
-         "filters": {
-           "title": "Filter",
-           "status": "Status",
-           "category": "Kategorie",
-           "active": "Aktive Filter",
-           "removeStatus": "Statusfilter entfernen",
-           "removeCategory": "Kategoriefilter entfernen"
-         },
-         "statuses": {
-           "released": "Freigegeben",
-           "in_review": "In Prüfung",
-           "changes_requested": "Änderungen verlangt",
-           "definitive": "Definitiv",
-           "ready_for_pickup": "Bereit zur Abholung",
-           "completed": "Abgeschlossen"
-         },
-         "ordersTitle": "Bestellungen",
-         "orderNotFound": "Die Bestellung wurde nicht gefunden.",
-         "back": "Zurück zur Übersicht",
-         "change": "Ändern",
-         "save": "Speichern",
-         "email": "E-Mail-Adresse",
-         "orderNumber": "Ordernummer",
-         "wishNumber": "Wunschnummer",
-         "status": "Status",
-         "itemCountHeader": "Anzahl Wünsche",
-         "actions": "Aktionen",
-         "itemCount": "{{ count }} Wünsche",
-          "process": "Bestellung verarbeiten",
-          "editTitle": "Bestellung bearbeiten",
-          "itemEditTitle": "Wunsch bearbeiten",
-         "currentText": "Aktueller Order-Text",
-         "originalText": "Ursprünglicher Order-Text",
-          "adminNotes": "Interne Bemerkung oder Begründung der Order-Zurückweisung",
-         "itemsTitle": "Wünsche",
-         "originalDescription": "Ursprüngliche Wunschbeschreibung",
-         "originalReason": "Ursprüngliche Begründung",
-         "rejectionReason": "Begründung der Zurückweisung",
-         "accept": "Wunsch akzeptieren",
-         "reject": "Wunsch zurückweisen",
-         "rejectOrder": "Zurückweisen",
-         "release": "Freigeben",
-         "cancel": "Abbrechen",
-         "successTitle": "Erfolgreich",
-         "saved": "Die Bestellung wurde gespeichert.",
-         "saveErrorTitle": "Bestellung konnte nicht gespeichert werden",
+      "overview": {
+        "title": "Admin-Übersicht",
+        "filters": {
+          "title": "Filter",
+          "status": "Status",
+          "category": "Kategorie",
+          "active": "Aktive Filter",
+          "removeStatus": "Statusfilter entfernen",
+          "removeCategory": "Kategoriefilter entfernen"
+        },
+        "statuses": {
+          "released": "Freigegeben",
+          "in_review": "In Prüfung",
+          "changes_requested": "Änderungen verlangt",
+          "definitive": "Definitiv",
+          "ready_for_pickup": "Bereit zur Abholung",
+          "completed": "Abgeschlossen"
+        },
+        "ordersTitle": "Bestellungen",
+        "orderNotFound": "Die Bestellung wurde nicht gefunden.",
+        "back": "Zurück zur Übersicht",
+        "change": "Ändern",
+        "save": "Speichern",
+        "email": "E-Mail-Adresse",
+        "orderNumber": "Ordernummer",
+        "wishNumber": "Wunschnummer",
+        "status": "Status",
+        "itemCountHeader": "Anzahl Wünsche",
+        "actions": "Aktionen",
+        "itemCount": "{{ count }} Wünsche",
+        "process": "Bestellung verarbeiten",
+        "editTitle": "Bestellung bearbeiten",
+        "itemEditTitle": "Wunsch bearbeiten",
+        "currentText": "Aktueller Order-Text",
+        "originalText": "Ursprünglicher Order-Text",
+        "adminNotes": "Interne Bemerkung oder Begründung der Order-Zurückweisung",
+        "itemsTitle": "Wünsche",
+        "originalDescription": "Ursprüngliche Wunschbeschreibung",
+        "originalReason": "Ursprüngliche Begründung",
+        "rejectionReason": "Begründung der Zurückweisung",
+        "accept": "Wunsch akzeptieren",
+        "reject": "Wunsch zurückweisen",
+        "rejectOrder": "Zurückweisen",
+        "release": "Freigeben",
+        "cancel": "Abbrechen",
+        "successTitle": "Erfolgreich",
+        "saved": "Die Bestellung wurde gespeichert.",
+        "saveErrorTitle": "Bestellung konnte nicht gespeichert werden",
         "loading": "Übersicht wird geladen ...",
         "definitiveTitle": "Definitive Bestellungen",
         "waiting_for_fairgateTitle": "Bestellungen warten auf Fairgate",
@@ -529,17 +547,17 @@
         "successTitle": "Erfolgreich",
         "deliveredMessage": "{{ updated }} definitive Bestellungen wurden zur Auslieferung markiert.",
         "errorTitle": "Übersicht konnte nicht geladen werden",
-         "errors": {
-           "INVALID_ORDER_DATA": "Die Bestelldaten sind ungültig.",
-           "ORDER_NOT_FOUND": "Die Bestellung wurde nicht gefunden.",
-           "REJECTION_REASON_REQUIRED": "Für eine Zurückweisung ist eine Begründung erforderlich.",
-           "ITEMS_NOT_ACCEPTED": "Alle Wünsche müssen zuerst akzeptiert werden.",
-            "ITEM_REJECTION_REQUIRED": "Mindestens ein Wunsch muss zurückgewiesen werden.",
-            "ORDER_REJECTION_REASON_REQUIRED": "Für die Zurückweisung der Order ist eine Begründung erforderlich.",
-            "rejectionReason": {
-              "required": "Bitte gib eine Begründung für die Zurückweisung ein."
-            },
-           "ORDER_UPDATE_FAILED": "Die Bestellung konnte nicht gespeichert werden.",
+        "errors": {
+          "INVALID_ORDER_DATA": "Die Bestelldaten sind ungültig.",
+          "ORDER_NOT_FOUND": "Die Bestellung wurde nicht gefunden.",
+          "REJECTION_REASON_REQUIRED": "Für eine Zurückweisung ist eine Begründung erforderlich.",
+          "ITEMS_NOT_ACCEPTED": "Alle Wünsche müssen zuerst akzeptiert werden.",
+          "ITEM_REJECTION_REQUIRED": "Mindestens ein Wunsch muss zurückgewiesen werden.",
+          "ORDER_REJECTION_REASON_REQUIRED": "Für die Zurückweisung der Order ist eine Begründung erforderlich.",
+          "rejectionReason": {
+            "required": "Bitte gib eine Begründung für die Zurückweisung ein."
+          },
+          "ORDER_UPDATE_FAILED": "Die Bestellung konnte nicht gespeichert werden.",
           "INVALID_OVERVIEW_CONFIGURATION": "Die Konfiguration für die Übersicht ist ungültig.",
           "REQUEST_FAILED": "Die Übersicht konnte nicht geladen werden.",
           "DELIVERY_FAILED": "Die definitiven Bestellungen konnten nicht zur Auslieferung markiert werden."

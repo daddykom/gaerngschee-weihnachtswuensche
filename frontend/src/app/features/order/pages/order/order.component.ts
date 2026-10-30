@@ -1,8 +1,15 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
+import {
+  applyWhen,
   form,
   FormField,
-  applyWhen,
   maxLength,
   min,
   minLength,
@@ -10,15 +17,19 @@ import {
   validate,
 } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog';
 import { ControlErrorComponent } from '../../../../shared/components/control-error/control-error';
-import { OrderFormValue, OrderItemStatus, OrderStatus } from '../../../../shared/models/order.model';
+import {
+  OrderFormValue,
+  OrderItemStatus,
+  OrderStatus,
+} from '../../../../shared/models/order.model';
 import { selectAuthFirstAccess } from '../../../../store/auth/auth.feature';
 import { NotificationActions } from '../../../../store/notification/notification.actions';
 import { OrderActions } from '../../../../store/order/order.actions';
@@ -60,14 +71,27 @@ export class OrderComponent {
   readonly storeForm = this.store.selectSignal(selectOrderForm);
   readonly canEdit = computed(() => {
     const currentOrder = this.order();
-    return currentOrder === null || ['draft', 'family_size_exceeded', 'changes_requested'].includes(currentOrder.status as OrderStatus);
+    return (
+      currentOrder === null ||
+      ['draft', 'family_size_exceeded', 'changes_requested'].includes(
+        currentOrder.status as OrderStatus,
+      )
+    );
   });
   readonly maxItems = computed(() => {
-    const adults = this.fairgateUserExists() === true ? this.fairgateAdultsCount() : this.storeForm().adultsCount;
-    const children = this.fairgateUserExists() === true ? this.fairgateChildrenCount() : this.storeForm().childrenCount;
+    const adults =
+      this.fairgateUserExists() === true
+        ? this.fairgateAdultsCount()
+        : this.storeForm().adultsCount;
+    const children =
+      this.fairgateUserExists() === true
+        ? this.fairgateChildrenCount()
+        : this.storeForm().childrenCount;
     return (adults ?? 0) + (children ?? 0);
   });
-  readonly canAddItem = computed(() => this.canEdit() && this.storeForm().items.length < this.maxItems());
+  readonly canAddItem = computed(
+    () => this.canEdit() && this.storeForm().items.length < this.maxItems(),
+  );
 
   readonly formModel = signal<OrderFormValue>({
     password: '',
@@ -79,19 +103,23 @@ export class OrderComponent {
   });
 
   readonly orderForm = form(this.formModel, (schema) => {
-    applyWhen(schema, () => this.firstAccess(), (passwordSchema) => {
-      required(passwordSchema.password);
-      minLength(passwordSchema.password, 12);
-      maxLength(passwordSchema.password, 128);
-      required(passwordSchema.passwordConfirmation);
-      minLength(passwordSchema.passwordConfirmation, 12);
-      maxLength(passwordSchema.passwordConfirmation, 128);
-      validate(passwordSchema.passwordConfirmation, ({ valueOf }) =>
-        valueOf(passwordSchema.password) === valueOf(passwordSchema.passwordConfirmation)
-          ? undefined
-          : { kind: 'passwordsDoNotMatch' },
-      );
-    });
+    applyWhen(
+      schema,
+      () => this.firstAccess(),
+      (passwordSchema) => {
+        required(passwordSchema.password);
+        minLength(passwordSchema.password, 12);
+        maxLength(passwordSchema.password, 128);
+        required(passwordSchema.passwordConfirmation);
+        minLength(passwordSchema.passwordConfirmation, 12);
+        maxLength(passwordSchema.passwordConfirmation, 128);
+        validate(passwordSchema.passwordConfirmation, ({ valueOf }) =>
+          valueOf(passwordSchema.password) === valueOf(passwordSchema.passwordConfirmation)
+            ? undefined
+            : { kind: 'passwordsDoNotMatch' },
+        );
+      },
+    );
     required(schema.adultsCount);
     min(schema.adultsCount, 0);
     required(schema.childrenCount);
@@ -112,7 +140,9 @@ export class OrderComponent {
 
     effect(() => {
       if (initialized) {
-        this.store.dispatch(OrderActions.formChanged({ changes: this.cloneFormValue(this.formModel()) }));
+        this.store.dispatch(
+          OrderActions.formChanged({ changes: this.cloneFormValue(this.formModel()) }),
+        );
       }
     });
   }
@@ -124,12 +154,14 @@ export class OrderComponent {
   save(): void {
     const itemCount = this.storeForm().items.length;
     if (itemCount < 1 || itemCount > this.maxItems()) {
-      this.store.dispatch(NotificationActions.show({
-        variant: 'error',
-        titleKey: 'app.order.errors.INVALID_ORDER',
-        messageKey: 'app.order.errors.items.itemCount',
-        preserveOnRoutes: ['/bestellung'],
-      }));
+      this.store.dispatch(
+        NotificationActions.show({
+          variant: 'error',
+          titleKey: 'app.order.errors.INVALID_ORDER',
+          messageKey: 'app.order.errors.items.itemCount',
+          preserveOnRoutes: ['/bestellung'],
+        }),
+      );
     }
 
     if (!this.orderForm().valid()) {
@@ -169,9 +201,11 @@ export class OrderComponent {
 
     dialogRef.afterClosed().subscribe((confirmed) => {
       if (confirmed) {
-        this.store.dispatch(OrderActions.formChanged({
-          changes: { items: this.storeForm().items.filter((item) => item.id !== id) },
-        }));
+        this.store.dispatch(
+          OrderActions.formChanged({
+            changes: { items: this.storeForm().items.filter((item) => item.id !== id) },
+          }),
+        );
       }
     });
   }

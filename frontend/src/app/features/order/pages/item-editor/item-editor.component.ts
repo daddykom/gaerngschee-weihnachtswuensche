@@ -53,14 +53,20 @@ export class ItemEditorComponent {
 
   constructor() {
     const item = this.orderFormState().items.find((candidate) => candidate.id === this.itemId);
-    this.otherItems = this.orderFormState().items.filter((candidate) => candidate.id !== this.itemId);
+    this.otherItems = this.orderFormState().items.filter(
+      (candidate) => candidate.id !== this.itemId,
+    );
     if (item) {
       this.formModel.set({ ...item });
     } else if (!this.isNew) {
       void this.router.navigate(['/bestellung']);
       return;
     } else {
-      this.store.dispatch(OrderActions.formChanged({ changes: { items: [...this.orderFormState().items, this.formModel()] } }));
+      this.store.dispatch(
+        OrderActions.formChanged({
+          changes: { items: [...this.orderFormState().items, this.formModel()] },
+        }),
+      );
     }
 
     this.initialized = true;
@@ -69,7 +75,9 @@ export class ItemEditorComponent {
       if (!this.initialized) {
         return;
       }
-      this.store.dispatch(OrderActions.formChanged({ changes: { items: [...this.otherItems, { ...itemValue }] } }));
+      this.store.dispatch(
+        OrderActions.formChanged({ changes: { items: [...this.otherItems, { ...itemValue }] } }),
+      );
     });
   }
 
@@ -79,17 +87,21 @@ export class ItemEditorComponent {
       return;
     }
 
-    this.store.dispatch(OrderActions.formChanged({
-      changes: { items: [...this.otherItems, { ...this.formModel() }] },
-    }));
+    this.store.dispatch(
+      OrderActions.formChanged({
+        changes: { items: [...this.otherItems, { ...this.formModel() }] },
+      }),
+    );
     void this.router.navigate(['/bestellung']);
   }
 
   back(): void {
     if (this.isNew) {
-      this.store.dispatch(OrderActions.formChanged({
-        changes: { items: this.otherItems },
-      }));
+      this.store.dispatch(
+        OrderActions.formChanged({
+          changes: { items: this.otherItems },
+        }),
+      );
     }
     void this.router.navigate(['/bestellung']);
   }

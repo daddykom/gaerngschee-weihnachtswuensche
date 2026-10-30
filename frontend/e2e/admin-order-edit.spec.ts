@@ -1,5 +1,5 @@
-import { expect, test } from './support/test';
 import { loginAsAdmin, mockOrders, orderFixture } from './support/admin-orders';
+import { expect, test } from './support/test';
 
 test.describe('Admin order edit route', () => {
   test('uses browser back on cancel', async ({ page }) => {
@@ -19,7 +19,11 @@ test.describe('Admin order edit route', () => {
     await page.route('http://localhost:8083/admin/orders/order-1', async (route) => {
       patchCount += 1;
       expect(route.request().postDataJSON().action).toBe('save');
-      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ order: orderFixture() }) });
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ order: orderFixture() }),
+      });
     });
 
     await page.goto('/admin/overview');
@@ -40,7 +44,11 @@ test.describe('Admin order edit route', () => {
     let action: unknown;
     await page.route('http://localhost:8083/admin/orders/order-1', async (route) => {
       action = route.request().postDataJSON().action;
-      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ order: { ...orderFixture(), status: 'definitive' } }) });
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ order: { ...orderFixture(), status: 'definitive' } }),
+      });
     });
 
     await page.goto('/admin/overview');
@@ -63,7 +71,11 @@ test.describe('Admin order edit route', () => {
     let action: unknown;
     await page.route('http://localhost:8083/admin/orders/order-1', async (route) => {
       action = route.request().postDataJSON().action;
-      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ order: { ...orderFixture(), status: 'changes_requested' } }) });
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ order: { ...orderFixture(), status: 'changes_requested' } }),
+      });
     });
 
     await page.goto('/admin/overview');

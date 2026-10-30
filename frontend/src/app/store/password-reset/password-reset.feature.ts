@@ -40,8 +40,9 @@ export const {
   selectResetStatus: selectPasswordResetStatus,
 } = passwordResetFeature;
 
-export const selectPasswordResetRequestLoading = (state: { passwordReset: PasswordResetState }): boolean =>
-  state.passwordReset.requestStatus === 'loading';
+export const selectPasswordResetRequestLoading = (state: {
+  passwordReset: PasswordResetState;
+}): boolean => state.passwordReset.requestStatus === 'loading';
 
 export const selectPasswordResetLoading = (state: { passwordReset: PasswordResetState }): boolean =>
   state.passwordReset.resetStatus === 'loading';

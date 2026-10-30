@@ -272,8 +272,12 @@ export const logoutEffect = createEffect(
       ofType(AuthActions.logoutRequested, AuthActions.logoutRequestedWithRedirect),
       exhaustMap((action) =>
         authService.logout().pipe(
-          map(() => NavigationActions.navigate({ target: 'target' in action ? action.target : '/' })),
-          catchError(() => of(NavigationActions.navigate({ target: 'target' in action ? action.target : '/' }))),
+          map(() =>
+            NavigationActions.navigate({ target: 'target' in action ? action.target : '/' }),
+          ),
+          catchError(() =>
+            of(NavigationActions.navigate({ target: 'target' in action ? action.target : '/' })),
+          ),
         ),
       ),
     ),

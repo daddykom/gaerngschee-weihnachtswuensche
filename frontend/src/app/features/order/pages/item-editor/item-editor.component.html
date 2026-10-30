@@ -8,7 +8,9 @@
     <mat-form-field appearance="outline" subscriptSizing="dynamic">
       <mat-label>{{ 'app.order.items.category' | translate }}</mat-label>
       <mat-select [formField]="itemForm.category">
-        <mat-option value="voucher">{{ 'app.order.items.categories.voucher' | translate }}</mat-option>
+        <mat-option value="voucher">{{
+          'app.order.items.categories.voucher' | translate
+        }}</mat-option>
         <mat-option value="gift">{{ 'app.order.items.categories.gift' | translate }}</mat-option>
       </mat-select>
       <app-control-error

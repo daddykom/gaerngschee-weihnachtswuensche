@@ -8,9 +8,20 @@
           <mat-form-field appearance="outline" subscriptSizing="dynamic">
             <mat-label>{{ 'app.order.password.label' | translate }}</mat-label>
             @if (canEdit()) {
-              <input matInput type="password" autocomplete="new-password" [formField]="orderForm.password" />
+              <input
+                matInput
+                type="password"
+                autocomplete="new-password"
+                [formField]="orderForm.password"
+              />
             } @else {
-              <input matInput type="password" autocomplete="new-password" [value]="storeForm().password" readonly />
+              <input
+                matInput
+                type="password"
+                autocomplete="new-password"
+                [value]="storeForm().password"
+                readonly
+              />
             }
             <app-control-error
               matError
@@ -21,9 +32,20 @@
           <mat-form-field appearance="outline" subscriptSizing="dynamic">
             <mat-label>{{ 'app.order.passwordConfirmation.label' | translate }}</mat-label>
             @if (canEdit()) {
-              <input matInput type="password" autocomplete="new-password" [formField]="orderForm.passwordConfirmation" />
+              <input
+                matInput
+                type="password"
+                autocomplete="new-password"
+                [formField]="orderForm.passwordConfirmation"
+              />
             } @else {
-              <input matInput type="password" autocomplete="new-password" [value]="storeForm().passwordConfirmation" readonly />
+              <input
+                matInput
+                type="password"
+                autocomplete="new-password"
+                [value]="storeForm().passwordConfirmation"
+                readonly
+              />
             }
             <app-control-error
               matError
@@ -98,7 +120,11 @@
       <p>{{ 'app.order.items.description' | translate }}</p>
       <div class="order-table-wrapper">
         <table>
-          <caption class="visually-hidden">{{ 'app.order.items.caption' | translate }}</caption>
+          <caption class="visually-hidden">
+            {{
+              'app.order.items.caption' | translate
+            }}
+          </caption>
           <thead>
             <tr>
               <th scope="col">{{ 'app.order.items.category' | translate }}</th>
@@ -111,10 +137,10 @@
           <tbody>
             @for (item of storeForm().items; track item.id) {
               <tr>
-                <td>{{ ('app.order.items.categories.' + item.category) | translate }}</td>
+                <td>{{ 'app.order.items.categories.' + item.category | translate }}</td>
                 <td>{{ item.description }}</td>
                 <td>{{ item.reason }}</td>
-                <td>{{ ('app.order.items.statuses.' + itemStatus(item.id)) | translate }}</td>
+                <td>{{ 'app.order.items.statuses.' + itemStatus(item.id) | translate }}</td>
                 <td>
                   @if (canEdit()) {
                     <div class="gl-cluster table-actions">

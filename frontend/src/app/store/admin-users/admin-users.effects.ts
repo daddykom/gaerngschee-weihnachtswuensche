@@ -150,7 +150,11 @@ export const sendPasswordResetEffect = createEffect(
 export const navigateBackAfterUserMutationEffect = createEffect(
   (actions$ = inject(Actions)) =>
     actions$.pipe(
-      ofType(AdminUsersActions.createSuccess, AdminUsersActions.updateSuccess, AdminUsersActions.updateProfileSuccess),
+      ofType(
+        AdminUsersActions.createSuccess,
+        AdminUsersActions.updateSuccess,
+        AdminUsersActions.updateProfileSuccess,
+      ),
       map(() => NavigationActions.navigate({ target: 'back' })),
     ),
   { functional: true },
@@ -182,7 +186,10 @@ export const adminUsersNotificationEffect = createEffect(
           });
         }
 
-        if (action.type === AdminUsersActions.updateSuccess.type || action.type === AdminUsersActions.updateProfileSuccess.type) {
+        if (
+          action.type === AdminUsersActions.updateSuccess.type ||
+          action.type === AdminUsersActions.updateProfileSuccess.type
+        ) {
           return NotificationActions.show({
             variant: 'success',
             titleKey: 'app.admin.users.successTitle',
@@ -190,7 +197,10 @@ export const adminUsersNotificationEffect = createEffect(
               ? 'app.admin.users.updatedWithEmail'
               : 'app.admin.users.updated',
             params: action.emailSentTo ? { recipient: action.emailSentTo } : {},
-            preserveOnRoutes: action.type === AdminUsersActions.updateProfileSuccess.type ? ['/user/profile'] : ['/admin/users'],
+            preserveOnRoutes:
+              action.type === AdminUsersActions.updateProfileSuccess.type
+                ? ['/user/profile']
+                : ['/admin/users'],
           });
         }
 

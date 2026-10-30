@@ -29,7 +29,9 @@ describe('frontendConfigFeature', () => {
 
   it('updates configs and loading/saving flags for all actions', () => {
     const config = { id: 'site_name' } as never;
-    expect(frontendConfigFeature.reducer(initialState, FrontendConfigActions.load).loadStatus).toBe('loading');
+    expect(frontendConfigFeature.reducer(initialState, FrontendConfigActions.load).loadStatus).toBe(
+      'loading',
+    );
     expect(
       frontendConfigFeature.reducer(
         { ...initialState, loadStatus: 'loading' },

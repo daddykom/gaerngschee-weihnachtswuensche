@@ -8,15 +8,22 @@ import { Store } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AdminOrdersActions } from '../../../../store/admin-orders/admin-orders.actions';
 import {
-  selectAdminOrders,
   selectAdminOrderCategories,
   selectAdminOrderStatuses,
+  selectAdminOrders,
   selectAdminOrdersLoadStatus,
 } from '../../../../store/admin-orders/admin-orders.feature';
 
 @Component({
   selector: 'app-admin-overview',
-  imports: [TranslatePipe, RouterLink, MatButtonModule, MatChipsModule, MatFormFieldModule, MatSelectModule],
+  imports: [
+    TranslatePipe,
+    RouterLink,
+    MatButtonModule,
+    MatChipsModule,
+    MatFormFieldModule,
+    MatSelectModule,
+  ],
   templateUrl: './admin-overview.component.html',
   styleUrl: './admin-overview.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -27,15 +34,26 @@ export class AdminOverviewComponent {
   readonly loadStatus = this.store.selectSignal(selectAdminOrdersLoadStatus);
   readonly selectedStatuses = this.store.selectSignal(selectAdminOrderStatuses);
   readonly selectedCategories = this.store.selectSignal(selectAdminOrderCategories);
-  readonly statusOptions = ['released', 'in_review', 'changes_requested', 'definitive', 'ready_for_pickup', 'completed'];
+  readonly statusOptions = [
+    'released',
+    'in_review',
+    'changes_requested',
+    'definitive',
+    'ready_for_pickup',
+    'completed',
+  ];
   readonly categoryOptions = ['gift', 'voucher'];
 
   statusChanged(statuses: string[]): void {
-    this.store.dispatch(AdminOrdersActions.filtersChanged({ statuses, categories: this.selectedCategories() }));
+    this.store.dispatch(
+      AdminOrdersActions.filtersChanged({ statuses, categories: this.selectedCategories() }),
+    );
   }
 
   categoryChanged(categories: string[]): void {
-    this.store.dispatch(AdminOrdersActions.filtersChanged({ statuses: this.selectedStatuses(), categories }));
+    this.store.dispatch(
+      AdminOrdersActions.filtersChanged({ statuses: this.selectedStatuses(), categories }),
+    );
   }
 
   removeStatus(status: string): void {
