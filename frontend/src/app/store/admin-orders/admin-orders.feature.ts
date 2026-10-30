@@ -6,7 +6,8 @@ export const adminOrdersFeature = createFeature({
   name: 'adminOrders',
   reducer: createReducer<AdminOrdersState>(
     initialState,
-    on(AdminOrdersActions.load, (state, { statuses, categories }) => ({
+    on(AdminOrdersActions.load, (state) => ({ ...state, loadStatus: 'loading', errorCode: null })),
+    on(AdminOrdersActions.filtersChanged, (state, { statuses, categories }) => ({
       ...state, statuses, categories, loadStatus: 'loading', errorCode: null,
     })),
     on(AdminOrdersActions.loadSuccess, (state, { orders }) => ({ ...state, orders, loadStatus: 'loaded' })),

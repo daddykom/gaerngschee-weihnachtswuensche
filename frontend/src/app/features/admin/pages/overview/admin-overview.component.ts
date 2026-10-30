@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -9,6 +9,8 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { AdminOrdersActions } from '../../../../store/admin-orders/admin-orders.actions';
 import {
   selectAdminOrders,
+  selectAdminOrderCategories,
+  selectAdminOrderStatuses,
   selectAdminOrdersLoadStatus,
 } from '../../../../store/admin-orders/admin-orders.feature';
 
@@ -23,8 +25,8 @@ export class AdminOverviewComponent {
   private readonly store = inject(Store);
   readonly orders = this.store.selectSignal(selectAdminOrders);
   readonly loadStatus = this.store.selectSignal(selectAdminOrdersLoadStatus);
-  readonly selectedStatuses = signal<string[]>(['released', 'in_review']);
-  readonly selectedCategories = signal<string[]>([]);
+  readonly selectedStatuses = this.store.selectSignal(selectAdminOrderStatuses);
+  readonly selectedCategories = this.store.selectSignal(selectAdminOrderCategories);
   readonly statusOptions = ['released', 'in_review', 'changes_requested', 'definitive', 'ready_for_pickup', 'completed'];
   readonly categoryOptions = ['gift', 'voucher'];
 
@@ -33,17 +35,15 @@ export class AdminOverviewComponent {
   }
 
   load(): void {
-    this.store.dispatch(AdminOrdersActions.load({ statuses: this.selectedStatuses(), categories: this.selectedCategories() }));
+    this.store.dispatch(AdminOrdersActions.load());
   }
 
   statusChanged(statuses: string[]): void {
-    this.selectedStatuses.set(statuses);
-    this.load();
+    this.store.dispatch(AdminOrdersActions.filtersChanged({ statuses, categories: this.selectedCategories() }));
   }
 
   categoryChanged(categories: string[]): void {
-    this.selectedCategories.set(categories);
-    this.load();
+    this.store.dispatch(AdminOrdersActions.filtersChanged({ statuses: this.selectedStatuses(), categories }));
   }
 
   removeStatus(status: string): void {

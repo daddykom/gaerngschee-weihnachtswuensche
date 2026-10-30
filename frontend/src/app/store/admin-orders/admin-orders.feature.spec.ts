@@ -6,7 +6,7 @@ describe('adminOrdersFeature', () => {
   const order = { id: 'order-1', status: 'released', items: [] };
 
   it('tracks loading, loaded and failed list states', () => {
-    expect(adminOrdersFeature.reducer(initialState, AdminOrdersActions.load({ statuses: ['released'], categories: ['gift'] }))).toMatchObject({
+    expect(adminOrdersFeature.reducer(initialState, AdminOrdersActions.filtersChanged({ statuses: ['released'], categories: ['gift'] }))).toMatchObject({
       statuses: ['released'],
       categories: ['gift'],
       loadStatus: 'loading',
