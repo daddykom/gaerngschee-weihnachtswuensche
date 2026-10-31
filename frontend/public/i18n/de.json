@@ -373,8 +373,17 @@
       "privacyLink": "Datenschutzerklärung lesen",
       "reservationDialog": {
         "title": "Wunsch erfüllen",
+        "wishDetailsTitle": "Wunschdetails",
+        "wishNumberLabel": "Wunschnummer",
+        "wishLabel": "Wunsch",
+        "reasonLabel": "Begründung",
+        "commitmentTitle": "Verbindliche Zusage",
         "emailLabel": "Deine E-Mail-Adresse",
-        "commitment": "Mit der Reservierung verpflichtest du dich, den Wunsch zu beschaffen, zu verpacken und am {{date}} im Zeitfenster {{time}} am Ort {{location}} abzugeben.",
+        "commitment": "Mit der Reservierung verpflichtest du dich, den Wunsch zu beschaffen, zu verpacken und zur angegebenen Zeit am angegebenen Ort abzugeben.",
+        "handoverTitle": "Übergabe",
+        "handoverDateLabel": "Datum",
+        "handoverTimeLabel": "Zeitfenster",
+        "handoverLocationLabel": "Ort",
         "privacyConsent": "Ich akzeptiere die Datenschutzerklärung.",
         "submit": "Bestätigungslink senden",
         "errors": {

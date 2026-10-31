@@ -48,7 +48,8 @@ export class FulfillmentPageComponent {
     this.store.dispatch(FulfillerOrdersActions.reservationStarted({ itemId: wish.id }));
     this.dialog.open(FulfillerReservationDialog, {
       data: wish,
-      width: 'min(40rem, calc(100vw - 2rem))',
+      width: 'calc(100vw - 2rem)',
+      maxWidth: '40rem',
     });
   }
 }
