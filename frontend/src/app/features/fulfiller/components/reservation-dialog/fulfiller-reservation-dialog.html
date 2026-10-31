@@ -1,6 +1,14 @@
 <h2 mat-dialog-title>{{ 'app.fulfiller.reservationDialog.title' | translate }}</h2>
 <mat-dialog-content>
   <div class="gl-stack gl-stack--section">
+    @if (status() === 'error' && errorCode(); as currentErrorCode) {
+    <div role="alert">
+      <app-info-box variant="error" [title]="'app.fulfiller.errorTitle' | translate">
+        {{ 'app.fulfiller.errors.' + currentErrorCode | translate }}
+      </app-info-box>
+    </div>
+    }
+
     <section class="gl-stack" aria-labelledby="selected-wish-heading">
       <h3 id="selected-wish-heading">
         {{ 'app.fulfiller.reservationDialog.wishDetailsTitle' | translate }}

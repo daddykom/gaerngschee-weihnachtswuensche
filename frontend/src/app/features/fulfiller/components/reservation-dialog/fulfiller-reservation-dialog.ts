@@ -9,11 +9,13 @@ import { RouterLink } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ControlErrorComponent } from '../../../../shared/components/control-error/control-error';
+import { InfoBoxComponent } from '../../../../shared/components/info-box/info-box';
 import { inputLimits } from '../../../../shared/constants/input-limits';
 import { FulfillerWish } from '../../../../shared/models/fulfiller-order.model';
 import { selectFrontendPublicConfigs } from '../../../../store/frontend-config/frontend-config.feature';
 import { FulfillerOrdersActions } from '../../../../store/fulfiller-orders/fulfiller-orders.actions';
 import {
+  selectFulfillerReservationErrorCode,
   selectFulfillerReservationForm,
   selectFulfillerReservationStatus,
 } from '../../../../store/fulfiller-orders/fulfiller-orders.feature';
@@ -23,6 +25,7 @@ import {
   imports: [
     ControlErrorComponent,
     FormField,
+    InfoBoxComponent,
     MatButtonModule,
     MatCheckboxModule,
     MatDialogModule,
@@ -41,6 +44,7 @@ export class FulfillerReservationDialog {
   private readonly storeForm = this.store.selectSignal(selectFulfillerReservationForm);
   private readonly publicConfigs = this.store.selectSignal(selectFrontendPublicConfigs);
   readonly status = this.store.selectSignal(selectFulfillerReservationStatus);
+  readonly errorCode = this.store.selectSignal(selectFulfillerReservationErrorCode);
   readonly model = signal({ email: '', privacyAccepted: false });
   readonly form = form(this.model, (schema) => {
     required(schema.email);
