@@ -17,25 +17,51 @@
       "privacyPageTitle": "Datenschutz – Gärngschee Weihnachtswünsche"
     },
     "home": {
-      "title": "Weihnachtswünsche",
-      "lead": "Gemeinsam machen wir einen Herbstmess-Besuch möglich - auch wenn das Geld knapp ist.",
-      "externalLink": "(öffnet in einem neuen Fenster)",
+      "title": "Weihnachtsaktion",
+      "lead": "Hilf mit, Weihnachtswünsche zu erfüllen",
       "loading": "Die Aktionsseite wird geladen ...",
       "login": "Anmelden",
       "logout": "Abmelden",
-      "donate": {
-        "title": "Weihnachtswünsche spenden",
-        "text": "Erfülle einer Familie einen Besuch an der Messe {{year}}.",
-        "action": "Jetzt spenden",
-        "unavailable": "Der Spendenlink ist momentan nicht verfügbar."
-      },
-      "receive": {
-        "title": "Weihnachtswünsche erhalten",
-        "text": "Möchtest Du ein Weihnachtswünsche für Dich und deine Famile? Starte hier deine Anfrage.",
-        "action": "Weihnachtswünsche anfragen",
+      "submit": {
+        "title": "Wunsch einreichen",
+        "text": "Reiche deinen Weihnachtswunsch ein.",
+        "action": "Wunsch einreichen",
         "notStarted": "Die nächste Weihnachtswünsche-Aktion beginnt am {{date}}.",
         "ended": "Wegen zu grosser Nachfrage sind leider keine Neuanmeldungen mehr möglich.",
         "unavailable": "Die Weihnachtswünsche-Aktion ist momentan nicht verfügbar."
+      },
+      "fulfill": {
+        "title": "Wünsche erfüllen",
+        "text": "Erfülle Weihnachtswünsche von anderen.",
+        "action": "Wünsche anzeigen"
+      },
+      "documents": {
+        "title": "Info Dokumente",
+        "text": "Bitte lies die folgenden Dokumente durch, bevor du mitmachst.",
+        "criteria": "Wunschzettel-Kriterien für Wünschende",
+        "givers": "Wunschzettel Infos für Schenkende"
+      },
+      "faq": {
+        "1": {
+          "question": "Welche Wertgrenze gilt für Wünsche?",
+          "answer": "<p>Pro Person gilt ein Maximalwert von <strong>CHF 100.-</strong></p><p>Alternativ kann sich eine Familie auch für einen gemeinsamen Familienwunsch entscheiden, der diesen Betrag übersteigen darf.</p>"
+        },
+        "2": {
+          "question": "Sind Freizeitpark-Wünsche möglich?",
+          "answer": "<p>Ja! Erlaubt sind Eintritte in Freizeit- und Erlebnisparks innerhalb der Schweiz.</p>"
+        },
+        "3": {
+          "question": "Kann ich Gutscheine wünschen?",
+          "answer": "<p>Ab dem <strong>12. Geburtstag</strong> sind Gutscheine möglich.</p><p>Für jüngere Kinder sind ausschliesslich <strong>Sachwünsche</strong> erlaubt.</p><p>💡 <em>Bei Gutscheinwünschen bestimmst du selber den Wert des Gutscheins.</em></p>"
+        },
+        "4": {
+          "question": "Welche Produkte müssen neu sein?",
+          "answer": "<p><strong>Folgende Produkte müssen zwingend neu sein:</strong></p><ul><li>Elektronische Gegenstände (Handy, Laptop, Tablet, Konsolen – diese dürfen gebraucht sein, aber in gutem Zustand)</li><li>Hygieneprodukte</li><li>Textilien wie Kleidung und Schuhe</li></ul><p>💡 <em>Andere Geschenke dürfen auch gebraucht sein, solange sie in gutem Zustand sind.</em></p>"
+        },
+        "5": {
+          "question": "Werden alle Wünsche erfüllt?",
+          "answer": "<p>Gärngschee behält sich vor, Wünsche abzulehnen, die nicht den Richtlinien entsprechen. Wir prüfen jeden Wunsch sorgfältig, um sicherzustellen, dass möglichst viele Wünsche erfüllt werden können.</p>"
+        }
       }
     },
     "publicConfiguration": {
