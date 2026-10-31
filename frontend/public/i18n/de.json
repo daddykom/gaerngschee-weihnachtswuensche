@@ -375,6 +375,31 @@
         "REQUEST_FAILED": "Die Wünsche konnten nicht geladen werden. Bitte versuche es später erneut."
       }
     },
+    "fulfillerRegistration": {
+      "pageTitle": "Als Wunscherfüller anmelden",
+      "lead": "Gib deine E-Mail-Adresse ein. Wir schicken dir einen persönlichen Link für die passwortlose Anmeldung.",
+      "emailHeading": "Deine E-Mail-Adresse",
+      "emailLabel": "E-Mail-Adresse",
+      "privacyConsent": "Ich akzeptiere die Datenschutzerklärung und möchte per E-Mail einen Anmeldelink erhalten.",
+      "privacyLink": "Datenschutzerklärung lesen",
+      "submit": "Anmeldelink senden",
+      "emailSentTitle": "E-Mail versandt",
+      "emailSentMessage": "Wir haben dir einen persönlichen Anmeldelink geschickt. Der Link ist 10 Minuten gültig.",
+      "errorTitle": "Anmeldung konnte nicht gestartet werden",
+      "errors": {
+        "email": {
+          "required": "Bitte gib deine E-Mail-Adresse ein.",
+          "email": "Bitte prüfe deine E-Mail-Adresse."
+        },
+        "privacyAccepted": {
+          "required": "Bitte akzeptiere die Datenschutzerklärung."
+        },
+        "PRIVACY_CONSENT_REQUIRED": "Bitte akzeptiere die Datenschutzerklärung.",
+        "CAMPAIGN_NOT_STARTED": "Die Aktion hat noch nicht begonnen.",
+        "CAMPAIGN_ENDED": "Die Aktion ist bereits beendet.",
+        "REQUEST_FAILED": "Der Anmeldelink konnte nicht gesendet werden. Bitte versuche es später erneut."
+      }
+    },
     "passwordChange": {
       "pageTitle": "Passwort ändern",
       "heading": "Passwort ändern",
@@ -844,6 +869,12 @@
           "nextText": "Der Link ist 10 Minuten gültig und kann nur einmal verwendet werden.",
           "button": "Weihnachtswünsche auswählen",
           "subject": "Dein Link zur Weihnachtswünsche-Bestellung"
+        },
+        "fulfiller": {
+          "title": "Dein Anmeldelink für Wunscherfüller",
+          "body": "Klicke auf den folgenden Link, um dich passwortlos als Wunscherfüller anzumelden und verfügbare Weihnachtswünsche zu übernehmen:",
+          "button": "Als Wunscherfüller anmelden",
+          "subject": "Dein Link zur Anmeldung als Wunscherfüller"
         },
         "common": {
           "ignore": "Falls du diese Anfrage nicht ausgelöst hast, kannst du diese E-Mail ignorieren."

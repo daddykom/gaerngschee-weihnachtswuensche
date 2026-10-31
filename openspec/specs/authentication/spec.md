@@ -14,6 +14,7 @@ Public and protected endpoints are separated by URL:
 | `/public/*` | Public access without authentication |
 | `/auth/*` | Authentication endpoints |
 | `/client/*` | Authenticated users in group `wunschbesteller` |
+| `/fulfiller/*` | Authenticated users in group `wunscherfueller` |
 | `/user/*` | Authenticated users in group `user` |
 | `/admin/*` | Authenticated users in group `admin` |
 
@@ -32,8 +33,10 @@ There are four authenticated user groups. Each user belongs to one group:
 | `admin` | System administration and user management |
 | `wunscherfueller` | Personen, die einzelne Wünsche erfüllen |
 
-Public registration always creates users in group `wunschbesteller`. The client cannot
-choose or submit a different group.
+The client registration flow creates users in group `wunschbesteller`. The client
+cannot choose or submit a different group. The fulfiller registration flow creates
+users in group `wunscherfueller` after successful one-time-token verification and
+does not use a password form.
 
 ## Backend Implementation
 
@@ -66,7 +69,11 @@ Implemented routes:
 | Method | URL | Purpose |
 |--------|-----|---------|
 | `POST` | `/auth/login` | Authenticate a user and issue a JWT |
+| `POST` | `/auth/registration-login` | Consume a client registration token and authenticate a client |
+| `POST` | `/auth/fulfiller-registration-login` | Consume a fulfiller registration token and authenticate a fulfiller |
 | `POST` | `/auth/logout` | Destroy the current session |
+| `POST` | `/public/start` | Request a client registration link |
+| `POST` | `/public/fulfiller-start` | Request a fulfiller registration link after required privacy opt-in |
 | `GET` | `/admin/users` | List users for administrators |
 
 ### Middleware
@@ -81,6 +88,20 @@ Implemented routes:
 - `/user/*` routes are protected by both middleware layers and allow the
   `user` and `admin` groups. Administrators therefore have all user rights.
 - `/client/*` routes allow only the `wunschbesteller` group.
+- `/fulfiller/*` routes allow only the `wunscherfueller` group.
+
+### Passwordless fulfiller registration
+
+- `POST /public/fulfiller-start` accepts an email address, language and mandatory
+  privacy opt-in.
+- The opt-in timestamp is stored with the registration token as
+  `privacy_accepted_at`.
+- A separate token purpose `fulfiller` is used. Tokens are stored hashed, expire
+  after ten minutes and can only be consumed once.
+- `POST /auth/fulfiller-registration-login` consumes only `fulfiller` tokens.
+- Existing `admin`, `user` and `wunschbesteller` accounts are not converted into
+  fulfillers. A new fulfiller account is created only when no account exists for
+  the verified email address.
 
 ## Security Considerations
 

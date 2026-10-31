@@ -7,6 +7,7 @@ namespace App\Routes;
 use App\Configuration\Actions\ListPublicConfigurationAction;
 use App\Configuration\Data\FrontendConfigRepository;
 use App\Registration\Actions\StartRegistrationAction;
+use App\Registration\Actions\StartFulfillerRegistrationAction;
 use App\Registration\Data\OrderRepository;
 use App\Registration\Services\AnmeldungService;
 use App\Registration\Services\RegistrationTokenService;
@@ -35,9 +36,12 @@ final class PublicRoutes
 
         $app->group('/public', function (RouteCollectorProxy $group) use ($anmeldungService, $registrationTokens, $configRepository, $rateLimitService): void {
             $start = $group->post('/start', new StartRegistrationAction($anmeldungService, $registrationTokens, $configRepository));
+            $fulfillerStart = $group->post('/fulfiller-start', new StartFulfillerRegistrationAction($anmeldungService, $registrationTokens, $configRepository));
             if ($rateLimitService !== null) {
                 $start->add(new RateLimitMiddleware(3, 900, static fn ($request): string => RateLimitMiddleware::ipAndEmail($request), $rateLimitService));
                 $start->add(new RateLimitMiddleware(20, 3600, static fn ($request): string => RateLimitMiddleware::ip($request), $rateLimitService));
+                $fulfillerStart->add(new RateLimitMiddleware(3, 900, static fn ($request): string => RateLimitMiddleware::ipAndEmail($request), $rateLimitService));
+                $fulfillerStart->add(new RateLimitMiddleware(20, 3600, static fn ($request): string => RateLimitMiddleware::ip($request), $rateLimitService));
             }
             $group->get('/configuration', new ListPublicConfigurationAction($configRepository));
         });

@@ -13,50 +13,60 @@ final class RegistrationTokenRepository
     {
     }
 
-    public function invalidateActiveForEmail(string $email, DateTimeImmutable $now): void
+    public function invalidateActiveForEmail(string $email, string $purpose, DateTimeImmutable $now): void
     {
         $stmt = $this->pdo->prepare(
             'UPDATE registration_tokens
              SET used_at = :used_at, updated_at = :updated_at
-             WHERE email = :email
+              WHERE email = :email AND purpose = :purpose
                AND used_at IS NULL
                AND expires_at > :now',
         );
         $timestamp = $now->format('Y-m-d H:i:s');
         $stmt->execute([
             'email' => $email,
+            'purpose' => $purpose,
             'used_at' => $timestamp,
             'updated_at' => $timestamp,
             'now' => $timestamp,
         ]);
     }
 
-    public function create(string $email, string $tokenHash, DateTimeImmutable $expiresAt): void
+    public function create(
+        string $email,
+        string $purpose,
+        string $tokenHash,
+        DateTimeImmutable $expiresAt,
+        ?DateTimeImmutable $privacyAcceptedAt = null,
+    ): void
     {
         $stmt = $this->pdo->prepare(
             'INSERT INTO registration_tokens
-                (id, email, token_hash, expires_at)
-             VALUES (:id, :email, :token_hash, :expires_at)',
+                (id, email, purpose, privacy_accepted_at, token_hash, expires_at)
+             VALUES (:id, :email, :purpose, :privacy_accepted_at, :token_hash, :expires_at)',
         );
         $stmt->execute([
             'id' => $this->createUuid(),
             'email' => $email,
+            'purpose' => $purpose,
+            'privacy_accepted_at' => $privacyAcceptedAt?->format('Y-m-d H:i:s'),
             'token_hash' => $tokenHash,
             'expires_at' => $expiresAt->format('Y-m-d H:i:s'),
         ]);
     }
 
-    public function findValid(string $tokenHash, DateTimeImmutable $now): ?array
+    public function findValid(string $tokenHash, string $purpose, DateTimeImmutable $now): ?array
     {
         $stmt = $this->pdo->prepare(
-            'SELECT id, email, token_hash, expires_at, used_at
+            'SELECT id, email, purpose, token_hash, expires_at, used_at
              FROM registration_tokens
-             WHERE token_hash = :token_hash
+              WHERE token_hash = :token_hash AND purpose = :purpose
                AND used_at IS NULL
                AND expires_at > :now',
         );
         $stmt->execute([
             'token_hash' => $tokenHash,
+            'purpose' => $purpose,
             'now' => $now->format('Y-m-d H:i:s'),
         ]);
         $row = $stmt->fetch();

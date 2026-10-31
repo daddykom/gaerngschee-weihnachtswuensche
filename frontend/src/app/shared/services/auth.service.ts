@@ -26,6 +26,8 @@ export interface RegistrationLoginResponse extends LoginResponse {
   salutation: string;
 }
 
+export type FulfillerRegistrationResponse = LoginResponse;
+
 export type EmailCheckMode = 'password' | 'email_sent' | 'info';
 
 export interface EmailCheckResponse {
@@ -70,6 +72,14 @@ export class AuthService {
   registrationLogin(token: string): Observable<RegistrationLoginResponse> {
     return this.http.post<RegistrationLoginResponse>(
       `${environment.apiUrl}/auth/registration-login`,
+      { token },
+      { withCredentials: true },
+    );
+  }
+
+  fulfillerRegistrationLogin(token: string): Observable<FulfillerRegistrationResponse> {
+    return this.http.post<FulfillerRegistrationResponse>(
+      `${environment.apiUrl}/auth/fulfiller-registration-login`,
       { token },
       { withCredentials: true },
     );

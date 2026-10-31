@@ -13,6 +13,8 @@ use Throwable;
 
 final class RegistrationTokenService
 {
+    public const CLIENT_ORDER = 'client-order';
+    public const FULFILLER = 'fulfiller';
     private readonly PDO $pdo;
     private readonly RegistrationTokenRepository $tokens;
 
@@ -23,7 +25,12 @@ final class RegistrationTokenService
     }
 
     /** @return array{token: string, expiresAt: string} */
-    public function issue(string $email, ?DateTimeImmutable $now = null): array
+    public function issue(
+        string $email,
+        ?DateTimeImmutable $now = null,
+        string $purpose = self::CLIENT_ORDER,
+        ?DateTimeImmutable $privacyAcceptedAt = null,
+    ): array
     {
         $now ??= new DateTimeImmutable('now', new DateTimeZone('UTC'));
         $token = rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '=');
@@ -31,8 +38,8 @@ final class RegistrationTokenService
 
         $this->pdo->beginTransaction();
         try {
-            $this->tokens->invalidateActiveForEmail($email, $now);
-            $this->tokens->create($email, hash('sha256', $token), $expiresAt);
+            $this->tokens->invalidateActiveForEmail($email, $purpose, $now);
+            $this->tokens->create($email, $purpose, hash('sha256', $token), $expiresAt, $privacyAcceptedAt);
             $this->pdo->commit();
         } catch (Throwable $exception) {
             $this->pdo->rollBack();
@@ -42,13 +49,13 @@ final class RegistrationTokenService
         return ['token' => $token, 'expiresAt' => $expiresAt->format(DATE_ATOM)];
     }
 
-    public function consume(string $token, ?DateTimeImmutable $now = null): ?string
+    public function consume(string $token, ?DateTimeImmutable $now = null, string $purpose = self::CLIENT_ORDER): ?string
     {
         $now ??= new DateTimeImmutable('now', new DateTimeZone('UTC'));
         $this->pdo->beginTransaction();
 
         try {
-            $record = $this->tokens->findValid(hash('sha256', $token), $now);
+            $record = $this->tokens->findValid(hash('sha256', $token), $purpose, $now);
             if ($record === null || !$this->tokens->consume($record['id'], $now)) {
                 $this->pdo->rollBack();
                 return null;

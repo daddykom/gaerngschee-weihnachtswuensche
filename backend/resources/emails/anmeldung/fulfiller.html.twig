@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="de">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{{ 'app.mail.registration.fulfiller.title'|trans }}</title></head>
+<body style="margin:0; padding:0; background-color:{{ EMAIL_THEME.pageBackground }}; font-family:Arial,Helvetica,sans-serif; color:{{ EMAIL_THEME.text }};">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:{{ EMAIL_THEME.pageBackground }};">
+    <tr><td align="center" style="padding:24px 12px;"><table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="width:100%; max-width:600px; background-color:{{ EMAIL_THEME.surface }}; border:1px solid {{ EMAIL_THEME.outline }}; border-radius:20px;">
+      <tr><td style="padding:32px; text-align:center; background-color:{{ EMAIL_THEME.primaryContainer }};"><img src="{{ LOGO_CID }}" width="210" alt="Gärngschee" style="display:block; width:210px; max-width:100%; height:auto; margin:0 auto 22px auto;"><h1 style="margin:0; font-size:28px; color:{{ EMAIL_THEME.text }};">{{ 'app.mail.registration.fulfiller.title'|trans }}</h1></td></tr>
+      <tr><td style="padding:24px 32px 8px; text-align:center;"><p style="font-size:17px; line-height:1.55; color:{{ EMAIL_THEME.mutedText }};">{{ 'app.mail.registration.fulfiller.body'|trans }}</p></td></tr>
+      <tr><td align="center" style="padding:22px 32px 34px;"><a href="{{ LOGIN_URL }}" style="display:inline-block; padding:14px 26px; font-size:17px; font-weight:700; color:{{ EMAIL_THEME.onPrimary }}; background:{{ EMAIL_THEME.primary }}; text-decoration:none; border-radius:999px;">{{ 'app.mail.registration.fulfiller.button'|trans }}</a><p style="margin:18px 0 0; font-size:13px; color:{{ EMAIL_THEME.mutedText }};">{{ 'app.mail.registration.common.ignore'|trans }}</p></td></tr>
+    </table></td></tr>
+  </table>
+</body>
+</html>

@@ -7,4 +7,5 @@ namespace App\Registration\Services;
 enum AnmeldungMailVariant: string
 {
     case ClientOrder = 'client-order';
+    case Fulfiller = 'fulfiller';
 }

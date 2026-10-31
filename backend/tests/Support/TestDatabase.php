@@ -30,6 +30,8 @@ final class TestDatabase
             'CREATE TABLE registration_tokens (
                 id TEXT PRIMARY KEY,
                 email TEXT NOT NULL,
+                purpose TEXT NOT NULL DEFAULT \'client-order\',
+                privacy_accepted_at TEXT NULL,
                 token_hash TEXT NOT NULL UNIQUE,
                 expires_at TEXT NOT NULL,
                 used_at TEXT NULL,

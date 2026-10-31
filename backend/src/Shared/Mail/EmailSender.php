@@ -93,10 +93,13 @@ final class EmailSender implements EmailSenderInterface
             'FAIRGATE_URL' => getenv('FAIRGATE_URL') ?: 'https://www.fairgate.ch',
         ]);
 
+        $subjectKey = $variant === AnmeldungMailVariant::ClientOrder
+            ? 'app.mail.registration.clientOrder.subject'
+            : 'app.mail.registration.fulfiller.subject';
         $message = (new Email())
             ->from(new Address($this->fromAddress, $this->fromName))
             ->to($recipient)
-            ->subject($this->translator->trans('app.mail.registration.clientOrder.subject', [], null, $locale))
+            ->subject($this->translator->trans($subjectKey, [], null, $locale))
             ->text($this->plainText($html))
             ->html($html)
             ->embedFromPath(
