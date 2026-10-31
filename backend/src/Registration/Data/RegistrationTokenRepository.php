@@ -38,8 +38,7 @@ final class RegistrationTokenRepository
         string $tokenHash,
         DateTimeImmutable $expiresAt,
         ?DateTimeImmutable $privacyAcceptedAt = null,
-    ): void
-    {
+    ): void {
         $stmt = $this->pdo->prepare(
             'INSERT INTO registration_tokens
                 (id, email, purpose, privacy_accepted_at, token_hash, expires_at)

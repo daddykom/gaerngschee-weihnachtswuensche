@@ -30,8 +30,7 @@ final class RegistrationTokenService
         ?DateTimeImmutable $now = null,
         string $purpose = self::CLIENT_ORDER,
         ?DateTimeImmutable $privacyAcceptedAt = null,
-    ): array
-    {
+    ): array {
         $now ??= new DateTimeImmutable('now', new DateTimeZone('UTC'));
         $token = rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '=');
         $expiresAt = $now->modify('+10 minutes');
