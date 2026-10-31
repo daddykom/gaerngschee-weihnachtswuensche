@@ -1,7 +1,8 @@
 import { provideHttpClient, withInterceptors, withXhr } from '@angular/common/http';
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { ApplicationConfig, isDevMode, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
+import { provideServiceWorker } from '@angular/service-worker';
 import { provideEffects } from '@ngrx/effects';
 import { provideState, provideStore } from '@ngrx/store';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
@@ -41,7 +42,7 @@ export const appConfig: ApplicationConfig = {
       notificationEffects,
       sessionEffects,
     ),
-    provideStoreDevtools(),
+    ...(isDevMode() ? [provideStoreDevtools()] : []),
     provideAnimations(),
     provideTranslateService({
       fallbackLang: 'de',
@@ -50,6 +51,10 @@ export const appConfig: ApplicationConfig = {
         prefix: './i18n/',
         suffix: '.json',
       }),
+    }),
+    provideServiceWorker('ngsw-worker.js', {
+      enabled: !isDevMode(),
+      registrationStrategy: 'registerWhenStable:30000',
     }),
   ],
 };

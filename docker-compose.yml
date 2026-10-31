@@ -21,3 +21,21 @@ services:
 
     extra_hosts:
       - "host.docker.internal:host-gateway"
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    ports:
+      - "8084:80"
+    environment:
+      - PMA_HOST=database
+      - PMA_PORT=3306
+      - PMA_ARBITRARY=1
+      - PMA_USER=gaerngschee_weihnachtswuensche
+      - PMA_PASSWORD=weihnachtswuensche-local-password
+    networks:
+      - shared-database
+
+networks:
+  shared-database:
+    external: true
+    name: gaerngschee-maesspaeggli_default

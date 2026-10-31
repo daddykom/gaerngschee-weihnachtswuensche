@@ -37,7 +37,7 @@ Unterstuetzte Sprache fuer `/public/start`: `de`.
 | `PATCH` | `/admin/users/{userId}` | `UpdateUserAction` | `AuthMiddleware`, Gruppe `admin` oder `user` | `{ email?, group?, required_password_reset? }` |
 | `DELETE` | `/admin/users/{userId}` | `DeleteUserAction` | `AuthMiddleware`, Gruppe `admin` | keiner |
 
-Moegliche Gruppen werden durch das Backend validiert und umfassen `admin`, `user` und `client`. Die Berechtigungen der jeweiligen Route sind in der Tabelle angegeben.
+Mögliche Gruppen werden durch das Backend validiert und umfassen `admin`, `user`, `wunschbesteller` und `wunscherfueller`. Die Berechtigungen der jeweiligen Route sind in der Tabelle angegeben.
 
 ## Fairgate
 

@@ -59,6 +59,7 @@ export class App {
   readonly authGroup = this.store.selectSignal(selectAuthGroup);
   readonly authEmail = this.store.selectSignal(selectAuthEmail);
   readonly isAdmin = computed(() => this.authGroup() === 'admin');
+  readonly isFulfiller = computed(() => this.authGroup() === 'wunscherfueller');
   private lastScrolledNotification: unknown = null;
 
   constructor() {

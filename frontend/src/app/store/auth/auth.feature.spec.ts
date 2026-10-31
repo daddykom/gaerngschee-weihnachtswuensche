@@ -10,9 +10,12 @@ describe('authReducer', () => {
     );
 
     expect(state).toEqual({
+      loginForm: { email: 'user@example.com', password: 'secret' },
+      passwordChangeForm: { newPassword: '', passwordConfirmation: '' },
       userId: null,
       group: null,
       requiredPasswordReset: false,
+      firstAccess: false,
       passwordChangeLoading: false,
       passwordChangeErrorCode: null,
       loading: true,
@@ -48,9 +51,12 @@ describe('authReducer', () => {
     );
 
     expect(state).toEqual({
+      loginForm: { email: '', password: '' },
+      passwordChangeForm: { newPassword: '', passwordConfirmation: '' },
       userId: 'user-123',
       group: 'admin',
       requiredPasswordReset: false,
+      firstAccess: false,
       passwordChangeLoading: false,
       passwordChangeErrorCode: null,
       loading: false,
@@ -82,9 +88,12 @@ describe('authReducer', () => {
     );
 
     expect(state).toEqual({
+      loginForm: { email: '', password: '' },
+      passwordChangeForm: { newPassword: '', passwordConfirmation: '' },
       userId: null,
       group: null,
       requiredPasswordReset: false,
+      firstAccess: false,
       passwordChangeLoading: false,
       passwordChangeErrorCode: null,
       loading: false,
@@ -112,6 +121,8 @@ describe('authReducer', () => {
   it('clears authentication data on logout', () => {
     const state = authReducer(
       {
+        loginForm: { email: '', password: '' },
+        passwordChangeForm: { newPassword: '', passwordConfirmation: '' },
         userId: 'user-123',
         group: 'admin',
         requiredPasswordReset: false,
@@ -126,6 +137,7 @@ describe('authReducer', () => {
         errorCode: null,
         registrationLoginLoading: false,
         registrationLoginErrorCode: null,
+        firstAccess: false,
         fairgateUserExists: null,
         fairgateStatus: null,
         childrenCount: null,
@@ -156,7 +168,8 @@ describe('authReducer', () => {
       AuthActions.registrationLoginSuccess({
         userId: 'client-1',
         email: 'client@example.com',
-        group: 'client',
+        group: 'wunschbesteller',
+        firstAccess: true,
         fairgateUserExists: true,
         childrenCount: 2,
         adultsCount: 2,
@@ -165,7 +178,7 @@ describe('authReducer', () => {
     );
     expect(state).toMatchObject({
       userId: 'client-1',
-      group: 'client',
+      group: 'wunschbesteller',
       registrationLoginLoading: false,
       registrationLoginErrorCode: null,
       fairgateUserExists: true,

@@ -18,7 +18,7 @@ final class SharedJsonFileLoaderTest extends TestCase
 
         self::assertSame('Weihnachtswünsche', $catalogue->get('app.title'));
         self::assertSame(
-            'Gemeinsam machen wir einen Herbstmess-Besuch möglich - auch wenn das Geld knapp ist.',
+            'Hilf mit, Weihnachtswünsche zu erfüllen',
             $catalogue->get('app.home.lead'),
         );
         self::assertSame(

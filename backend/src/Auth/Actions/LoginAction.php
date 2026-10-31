@@ -29,7 +29,7 @@ final class LoginAction
         }
 
         $user = ($this->users ?? new UserRepository())->verifyPassword($email, $password);
-        if ($user === null || !in_array($user['group'] ?? null, ['admin', 'user'], true)) {
+        if ($user === null || !in_array($user['group'] ?? null, ['admin', 'user', 'wunschbesteller', 'wunscherfueller'], true)) {
             return JsonResponse::error($response, 'INVALID_CREDENTIALS', 401);
         }
 

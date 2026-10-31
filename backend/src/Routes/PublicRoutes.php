@@ -6,9 +6,14 @@ namespace App\Routes;
 
 use App\Configuration\Actions\ListPublicConfigurationAction;
 use App\Configuration\Data\FrontendConfigRepository;
+use App\Registration\Actions\PublicFulfillerOrderListAction;
+use App\Registration\Actions\PublicFulfillerAvailabilityVersionAction;
+use App\Registration\Actions\PublicFulfillerWishStatusesAction;
 use App\Registration\Actions\StartRegistrationAction;
+use App\Registration\Actions\StartFulfillerReservationAction;
 use App\Registration\Data\OrderRepository;
 use App\Registration\Services\AnmeldungService;
+use App\Registration\Services\FulfillerReservationService;
 use App\Registration\Services\RegistrationTokenService;
 use App\Middleware\RateLimitMiddleware;
 use App\Shared\Http\RateLimitService;
@@ -26,6 +31,7 @@ final class PublicRoutes
         ?FrontendConfigRepository $configRepository = null,
         ?OrderRepository $orderRepository = null,
         ?RateLimitService $rateLimitService = null,
+        ?FulfillerReservationService $fulfillerReservations = null,
     ): void {
         $app->get('/public/php-test', static function (ServerRequestInterface $request, ResponseInterface $response): ResponseInterface {
             $response->getBody()->write('PHP backend is reachable.');
@@ -33,11 +39,17 @@ final class PublicRoutes
             return $response->withHeader('Content-Type', 'text/plain; charset=utf-8');
         });
 
-        $app->group('/public', function (RouteCollectorProxy $group) use ($anmeldungService, $registrationTokens, $configRepository, $rateLimitService): void {
+        $app->group('/public', function (RouteCollectorProxy $group) use ($anmeldungService, $registrationTokens, $configRepository, $rateLimitService, $fulfillerReservations): void {
             $start = $group->post('/start', new StartRegistrationAction($anmeldungService, $registrationTokens, $configRepository));
+            $fulfillerStart = $group->post('/fulfiller-reservation-start', new StartFulfillerReservationAction($anmeldungService, $fulfillerReservations, $configRepository));
+            $group->get('/fulfiller/orders', new PublicFulfillerOrderListAction());
+            $group->get('/fulfiller/availability-version', new PublicFulfillerAvailabilityVersionAction());
+            $group->get('/fulfiller/wish-statuses', new PublicFulfillerWishStatusesAction());
             if ($rateLimitService !== null) {
-                $start->add(new RateLimitMiddleware(3, 900, static fn ($request): string => RateLimitMiddleware::ipAndEmail($request), $rateLimitService));
-                $start->add(new RateLimitMiddleware(20, 3600, static fn ($request): string => RateLimitMiddleware::ip($request), $rateLimitService));
+                $start->add(new RateLimitMiddleware(10, 60, static fn ($request): string => RateLimitMiddleware::ipAndEmail($request), $rateLimitService));
+                $start->add(new RateLimitMiddleware(10, 60, static fn ($request): string => RateLimitMiddleware::ip($request), $rateLimitService));
+                $fulfillerStart->add(new RateLimitMiddleware(10, 60, static fn ($request): string => RateLimitMiddleware::ipAndEmail($request), $rateLimitService));
+                $fulfillerStart->add(new RateLimitMiddleware(10, 60, static fn ($request): string => RateLimitMiddleware::ip($request), $rateLimitService));
             }
             $group->get('/configuration', new ListPublicConfigurationAction($configRepository));
         });

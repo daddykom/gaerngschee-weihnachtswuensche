@@ -13,7 +13,15 @@ interface EmailSenderInterface
         AnmeldungMailVariant $variant,
         string $locale = 'de',
         ?string $loginUrl = null,
+        ?array $wish = null,
     ): void;
+
+    /** @param array<string, mixed> $wish @param array<string, mixed> $handover */
+    public function renderFulfillerReservationConfirmation(
+        array $wish,
+        array $handover,
+        string $locale = 'de',
+    ): array;
 
     public function sendUserCreated(string $recipient, string $temporaryPassword): void;
 

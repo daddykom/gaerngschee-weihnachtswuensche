@@ -1,9 +1,16 @@
+export interface StartForm {
+  email: string;
+  language: string;
+}
+
 export interface StartState {
-  loading: boolean;
+  status: 'initial' | 'loading' | 'success' | 'error';
   sent: boolean | null;
+  form: StartForm;
 }
 
 export const initialState: StartState = {
-  loading: false,
+  status: 'initial',
   sent: null,
+  form: { email: '', language: 'de' },
 };

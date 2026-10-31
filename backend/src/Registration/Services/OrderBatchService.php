@@ -8,10 +8,10 @@ use App\Configuration\Data\FrontendConfigRepository;
 use App\Fairgate\Services\FairgateContactProvider;
 use App\Fairgate\Services\FairgateBatchContactProvider;
 use App\Fairgate\Services\FairgateOrderDataEvaluator;
-use App\Registration\Data\OrderEmailQueueRepository;
 use App\Registration\Data\OrderRepository;
 use App\Registration\Data\RegistrationTokenRepository;
 use App\Shared\Mail\EmailSenderInterface;
+use App\Shared\Mail\EmailQueueRepository;
 use App\Shared\Database\Database;
 use App\Shared\Logging\ExternalErrorLogRepository;
 use DateTimeImmutable;
@@ -26,7 +26,7 @@ final class OrderBatchService
 
     public function __construct(
         private readonly OrderRepository $orders,
-        private readonly OrderEmailQueueRepository $queue,
+        private readonly EmailQueueRepository $queue,
         private readonly FrontendConfigRepository $config,
         private readonly FairgateContactProvider $fairgate,
         private readonly EmailSenderInterface $emails,
@@ -67,22 +67,22 @@ final class OrderBatchService
                 $this->emails->sendStoredEmail($email['recipient'], $email['subject'], $email['html_body'], $email['text_body']);
                 $this->queue->remove($email['id']);
                 if ($email['email_type'] === 'order_confirmation') {
-                    $this->orders->markBatchEmailSent($email['order_id']);
-                } else {
-                    $this->orders->markFairgateReminderSent($email['order_id']);
+                    $this->orders->markReleased($email['reference_id']);
+                } elseif ($email['email_type'] === 'fairgate_reminder') {
+                    $this->orders->markFairgateReminderSent($email['reference_id']);
                 }
                 $result['sent']++;
             } catch (Throwable $exception) {
                 $this->queue->recordFailure($email['id'], $exception->getMessage());
-                $this->log('Queued email failed', $email['order_id'], $exception);
+                $this->log('Queued email failed', $email['reference_id'], $exception);
                 $result['failed']++;
             }
         }
 
-        foreach ($this->orders->findProvisionalWithUsers() as $entry) {
+        foreach ($this->orders->findWaitingForFairgateWithUsers() as $entry) {
             $result['loaded']++;
             $order = $entry['order'];
-            if ($this->queue->hasPendingForOrder($order['id'])) {
+            if ($this->queue->hasPendingForReference('order', $order['id'])) {
                 continue;
             }
 
@@ -142,7 +142,7 @@ final class OrderBatchService
     private function contactData(string $email, ?array $contacts): ?array
     {
         if ($contacts === null) {
-            $data = $this->fairgate->findContactDataByEmail($email)['data'] ?? null;
+            $data = $this->fairgate->findContactDataByEmail($email, ClientRegistrationLoginService::MEMBERSHIP)['data'] ?? null;
             return is_array($data) ? $data : null;
         }
 
@@ -161,11 +161,12 @@ final class OrderBatchService
         if (($order['fairgateStatus'] ?? null) === 'expired') {
             $order['fairgateDocumentEmail'] = $this->documentEmail();
         }
-        $message = $this->emails->renderOrderConfirmation($order, 'definitive');
+        $message = $this->emails->renderOrderConfirmation($order, 'released');
         try {
             $this->emails->sendStoredEmail($email, $message['subject'], $message['html'], $message['text']);
         } catch (Throwable $exception) {
             $this->queue->enqueue(
+                'order',
                 $order['id'],
                 'order_confirmation',
                 $email,
@@ -177,7 +178,7 @@ final class OrderBatchService
             return;
         }
 
-        $this->orders->markBatchEmailSent($order['id']);
+        $this->orders->markReleased($order['id']);
         $result['sent']++;
     }
 
@@ -212,7 +213,14 @@ final class OrderBatchService
             $this->orders->markFairgateReminderSent($order['id']);
             $result['sent']++;
         } catch (Throwable $exception) {
-            $this->queue->enqueue($order['id'], 'fairgate_reminder', $email, $message, $exception->getMessage());
+            $this->queue->enqueue(
+                'order',
+                $order['id'],
+                'fairgate_reminder',
+                $email,
+                $message,
+                $exception->getMessage(),
+            );
             $this->log('Fairgate reminder failed and queued', $order['id'], $exception);
             $result['queued']++;
         }

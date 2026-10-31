@@ -81,6 +81,7 @@ final class EmailSender implements EmailSenderInterface
         AnmeldungMailVariant $variant,
         string $locale = 'de',
         ?string $loginUrl = null,
+        ?array $wish = null,
     ): void {
         if ($this->translator instanceof LocaleAwareInterface) {
             $this->translator->setLocale($locale);
@@ -91,12 +92,17 @@ final class EmailSender implements EmailSenderInterface
             'LOGO_CID' => 'cid:gaerngschee-logo',
             'REGISTRATION_URL' => $frontendBaseUrl . '/register',
             'FAIRGATE_URL' => getenv('FAIRGATE_URL') ?: 'https://www.fairgate.ch',
+            'WISH' => $wish,
         ]);
 
+        $subjectKey = match ($variant) {
+            AnmeldungMailVariant::ClientOrder => 'app.mail.registration.clientOrder.subject',
+            AnmeldungMailVariant::FulfillerReservation => 'app.mail.registration.fulfillerReservation.subject',
+        };
         $message = (new Email())
             ->from(new Address($this->fromAddress, $this->fromName))
             ->to($recipient)
-            ->subject($this->translator->trans('app.mail.registration.clientOrder.subject', [], null, $locale))
+            ->subject($this->translator->trans($subjectKey, [], null, $locale))
             ->text($this->plainText($html))
             ->html($html)
             ->embedFromPath(
@@ -115,6 +121,33 @@ final class EmailSender implements EmailSenderInterface
                 $exception,
             );
         }
+    }
+
+    /** @param array<string, mixed> $wish @param array<string, mixed> $handover */
+    public function renderFulfillerReservationConfirmation(
+        array $wish,
+        array $handover,
+        string $locale = 'de',
+    ): array {
+        if ($this->translator instanceof LocaleAwareInterface) {
+            $this->translator->setLocale($locale);
+        }
+        $html = $this->twig->render('fulfiller-reservation-confirmation.html.twig', [
+            'LOGO_CID' => 'cid:' . self::LOGO_CID,
+            'WISH' => $wish,
+            'HANDOVER' => $handover,
+        ]);
+
+        return [
+            'subject' => $this->translator->trans(
+                'app.mail.registration.fulfillerReservationConfirmation.subject',
+                [],
+                null,
+                $locale,
+            ),
+            'html' => $html,
+            'text' => $this->plainText($html),
+        ];
     }
 
     public function sendUserCreated(string $recipient, string $temporaryPassword): void
@@ -162,7 +195,7 @@ final class EmailSender implements EmailSenderInterface
     /** @return array{subject: string, html: string, text: string} */
     public function renderOrderConfirmation(array $order, string $mailStatus): array
     {
-        if (!in_array($mailStatus, ['definitive', 'provisional'], true)) {
+        if (!in_array($mailStatus, ['released', 'waiting_for_fairgate', 'definitive'], true)) {
             throw new \InvalidArgumentException('Invalid order confirmation mail status.');
         }
         $html = $this->twig->render('order-confirmation-' . $mailStatus . '.html.twig', [

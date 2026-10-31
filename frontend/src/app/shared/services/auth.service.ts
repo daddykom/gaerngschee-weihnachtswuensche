@@ -15,6 +15,7 @@ export interface LoginResponse {
   user: AuthUser;
   group: UserGroup;
   requiredPasswordReset: boolean;
+  firstAccess: boolean;
 }
 
 export interface RegistrationLoginResponse extends LoginResponse {

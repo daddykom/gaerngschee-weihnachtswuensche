@@ -1,4 +1,113 @@
-<section class="gl-stack gl-stack--group" aria-labelledby="overview-heading">
-  <h2 id="overview-heading">{{ 'app.admin.overview.stub.title' | translate }}</h2>
-  <p>{{ 'app.admin.overview.stub.message' | translate }}</p>
-</section>
+<div class="gl-stack gl-stack--section">
+  <section class="gl-stack gl-stack--group" aria-labelledby="order-filter-heading">
+    <h2 id="order-filter-heading">{{ 'app.admin.overview.filters.title' | translate }}</h2>
+    <div class="gl-grid gl-grid--2">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>{{ 'app.admin.overview.filters.status' | translate }}</mat-label>
+        <mat-select
+          multiple
+          [value]="selectedStatuses()"
+          (selectionChange)="statusChanged($event.value)"
+        >
+          @for (status of statusOptions; track status) {
+            <mat-option [value]="status">{{
+              'app.admin.overview.statuses.' + status | translate
+            }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>{{ 'app.admin.overview.filters.category' | translate }}</mat-label>
+        <mat-select
+          multiple
+          [value]="selectedCategories()"
+          (selectionChange)="categoryChanged($event.value)"
+        >
+          @for (category of categoryOptions; track category) {
+            <mat-option [value]="category">{{
+              'app.order.items.categories.' + category | translate
+            }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <mat-chip-set aria-label="{{ 'app.admin.overview.filters.active' | translate }}">
+      @for (status of selectedStatuses(); track status) {
+        <mat-chip-row (removed)="removeStatus(status)">
+          {{ 'app.admin.overview.statuses.' + status | translate }}
+          <button
+            matChipRemove
+            [attr.aria-label]="
+              ('app.admin.overview.filters.removeStatus' | translate) +
+              ' ' +
+              ('app.admin.overview.statuses.' + status | translate)
+            "
+          >
+            <span aria-hidden="true">×</span>
+          </button>
+        </mat-chip-row>
+      }
+      @for (category of selectedCategories(); track category) {
+        <mat-chip-row (removed)="removeCategory(category)">
+          {{ 'app.order.items.categories.' + category | translate }}
+          <button
+            matChipRemove
+            [attr.aria-label]="
+              ('app.admin.overview.filters.removeCategory' | translate) +
+              ' ' +
+              ('app.order.items.categories.' + category | translate)
+            "
+          >
+            <span aria-hidden="true">×</span>
+          </button>
+        </mat-chip-row>
+      }
+    </mat-chip-set>
+  </section>
+
+  <section class="gl-stack gl-stack--group" aria-labelledby="orders-heading">
+    <h2 id="orders-heading">{{ 'app.admin.overview.ordersTitle' | translate }}</h2>
+    @if (loadStatus() === 'loading') {
+      <p>{{ 'app.admin.overview.loading' | translate }}</p>
+    } @else {
+      <div
+        class="order-list"
+        role="table"
+        [attr.aria-label]="'app.admin.overview.tableCaption' | translate"
+      >
+        <div class="order-list__row order-list__row--header" role="row">
+          <span role="columnheader">{{ 'app.admin.overview.orderNumber' | translate }}</span>
+          <span role="columnheader">{{ 'app.admin.overview.email' | translate }}</span>
+          <span role="columnheader">{{ 'app.admin.overview.status' | translate }}</span>
+          <span role="columnheader">{{ 'app.admin.overview.itemCountHeader' | translate }}</span>
+          <span role="columnheader">{{ 'app.admin.overview.actions' | translate }}</span>
+        </div>
+        @for (order of orders(); track order.id) {
+          <div class="order-list__row" role="row">
+            <span role="cell" [attr.data-label]="'app.admin.overview.orderNumber' | translate">{{
+              order.orderNumber ?? '—'
+            }}</span>
+            <span role="cell" [attr.data-label]="'app.admin.overview.email' | translate">{{
+              order.requesterEmail
+            }}</span>
+            <span role="cell" [attr.data-label]="'app.admin.overview.status' | translate">{{
+              'app.admin.overview.statuses.' + order.status | translate
+            }}</span>
+            <span
+              role="cell"
+              [attr.data-label]="'app.admin.overview.itemCountHeader' | translate"
+              >{{ 'app.admin.overview.itemCount' | translate: { count: order.items.length } }}</span
+            >
+            <span role="cell" [attr.data-label]="'app.admin.overview.actions' | translate"
+              ><a mat-button [routerLink]="['/admin/orders', order.id, 'edit']">{{
+                'app.admin.overview.process' | translate
+              }}</a></span
+            >
+          </div>
+        } @empty {
+          <p>{{ 'app.admin.overview.empty' | translate }}</p>
+        }
+      </div>
+    }
+  </section>
+</div>

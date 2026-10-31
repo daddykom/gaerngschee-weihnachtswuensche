@@ -41,8 +41,8 @@ final class PublicStartRoutesTest extends TestCase
              VALUES (:id, :variable_name, :value, :description, :access_group, :update_group, :label)',
         );
         foreach ([
-            ['id' => 'client-url', 'variable_name' => 'fairgate_url', 'value' => 'https://fairgate.example', 'access_group' => ['client']],
-            ['id' => 'client-message', 'variable_name' => 'client_message', 'value' => 'Message', 'access_group' => ['admin', 'client']],
+            ['id' => 'client-url', 'variable_name' => 'fairgate_url', 'value' => 'https://fairgate.example', 'access_group' => ['wunschbesteller']],
+            ['id' => 'client-message', 'variable_name' => 'client_message', 'value' => 'Message', 'access_group' => ['admin', 'wunschbesteller']],
             ['id' => 'admin-email', 'variable_name' => 'fairgate_test_email', 'value' => 'admin@example.com', 'access_group' => ['admin']],
         ] as $config) {
             $insert->execute([
@@ -135,9 +135,14 @@ final class PublicStartRoutesTest extends TestCase
         return new AnmeldungService(
             $failToSend
                 ? new class () implements EmailSenderInterface {
-                    public function sendAnmeldung(string $recipient, \App\Registration\Services\AnmeldungMailVariant $variant, string $locale = 'de', ?string $loginUrl = null): void
+                    public function sendAnmeldung(string $recipient, \App\Registration\Services\AnmeldungMailVariant $variant, string $locale = 'de', ?string $loginUrl = null, ?array $wish = null): void
                     {
                         throw new \RuntimeException('SMTP failed');
+                    }
+
+                    public function renderFulfillerReservationConfirmation(array $wish, array $handover, string $locale = 'de'): array
+                    {
+                        return [];
                     }
 
                     public function sendOrderStatus(string $recipient, string $status, string $locale = 'de'): void
@@ -178,8 +183,13 @@ final class PublicStartRoutesTest extends TestCase
                     }
                 }
             : new class () implements EmailSenderInterface {
-                public function sendAnmeldung(string $recipient, \App\Registration\Services\AnmeldungMailVariant $variant, string $locale = 'de', ?string $loginUrl = null): void
+                public function sendAnmeldung(string $recipient, \App\Registration\Services\AnmeldungMailVariant $variant, string $locale = 'de', ?string $loginUrl = null, ?array $wish = null): void
                 {
+                }
+
+                public function renderFulfillerReservationConfirmation(array $wish, array $handover, string $locale = 'de'): array
+                {
+                    return [];
                 }
 
                 public function sendOrderStatus(string $recipient, string $status, string $locale = 'de'): void
@@ -243,7 +253,7 @@ final class PublicStartRoutesTest extends TestCase
             'variable_name' => 'campaign_start_date',
             'value' => json_encode($startDate, JSON_THROW_ON_ERROR),
             'description' => '',
-            'access_group' => json_encode(['admin', 'client'], JSON_THROW_ON_ERROR),
+            'access_group' => json_encode(['admin', 'wunschbesteller'], JSON_THROW_ON_ERROR),
             'update_group' => json_encode(['admin'], JSON_THROW_ON_ERROR),
             'label' => '',
         ]);
@@ -256,7 +266,7 @@ final class PublicStartRoutesTest extends TestCase
             'variable_name' => 'campaign_end_date',
             'value' => json_encode('2026-12-31', JSON_THROW_ON_ERROR),
             'description' => '',
-            'access_group' => json_encode(['admin', 'client'], JSON_THROW_ON_ERROR),
+            'access_group' => json_encode(['admin', 'wunschbesteller'], JSON_THROW_ON_ERROR),
             'update_group' => json_encode(['admin'], JSON_THROW_ON_ERROR),
             'label' => '',
         ]);
@@ -269,7 +279,7 @@ final class PublicStartRoutesTest extends TestCase
             'variable_name' => 'campaign_year',
             'value' => json_encode('2026', JSON_THROW_ON_ERROR),
             'description' => '',
-            'access_group' => json_encode(['admin', 'client'], JSON_THROW_ON_ERROR),
+            'access_group' => json_encode(['admin', 'wunschbesteller'], JSON_THROW_ON_ERROR),
             'update_group' => json_encode(['admin'], JSON_THROW_ON_ERROR),
             'label' => '',
         ]);

@@ -33,6 +33,7 @@ export const clientLoginGuard: CanMatchFn = () => {
             childrenCount: response.childrenCount,
             adultsCount: response.adultsCount,
             salutation: response.salutation,
+            firstAccess: response.firstAccess,
           }),
         );
         return router.parseUrl('/bestellung');

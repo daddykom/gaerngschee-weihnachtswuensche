@@ -18,7 +18,8 @@ final class TestDatabase
                 email TEXT UNIQUE NOT NULL,
                 password TEXT NOT NULL,
                 "group" TEXT NOT NULL,
-                superuser INTEGER NOT NULL DEFAULT 0,
+                 superuser INTEGER NOT NULL DEFAULT 0,
+                 token_version INTEGER NOT NULL DEFAULT 0,
                 required_password_reset INTEGER NOT NULL DEFAULT 0,
                 created_at TEXT,
                 updated_at TEXT
@@ -29,6 +30,8 @@ final class TestDatabase
             'CREATE TABLE registration_tokens (
                 id TEXT PRIMARY KEY,
                 email TEXT NOT NULL,
+                purpose TEXT NOT NULL DEFAULT \'client-order\',
+                privacy_accepted_at TEXT NULL,
                 token_hash TEXT NOT NULL UNIQUE,
                 expires_at TEXT NOT NULL,
                 used_at TEXT NULL,
@@ -69,9 +72,18 @@ final class TestDatabase
                 user_id TEXT NOT NULL,
                 year INTEGER NOT NULL,
                 status TEXT NOT NULL,
-                 adults_count INTEGER NOT NULL DEFAULT 0,
-                 children_count INTEGER NOT NULL DEFAULT 0,
-                 fairgate_status TEXT NULL,
+                  adults_count INTEGER NOT NULL DEFAULT 0,
+                  children_count INTEGER NOT NULL DEFAULT 0,
+                  original_text TEXT NULL,
+                  current_text TEXT NULL,
+                  admin_notes TEXT NULL,
+                  fairgate_adults_count INTEGER NULL,
+                  fairgate_children_count INTEGER NULL,
+                  processing_year INTEGER NULL,
+                  order_number INTEGER NULL,
+                  released_at TEXT NULL,
+                  definitive_at TEXT NULL,
+                  fairgate_status TEXT NULL,
                  confirmation_email_sent_at TEXT NULL,
                  fairgate_reminder_email_sent_at TEXT NULL,
                   created_at TEXT,
@@ -80,9 +92,48 @@ final class TestDatabase
             )',
         );
         $pdo->exec(
-            'CREATE TABLE order_email_queue (
+            'CREATE TABLE order_items (
                 id TEXT PRIMARY KEY,
                 order_id TEXT NOT NULL,
+                category TEXT NOT NULL DEFAULT \'gift\',
+                original_description TEXT NOT NULL,
+                current_description TEXT NOT NULL,
+                original_reason TEXT NULL,
+                 current_reason TEXT NULL,
+                 admin_notes TEXT NULL,
+                 status TEXT NOT NULL,
+                 publication_status TEXT NOT NULL DEFAULT \'draft\',
+                 fulfillment_status TEXT NOT NULL DEFAULT \'available\',
+                 item_number INTEGER NULL,
+                 fulfiller_email TEXT NULL,
+                 reserved_at TEXT NULL,
+                 reservation_expires_at TEXT NULL,
+                 reservation_token_id TEXT NULL,
+                 due_at TEXT NULL,
+                received_at TEXT NULL,
+                created_at TEXT,
+                updated_at TEXT
+            )',
+        );
+        $pdo->exec(
+            'CREATE TABLE fulfiller_reservation_tokens (
+                id TEXT PRIMARY KEY,
+                order_item_id TEXT NOT NULL,
+                email TEXT NOT NULL,
+                token_hash TEXT NOT NULL UNIQUE,
+                expires_at TEXT NOT NULL,
+                used_at TEXT NULL,
+                privacy_accepted_at TEXT NOT NULL,
+                privacy_confirmed_at TEXT NULL,
+                created_at TEXT,
+                updated_at TEXT
+            )',
+        );
+        $pdo->exec(
+            'CREATE TABLE email_queue (
+                id TEXT PRIMARY KEY,
+                reference_type TEXT NOT NULL,
+                reference_id TEXT NOT NULL,
                 email_type TEXT NOT NULL,
                 recipient TEXT NOT NULL,
                 subject TEXT NOT NULL,
@@ -91,7 +142,7 @@ final class TestDatabase
                 last_error TEXT NULL,
                 created_at TEXT,
                 updated_at TEXT,
-                UNIQUE (order_id, email_type)
+                UNIQUE (reference_type, reference_id, email_type)
             )',
         );
         $pdo->exec(

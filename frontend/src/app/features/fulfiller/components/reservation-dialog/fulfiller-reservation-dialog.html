@@ -1,0 +1,94 @@
+<h2 mat-dialog-title>{{ 'app.fulfiller.reservationDialog.title' | translate }}</h2>
+<mat-dialog-content>
+  <div class="gl-stack gl-stack--section">
+    @if (status() === 'error' && errorCode(); as currentErrorCode) {
+    <div role="alert">
+      <app-info-box variant="error" [title]="'app.fulfiller.errorTitle' | translate">
+        {{ 'app.fulfiller.errors.' + currentErrorCode | translate }}
+      </app-info-box>
+    </div>
+    }
+
+    <section class="gl-stack" aria-labelledby="selected-wish-heading">
+      <h3 id="selected-wish-heading">
+        {{ 'app.fulfiller.reservationDialog.wishDetailsTitle' | translate }}
+      </h3>
+      <dl class="reservation-dialog__details gl-stack">
+        <div>
+          <dt>{{ 'app.fulfiller.reservationDialog.wishNumberLabel' | translate }}</dt>
+          <dd>{{ wish.wishNumber }}</dd>
+        </div>
+        <div>
+          <dt>{{ 'app.fulfiller.reservationDialog.wishLabel' | translate }}</dt>
+          <dd class="gl-text--multiline">{{ wish.currentDescription }}</dd>
+        </div>
+        @if (wish.currentReason) {
+        <div>
+          <dt>{{ 'app.fulfiller.reservationDialog.reasonLabel' | translate }}</dt>
+          <dd class="gl-text--multiline">{{ wish.currentReason }}</dd>
+        </div>
+        }
+      </dl>
+    </section>
+
+    <section class="gl-stack" aria-labelledby="commitment-heading">
+      <h3 id="commitment-heading">
+        {{ 'app.fulfiller.reservationDialog.commitmentTitle' | translate }}
+      </h3>
+      <p>{{ 'app.fulfiller.reservationDialog.commitment' | translate }}</p>
+    </section>
+
+    <section class="gl-stack" aria-labelledby="handover-heading">
+      <h3 id="handover-heading">
+        {{ 'app.fulfiller.reservationDialog.handoverTitle' | translate }}
+      </h3>
+      <dl class="reservation-dialog__details gl-stack">
+        <div>
+          <dt>{{ 'app.fulfiller.reservationDialog.handoverDateLabel' | translate }}</dt>
+          <dd>{{ handoverDate() }}</dd>
+        </div>
+        <div>
+          <dt>{{ 'app.fulfiller.reservationDialog.handoverTimeLabel' | translate }}</dt>
+          <dd>{{ handoverTime() }}</dd>
+        </div>
+        <div>
+          <dt>{{ 'app.fulfiller.reservationDialog.handoverLocationLabel' | translate }}</dt>
+          <dd>{{ handoverLocation() }}</dd>
+        </div>
+      </dl>
+    </section>
+
+    <form class="gl-stack" (submit)="$event.preventDefault(); submit()">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>{{ 'app.fulfiller.reservationDialog.emailLabel' | translate }}</mat-label>
+        <input matInput type="email" autocomplete="email" [formField]="form.email" />
+        <app-control-error
+          matError
+          [control]="form.email()"
+          translationPrefix="app.fulfiller.reservationDialog.errors.email"
+        />
+      </mat-form-field>
+
+      <div class="gl-stack">
+        <mat-checkbox [formField]="form.privacyAccepted">
+          {{ 'app.fulfiller.reservationDialog.privacyConsent' | translate }}
+          <a routerLink="/datenschutz" mat-dialog-close>
+            {{ 'app.fulfiller.privacyLink' | translate }}
+          </a>
+        </mat-checkbox>
+        <app-control-error
+          [control]="form.privacyAccepted()"
+          translationPrefix="app.fulfiller.reservationDialog.errors.privacyAccepted"
+        />
+      </div>
+    </form>
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions class="reservation-dialog__actions">
+  <button mat-button type="button" mat-dialog-close>
+    {{ 'app.fulfiller.cancel' | translate }}
+  </button>
+  <button mat-flat-button type="button" (click)="submit()" [disabled]="status() === 'loading'">
+    {{ 'app.fulfiller.reservationDialog.submit' | translate }}
+  </button>
+</mat-dialog-actions>

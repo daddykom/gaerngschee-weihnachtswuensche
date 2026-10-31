@@ -45,13 +45,34 @@
 }
 
 @media (max-width: 47.99rem) {
+  .app-header__content {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    gap: var(--gl-space-sm);
+    min-height: 3.5rem;
+  }
+
+  .header-logo {
+    width: 4.5rem;
+    height: 2.5rem;
+  }
+
+  .app-header__title {
+    overflow: hidden;
+    min-width: 0;
+    font-size: 0.9375rem;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .app-header__email {
     display: none;
   }
 
   .app-header__account-button {
     display: inline-flex;
-    margin-inline-start: auto;
+    margin-inline-start: 0;
   }
 }
 

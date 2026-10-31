@@ -24,10 +24,6 @@ export class UsersComponent {
   readonly users = this.store.selectSignal(selectAdminUsers);
   readonly loading = this.store.selectSignal(selectAdminUsersLoading);
 
-  constructor() {
-    this.store.dispatch(AdminUsersActions.load());
-  }
-
   deleteUser(userId: string): void {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {

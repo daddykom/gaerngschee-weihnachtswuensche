@@ -1,6 +1,11 @@
 import { expect, test } from '@playwright/test';
+import { resetIntegrationRateLimits } from './support/auth-header';
 
 test.describe('Integration login', () => {
+  test.beforeEach(() => {
+    resetIntegrationRateLimits();
+  });
+
   test('logs in through the real backend', async ({ page }) => {
     await page.goto('/login');
     await page.locator('input[type="email"]').fill('admin@gaerngschee.ch');

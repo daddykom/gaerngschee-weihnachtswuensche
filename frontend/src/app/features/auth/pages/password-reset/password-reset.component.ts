@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
 import { form, FormField, maxLength, minLength, required, validate } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
@@ -8,7 +8,10 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { ControlErrorComponent } from '../../../../shared/components/control-error/control-error';
 import { inputLimits } from '../../../../shared/constants/input-limits';
 import { AuthActions } from '../../../../store/auth/auth.actions';
-import { selectPasswordResetLoading } from '../../../../store/password-reset/password-reset.feature';
+import {
+  selectPasswordResetLoading,
+  selectPasswordResetResetForm,
+} from '../../../../store/password-reset/password-reset.feature';
 
 @Component({
   selector: 'app-password-reset',
@@ -24,7 +27,8 @@ export class PasswordResetComponent {
   readonly token = this.route.snapshot.queryParamMap.get('token') ?? '';
   readonly email = this.route.snapshot.queryParamMap.get('email') ?? '';
   readonly loading = this.store.selectSignal(selectPasswordResetLoading);
-  readonly model = signal({ email: this.email, newPassword: '', passwordConfirmation: '' });
+  readonly storeForm = this.store.selectSignal(selectPasswordResetResetForm);
+  readonly model = signal({ newPassword: '', passwordConfirmation: '' });
   readonly passwordResetForm = form(this.model, (schema) => {
     required(schema.newPassword);
     minLength(schema.newPassword, inputLimits.minimumPasswordLength);
@@ -40,6 +44,33 @@ export class PasswordResetComponent {
   });
 
   constructor() {
+    let initialized = false;
+    let previousModel = { newPassword: '', passwordConfirmation: '' };
+    effect(() => {
+      const storeForm = this.storeForm();
+      if (!initialized && storeForm !== undefined) {
+        this.model.set({ ...storeForm });
+        previousModel = { ...storeForm };
+        initialized = true;
+      }
+    });
+    effect(() => {
+      if (!initialized) {
+        return;
+      }
+      const currentModel = this.model();
+      const changes: Partial<typeof currentModel> = {};
+      if (currentModel.newPassword !== previousModel.newPassword) {
+        changes.newPassword = currentModel.newPassword;
+      }
+      if (currentModel.passwordConfirmation !== previousModel.passwordConfirmation) {
+        changes.passwordConfirmation = currentModel.passwordConfirmation;
+      }
+      if (Object.keys(changes).length > 0) {
+        this.store.dispatch(AuthActions.passwordResetFormChanged({ changes }));
+        previousModel = { ...currentModel };
+      }
+    });
     if (this.token) {
       void this.router.navigate([], {
         relativeTo: this.route,
@@ -58,7 +89,10 @@ export class PasswordResetComponent {
     }
 
     this.store.dispatch(
-      AuthActions.passwordReset({ token: this.token, password: this.model().newPassword }),
+      AuthActions.passwordReset({
+        token: this.token,
+        password: this.storeForm()?.newPassword ?? this.model().newPassword,
+      }),
     );
   }
 }

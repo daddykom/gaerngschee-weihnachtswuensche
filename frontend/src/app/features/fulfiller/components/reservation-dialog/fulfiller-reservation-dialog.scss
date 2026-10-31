@@ -1,0 +1,45 @@
+:host {
+  display: block;
+}
+
+.reservation-dialog__details {
+  margin: 0;
+}
+
+.reservation-dialog__details > div {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gl-space-sm);
+}
+
+.reservation-dialog__details dt {
+  font-weight: 600;
+}
+
+.reservation-dialog__details dd,
+:host p {
+  margin: 0;
+}
+
+.reservation-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--gl-space-sm);
+}
+
+.reservation-dialog__actions button {
+  min-height: 48px;
+  padding-inline: 1.25rem;
+  font-size: 1rem;
+}
+
+@media (max-width: 599px) {
+  .reservation-dialog__actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .reservation-dialog__actions button {
+    width: 100%;
+  }
+}

@@ -52,7 +52,7 @@ final class AdminRoutesTest extends TestCase
     {
         $admin = $this->repository->createUser('admin@example.com', 'secret', 'admin');
         $this->repository->createUser('user@example.com', 'secret', 'user');
-        $this->repository->createUser('client@example.com', 'secret', 'client');
+        $this->repository->createUser('client@example.com', 'secret', 'wunschbesteller');
         (new SessionService())->setUser($admin['id'], 'admin');
         $app = AppFactory::create();
         $app->addRoutingMiddleware();
@@ -70,7 +70,7 @@ final class AdminRoutesTest extends TestCase
     public function testAdminCannotAccessClientUserDetails(): void
     {
         $admin = $this->repository->createUser('admin@example.com', 'secret', 'admin');
-        $client = $this->repository->createUser('client@example.com', 'secret', 'client');
+        $client = $this->repository->createUser('client@example.com', 'secret', 'wunschbesteller');
         (new SessionService())->setUser($admin['id'], 'admin');
 
         $response = $this->createApp()->handle(
@@ -95,8 +95,8 @@ final class AdminRoutesTest extends TestCase
 
     public function testClientCannotListAdminUsers(): void
     {
-        $client = $this->repository->createUser('client@example.com', 'secret', 'client');
-        (new SessionService())->setUser($client['id'], 'client');
+        $client = $this->repository->createUser('client@example.com', 'secret', 'wunschbesteller');
+        (new SessionService())->setUser($client['id'], 'wunschbesteller');
         $app = AppFactory::create();
         $app->addRoutingMiddleware();
         AdminRoutes::register($app, $this->repository);
@@ -226,14 +226,14 @@ final class AdminRoutesTest extends TestCase
 
         $response = $this->createApp()->handle($this->request('POST', '/admin/users', [
             'email' => 'client@example.com',
-            'group' => 'client',
+            'group' => 'wunschbesteller',
         ]));
 
         self::assertSame(422, $response->getStatusCode());
         self::assertNull($this->repository->findByEmail('client@example.com'));
     }
 
-    public function testUserCanUpdateOwnEmailButNotAnotherUser(): void
+    public function testUserCannotUpdateUsersThroughAdminRoutes(): void
     {
         $user = $this->repository->createUser('user@example.com', 'secret', 'user');
         $other = $this->repository->createUser('other@example.com', 'secret', 'user');
@@ -248,9 +248,9 @@ final class AdminRoutesTest extends TestCase
             'email' => 'blocked@example.com',
         ]));
 
-        self::assertSame(200, $ownResponse->getStatusCode());
-        self::assertSame('changed@example.com', $emailSender->changedRecipient);
+        self::assertSame(404, $ownResponse->getStatusCode());
         self::assertSame(404, $otherResponse->getStatusCode());
+        self::assertNull($emailSender->changedRecipient);
     }
 
     public function testAdminCanUpdateUserGroupAndPasswordResetFlag(): void
@@ -275,7 +275,7 @@ final class AdminRoutesTest extends TestCase
     public function testAdminCannotUpdateClientUser(): void
     {
         $admin = $this->repository->createUser('admin@example.com', 'secret', 'admin');
-        $client = $this->repository->createUser('client@example.com', 'secret', 'client');
+        $client = $this->repository->createUser('client@example.com', 'secret', 'wunschbesteller');
         (new SessionService())->setUser($admin['id'], 'admin');
 
         $response = $this->createApp()->handle($this->request('PATCH', '/admin/users/' . $client['id'], [
@@ -318,7 +318,7 @@ final class AdminRoutesTest extends TestCase
     public function testAdminCannotDeleteClientUser(): void
     {
         $admin = $this->repository->createUser('admin@example.com', 'secret', 'admin');
-        $client = $this->repository->createUser('client@example.com', 'secret', 'client');
+        $client = $this->repository->createUser('client@example.com', 'secret', 'wunschbesteller');
         (new SessionService())->setUser($admin['id'], 'admin');
 
         $response = $this->createApp()->handle(
@@ -332,7 +332,7 @@ final class AdminRoutesTest extends TestCase
     public function testAdminCannotSendPasswordResetToClientUser(): void
     {
         $admin = $this->repository->createUser('admin@example.com', 'secret', 'admin');
-        $client = $this->repository->createUser('client@example.com', 'secret', 'client');
+        $client = $this->repository->createUser('client@example.com', 'secret', 'wunschbesteller');
         (new SessionService())->setUser($admin['id'], 'admin');
 
         $response = $this->createApp()->handle(
@@ -362,7 +362,7 @@ final class AdminRoutesTest extends TestCase
             'INSERT INTO frontend_config (id, variable_name, value, description, access_group, update_group, label)
              VALUES (?, ?, ?, ?, ?, ?, ?)',
         )->execute([
-            'config-campaign-year-' . bin2hex(random_bytes(2)), 'campaign_year', '"' . date('Y') . '"', 'Campaign year', '["admin", "client"]', '["admin"]', 'Campaign year',
+            'config-campaign-year-' . bin2hex(random_bytes(2)), 'campaign_year', '"' . date('Y') . '"', 'Campaign year', '["admin", "wunschbesteller"]', '["admin"]', 'Campaign year',
         ]);
     }
 

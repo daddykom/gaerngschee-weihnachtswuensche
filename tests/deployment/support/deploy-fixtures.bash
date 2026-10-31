@@ -97,7 +97,7 @@ run_deploy() {
     "COMPOSER_BIN=$fake_bin/composer"
     "DEPLOY_EXPECTED_ENV_FILE=$target_base/$environment/backend/.env"
     'REPO_URL=https://example.test/repository.git'
-    "$project_directory/scripts/deploy.sh"
+    "$project_directory/scripts/deploy-weihnachtswuensche.sh"
     "$environment"
   )
 

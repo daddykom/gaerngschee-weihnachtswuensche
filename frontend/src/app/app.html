@@ -26,6 +26,9 @@
           <mat-icon aria-hidden="true">account_circle</mat-icon>
           <span>{{ email }}</span>
         </div>
+        @if (isFulfiller()) {
+        <a mat-menu-item routerLink="/erfuellen">{{ 'app.navigation.fulfillment' | translate }}</a>
+        }
       </mat-menu>
       } @if (isAdmin()) { @defer (when isAdmin()) {
       <app-admin-navigation [email]="authEmail()" />

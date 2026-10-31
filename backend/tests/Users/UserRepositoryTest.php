@@ -22,10 +22,10 @@ final class UserRepositoryTest extends TestCase
 
     public function testCreateUserStoresHashAndReturnsSafeUser(): void
     {
-        $user = $this->repository->createUser('client@example.com', 'secret', 'client');
+        $user = $this->repository->createUser('client@example.com', 'secret', 'wunschbesteller');
 
         self::assertSame('client@example.com', $user['email']);
-        self::assertSame('client', $user['group']);
+        self::assertSame('wunschbesteller', $user['group']);
         self::assertFalse((bool) $user['required_password_reset']);
         self::assertArrayNotHasKey('password', $user);
 

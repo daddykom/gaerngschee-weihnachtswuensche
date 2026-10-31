@@ -282,7 +282,7 @@ Für die Weiterverarbeitung gelten folgende Regeln:
 - Die Route erstellt einen einmaligen Registrierungstoken und versendet einen Link an die angegebene E-Mail-Adresse.
 - Registrierungstoken werden in der separaten Tabelle `registration_tokens` gespeichert, nur gehasht abgelegt und sind zehn Minuten gültig.
 - `POST /auth/registration-login` konsumiert den Token.
-- Erst beim erfolgreichen Token-Login wird ein neuer Benutzer mit der Gruppe `client` angelegt, falls noch keiner existiert.
+- Erst beim erfolgreichen Token-Login wird ein neuer Benutzer mit der Gruppe `wunschbesteller` angelegt, falls noch keiner existiert.
 - Bestehende `admin`- und `user`-Konten werden nicht in Client-Konten umgewandelt; die Antwort bleibt aus Sicherheitsgründen neutral.
 - Nach dem Token-Login werden JWT, Client-Gruppe und die berechneten Fairgate-Werte an das Frontend geliefert.
 - Das Frontend verarbeitet den Link unter `/client-login` und navigiert nach erfolgreichem Login zu `/order`.
@@ -290,9 +290,12 @@ Für die Weiterverarbeitung gelten folgende Regeln:
 ### Bestellstatus
 
 - Bestellungen werden pro Kunde und Kalenderjahr gespeichert.
-- Die technischen Statuswerte lauten `provisional` und `definitive`.
-- `fairgateUserExists = true` ergibt beim Speichern den Status `definitive`.
-- Jeder andere Fairgate-Status ergibt beim Speichern den Status `provisional`.
+- Die fachlichen Statuswerte lauten `draft`, `waiting_for_fairgate`, `released`,
+  `family_size_exceeded`, `in_review`, `changes_requested`, `definitive`,
+  `ready_for_pickup` und `completed`.
+- `fairgateUserExists = true` ergibt beim Speichern den Status `released`.
+- Jeder andere Fairgate-Status ergibt beim Speichern den Status
+  `waiting_for_fairgate`.
 - Sichtbare Übersetzungen dürfen diese technischen Werte lokalisieren.
 
 ## Arbeitsweise & Verhaltensregeln
@@ -460,6 +463,14 @@ Als Leitlinie gilt:
 > **Design for change, but do not implement the future in advance.**
 
 ## Coding Rules
+
+### 4a. Prettier-Formatierung
+
+- Nach jeder Änderung an formatierbaren Frontend-Dateien muss Prettier auf den
+  geänderten Dateien ausgeführt werden.
+- Vor dem Abschluss ist die Formatierung mit `npx prettier --check .` im
+  Verzeichnis `frontend/` zu prüfen.
+- Die projektspezifische Konfiguration in `frontend/.prettierrc` ist verbindlich.
 
 ### 5. Immer Signal Forms verwenden
 

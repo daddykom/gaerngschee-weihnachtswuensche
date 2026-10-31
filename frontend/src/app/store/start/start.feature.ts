@@ -6,19 +6,24 @@ export const startFeature = createFeature({
   name: 'start',
   reducer: createReducer<StartState>(
     initialState,
-    on(StartActions.submit, (state) => ({
+    on(StartActions.formChanged, (state, { changes }) => ({
       ...state,
-      loading: true,
+      form: { ...state.form, ...changes },
+    })),
+    on(StartActions.submit, (state, { email, language }) => ({
+      ...state,
+      status: 'loading',
       sent: null,
+      form: { email, language },
     })),
     on(StartActions.submitSuccess, (state, { sent }) => ({
       ...state,
-      loading: false,
+      status: 'success',
       sent,
     })),
     on(StartActions.submitFailure, (state) => ({
       ...state,
-      loading: false,
+      status: 'error',
       sent: false,
     })),
   ),
@@ -28,6 +33,10 @@ export const {
   name: startFeatureName,
   reducer: startReducer,
   selectStartState,
-  selectLoading: selectStartLoading,
+  selectStatus: selectStartStatus,
   selectSent: selectStartSent,
+  selectForm: selectStartForm,
 } = startFeature;
+
+export const selectStartLoading = (state: { start: StartState }): boolean =>
+  state.start.status === 'loading';

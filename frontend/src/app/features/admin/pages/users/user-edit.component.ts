@@ -1,5 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { email, form, FormField, maxLength, required } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -8,12 +7,16 @@ import { MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
-import { map, of } from 'rxjs';
 import { ControlErrorComponent } from '../../../../shared/components/control-error/control-error';
 import { inputLimits } from '../../../../shared/constants/input-limits';
-import { AdminUsersService } from '../../../../shared/services/admin-users.service';
 import { AdminUsersActions } from '../../../../store/admin-users/admin-users.actions';
-import { selectAdminUsersSaving } from '../../../../store/admin-users/admin-users.feature';
+import {
+  selectAdminUsersDetailLoading,
+  selectAdminUsersForm,
+  selectAdminUsersSaving,
+  selectAdminUsersSelectedUser,
+} from '../../../../store/admin-users/admin-users.feature';
+import { AdminUserForm } from '../../../../store/admin-users/admin-users.state';
 import { selectAuthGroup } from '../../../../store/auth/auth.feature';
 import { NavigationActions } from '../../../../store/navigation/navigation.actions';
 
@@ -34,18 +37,17 @@ import { NavigationActions } from '../../../../store/navigation/navigation.actio
 export class UserEditComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly store = inject(Store);
-  private readonly service = inject(AdminUsersService);
 
   private readonly authGroup = this.store.selectSignal(selectAuthGroup);
   readonly isAdmin = computed(() => this.authGroup() === 'admin');
   readonly saving = this.store.selectSignal(selectAdminUsersSaving);
+  readonly loading = this.store.selectSignal(selectAdminUsersDetailLoading);
+  readonly selectedUser = this.store.selectSignal(selectAdminUsersSelectedUser);
+  readonly storeForm = this.store.selectSignal(selectAdminUsersForm);
   readonly userId = this.route.snapshot.paramMap.get('userId');
+  readonly isProfile = this.route.snapshot.routeConfig?.path === 'user/profile';
   readonly isNew = this.route.snapshot.routeConfig?.path === 'new';
-  readonly model = signal<{
-    email: string;
-    group: 'admin' | 'user' | 'client';
-    requiredPasswordReset: boolean;
-  }>({
+  readonly model = signal<AdminUserForm>({
     email: '',
     group: 'user',
     requiredPasswordReset: false,
@@ -56,22 +58,56 @@ export class UserEditComponent {
     maxLength(schema.email, inputLimits.email);
     required(schema.group);
   });
-  readonly loading = toSignal(
-    this.isNew || this.userId === null
-      ? of(false)
-      : this.service.get(this.userId).pipe(
-          map(({ user }) => {
-            this.model.update((model) => ({
-              ...model,
-              email: user.email,
-              group: user.group,
-              requiredPasswordReset: user.required_password_reset,
-            }));
-            return false;
-          }),
-        ),
-    { initialValue: !this.isNew },
-  );
+  constructor() {
+    if (this.isNew) {
+      this.store.dispatch(
+        AdminUsersActions.formLoaded({
+          form: { email: '', group: 'user', requiredPasswordReset: false },
+        }),
+      );
+    }
+    let initialized = false;
+    let previousModel = this.model();
+    effect(() => {
+      const user = this.selectedUser();
+      if (user === null || this.isNew) {
+        return;
+      }
+      const form = {
+        email: user.email,
+        group: user.group === 'admin' ? 'admin' : 'user',
+        requiredPasswordReset: user.required_password_reset,
+      } as const;
+      this.store.dispatch(AdminUsersActions.formLoaded({ form }));
+      this.model.set(form);
+      previousModel = form;
+      initialized = true;
+    });
+    effect(() => {
+      const storeForm = this.storeForm();
+      if (!initialized && (this.isNew || storeForm !== undefined)) {
+        this.model.set({ ...storeForm });
+        previousModel = { ...storeForm };
+        initialized = true;
+      }
+    });
+    effect(() => {
+      if (!initialized) {
+        return;
+      }
+      const currentModel = this.model();
+      const changes: Partial<typeof currentModel> = {};
+      if (currentModel.email !== previousModel.email) changes.email = currentModel.email;
+      if (currentModel.group !== previousModel.group) changes.group = currentModel.group;
+      if (currentModel.requiredPasswordReset !== previousModel.requiredPasswordReset) {
+        changes.requiredPasswordReset = currentModel.requiredPasswordReset;
+      }
+      if (Object.keys(changes).length > 0) {
+        this.store.dispatch(AdminUsersActions.formChanged({ changes }));
+        previousModel = { ...currentModel };
+      }
+    });
+  }
 
   onSubmit(): void {
     if (!this.form().valid()) {
@@ -80,30 +116,31 @@ export class UserEditComponent {
       return;
     }
 
-    const value = this.model();
+    const value = this.storeForm() ?? this.model();
     if (this.isNew) {
       this.store.dispatch(AdminUsersActions.create({ email: value.email, group: value.group }));
       return;
     }
 
-    if (this.userId === null) {
+    if (this.userId === null && !this.isProfile) {
       return;
     }
 
-    const changes = this.isAdmin()
-      ? {
-          email: value.email,
-          group: value.group,
-          required_password_reset: value.requiredPasswordReset,
-        }
-      : { email: value.email };
+    const changes =
+      this.isAdmin() && !this.isProfile
+        ? {
+            email: value.email,
+            group: value.group,
+            required_password_reset: value.requiredPasswordReset,
+          }
+        : { email: value.email };
 
-    this.store.dispatch(
-      AdminUsersActions.update({
-        userId: this.userId,
-        changes,
-      }),
-    );
+    if (this.isProfile) {
+      this.store.dispatch(AdminUsersActions.updateProfile({ changes: { email: value.email } }));
+      return;
+    }
+
+    this.store.dispatch(AdminUsersActions.update({ userId: this.userId as string, changes }));
   }
 
   cancel(): void {

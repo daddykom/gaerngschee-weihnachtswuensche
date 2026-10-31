@@ -67,8 +67,12 @@ final class StartRegistrationActionTest extends TestCase
     {
         return new AnmeldungService(
             new class () implements EmailSenderInterface {
-                public function sendAnmeldung(string $recipient, \App\Registration\Services\AnmeldungMailVariant $variant, string $locale = 'de', ?string $loginUrl = null): void
+                public function sendAnmeldung(string $recipient, \App\Registration\Services\AnmeldungMailVariant $variant, string $locale = 'de', ?string $loginUrl = null, ?array $wish = null): void
                 {
+                }
+                public function renderFulfillerReservationConfirmation(array $wish, array $handover, string $locale = 'de'): array
+                {
+                    return [];
                 }
                 public function sendOrderStatus(string $recipient, string $status, string $locale = 'de'): void
                 {
@@ -114,7 +118,7 @@ final class StartRegistrationActionTest extends TestCase
             'variable_name' => 'campaign_start_date',
             'value' => json_encode($startDate, JSON_THROW_ON_ERROR),
             'description' => '',
-            'access_group' => json_encode(['admin', 'client'], JSON_THROW_ON_ERROR),
+            'access_group' => json_encode(['admin', 'wunschbesteller'], JSON_THROW_ON_ERROR),
             'update_group' => json_encode(['admin'], JSON_THROW_ON_ERROR),
             'label' => '',
         ]);
@@ -127,7 +131,7 @@ final class StartRegistrationActionTest extends TestCase
             'variable_name' => 'campaign_end_date',
             'value' => json_encode($endDate, JSON_THROW_ON_ERROR),
             'description' => '',
-            'access_group' => json_encode(['admin', 'client'], JSON_THROW_ON_ERROR),
+            'access_group' => json_encode(['admin', 'wunschbesteller'], JSON_THROW_ON_ERROR),
             'update_group' => json_encode(['admin'], JSON_THROW_ON_ERROR),
             'label' => '',
         ]);
@@ -140,7 +144,7 @@ final class StartRegistrationActionTest extends TestCase
             'variable_name' => 'campaign_year',
             'value' => json_encode('2026', JSON_THROW_ON_ERROR),
             'description' => '',
-            'access_group' => json_encode(['admin', 'client'], JSON_THROW_ON_ERROR),
+            'access_group' => json_encode(['admin', 'wunschbesteller'], JSON_THROW_ON_ERROR),
             'update_group' => json_encode(['admin'], JSON_THROW_ON_ERROR),
             'label' => '',
         ]);

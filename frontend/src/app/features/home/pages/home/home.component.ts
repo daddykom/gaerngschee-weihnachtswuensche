@@ -1,5 +1,8 @@
 import { Component, computed, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -10,7 +13,14 @@ import { selectFrontendPublicConfigs } from '../../../../store/frontend-config/f
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [MatButtonModule, RouterLink, TranslatePipe],
+  imports: [
+    MatButtonModule,
+    MatCardModule,
+    MatExpansionModule,
+    MatIconModule,
+    RouterLink,
+    TranslatePipe,
+  ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
 })
@@ -68,19 +78,7 @@ export class HomeComponent {
           timeZone: 'Europe/Zurich',
         }).format(date);
   });
-  readonly donationUrl = computed(() => {
-    const value = this.configValue('donation_url');
-    if (value === null) {
-      return null;
-    }
-
-    try {
-      const url = new URL(value);
-      return url.protocol === 'https:' ? url.toString() : null;
-    } catch {
-      return null;
-    }
-  });
+  readonly faqItems = [1, 2, 3, 4, 5];
 
   logout(): void {
     this.store.dispatch(AuthActions.logoutRequested());

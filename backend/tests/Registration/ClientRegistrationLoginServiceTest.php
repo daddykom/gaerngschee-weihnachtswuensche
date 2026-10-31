@@ -28,7 +28,7 @@ final class ClientRegistrationLoginServiceTest extends TestCase
         $result = $service->login($issued['token']);
 
         self::assertNotNull($result);
-        self::assertSame('client', $result['user']['group']);
+        self::assertSame('wunschbesteller', $result['user']['group']);
         self::assertTrue($result['fairgateUserExists']);
         self::assertSame(2, $result['childrenCount']);
         self::assertSame(2, $result['adultsCount']);

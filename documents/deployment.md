@@ -74,8 +74,8 @@ vorgesehene Installation. Standardmässig wird
 `$HOME/public_html/gaerngschee/weihnachtswuensche` als Basisverzeichnis verwendet:
 
 ```bash
-scripts/deploy.sh pre-prod
-scripts/deploy.sh prod
+scripts/deploy-weihnachtswuensche.sh pre-prod
+scripts/deploy-weihnachtswuensche.sh prod
 ```
 
 Die Ziele sind damit:

@@ -30,9 +30,10 @@ test.describe('Client login route', () => {
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({
-          user: { id: 'client-1', email: 'client@example.com', group: 'client' },
-          group: 'client',
-          requiredPasswordReset: false,
+          user: { id: 'client-1', email: 'client@example.com', group: 'wunschbesteller' },
+          group: 'wunschbesteller',
+          requiredPasswordReset: true,
+          firstAccess: true,
           fairgateUserExists: true,
           childrenCount: 2,
           adultsCount: 2,

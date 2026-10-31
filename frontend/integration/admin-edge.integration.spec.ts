@@ -13,6 +13,14 @@ test.describe('Integration admin edge cases', () => {
     });
   });
 
+  test('rejects request bodies above the configured limit', async ({ page }) => {
+    const response = await page.request.post('http://localhost:8082/public/start', {
+      data: { email: 'person@example.com', padding: 'x'.repeat(65536) },
+    });
+
+    expect(response.status()).toBe(413);
+  });
+
   test('denies configuration changes for a normal user', async ({ page }) => {
     await loginAsUser(page);
 

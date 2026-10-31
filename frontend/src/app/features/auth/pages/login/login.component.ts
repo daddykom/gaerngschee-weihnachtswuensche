@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   inject,
   OnInit,
   signal,
@@ -20,6 +21,7 @@ import {
   selectAuthEmailCheckLoading,
   selectAuthEmailCheckMode,
   selectAuthLoading,
+  selectAuthLoginForm,
 } from '../../../../store/auth/auth.feature';
 import { NavigationActions } from '../../../../store/navigation/navigation.actions';
 
@@ -38,6 +40,7 @@ export class Login implements OnInit {
   readonly emailCheckLoading = this.store.selectSignal(selectAuthEmailCheckLoading);
   readonly emailCheckMode = this.store.selectSignal(selectAuthEmailCheckMode);
   readonly emailCheckEmail = this.store.selectSignal(selectAuthEmailCheckEmail);
+  readonly storeForm = this.store.selectSignal(selectAuthLoginForm);
 
   readonly loginModel = signal({ email: '', password: '' });
   readonly loginForm = form(this.loginModel, (schema) => {
@@ -47,6 +50,33 @@ export class Login implements OnInit {
     required(schema.password);
     maxLength(schema.password, inputLimits.password);
   });
+
+  constructor() {
+    let initialized = false;
+    let previousModel = { email: '', password: '' };
+    effect(() => {
+      const storeForm = this.storeForm();
+      if (!initialized && storeForm !== undefined) {
+        this.loginModel.set({ ...storeForm });
+        previousModel = { ...storeForm };
+        initialized = true;
+      }
+    });
+    effect(() => {
+      if (!initialized) {
+        return;
+      }
+      const currentModel = this.loginModel();
+      const changes: Partial<typeof currentModel> = {};
+      if (currentModel.email !== previousModel.email) changes.email = currentModel.email;
+      if (currentModel.password !== previousModel.password)
+        changes.password = currentModel.password;
+      if (Object.keys(changes).length > 0) {
+        this.store.dispatch(AuthActions.loginFormChanged({ changes }));
+        previousModel = { ...currentModel };
+      }
+    });
+  }
 
   readonly passwordRequired = computed(
     () =>
@@ -58,6 +88,7 @@ export class Login implements OnInit {
     const email = this.route.snapshot.queryParamMap.get('email');
     if (email) {
       this.loginModel.update((model) => ({ ...model, email }));
+      this.store.dispatch(AuthActions.loginFormChanged({ changes: { email } }));
     }
   }
 
@@ -67,7 +98,7 @@ export class Login implements OnInit {
       return;
     }
 
-    const { email, password } = this.loginModel();
+    const { email, password } = this.storeForm() ?? this.loginModel();
 
     if (!this.passwordRequired()) {
       this.store.dispatch(AuthActions.checkEmail({ email }));

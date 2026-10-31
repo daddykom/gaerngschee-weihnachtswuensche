@@ -19,9 +19,10 @@ describe('clientLoginGuard', () => {
   };
   const store = { dispatch: vi.fn() };
   const response: RegistrationLoginResponse = {
-    user: { id: 'client-1', email: 'client@example.com', group: 'client' },
-    group: 'client',
+    user: { id: 'client-1', email: 'client@example.com', group: 'wunschbesteller' },
+    group: 'wunschbesteller',
     requiredPasswordReset: false,
+    firstAccess: true,
     fairgateStatus: 'valid',
     fairgateUserExists: true,
     childrenCount: 1,
@@ -55,7 +56,8 @@ describe('clientLoginGuard', () => {
       AuthActions.registrationLoginSuccess({
         userId: 'client-1',
         email: 'client@example.com',
-        group: 'client',
+        group: 'wunschbesteller',
+        firstAccess: true,
         fairgateStatus: 'valid',
         fairgateUserExists: true,
         childrenCount: 1,

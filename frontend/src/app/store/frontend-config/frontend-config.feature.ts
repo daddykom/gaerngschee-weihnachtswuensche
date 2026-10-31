@@ -1,25 +1,59 @@
 import { createFeature, createReducer, on } from '@ngrx/store';
 import { FrontendConfigActions } from './frontend-config.actions';
-import { FrontendConfigState, initialState } from './frontend-config.state';
+import { FrontendConfigForm, FrontendConfigState, initialState } from './frontend-config.state';
 
 export const frontendConfigFeature = createFeature({
   name: 'frontendConfig',
   reducer: createReducer<FrontendConfigState>(
     initialState,
-    on(FrontendConfigActions.load, (state) => ({ ...state, loading: true })),
+    on(FrontendConfigActions.load, (state) => ({
+      ...state,
+      loadStatus: 'loading',
+      errorCode: null,
+    })),
     on(FrontendConfigActions.loadSuccess, (state, { configs }) => ({
       ...state,
       configs,
-      loading: false,
+      form: configs.reduce<FrontendConfigForm>(
+        (form, config) => ({
+          ...form,
+          [config.id]: Array.isArray(config.value) ? [...config.value] : (config.value ?? ''),
+        }),
+        {},
+      ),
+      loadStatus: 'success',
     })),
-    on(FrontendConfigActions.loadFailure, (state) => ({ ...state, loading: false })),
-    on(FrontendConfigActions.save, (state) => ({ ...state, saving: true })),
+    on(FrontendConfigActions.loadFailure, (state, { errorCode }) => ({
+      ...state,
+      loadStatus: 'error',
+      errorCode,
+    })),
+    on(FrontendConfigActions.formChanged, (state, { changes }) => ({
+      ...state,
+      form: { ...state.form, ...changes },
+    })),
+    on(FrontendConfigActions.save, (state) => ({
+      ...state,
+      saveStatus: 'loading',
+      errorCode: null,
+    })),
     on(FrontendConfigActions.saveSuccess, (state, { configs }) => ({
       ...state,
       configs,
-      saving: false,
+      form: configs.reduce<FrontendConfigForm>(
+        (form, config) => ({
+          ...form,
+          [config.id]: Array.isArray(config.value) ? [...config.value] : (config.value ?? ''),
+        }),
+        {},
+      ),
+      saveStatus: 'success',
     })),
-    on(FrontendConfigActions.saveFailure, (state) => ({ ...state, saving: false })),
+    on(FrontendConfigActions.saveFailure, (state, { errorCode }) => ({
+      ...state,
+      saveStatus: 'error',
+      errorCode,
+    })),
     on(FrontendConfigActions.loadPublic, (state) => ({
       ...state,
       publicStatus: 'loading',
@@ -43,9 +77,18 @@ export const {
   name: frontendConfigFeatureName,
   reducer: frontendConfigReducer,
   selectConfigs: selectFrontendConfigs,
+  selectForm: selectFrontendConfigForm,
   selectPublicConfigs: selectFrontendPublicConfigs,
-  selectLoading: selectFrontendConfigLoading,
-  selectSaving: selectFrontendConfigSaving,
+  selectLoadStatus: selectFrontendConfigLoadStatus,
+  selectSaveStatus: selectFrontendConfigSaveStatus,
   selectPublicStatus: selectFrontendPublicConfigStatus,
   selectPublicErrorCode: selectFrontendPublicConfigErrorCode,
 } = frontendConfigFeature;
+
+export const selectFrontendConfigLoading = (state: {
+  frontendConfig: FrontendConfigState;
+}): boolean => state.frontendConfig.loadStatus === 'loading';
+
+export const selectFrontendConfigSaving = (state: {
+  frontendConfig: FrontendConfigState;
+}): boolean => state.frontendConfig.saveStatus === 'loading';

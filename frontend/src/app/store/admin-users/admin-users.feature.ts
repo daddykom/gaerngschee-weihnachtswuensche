@@ -6,52 +6,89 @@ export const adminUsersFeature = createFeature({
   name: 'adminUsers',
   reducer: createReducer<AdminUsersState>(
     initialState,
+    on(AdminUsersActions.formLoaded, (state, { form }) => ({
+      ...state,
+      form,
+    })),
+    on(AdminUsersActions.formChanged, (state, { changes }) => ({
+      ...state,
+      form: { ...state.form, ...changes },
+    })),
     on(AdminUsersActions.load, (state) => ({
       ...state,
-      loading: true,
+      loadStatus: 'loading',
+      errorCode: null,
     })),
     on(AdminUsersActions.loadSuccess, (state, { users }) => ({
       ...state,
       users,
-      loading: false,
+      loadStatus: 'loaded',
     })),
-    on(AdminUsersActions.loadFailure, (state) => ({
+    on(AdminUsersActions.loadFailure, (state, { errorCode }) => ({
       ...state,
-      loading: false,
+      loadStatus: 'error',
+      errorCode,
+    })),
+    on(AdminUsersActions.loadUser, AdminUsersActions.loadProfile, (state) => ({
+      ...state,
+      selectedUser: null,
+      detailStatus: 'loading',
+      detailErrorCode: null,
+    })),
+    on(AdminUsersActions.loadUserSuccess, (state, { user }) => ({
+      ...state,
+      selectedUser: user,
+      detailStatus: 'loaded',
+    })),
+    on(AdminUsersActions.loadUserFailure, (state, { errorCode }) => ({
+      ...state,
+      detailStatus: 'error',
+      detailErrorCode: errorCode,
     })),
     on(
       AdminUsersActions.create,
       AdminUsersActions.update,
+      AdminUsersActions.updateProfile,
       AdminUsersActions.delete,
       AdminUsersActions.sendPasswordReset,
       (state) => ({
         ...state,
-        saving: true,
+        saveStatus: 'loading',
+        errorCode: null,
       }),
     ),
     on(AdminUsersActions.createSuccess, (state, { user }) => ({
       ...state,
       users: [user, ...state.users],
-      saving: false,
+      saveStatus: 'success',
     })),
     on(AdminUsersActions.updateSuccess, (state, { user }) => ({
       ...state,
+      selectedUser: user,
       users: state.users.map((current) => (current.id === user.id ? user : current)),
-      saving: false,
+      saveStatus: 'success',
+    })),
+    on(AdminUsersActions.updateProfileSuccess, (state, { user }) => ({
+      ...state,
+      selectedUser: user,
+      users: state.users.map((current) => (current.id === user.id ? user : current)),
+      saveStatus: 'success',
     })),
     on(AdminUsersActions.deleteSuccess, (state, { userId }) => ({
       ...state,
       users: state.users.filter((user) => user.id !== userId),
-      saving: false,
+      saveStatus: 'success',
     })),
     on(
       AdminUsersActions.createFailure,
       AdminUsersActions.updateFailure,
+      AdminUsersActions.updateProfileFailure,
       AdminUsersActions.deleteFailure,
       AdminUsersActions.sendPasswordResetFailure,
-      (state) => ({
+      (state, action) => ({
         ...state,
-        saving: false,
+        saveStatus: 'error',
+        errorCode: action.errorCode,
       }),
     ),
   ),
@@ -61,6 +98,18 @@ export const {
   name: adminUsersFeatureName,
   reducer: adminUsersReducer,
   selectUsers: selectAdminUsers,
-  selectLoading: selectAdminUsersLoading,
-  selectSaving: selectAdminUsersSaving,
+  selectSelectedUser: selectAdminUsersSelectedUser,
+  selectDetailStatus: selectAdminUsersDetailStatus,
+  selectLoadStatus: selectAdminUsersLoadStatus,
+  selectSaveStatus: selectAdminUsersSaveStatus,
+  selectForm: selectAdminUsersForm,
 } = adminUsersFeature;
+
+export const selectAdminUsersLoading = (state: { adminUsers: AdminUsersState }): boolean =>
+  state.adminUsers.loadStatus === 'loading';
+
+export const selectAdminUsersSaving = (state: { adminUsers: AdminUsersState }): boolean =>
+  state.adminUsers.saveStatus === 'loading';
+
+export const selectAdminUsersDetailLoading = (state: { adminUsers: AdminUsersState }): boolean =>
+  state.adminUsers.detailStatus === 'loading';

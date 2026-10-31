@@ -69,29 +69,10 @@ test.describe('User edit route', () => {
     await expectTranslatedText(page.getByRole('alert'), 'app.admin.users.updated');
   });
 
-  test('normal user sees only the own email field', async ({ page }) => {
+  test('normal user cannot access administration pages', async ({ page }) => {
     await loginAsUser(page);
-    await page.route('http://localhost:8083/admin/users/2', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          user: {
-            id: '2',
-            email: 'user@example.com',
-            group: 'user',
-            required_password_reset: false,
-          },
-        }),
-      });
-    });
-
     await expect(page.getByRole('button', { name: 'Administrationsmenü öffnen' })).toHaveCount(0);
-    await page.goto('/admin/users/2');
-    await page.waitForURL('**/admin/users/2');
-    await expect(page.locator('input[type="email"]')).toBeVisible();
-    await expect(page.getByRole('combobox')).not.toBeVisible();
-    await expect(page.getByRole('checkbox')).not.toBeVisible();
+    await expect(page).toHaveURL(/\/not-found$/);
   });
 
   test('cancel navigates back without saving', async ({ page }) => {
@@ -177,5 +158,5 @@ async function login(
   await page.getByRole('button', { name: 'Weiter' }).click();
   await page.locator('input[type="password"]').fill('secret');
   await page.getByRole('button', { name: 'Anmelden' }).click();
-  await page.waitForURL(group === 'user' ? '**/bestellung' : '**/admin/overview');
+  await page.waitForURL(group === 'admin' ? '**/admin/overview' : '**/not-found');
 }

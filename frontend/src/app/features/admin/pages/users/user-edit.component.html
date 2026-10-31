@@ -1,6 +1,13 @@
 <section class="gl-stack gl-stack--group">
   <h2>
-    {{ (isNew ? 'app.admin.users.createHeading' : 'app.admin.users.editHeading') | translate }}
+    {{
+      (isProfile
+        ? 'app.user.profile.heading'
+        : isNew
+          ? 'app.admin.users.createHeading'
+          : 'app.admin.users.editHeading'
+      ) | translate
+    }}
   </h2>
 
   <form class="user-form gl-stack gl-stack--group" (submit)="$event.preventDefault(); onSubmit()">
@@ -14,7 +21,7 @@
       />
     </mat-form-field>
 
-    @if (isAdmin()) {
+    @if (isAdmin() && !isProfile) {
       <mat-form-field appearance="outline">
         <mat-label>{{ 'app.admin.users.groupLabel' | translate }}</mat-label>
         <mat-select [formField]="form.group">
@@ -24,7 +31,7 @@
       </mat-form-field>
     }
 
-    @if (isAdmin()) {
+    @if (isAdmin() && !isProfile) {
       <mat-checkbox [formField]="form.requiredPasswordReset">
         {{ 'app.admin.users.passwordResetRequired' | translate }}
       </mat-checkbox>

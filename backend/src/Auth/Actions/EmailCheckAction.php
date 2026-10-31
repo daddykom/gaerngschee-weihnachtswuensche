@@ -8,6 +8,7 @@ use App\Configuration\Data\FrontendConfigRepository;
 use App\Registration\Data\OrderRepository;
 use App\Registration\Services\AnmeldungService;
 use App\Registration\Services\RegistrationTokenService;
+use App\Registration\Services\OrderStatus;
 use App\Shared\Database\Database;
 use App\Shared\Http\JsonRequest;
 use App\Shared\Http\JsonResponse;
@@ -38,7 +39,7 @@ final class EmailCheckAction
         $email = strtolower(trim($email));
         $users = $this->users ?? new UserRepository();
         $user = $users->findByEmail($email);
-        if (is_array($user) && in_array($user['group'] ?? null, ['admin', 'user'], true)) {
+        if (is_array($user) && in_array($user['group'] ?? null, ['admin', 'user', 'wunschbesteller', 'wunscherfueller'], true)) {
             return JsonResponse::success($response, ['mode' => 'password']);
         }
 
@@ -47,7 +48,7 @@ final class EmailCheckAction
         $status = ($this->orders ?? new OrderRepository(Database::getConnection()))
             ->findStatusForEmailAndYear($email, $year);
 
-        if (in_array($status, ['provisional', 'definitive'], true)) {
+        if ($status !== null && in_array($status, OrderStatus::all(), true)) {
             try {
                 $token = ($this->tokens ?? new RegistrationTokenService())->issue($email)['token'];
                 $frontendBaseUrl = rtrim(getenv('FRONTEND_BASE_URL') ?: 'http://localhost:4200', '/');
