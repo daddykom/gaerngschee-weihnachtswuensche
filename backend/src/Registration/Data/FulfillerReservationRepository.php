@@ -138,7 +138,7 @@ final class FulfillerReservationRepository
         $conditions = [
             "orders.status = 'definitive'",
             "items.publication_status = 'approved'",
-            "items.fulfillment_status IN ('available', 'pending_confirmation', 'reserved')",
+            "items.fulfillment_status IN ('available', 'pending_confirmation')",
         ];
         $parameters = [];
 

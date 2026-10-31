@@ -51,4 +51,38 @@ final class FulfillerReservationServiceTest extends TestCase
         self::assertSame('pending_confirmation', $pdo->query("SELECT fulfillment_status FROM order_items WHERE id = 'item-1'")->fetchColumn());
         self::assertSame('other@example.com', $pdo->query("SELECT fulfiller_email FROM order_items WHERE id = 'item-1'")->fetchColumn());
     }
+
+    public function testPublicListExcludesDefinitivelyReservedWishesButStatusRefreshKeepsThemVisible(): void
+    {
+        $pdo = TestDatabase::create();
+        $pdo->exec("INSERT INTO orders (id, user_id, year, status, order_number) VALUES ('order-1', 'user-1', 2026, 'definitive', 12)");
+        foreach ([
+            ['item-available', 'available'],
+            ['item-pending', 'pending_confirmation'],
+            ['item-reserved', 'reserved'],
+        ] as [$id, $status]) {
+            $pdo->prepare(
+                "INSERT INTO order_items
+                    (id, order_id, category, original_description, current_description, status,
+                     publication_status, fulfillment_status, item_number)
+                 VALUES (:id, 'order-1', 'gift', :description, :description, 'approved', 'approved', :status, :item_number)",
+            )->execute([
+                'id' => $id,
+                'description' => $id,
+                'status' => $status,
+                'item_number' => count($pdo->query('SELECT id FROM order_items')->fetchAll()) + 1,
+            ]);
+        }
+
+        $repository = new FulfillerReservationRepository($pdo);
+        $orders = $repository->findPublicOrders();
+        $statuses = $repository->findPublicStatuses();
+
+        self::assertCount(2, $orders[0]['items']);
+        self::assertSame(['item-available', 'item-pending'], array_column($orders[0]['items'], 'id'));
+        self::assertSame(
+            ['item-available', 'item-pending', 'item-reserved'],
+            array_column($statuses, 'id'),
+        );
+    }
 }

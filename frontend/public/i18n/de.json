@@ -413,6 +413,7 @@
         "PRIVACY_CONSENT_REQUIRED": "Bitte akzeptiere die Datenschutzerklärung.",
         "INVALID_EMAIL": "Bitte prüfe deine E-Mail-Adresse.",
         "INVALID_WISH_DATA": "Der ausgewählte Wunsch ist ungültig.",
+        "RATE_LIMITED": "Zu viele Versuche. Bitte warte kurz und versuche es später erneut.",
         "REQUEST_FAILED": "Die Wünsche konnten nicht geladen werden. Bitte versuche es später erneut."
       }
     },

@@ -51,13 +51,13 @@ final class AuthRoutes
 
             $passwordResetRequest = $group->post('/password-reset-request', new PasswordResetRequestAction());
             if ($rateLimitService !== null) {
-                $passwordResetRequest->add(new RateLimitMiddleware(3, 900, static fn ($request): string => RateLimitMiddleware::ipAndEmail($request), $rateLimitService));
-                $passwordResetRequest->add(new RateLimitMiddleware(20, 3600, static fn ($request): string => RateLimitMiddleware::ip($request), $rateLimitService));
+                $passwordResetRequest->add(new RateLimitMiddleware(10, 60, static fn ($request): string => RateLimitMiddleware::ipAndEmail($request), $rateLimitService));
+                $passwordResetRequest->add(new RateLimitMiddleware(10, 60, static fn ($request): string => RateLimitMiddleware::ip($request), $rateLimitService));
             }
 
             $passwordReset = $group->post('/password-reset', new PasswordResetAction());
             if ($rateLimitService !== null) {
-                $passwordReset->add(new RateLimitMiddleware(10, 900, static fn ($request): string => RateLimitMiddleware::ip($request), $rateLimitService));
+                $passwordReset->add(new RateLimitMiddleware(10, 60, static fn ($request): string => RateLimitMiddleware::ip($request), $rateLimitService));
             }
 
             $registrationLogin = $group->post('/registration-login', new ClientRegistrationLoginAction(
@@ -69,19 +69,19 @@ final class AuthRoutes
                 new ConfirmFulfillerReservationAction(),
             );
             if ($rateLimitService !== null) {
-                $registrationLogin->add(new RateLimitMiddleware(10, 900, static fn ($request): string => RateLimitMiddleware::ip($request), $rateLimitService));
-                $fulfillerReservationConfirmation->add(new RateLimitMiddleware(10, 900, static fn ($request): string => RateLimitMiddleware::ip($request), $rateLimitService));
+                $registrationLogin->add(new RateLimitMiddleware(10, 60, static fn ($request): string => RateLimitMiddleware::ip($request), $rateLimitService));
+                $fulfillerReservationConfirmation->add(new RateLimitMiddleware(10, 60, static fn ($request): string => RateLimitMiddleware::ip($request), $rateLimitService));
             }
 
             $login = $group->post('/login', new LoginAction($userRepository, $sessionService));
             if ($rateLimitService !== null) {
-                $login->add(new RateLimitMiddleware(10, 900, static fn ($request): string => RateLimitMiddleware::ipAndEmail($request), $rateLimitService));
-                $login->add(new RateLimitMiddleware(50, 900, static fn ($request): string => RateLimitMiddleware::ip($request), $rateLimitService));
+                $login->add(new RateLimitMiddleware(10, 60, static fn ($request): string => RateLimitMiddleware::ipAndEmail($request), $rateLimitService));
+                $login->add(new RateLimitMiddleware(10, 60, static fn ($request): string => RateLimitMiddleware::ip($request), $rateLimitService));
             }
             $emailCheck = $group->post('/email-check', $emailCheckAction ?? new EmailCheckAction());
             if ($rateLimitService !== null) {
-                $emailCheck->add(new RateLimitMiddleware(5, 900, static fn ($request): string => RateLimitMiddleware::ipAndEmail($request), $rateLimitService));
-                $emailCheck->add(new RateLimitMiddleware(30, 900, static fn ($request): string => RateLimitMiddleware::ip($request), $rateLimitService));
+                $emailCheck->add(new RateLimitMiddleware(10, 60, static fn ($request): string => RateLimitMiddleware::ipAndEmail($request), $rateLimitService));
+                $emailCheck->add(new RateLimitMiddleware(10, 60, static fn ($request): string => RateLimitMiddleware::ip($request), $rateLimitService));
             }
             $group->post('/logout', new LogoutAction());
             $group->get('/session-status', new SessionStatusAction($sessionService));

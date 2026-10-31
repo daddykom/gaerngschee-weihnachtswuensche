@@ -62,7 +62,7 @@ final class AdminRoutes
 
             $passwordReset = $group->post('/users/{userId}/password-reset', new SendPasswordResetLinkAction($userRepository, null, $emailSender));
             if ($rateLimitService !== null) {
-                $passwordReset->add(new RateLimitMiddleware(10, 3600, static fn ($request): string => RateLimitMiddleware::session($request), $rateLimitService));
+                $passwordReset->add(new RateLimitMiddleware(10, 60, static fn ($request): string => RateLimitMiddleware::session($request), $rateLimitService));
             }
             $passwordReset->add(new GroupMiddleware(['admin'], $userRepository))->add(new AuthMiddleware());
 

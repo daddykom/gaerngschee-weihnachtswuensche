@@ -30,8 +30,7 @@ final class AnmeldungService
         string $loginUrl,
         array $wish,
         string $locale = 'de',
-    ): void
-    {
+    ): void {
         $email = strtolower(trim($email));
         if (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
             throw new InvalidArgumentException('Invalid email address.');

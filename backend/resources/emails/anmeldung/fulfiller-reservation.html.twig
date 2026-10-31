@@ -11,7 +11,7 @@
       <td align="center" style="padding:24px 12px;">
         <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="width:100%; max-width:600px; background-color:{{ EMAIL_THEME.surface }}; border:1px solid {{ EMAIL_THEME.outline }}; border-radius:20px;">
           <tr>
-            <td style="padding:32px; text-align:center; background-color:{{ EMAIL_THEME.primaryContainer }};">
+            <td style="padding:32px; text-align:center; background-color:{{ EMAIL_THEME.primaryContainer }}; border-radius:20px 20px 0 0;">
               <img src="{{ LOGO_CID }}" width="210" alt="Gärngschee" style="display:block; width:210px; max-width:100%; height:auto; margin:0 auto 22px auto;">
               <h1 style="margin:0; font-size:28px; color:{{ EMAIL_THEME.text }};">{{ 'app.mail.registration.fulfillerReservation.title'|trans }}</h1>
             </td>
@@ -23,7 +23,7 @@
             </td>
           </tr>
           <tr>
-            <td align="center" style="padding:22px 32px 34px;">
+            <td align="center" style="padding:22px 32px 34px; border-radius:0 0 20px 20px;">
               <a href="{{ LOGIN_URL }}" style="display:inline-block; padding:14px 26px; font-size:17px; font-weight:700; color:{{ EMAIL_THEME.onPrimary }}; background:{{ EMAIL_THEME.primary }}; text-decoration:none; border-radius:999px;">{{ 'app.mail.registration.fulfillerReservation.button'|trans }}</a>
               <p style="margin:18px 0 0; font-size:13px; color:{{ EMAIL_THEME.mutedText }};">{{ 'app.mail.registration.common.ignore'|trans }}</p>
             </td>

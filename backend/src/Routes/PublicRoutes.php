@@ -46,10 +46,10 @@ final class PublicRoutes
             $group->get('/fulfiller/availability-version', new PublicFulfillerAvailabilityVersionAction());
             $group->get('/fulfiller/wish-statuses', new PublicFulfillerWishStatusesAction());
             if ($rateLimitService !== null) {
-                $start->add(new RateLimitMiddleware(3, 900, static fn ($request): string => RateLimitMiddleware::ipAndEmail($request), $rateLimitService));
-                $start->add(new RateLimitMiddleware(20, 3600, static fn ($request): string => RateLimitMiddleware::ip($request), $rateLimitService));
-                $fulfillerStart->add(new RateLimitMiddleware(3, 900, static fn ($request): string => RateLimitMiddleware::ipAndEmail($request), $rateLimitService));
-                $fulfillerStart->add(new RateLimitMiddleware(20, 3600, static fn ($request): string => RateLimitMiddleware::ip($request), $rateLimitService));
+                $start->add(new RateLimitMiddleware(10, 60, static fn ($request): string => RateLimitMiddleware::ipAndEmail($request), $rateLimitService));
+                $start->add(new RateLimitMiddleware(10, 60, static fn ($request): string => RateLimitMiddleware::ip($request), $rateLimitService));
+                $fulfillerStart->add(new RateLimitMiddleware(10, 60, static fn ($request): string => RateLimitMiddleware::ipAndEmail($request), $rateLimitService));
+                $fulfillerStart->add(new RateLimitMiddleware(10, 60, static fn ($request): string => RateLimitMiddleware::ip($request), $rateLimitService));
             }
             $group->get('/configuration', new ListPublicConfigurationAction($configRepository));
         });
