@@ -367,8 +367,11 @@
       "reservationEmailSentTitle": "Bestätigungs-E-Mail versandt",
       "reservationEmailSentMessage": "Bitte bestätige die Reservierung über den Link in deiner E-Mail. Der Wunsch bleibt bis dahin vorübergehend blockiert.",
       "reservationConfirmationTitle": "Wunschreservierung bestätigen",
+      "reservationConfirmedTitle": "Wunschreservierung bestätigt",
       "reservationConfirmed": "Die Reservierung wurde bestätigt. Bitte bringe den Wunsch zum angegebenen Abgabezeitpunkt an den angegebenen Ort.",
+      "moreWishes": "Weitere Weihnachtswünsche erfüllen",
       "handoverDetails": "Abgabe: {{date}}, {{time}}, {{location}}",
+      "reservationConfirmationFailedTitle": "Wunschreservierung konnte nicht bestätigt werden",
       "reservationConfirmationFailed": "Der Bestätigungslink ist ungültig, abgelaufen oder der Wunsch wurde inzwischen anderweitig reserviert.",
       "privacyLink": "Datenschutzerklärung lesen",
       "reservationDialog": {
@@ -917,6 +920,18 @@
           "intro": "Bitte bestätige, dass du den folgenden Wunsch erfüllen möchtest:",
           "button": "Wunschreservierung bestätigen",
           "subject": "Bitte bestätige deine Wunschreservierung"
+        },
+        "fulfillerReservationConfirmation": {
+          "title": "Wunschreservierung bestätigt",
+          "subject": "Deine Wunschreservierung ist bestätigt",
+          "body": "Danke, dass du diesen Weihnachtswunsch erfüllst. Deine Reservierung wurde erfolgreich bestätigt.",
+          "wishNumber": "Wunschnummer",
+          "wish": "Wunsch",
+          "handoverTitle": "Übergabe",
+          "date": "Datum",
+          "time": "Zeitfenster",
+          "location": "Ort",
+          "keepMessage": "Bitte bewahre diese E-Mail auf und bringe den Wunsch zum angegebenen Zeitpunkt an den angegebenen Ort."
         },
         "common": {
           "ignore": "Falls du diese Anfrage nicht ausgelöst hast, kannst du diese E-Mail ignorieren."

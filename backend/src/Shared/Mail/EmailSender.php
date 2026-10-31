@@ -123,6 +123,33 @@ final class EmailSender implements EmailSenderInterface
         }
     }
 
+    /** @param array<string, mixed> $wish @param array<string, mixed> $handover */
+    public function renderFulfillerReservationConfirmation(
+        array $wish,
+        array $handover,
+        string $locale = 'de',
+    ): array {
+        if ($this->translator instanceof LocaleAwareInterface) {
+            $this->translator->setLocale($locale);
+        }
+        $html = $this->twig->render('fulfiller-reservation-confirmation.html.twig', [
+            'LOGO_CID' => 'cid:' . self::LOGO_CID,
+            'WISH' => $wish,
+            'HANDOVER' => $handover,
+        ]);
+
+        return [
+            'subject' => $this->translator->trans(
+                'app.mail.registration.fulfillerReservationConfirmation.subject',
+                [],
+                null,
+                $locale,
+            ),
+            'html' => $html,
+            'text' => $this->plainText($html),
+        ];
+    }
+
     public function sendUserCreated(string $recipient, string $temporaryPassword): void
     {
         $frontendBaseUrl = rtrim(getenv('FRONTEND_BASE_URL') ?: 'http://localhost:4200', '/');

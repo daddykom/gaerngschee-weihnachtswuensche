@@ -1,11 +1,12 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { FulfillerOrdersService } from '../../../../shared/services/fulfiller-orders.service';
 
 @Component({
   selector: 'app-reservation-confirmation',
-  imports: [TranslatePipe],
+  imports: [MatButtonModule, RouterLink, TranslatePipe],
   templateUrl: './reservation-confirmation.component.html',
   styleUrl: './reservation-confirmation.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

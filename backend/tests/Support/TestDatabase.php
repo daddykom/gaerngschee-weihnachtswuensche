@@ -130,9 +130,10 @@ final class TestDatabase
             )',
         );
         $pdo->exec(
-            'CREATE TABLE order_email_queue (
+            'CREATE TABLE email_queue (
                 id TEXT PRIMARY KEY,
-                order_id TEXT NOT NULL,
+                reference_type TEXT NOT NULL,
+                reference_id TEXT NOT NULL,
                 email_type TEXT NOT NULL,
                 recipient TEXT NOT NULL,
                 subject TEXT NOT NULL,
@@ -141,7 +142,7 @@ final class TestDatabase
                 last_error TEXT NULL,
                 created_at TEXT,
                 updated_at TEXT,
-                UNIQUE (order_id, email_type)
+                UNIQUE (reference_type, reference_id, email_type)
             )',
         );
         $pdo->exec(

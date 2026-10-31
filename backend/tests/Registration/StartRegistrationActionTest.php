@@ -70,6 +70,10 @@ final class StartRegistrationActionTest extends TestCase
                 public function sendAnmeldung(string $recipient, \App\Registration\Services\AnmeldungMailVariant $variant, string $locale = 'de', ?string $loginUrl = null, ?array $wish = null): void
                 {
                 }
+                public function renderFulfillerReservationConfirmation(array $wish, array $handover, string $locale = 'de'): array
+                {
+                    return [];
+                }
                 public function sendOrderStatus(string $recipient, string $status, string $locale = 'de'): void
                 {
                 }

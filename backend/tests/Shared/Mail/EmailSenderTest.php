@@ -85,6 +85,26 @@ final class EmailSenderTest extends TestCase
         );
     }
 
+    public function testRendersFulfillerReservationConfirmationWithoutAConfirmationLink(): void
+    {
+        $sender = new EmailSender(
+            $this->createMock(MailerInterface::class),
+            'noreply@example.com',
+            'Gärngschee-Weihnachtswünsche',
+        );
+
+        $message = $sender->renderFulfillerReservationConfirmation(
+            ['wishNumber' => '12-1', 'currentDescription' => 'Bauklötze'],
+            ['date' => '2026-12-19', 'time' => '10:00–12:00 Uhr', 'location' => 'Clarastrasse 10, 4058 Basel'],
+        );
+
+        self::assertSame('Deine Wunschreservierung ist bestätigt', $message['subject']);
+        self::assertStringContainsString('Bauklötze', $message['html']);
+        self::assertStringContainsString('Clarastrasse 10, 4058 Basel', $message['html']);
+        self::assertStringNotContainsString('http://localhost:4200', $message['html']);
+        self::assertStringContainsString('Danke, dass du diesen Weihnachtswunsch erfüllst.', $message['text']);
+    }
+
     public function testSendOrderConfirmationRendersDefinitiveOrder(): void
     {
         $mailer = $this->createMock(MailerInterface::class);

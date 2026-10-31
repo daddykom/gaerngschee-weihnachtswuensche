@@ -31,6 +31,11 @@ final class RecordingEmailSender implements EmailSenderInterface
         $this->loginUrls[] = $loginUrl;
     }
 
+    public function renderFulfillerReservationConfirmation(array $wish, array $handover, string $locale = 'de'): array
+    {
+        return ['subject' => 'subject', 'html' => 'html', 'text' => 'text'];
+    }
+
     public function sendOrderStatus(string $recipient, string $status, string $locale = 'de'): void
     {
         $this->recipients[] = $recipient;

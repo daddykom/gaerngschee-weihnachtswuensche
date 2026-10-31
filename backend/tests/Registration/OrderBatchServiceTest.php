@@ -6,11 +6,11 @@ namespace Tests\Registration;
 
 use App\Configuration\Data\FrontendConfigRepository;
 use App\Fairgate\Services\FairgateContactProvider;
-use App\Registration\Data\OrderEmailQueueRepository;
 use App\Registration\Data\OrderRepository;
 use App\Registration\Data\RegistrationTokenRepository;
 use App\Registration\Services\OrderBatchService;
 use App\Shared\Logging\ExternalErrorLogRepository;
+use App\Shared\Mail\EmailQueueRepository;
 use App\Users\Data\UserRepository;
 use Tests\Support\RecordingEmailSender;
 use Tests\Support\TestDatabase;
@@ -35,7 +35,7 @@ final class OrderBatchServiceTest extends TestCase
         self::assertSame(0, $result['failed']);
         self::assertSame(1, $result['queued']);
         self::assertSame('waiting_for_fairgate', $orders->findForYear($user['id'], 2026)['status']);
-        self::assertCount(1, (new OrderEmailQueueRepository($pdo))->pending());
+        self::assertCount(1, (new EmailQueueRepository($pdo))->pending());
     }
 
     public function testNextBatchRunRetriesFailedEmail(): void
@@ -58,7 +58,7 @@ final class OrderBatchServiceTest extends TestCase
         self::assertSame(1, $result['sent']);
         self::assertSame(0, $result['loaded']);
         self::assertSame('released', $orders->findForYear($user['id'], 2026)['status']);
-        self::assertCount(0, (new OrderEmailQueueRepository($pdo))->pending());
+        self::assertCount(0, (new EmailQueueRepository($pdo))->pending());
     }
 
     public function testSendsFirstFairgateReminderAfterTheConfiguredInterval(): void
@@ -133,7 +133,7 @@ final class OrderBatchServiceTest extends TestCase
         $result = $service->run();
 
         self::assertSame(0, $result['sent']);
-        self::assertCount(0, (new OrderEmailQueueRepository($pdo))->pending());
+        self::assertCount(0, (new EmailQueueRepository($pdo))->pending());
     }
 
     public function testFailedFairgateReminderIsQueuedAndRetried(): void
@@ -163,7 +163,7 @@ final class OrderBatchServiceTest extends TestCase
 
         self::assertSame(1, $retried['sent']);
         self::assertNotNull($updated['fairgateReminderEmailSentAt']);
-        self::assertCount(0, (new OrderEmailQueueRepository($pdo))->pending());
+        self::assertCount(0, (new EmailQueueRepository($pdo))->pending());
     }
 
     public function testSuccessfulOrderIsNotSentAgainOnTheNextBatchRun(): void
@@ -191,7 +191,7 @@ final class OrderBatchServiceTest extends TestCase
     {
         return new OrderBatchService(
             new OrderRepository($pdo),
-            new OrderEmailQueueRepository($pdo),
+            new EmailQueueRepository($pdo),
             new FrontendConfigRepository($pdo),
             $fairgate,
             $emails,

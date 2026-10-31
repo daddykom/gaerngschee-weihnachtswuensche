@@ -1,11 +1,10 @@
-<main class="gl-page gl-stack gl-stack--section" aria-labelledby="reservation-confirmation-title">
+<div class="gl-page gl-stack gl-stack--section">
   @if (loading()) {
+    <h1>{{ 'app.fulfiller.reservationConfirmationTitle' | translate }}</h1>
     <p role="status">{{ 'app.common.loading' | translate }}</p>
   } @else if (success()) {
     <section class="gl-stack gl-stack--group">
-      <h1 id="reservation-confirmation-title">
-        {{ 'app.fulfiller.reservationConfirmationTitle' | translate }}
-      </h1>
+      <h1>{{ 'app.fulfiller.reservationConfirmedTitle' | translate }}</h1>
       <p>{{ 'app.fulfiller.reservationConfirmed' | translate }}</p>
       @if (handover(); as details) {
         <p>
@@ -15,13 +14,14 @@
           }}
         </p>
       }
+      <a mat-stroked-button color="primary" routerLink="/erfuellen">
+        {{ 'app.fulfiller.moreWishes' | translate }}
+      </a>
     </section>
   } @else if (error()) {
     <section class="gl-stack gl-stack--group" role="alert">
-      <h1 id="reservation-confirmation-title">
-        {{ 'app.fulfiller.reservationConfirmationTitle' | translate }}
-      </h1>
+      <h1>{{ 'app.fulfiller.reservationConfirmationFailedTitle' | translate }}</h1>
       <p>{{ 'app.fulfiller.reservationConfirmationFailed' | translate }}</p>
     </section>
   }
-</main>
+</div>

@@ -16,6 +16,13 @@ interface EmailSenderInterface
         ?array $wish = null,
     ): void;
 
+    /** @param array<string, mixed> $wish @param array<string, mixed> $handover */
+    public function renderFulfillerReservationConfirmation(
+        array $wish,
+        array $handover,
+        string $locale = 'de',
+    ): array;
+
     public function sendUserCreated(string $recipient, string $temporaryPassword): void;
 
     public function sendUserEmailChanged(string $recipient): void;
