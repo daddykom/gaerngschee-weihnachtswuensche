@@ -319,6 +319,36 @@
         }
       }
     },
+    "fulfiller": {
+      "pageTitle": "Weihnachtswünsche erfüllen",
+      "filters": {
+        "title": "Wünsche suchen",
+        "search": "Suche",
+        "searchHint": "Suche nach Familieninformationen, Wunschtext oder Begründung.",
+        "minimumSearchLength": "Die Suche startet ab drei Zeichen.",
+        "category": "Kategorie",
+        "allCategories": "Alle Kategorien"
+      },
+      "ordersTitle": "Definitive Bestellungen",
+      "orderTitle": "Bestellung {{orderNumber}}",
+      "year": "Aktionsjahr {{year}}",
+      "familyInformation": "Anonymisierte Familieninformation",
+      "loading": "Wünsche werden geladen ...",
+      "empty": "Es wurden keine passenden verfügbaren Wünsche gefunden.",
+      "reserve": "Diesen Wunsch erfüllen",
+      "reserved": "Von dir reserviert",
+      "reserveTitle": "Wunsch reservieren",
+      "reserveMessage": "Möchtest du diesen Wunsch reservieren? Du beschaffst, verpackst und bringst das Geschenk anschliessend selbst.",
+      "reserveConfirm": "Wunsch reservieren",
+      "cancel": "Abbrechen",
+      "successTitle": "Wunsch reserviert",
+      "reservedMessage": "Der Wunsch wurde für dich reserviert.",
+      "errorTitle": "Wunsch konnte nicht reserviert werden",
+      "errors": {
+        "WISH_NOT_AVAILABLE": "Dieser Wunsch wurde inzwischen von jemand anderem reserviert.",
+        "REQUEST_FAILED": "Die Wünsche konnten nicht geladen werden. Bitte versuche es später erneut."
+      }
+    },
     "passwordChange": {
       "pageTitle": "Passwort ändern",
       "heading": "Passwort ändern",
@@ -671,6 +701,7 @@
       "delivery": "Auslieferung",
       "configuration": "Konfiguration",
       "fairgateTest": "Fairgate-Test",
+      "fulfillment": "Wünsche erfüllen",
       "userManagement": "Benutzerverwaltung",
       "clientDeletion": "Client-Bestellung löschen",
       "myUser": "Meine Daten",

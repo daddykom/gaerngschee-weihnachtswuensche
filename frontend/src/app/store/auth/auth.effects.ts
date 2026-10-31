@@ -165,7 +165,9 @@ export const navigateOnLoginSuccessEffect = createEffect(
             ? '/password-change'
             : group === 'wunschbesteller'
               ? '/bestellung'
-              : '/admin/overview',
+              : group === 'wunscherfueller'
+                ? '/erfuellen'
+                : '/admin/overview',
         }),
       ),
     ),

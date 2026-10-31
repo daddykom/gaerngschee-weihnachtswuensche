@@ -7,6 +7,7 @@ import { adminOverviewResolver } from './features/admin/pages/overview/admin-ove
 import { userEditResolver } from './features/admin/pages/users/user-edit.resolver';
 import { usersResolver } from './features/admin/pages/users/users.resolver';
 import { clientLoginGuard } from './features/auth/guards/client-login.guard';
+import { fulfillmentResolver } from './features/fulfiller/pages/fulfillment/fulfillment.resolver';
 import { orderResolver } from './features/order/pages/order/order.resolver';
 import { publicConfigurationResolver } from './features/public-configuration/public-configuration.resolver';
 import { groupGuard } from './shared/guards/group.guard';
@@ -18,6 +19,8 @@ import { fairgateLookupEffects } from './store/fairgate-lookup/fairgate-lookup.e
 import { fairgateLookupFeature } from './store/fairgate-lookup/fairgate-lookup.feature';
 import { fairgateTestEffects } from './store/fairgate-test/fairgate-test.effects';
 import { fairgateTestFeature } from './store/fairgate-test/fairgate-test.feature';
+import { fulfillerOrdersEffects } from './store/fulfiller-orders/fulfiller-orders.effects';
+import { fulfillerOrdersFeature } from './store/fulfiller-orders/fulfiller-orders.feature';
 import { orderEffects } from './store/order/order.effects';
 import { orderFeature } from './store/order/order.feature';
 import { passwordResetFeature } from './store/password-reset/password-reset.feature';
@@ -115,6 +118,17 @@ export const appRoutes: Routes = [
         loadComponent: () =>
           import('./features/order/pages/order-confirmation/order-confirmation.component').then(
             (m) => m.OrderConfirmationComponent,
+          ),
+      },
+      {
+        path: 'erfuellen',
+        canActivate: [groupGuard(['wunscherfueller'])],
+        providers: [provideState(fulfillerOrdersFeature), provideEffects(fulfillerOrdersEffects)],
+        resolve: { orders: fulfillmentResolver },
+        data: { pageTitle: 'app.fulfiller.pageTitle' },
+        loadComponent: () =>
+          import('./features/fulfiller/pages/fulfillment/fulfillment-page.component').then(
+            (m) => m.FulfillmentPageComponent,
           ),
       },
       {

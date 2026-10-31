@@ -90,6 +90,170 @@ final class OrderRepository
     }
 
     /** @return list<array<string, mixed>> */
+    public function findForFulfiller(string $email, ?string $search = null, ?string $category = null): array
+    {
+        $parameters = ['fulfiller_email' => strtolower(trim($email))];
+        $conditions = [
+            "orders.status = 'definitive'",
+            "EXISTS (
+                SELECT 1 FROM order_items available_items
+                WHERE available_items.order_id = orders.id
+                  AND available_items.publication_status = 'approved'
+                  AND (
+                    available_items.fulfillment_status = 'available'
+                    OR (available_items.fulfillment_status = 'reserved' AND LOWER(available_items.fulfiller_email) = :fulfiller_email)
+                  )
+            )",
+        ];
+
+        if ($category !== null) {
+            $conditions[] = "EXISTS (
+                SELECT 1 FROM order_items category_items
+                WHERE category_items.order_id = orders.id
+                  AND category_items.category = :category
+                  AND category_items.publication_status = 'approved'
+                  AND (
+                    category_items.fulfillment_status = 'available'
+                    OR (category_items.fulfillment_status = 'reserved' AND LOWER(category_items.fulfiller_email) = :category_fulfiller_email)
+                  )
+            )";
+            $parameters['category'] = $category;
+            $parameters['category_fulfiller_email'] = strtolower(trim($email));
+        }
+
+        if ($search !== null && trim($search) !== '') {
+            $conditions[] = "(
+                LOWER(COALESCE(orders.current_text, '')) LIKE :search_order
+                OR EXISTS (
+                    SELECT 1 FROM order_items search_items
+                    WHERE search_items.order_id = orders.id
+                      AND search_items.publication_status = 'approved'
+                      AND (
+                        search_items.fulfillment_status = 'available'
+                        OR (search_items.fulfillment_status = 'reserved' AND LOWER(search_items.fulfiller_email) = :search_fulfiller_email)
+                      )
+                      AND (
+                        LOWER(COALESCE(search_items.current_description, '')) LIKE :search_description
+                        OR LOWER(COALESCE(search_items.current_reason, '')) LIKE :search_reason
+                      )
+                )
+            )";
+            $term = '%' . strtolower(trim($search)) . '%';
+            $parameters['search_order'] = $term;
+            $parameters['search_fulfiller_email'] = strtolower(trim($email));
+            $parameters['search_description'] = $term;
+            $parameters['search_reason'] = $term;
+        }
+
+        $statement = $this->pdo->prepare(
+            'SELECT id, year, order_number, current_text
+             FROM orders WHERE ' . implode(' AND ', $conditions) . ' ORDER BY year DESC, order_number ASC, id ASC',
+        );
+        $statement->execute($parameters);
+        $orders = [];
+        foreach ($statement->fetchAll() as $row) {
+            $orderText = is_string($row['current_text']) ? $row['current_text'] : null;
+            $items = $this->findFulfillerItems((string) $row['id'], $email, $category);
+            $items = array_map(static fn (array $item): array => [
+                ...$item,
+                'wishNumber' => $item['itemNumber'] === null
+                    ? null
+                    : (string) $row['order_number'] . '-' . (string) $item['itemNumber'],
+            ], $items);
+            if ($search !== null && trim($search) !== '' && !self::contains($orderText, $search)) {
+                $items = array_values(array_filter($items, static fn (array $item): bool =>
+                    self::contains($item['currentDescription'] ?? null, $search)
+                    || self::contains($item['currentReason'] ?? null, $search)));
+            }
+            if ($items === []) {
+                continue;
+            }
+            $orders[] = [
+                'id' => (string) $row['id'],
+                'year' => (int) $row['year'],
+                'orderNumber' => (int) $row['order_number'],
+                'currentText' => $orderText,
+                'items' => $items,
+            ];
+        }
+
+        return $orders;
+    }
+
+    /** @return list<array<string, mixed>> */
+    private function findFulfillerItems(string $orderId, string $email, ?string $category): array
+    {
+        $conditions = [
+            'order_id = :order_id',
+            "publication_status = 'approved'",
+            "(fulfillment_status = 'available' OR (fulfillment_status = 'reserved' AND LOWER(fulfiller_email) = :fulfiller_email))",
+        ];
+        $parameters = [
+            'order_id' => $orderId,
+            'fulfiller_email' => strtolower(trim($email)),
+        ];
+        if ($category !== null) {
+            $conditions[] = 'category = :category';
+            $parameters['category'] = $category;
+        }
+        $statement = $this->pdo->prepare(
+            'SELECT id, item_number, category, current_description, current_reason, fulfillment_status, reserved_at
+             FROM order_items WHERE ' . implode(' AND ', $conditions) . ' ORDER BY item_number ASC, id ASC',
+        );
+        $statement->execute($parameters);
+
+        return array_map(static fn (array $item): array => [
+            'id' => (string) $item['id'],
+            'itemNumber' => (int) $item['item_number'],
+            'wishNumber' => null,
+            'category' => (string) $item['category'],
+            'currentDescription' => (string) $item['current_description'],
+            'currentReason' => $item['current_reason'],
+            'fulfillmentStatus' => (string) $item['fulfillment_status'],
+            'reservedAt' => $item['reserved_at'],
+        ], $statement->fetchAll());
+    }
+
+    /** @return array<string, mixed>|null */
+    public function reserveItemForFulfiller(string $itemId, string $email): ?array
+    {
+        $statement = $this->pdo->prepare(
+            "UPDATE order_items
+             SET fulfillment_status = 'reserved', fulfiller_email = :email, reserved_at = CURRENT_TIMESTAMP,
+                 updated_at = CURRENT_TIMESTAMP
+             WHERE id = :id AND publication_status = 'approved' AND fulfillment_status = 'available'
+               AND EXISTS (SELECT 1 FROM orders WHERE orders.id = order_items.order_id AND orders.status = 'definitive')",
+        );
+        $statement->execute(['id' => $itemId, 'email' => strtolower(trim($email))]);
+        if ($statement->rowCount() !== 1) {
+            return null;
+        }
+
+        $result = $this->pdo->prepare(
+            'SELECT order_id, id, item_number, fulfillment_status, reserved_at
+             FROM order_items WHERE id = :id',
+        );
+        $result->execute(['id' => $itemId]);
+        $item = $result->fetch();
+        if (!is_array($item)) {
+            return null;
+        }
+
+        return [
+            'orderId' => (string) $item['order_id'],
+            'id' => (string) $item['id'],
+            'itemNumber' => (int) $item['item_number'],
+            'fulfillmentStatus' => (string) $item['fulfillment_status'],
+            'reservedAt' => $item['reserved_at'],
+        ];
+    }
+
+    private static function contains(?string $value, string $search): bool
+    {
+        return $value !== null && str_contains(strtolower($value), strtolower($search));
+    }
+
+    /** @return list<array<string, mixed>> */
     public function findForAdministration(array $statuses, array $categories): array
     {
         $parameters = [];

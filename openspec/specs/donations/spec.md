@@ -2,25 +2,31 @@
 
 ## Overview
 
-Verwaltung der Erfüllung einzelner Weihnachtswünsche durch Erfüller.
+Verwaltung der Reservierung einzelner Weihnachtswünsche durch Erfüller.
+Ein Wunsch wird zunächst reserviert, da der Erfüller ihn anschliessend noch
+beschaffen, verpacken und zur Organisation bringen muss.
 
 ## Features
 
 ### F1: Wunsch auswählen
 
-- Erfüller sieht verfügbare Weihnachtswünsche
+- Erfüller sieht verfügbare Weihnachtswünsche aus definitiven Bestellungen
+- Die Wünsche werden nach Bestellung gruppiert angezeigt
+- Anonymisierte, korrigierte Familien- und Wunschtexte werden angezeigt
+- Die Wunschnummer wird im Format `<Bestellnummer>-<Wunschnummer>` angezeigt
+- Die Liste kann nach Kategorie und korrigierten Texten durchsucht werden
 - Erfüller wählt genau einen Weihnachtswunsch aus
 
 ### F2: Erfüllung bestätigen
 
-- Erfüllung des ausgewählten Wunsches bestätigen
-- Wunsch als erfüllt markieren
+- Reservierung des ausgewählten Wunsches ausdrücklich bestätigen
+- Wunsch als reserviert markieren
 - Erfüllung dem Erfüller zuordnen
 
 ### F3: Wunsch-Status
 
 - Verfügbare Wünsche anzeigen
-- Bereits erfüllte Wünsche aus der Auswahl entfernen
+- Bereits reservierte Wünsche aus der Auswahl entfernen bzw. dem eigenen Erfüller zuordnen
 - Statusänderungen nachvollziehbar speichern
 
 ## Data Model
@@ -28,11 +34,12 @@ Verwaltung der Erfüllung einzelner Weihnachtswünsche durch Erfüller.
 ### Donation
 
 ```typescript
-interface FulfilledWish {
+interface ReservedWish {
   id: string;
   wishId: string;
+  orderId: string;
   fulfillerId: string;
-  status: 'fulfilled';
+  status: 'reserved';
   createdAt: string;
 }
 ```
@@ -41,21 +48,21 @@ interface FulfilledWish {
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/wishes` | List available wishes |
-| POST | `/api/wishes/{wishId}/fulfill` | Fulfill one wish |
-| GET | `/api/wishes/fulfilled` | List fulfilled wishes (staff only) |
+| GET | `/fulfiller/orders` | Definitive Bestellungen mit verfügbaren Wünschen laden |
+| POST | `/fulfiller/order-items/{itemId}/reserve` | Einen Wunsch reservieren |
 
 ## Fachliche Regeln
 
-- Ein Wunsch darf nicht mehrfach erfüllt werden
-- Die Erfüllung wird nur nach ausdrücklicher Bestätigung gespeichert
+- Ein Wunsch darf nicht mehrfach reserviert werden
+- Die Reservierung wird nur nach ausdrücklicher Bestätigung gespeichert
 - Erfüller können nur verfügbare Wünsche auswählen
+- Die Reservierung erfolgt atomar, damit parallele Reservierungen nicht denselben Wunsch übernehmen können
 
 ## Implementation Status
 
 | Component | Status |
 |-----------|--------|
-| Wish selection | ✗ Not implemented |
-| Fulfillment confirmation | ✗ Not implemented |
-| Fulfillment recording | ✗ Not implemented |
-| Availability update | ✗ Not implemented |
+| Wish selection | ✓ Implemented |
+| Reservation confirmation | ✓ Implemented |
+| Reservation recording | ✓ Implemented |
+| Availability update | ✓ Implemented |

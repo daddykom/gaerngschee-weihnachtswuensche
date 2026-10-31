@@ -1,6 +1,6 @@
 # Sicherheits-Audit
 
-Stand: 12. September 2026
+Stand: 30. Oktober 2026
 
 ## Umfang
 
@@ -26,15 +26,15 @@ Sicherheits- und Härtungsrisiken.
 | **Erledigt, Restrisiko** | CSRF-Schutz, Origin-Prüfung und feste CORS-Allowlist sind umgesetzt (`backend/src/Middleware/CsrfMiddleware.php`, `backend/src/Application.php`). | Schutz für alle mutierenden Routen und Deployment-Origin regelmässig prüfen. | Ein kompromittierter Origin kann weiterhin legitime Browseraktionen auslösen. |
 | **Erledigt, Restrisiko** | Rate Limiting ist für Login-, Passwort-, Registrierungs- und Mail-Flows umgesetzt. | Zentrale Limits und Monitoring für verteilte Angriffe ergänzen. | Verteilte Angriffe benötigen zusätzlich Bot-Schutz. |
 | **Erledigt, Restrisiko** | Session-Cookies werden vor `session_start()` mit `Secure`, `HttpOnly` und `SameSite` konfiguriert (`backend/src/Auth/Services/SessionService.php`). | HTTPS und HSTS im produktiven Reverse Proxy prüfen. | Effektive Defaults hängen weiterhin von der Deployment-Umgebung ab. |
-| **Hoch** | JWTs enthalten keine Bindung an Issuer, Audience oder Benutzerstatus. Serverseitiger Widerruf fehlt (`backend/src/Auth/Services/JwtService.php:61-78`). | Algorithmus strikt allowlisten, `iss`/`aud` validieren, Token-Version oder Revocation-Liste nutzen und Tokens bei Passwort- oder Rollenänderung widerrufen. | Gestohlene Tokens bleiben bis zum Ablauf gültig. |
-| **Erledigt, Restrisiko** | Registration-, Reset- und Delivery-Tokens werden nach dem Einlesen per `replaceUrl` aus der Browser-URL entfernt. | Referrer-Policy und möglichst Fragment- oder Bootstrap-Tokens ergänzen. | Leaks vor der URL-Bereinigung sind nicht vollständig verhinderbar. |
-| **Erledigt, Restrisiko** | Request-Grössen und fachliche Werte sind server- und clientseitig begrenzt. | Limits durch Webserver-Konfiguration und Integrationstests zusätzlich absichern. | Limits müssen mit legitimen Bestelldaten abgestimmt werden. |
-| **Erledigt, Restrisiko** | Dynamisches `[innerHTML]` wurde entfernt; Linktext und `href` werden separat gebunden. | Externe HTTPS-Ziele weiterhin fachlich begrenzen. | Erlaubte externe HTTPS-Ziele bleiben ein Vertrauensrisiko. |
+| **Erledigt, Restrisiko** | JWTs werden mit einer festen Algorithmus-Allowlist geprüft und enthalten Issuer, Audience sowie eine Token-Version. Serverseitige Token-Versionen ermöglichen den Widerruf bei Passwort- oder Rollenänderungen (`backend/src/Auth/Services/JwtService.php`). | Token-Ablaufzeiten und Widerrufsverhalten regelmässig prüfen. | Ein bereits gestohlener Token bleibt bis zum Ablauf oder bis zur serverseitigen Invalidierung nutzbar. |
+| **Erledigt, Restrisiko** | Registration-, Reset- und Delivery-Tokens werden nach dem Einlesen per `replaceUrl` aus der Browser-URL entfernt. Zusätzlich ist eine strikte Referrer-Policy gesetzt. | Möglichst Fragment- oder Bootstrap-Tokens sowie regelmässige Prüfung der URL-Bereinigung ergänzen. | Leaks vor der URL-Bereinigung sind nicht vollständig verhinderbar. |
+| **Erledigt, Restrisiko** | Request-Grössen und fachliche Werte sind server- und clientseitig begrenzt. Webserver-Limits und ein Integrationstest für HTTP 413 ergänzen die Anwendungslimits. | Limits mit legitimen Bestelldaten abstimmen. | Zu niedrige Limits können legitime Requests ablehnen. |
+| **Erledigt, Restrisiko** | Dynamisches `[innerHTML]` wurde entfernt; Linktext und `href` werden separat gebunden. Konfigurierbare externe Ziele werden zusätzlich über eine Host-Allowlist begrenzt. | Allowlist bei fachlichen Änderungen und im Deployment prüfen. | Erlaubte externe HTTPS-Ziele bleiben ein Vertrauensrisiko. |
 | **Behoben** | Security Headers und eine verbindliche CSP sind in `docker/nginx.conf` und `frontend/public/.htaccess` gesetzt. | Konfiguration am tatsächlich öffentlichen Reverse Proxy prüfen und CSP bei Änderungen an externen Ressourcen aktualisieren. | Der lokale Container konnte hier nicht mit einem installierten Nginx-Konfigurationsparser geprüft werden. |
 | **Erledigt** | Der Auth-Interceptor sendet keine Bearer-Tokens mehr und beschränkt sich auf den CSRF-Header (`frontend/src/app/shared/interceptors/auth-token.interceptor.ts`). | API-Origin und CORS-Allowlist im Deployment prüfen. | Keine zusätzlichen Token-Header im Frontend-Interceptor. |
 | **Mittel** | Der Password-Reset-/Registration-Flow kann nach einem externen Fairgate-Fehler inkonsistent sein: Tokens werden vor Abschluss des Flows verbraucht. | Idempotenten Zustandsautomaten mit sauberem Retry-/Rollback-Verhalten implementieren. | Externe Fairgate-Ausfälle bleiben möglich. |
 | **Mittel** | Schwache Passwörter werden akzeptiert; das Backend prüft primär auf einen vorhandenen String. | Zentrale Mindestlänge, beispielsweise 12 Zeichen, und Prüfung kompromittierter Passwörter. MFA für Admins ergänzen. | Schützt nicht gegen Phishing oder Credential Stuffing. |
-| **Niedrig-Mittel** | NgRx Store DevTools sind offenbar global aktiv (`frontend/src/app/app.config.ts:32`). Der Store enthält Tokens und personenbezogene Daten. | DevTools nur in Development aktivieren. | Benutzer mit Browser- oder Debug-Zugriff können Laufzeitdaten weiterhin sehen. |
+| **Erledigt, Restrisiko** | NgRx Store DevTools werden nur im Development-Modus registriert (`frontend/src/app/app.config.ts`). Der Store enthält Tokens und personenbezogene Daten. | Ausschliesslich Produktionsartefakte deployen und Debug-Zugriff in produktiven Browsern vermeiden. | Benutzer mit Browser- oder Debug-Zugriff können Laufzeitdaten weiterhin sehen. |
 | **Niedrig-Mittel** | Development- und Integration-Builds verwenden Source Maps und deaktivierte Optimierung. | Ausschliesslich Produktionsartefakte deployen und `.map`-Dateien im Deployment blockieren. | Öffentlicher JavaScript-Code bleibt grundsätzlich analysierbar. |
 
 ## Dependency-Check
@@ -87,10 +87,10 @@ gefunden:
 ## Empfohlene Reihenfolge
 
 1. Alle Secrets rotieren und Git-Historie sowie CI-Logs prüfen.
-2. JWT-Claims, Widerruf und Passwortregeln ergänzen.
-3. Security Headers, CSP, HTTPS und HSTS produktiv verifizieren.
-4. Eingabelimits mit Webserver- und Integrationstests absichern.
-5. Referrer-Policy und externe Ziel-Allowlist ergänzen.
+2. Password-Reset-/Registrierungsfluss bei Fairgate-Fehlern idempotent machen.
+3. Passwortregeln erweitern und die optionale MFA für Admins bewerten.
+4. Security Headers, CSP, HTTPS, HSTS und Cookie-Attribute produktiv verifizieren.
+5. Ausschliesslich Produktionsartefakte deployen und Source Maps im öffentlichen Deployment blockieren.
 
 ## Einschränkungen
 
