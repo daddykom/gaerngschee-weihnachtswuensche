@@ -132,7 +132,6 @@ export const appRoutes: Routes = [
       },
       {
         path: 'fulfiller-reservation',
-        data: { pageTitle: 'app.fulfiller.reservationConfirmationTitle' },
         loadComponent: () =>
           import(
             './features/fulfiller/pages/reservation-confirmation/reservation-confirmation.component'
