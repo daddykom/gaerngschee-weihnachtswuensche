@@ -14,7 +14,6 @@ use Throwable;
 final class RegistrationTokenService
 {
     public const CLIENT_ORDER = 'client-order';
-    public const FULFILLER = 'fulfiller';
     private readonly PDO $pdo;
     private readonly RegistrationTokenRepository $tokens;
 

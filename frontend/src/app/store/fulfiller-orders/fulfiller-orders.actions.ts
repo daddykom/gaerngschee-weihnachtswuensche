@@ -1,5 +1,9 @@
 import { createActionGroup, emptyProps, props } from '@ngrx/store';
-import { FulfillerCategory, FulfillerOrder } from '../../shared/models/fulfiller-order.model';
+import {
+  FulfillerCategory,
+  FulfillerOrder,
+  FulfillerWishStatusUpdate,
+} from '../../shared/models/fulfiller-order.model';
 
 export const FulfillerOrdersActions = createActionGroup({
   source: 'Fulfiller Orders',
@@ -9,12 +13,17 @@ export const FulfillerOrdersActions = createActionGroup({
     'Category Changed': props<{ category: FulfillerCategory | '' }>(),
     'Load Success': props<{ orders: FulfillerOrder[] }>(),
     'Load Failure': props<{ errorCode: string }>(),
-    Reserve: props<{ itemId: string }>(),
-    'Reserve Success': props<{
-      orderId: string;
-      itemId: string;
-      reservedAt: string | null;
+    'Reservation Form Changed': props<{
+      changes: Partial<{ email: string; privacyAccepted: boolean }>;
     }>(),
-    'Reserve Failure': props<{ errorCode: string }>(),
+    'Reservation Started': props<{ itemId: string }>(),
+    'Reservation Submitted': emptyProps(),
+    'Reservation Request Success': props<{
+      itemId: string;
+      reservationExpiresAt: string;
+    }>(),
+    'Reservation Request Failure': props<{ errorCode: string }>(),
+    'Polling Started': emptyProps(),
+    'Wish Statuses Updated': props<{ items: FulfillerWishStatusUpdate[] }>(),
   },
 });

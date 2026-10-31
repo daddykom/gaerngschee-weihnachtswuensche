@@ -67,7 +67,7 @@ final class StartRegistrationActionTest extends TestCase
     {
         return new AnmeldungService(
             new class () implements EmailSenderInterface {
-                public function sendAnmeldung(string $recipient, \App\Registration\Services\AnmeldungMailVariant $variant, string $locale = 'de', ?string $loginUrl = null): void
+                public function sendAnmeldung(string $recipient, \App\Registration\Services\AnmeldungMailVariant $variant, string $locale = 'de', ?string $loginUrl = null, ?array $wish = null): void
                 {
                 }
                 public function sendOrderStatus(string $recipient, string $status, string $locale = 'de'): void

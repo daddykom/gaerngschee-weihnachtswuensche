@@ -105,10 +105,26 @@ final class TestDatabase
                  publication_status TEXT NOT NULL DEFAULT \'draft\',
                  fulfillment_status TEXT NOT NULL DEFAULT \'available\',
                  item_number INTEGER NULL,
-                fulfiller_email TEXT NULL,
-                reserved_at TEXT NULL,
-                due_at TEXT NULL,
+                 fulfiller_email TEXT NULL,
+                 reserved_at TEXT NULL,
+                 reservation_expires_at TEXT NULL,
+                 reservation_token_id TEXT NULL,
+                 due_at TEXT NULL,
                 received_at TEXT NULL,
+                created_at TEXT,
+                updated_at TEXT
+            )',
+        );
+        $pdo->exec(
+            'CREATE TABLE fulfiller_reservation_tokens (
+                id TEXT PRIMARY KEY,
+                order_item_id TEXT NOT NULL,
+                email TEXT NOT NULL,
+                token_hash TEXT NOT NULL UNIQUE,
+                expires_at TEXT NOT NULL,
+                used_at TEXT NULL,
+                privacy_accepted_at TEXT NOT NULL,
+                privacy_confirmed_at TEXT NULL,
                 created_at TEXT,
                 updated_at TEXT
             )',

@@ -75,7 +75,11 @@
                         </p>
                       }
                     </div>
-                    @if (wish.fulfillmentStatus === 'reserved') {
+                    @if (wish.fulfillmentStatus === 'pending_confirmation') {
+                      <p class="wish-entry__reserved" role="status">
+                        {{ 'app.fulfiller.pendingConfirmation' | translate }}
+                      </p>
+                    } @else if (wish.fulfillmentStatus === 'reserved') {
                       <p class="wish-entry__reserved" role="status">
                         {{ 'app.fulfiller.reserved' | translate }}
                       </p>

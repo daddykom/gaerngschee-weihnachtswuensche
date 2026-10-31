@@ -24,14 +24,26 @@ final class AnmeldungService
         $this->emailSender->sendAnmeldung($email, AnmeldungMailVariant::ClientOrder, $locale, $loginUrl);
     }
 
-    public function sendFulfillerLink(string $email, string $loginUrl, string $locale = 'de'): void
+    /** @param array<string, mixed> $wish */
+    public function sendFulfillerReservationLink(
+        string $email,
+        string $loginUrl,
+        array $wish,
+        string $locale = 'de',
+    ): void
     {
         $email = strtolower(trim($email));
         if (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
             throw new InvalidArgumentException('Invalid email address.');
         }
 
-        $this->emailSender->sendAnmeldung($email, AnmeldungMailVariant::Fulfiller, $locale, $loginUrl);
+        $this->emailSender->sendAnmeldung(
+            $email,
+            AnmeldungMailVariant::FulfillerReservation,
+            $locale,
+            $loginUrl,
+            $wish,
+        );
     }
 
 }

@@ -18,6 +18,7 @@ describe('fulfillerOrdersFeature', () => {
         currentReason: null,
         fulfillmentStatus: 'available' as const,
         reservedAt: null,
+        reservationExpiresAt: null,
       },
     ],
   };
@@ -37,20 +38,25 @@ describe('fulfillerOrdersFeature', () => {
     ).toMatchObject({ orders: [order], loadStatus: 'loaded' });
   });
 
-  it('updates only the reserved wish', () => {
+  it('patches only matching wish statuses without rebuilding the order list', () => {
     const state = { ...initialState, orders: [order] };
     const result = fulfillerOrdersFeature.reducer(
       state,
-      FulfillerOrdersActions.reserveSuccess({
-        orderId: 'order-1',
-        itemId: 'item-1',
-        reservedAt: '2026-10-31T12:00:00Z',
+      FulfillerOrdersActions.wishStatusesUpdated({
+        items: [
+          {
+            id: 'item-1',
+            fulfillmentStatus: 'pending_confirmation',
+            reservedAt: null,
+            reservationExpiresAt: '2026-10-31T12:10:00Z',
+          },
+        ],
       }),
     );
 
     expect(result.orders[0].items[0]).toMatchObject({
-      fulfillmentStatus: 'reserved',
-      reservedAt: '2026-10-31T12:00:00Z',
+      fulfillmentStatus: 'pending_confirmation',
+      reservationExpiresAt: '2026-10-31T12:10:00Z',
     });
     expect(result.orders).not.toBe(state.orders);
   });

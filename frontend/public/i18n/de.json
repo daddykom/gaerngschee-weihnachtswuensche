@@ -363,6 +363,31 @@
       "empty": "Es wurden keine passenden verfügbaren Wünsche gefunden.",
       "reserve": "Diesen Wunsch erfüllen",
       "reserved": "Von dir reserviert",
+      "pendingConfirmation": "Bestätigung per E-Mail ausstehend",
+      "reservationEmailSentTitle": "Bestätigungs-E-Mail versandt",
+      "reservationEmailSentMessage": "Bitte bestätige die Reservierung über den Link in deiner E-Mail. Der Wunsch bleibt bis dahin vorübergehend blockiert.",
+      "reservationConfirmationTitle": "Wunschreservierung bestätigen",
+      "reservationConfirmed": "Die Reservierung wurde bestätigt. Bitte bringe den Wunsch zum angegebenen Abgabezeitpunkt an den angegebenen Ort.",
+      "handoverDetails": "Abgabe: {{date}}, {{time}}, {{location}}",
+      "reservationConfirmationFailed": "Der Bestätigungslink ist ungültig, abgelaufen oder der Wunsch wurde inzwischen anderweitig reserviert.",
+      "privacyLink": "Datenschutzerklärung lesen",
+      "reservationDialog": {
+        "title": "Wunsch erfüllen",
+        "emailLabel": "Deine E-Mail-Adresse",
+        "commitment": "Mit der Reservierung verpflichtest du dich, den Wunsch zu beschaffen, zu verpacken und am {{date}} im Zeitfenster {{time}} am Ort {{location}} abzugeben.",
+        "privacyConsent": "Ich akzeptiere die Datenschutzerklärung.",
+        "submit": "Bestätigungslink senden",
+        "errors": {
+          "email": {
+            "required": "Bitte gib deine E-Mail-Adresse ein.",
+            "email": "Bitte prüfe deine E-Mail-Adresse.",
+            "maxLength": "Die E-Mail-Adresse ist zu lang."
+          },
+          "privacyAccepted": {
+            "required": "Bitte akzeptiere die Datenschutzerklärung."
+          }
+        }
+      },
       "reserveTitle": "Wunsch reservieren",
       "reserveMessage": "Möchtest du diesen Wunsch reservieren? Du beschaffst, verpackst und bringst das Geschenk anschliessend selbst.",
       "reserveConfirm": "Wunsch reservieren",
@@ -370,8 +395,15 @@
       "successTitle": "Wunsch reserviert",
       "reservedMessage": "Der Wunsch wurde für dich reserviert.",
       "errorTitle": "Wunsch konnte nicht reserviert werden",
+      "loadErrorTitle": "Wünsche konnten nicht geladen werden",
+      "loadErrors": {
+        "REQUEST_FAILED": "Die Wunschliste konnte nicht geladen werden. Bitte versuche es später erneut."
+      },
       "errors": {
         "WISH_NOT_AVAILABLE": "Dieser Wunsch wurde inzwischen von jemand anderem reserviert.",
+        "PRIVACY_CONSENT_REQUIRED": "Bitte akzeptiere die Datenschutzerklärung.",
+        "INVALID_EMAIL": "Bitte prüfe deine E-Mail-Adresse.",
+        "INVALID_WISH_DATA": "Der ausgewählte Wunsch ist ungültig.",
         "REQUEST_FAILED": "Die Wünsche konnten nicht geladen werden. Bitte versuche es später erneut."
       }
     },
@@ -870,11 +902,11 @@
           "button": "Weihnachtswünsche auswählen",
           "subject": "Dein Link zur Weihnachtswünsche-Bestellung"
         },
-        "fulfiller": {
-          "title": "Dein Anmeldelink für Wunscherfüller",
-          "body": "Klicke auf den folgenden Link, um dich passwortlos als Wunscherfüller anzumelden und verfügbare Weihnachtswünsche zu übernehmen:",
-          "button": "Als Wunscherfüller anmelden",
-          "subject": "Dein Link zur Anmeldung als Wunscherfüller"
+        "fulfillerReservation": {
+          "title": "Deine Wunschreservierung bestätigen",
+          "intro": "Bitte bestätige, dass du den folgenden Wunsch erfüllen möchtest:",
+          "button": "Wunschreservierung bestätigen",
+          "subject": "Bitte bestätige deine Wunschreservierung"
         },
         "common": {
           "ignore": "Falls du diese Anfrage nicht ausgelöst hast, kannst du diese E-Mail ignorieren."

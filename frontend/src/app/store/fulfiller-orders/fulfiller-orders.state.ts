@@ -3,14 +3,21 @@ import { FulfillerCategory, FulfillerOrder } from '../../shared/models/fulfiller
 export type FulfillerOrdersLoadStatus = 'initial' | 'loading' | 'loaded' | 'error';
 export type FulfillerOrdersReserveStatus = 'initial' | 'loading' | 'success' | 'error';
 
+export interface FulfillerReservationForm {
+  itemId: string | null;
+  email: string;
+  privacyAccepted: boolean;
+}
+
 export interface FulfillerOrdersState {
   orders: FulfillerOrder[];
   search: string;
   category: FulfillerCategory | '';
   loadStatus: FulfillerOrdersLoadStatus;
-  reserveStatus: FulfillerOrdersReserveStatus;
   errorCode: string | null;
-  reserveErrorCode: string | null;
+  reservationForm: FulfillerReservationForm;
+  reservationStatus: FulfillerOrdersReserveStatus;
+  reservationErrorCode: string | null;
 }
 
 export const initialState: FulfillerOrdersState = {
@@ -18,7 +25,8 @@ export const initialState: FulfillerOrdersState = {
   search: '',
   category: '',
   loadStatus: 'initial',
-  reserveStatus: 'initial',
   errorCode: null,
-  reserveErrorCode: null,
+  reservationForm: { itemId: null, email: '', privacyAccepted: false },
+  reservationStatus: 'initial',
+  reservationErrorCode: null,
 };

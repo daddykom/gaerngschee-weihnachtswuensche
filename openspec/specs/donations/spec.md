@@ -3,31 +3,33 @@
 ## Overview
 
 Verwaltung der Reservierung einzelner Weihnachtswünsche durch Erfüller.
-Ein Wunsch wird zunächst reserviert, da der Erfüller ihn anschliessend noch
-beschaffen, verpacken und zur Organisation bringen muss.
+Die öffentliche Wunschliste benötigt kein Konto. Eine Reservierung wird per
+E-Mail bestätigt und bleibt bis zur Bestätigung zehn Minuten vorläufig.
 
 ## Features
 
 ### F1: Wunsch auswählen
 
-- Erfüller sieht verfügbare Weihnachtswünsche aus definitiven Bestellungen
+- Erfüller sieht öffentliche Wünsche aus definitiven Bestellungen ohne Login
 - Die Wünsche werden nach Bestellung gruppiert angezeigt
 - Anonymisierte, korrigierte Familien- und Wunschtexte werden angezeigt
 - Die Wunschnummer wird im Format `<Bestellnummer>-<Wunschnummer>` angezeigt
 - Die Liste kann nach Kategorie und korrigierten Texten durchsucht werden
 - Erfüller wählt genau einen Weihnachtswunsch aus
 
-### F2: Erfüllung bestätigen
+### F2: Reservierung per E-Mail bestätigen
 
-- Reservierung des ausgewählten Wunsches ausdrücklich bestätigen
-- Wunsch als reserviert markieren
-- Erfüllung dem Erfüller zuordnen
+- E-Mail-Adresse, Datenschutzzustimmung und verbindliche Übergabezusage erfassen
+- Vorläufige Reservierung bis zur Token-Bestätigung halten
+- Bestätigungslink ist zehn Minuten gültig und macht die Reservierung definitiv
+- Abgelaufene oder nicht bestätigte Vorreservierungen werden wieder verfügbar
 
 ### F3: Wunsch-Status
 
 - Verfügbare Wünsche anzeigen
-- Bereits reservierte Wünsche aus der Auswahl entfernen bzw. dem eigenen Erfüller zuordnen
+- Vorläufige und definitive Reservierungen klar anzeigen
 - Statusänderungen nachvollziehbar speichern
+- Offene Fulfiller-Listen aktualisieren nur die betroffenen Statuswerte
 
 ## Data Model
 
@@ -38,8 +40,8 @@ interface ReservedWish {
   id: string;
   wishId: string;
   orderId: string;
-  fulfillerId: string;
-  status: 'reserved';
+  fulfillerEmail: string;
+  status: 'pending_confirmation' | 'reserved';
   createdAt: string;
 }
 ```
@@ -48,13 +50,16 @@ interface ReservedWish {
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/fulfiller/orders` | Definitive Bestellungen mit verfügbaren Wünschen laden |
-| POST | `/fulfiller/order-items/{itemId}/reserve` | Einen Wunsch reservieren |
+| GET | `/public/fulfiller/orders` | Öffentliche definitive Bestellungen laden |
+| GET | `/public/fulfiller/wish-statuses` | Nur Wunschstatus aktualisieren |
+| POST | `/public/fulfiller-reservation-start` | Vorläufige Reservierung anfordern |
+| POST | `/auth/fulfiller-reservation-confirm` | Reservierung über E-Mail-Token bestätigen |
 
 ## Fachliche Regeln
 
 - Ein Wunsch darf nicht mehrfach reserviert werden
-- Die Reservierung wird nur nach ausdrücklicher Bestätigung gespeichert
+- Die E-Mail-Adresse und Datenschutzzustimmung werden vor dem Versand erfasst
+- Eine definitive Reservierung entsteht erst durch den Bestätigungslink
 - Erfüller können nur verfügbare Wünsche auswählen
 - Die Reservierung erfolgt atomar, damit parallele Reservierungen nicht denselben Wunsch übernehmen können
 

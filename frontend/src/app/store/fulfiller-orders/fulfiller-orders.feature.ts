@@ -34,32 +34,66 @@ export const fulfillerOrdersFeature = createFeature({
       loadStatus: 'error',
       errorCode,
     })),
-    on(FulfillerOrdersActions.reserve, (state) => ({
+    on(FulfillerOrdersActions.reservationStarted, (state, { itemId }) => ({
       ...state,
-      reserveStatus: 'loading',
-      reserveErrorCode: null,
+      reservationForm: { itemId, email: '', privacyAccepted: false },
+      reservationStatus: 'initial' as const,
+      reservationErrorCode: null,
     })),
-    on(FulfillerOrdersActions.reserveSuccess, (state, { orderId, itemId, reservedAt }) => ({
+    on(FulfillerOrdersActions.reservationFormChanged, (state, { changes }) => ({
       ...state,
-      orders: state.orders.map((order) =>
-        order.id !== orderId
-          ? order
-          : {
-              ...order,
-              items: order.items.map((item) =>
-                item.id === itemId
-                  ? { ...item, fulfillmentStatus: 'reserved' as const, reservedAt }
-                  : item,
-              ),
-            },
-      ),
-      reserveStatus: 'success',
-      reserveErrorCode: null,
+      reservationForm: { ...state.reservationForm, ...changes },
     })),
-    on(FulfillerOrdersActions.reserveFailure, (state, { errorCode }) => ({
+    on(FulfillerOrdersActions.reservationSubmitted, (state) => ({
       ...state,
-      reserveStatus: 'error',
-      reserveErrorCode: errorCode,
+      reservationStatus: 'loading' as const,
+      reservationErrorCode: null,
+    })),
+    on(
+      FulfillerOrdersActions.reservationRequestSuccess,
+      (state, { itemId, reservationExpiresAt }) => ({
+        ...state,
+        orders: state.orders.map((order) =>
+          !order.items.some((item) => item.id === itemId)
+            ? order
+            : {
+                ...order,
+                items: order.items.map((item) =>
+                  item.id === itemId
+                    ? {
+                        ...item,
+                        fulfillmentStatus: 'pending_confirmation' as const,
+                        reservationExpiresAt,
+                      }
+                    : item,
+                ),
+              },
+        ),
+        reservationStatus: 'success' as const,
+        reservationErrorCode: null,
+      }),
+    ),
+    on(FulfillerOrdersActions.reservationRequestFailure, (state, { errorCode }) => ({
+      ...state,
+      reservationStatus: 'error' as const,
+      reservationErrorCode: errorCode,
+    })),
+    on(FulfillerOrdersActions.wishStatusesUpdated, (state, { items }) => ({
+      ...state,
+      orders: state.orders.map((order) => ({
+        ...order,
+        items: order.items.map((item) => {
+          const update = items.find((candidate) => candidate.id === item.id);
+          return update
+            ? {
+                ...item,
+                fulfillmentStatus: update.fulfillmentStatus,
+                reservedAt: update.reservedAt,
+                reservationExpiresAt: update.reservationExpiresAt,
+              }
+            : item;
+        }),
+      })),
     })),
   ),
 });
@@ -69,5 +103,7 @@ export const {
   selectSearch: selectFulfillerOrdersSearch,
   selectCategory: selectFulfillerOrdersCategory,
   selectLoadStatus: selectFulfillerOrdersLoadStatus,
-  selectReserveStatus: selectFulfillerOrdersReserveStatus,
+  selectReservationForm: selectFulfillerReservationForm,
+  selectReservationStatus: selectFulfillerReservationStatus,
+  selectReservationErrorCode: selectFulfillerReservationErrorCode,
 } = fulfillerOrdersFeature;

@@ -13,6 +13,7 @@ interface EmailSenderInterface
         AnmeldungMailVariant $variant,
         string $locale = 'de',
         ?string $loginUrl = null,
+        ?array $wish = null,
     ): void;
 
     public function sendUserCreated(string $recipient, string $temporaryPassword): void;

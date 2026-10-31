@@ -81,6 +81,7 @@ final class EmailSender implements EmailSenderInterface
         AnmeldungMailVariant $variant,
         string $locale = 'de',
         ?string $loginUrl = null,
+        ?array $wish = null,
     ): void {
         if ($this->translator instanceof LocaleAwareInterface) {
             $this->translator->setLocale($locale);
@@ -91,11 +92,13 @@ final class EmailSender implements EmailSenderInterface
             'LOGO_CID' => 'cid:gaerngschee-logo',
             'REGISTRATION_URL' => $frontendBaseUrl . '/register',
             'FAIRGATE_URL' => getenv('FAIRGATE_URL') ?: 'https://www.fairgate.ch',
+            'WISH' => $wish,
         ]);
 
-        $subjectKey = $variant === AnmeldungMailVariant::ClientOrder
-            ? 'app.mail.registration.clientOrder.subject'
-            : 'app.mail.registration.fulfiller.subject';
+        $subjectKey = match ($variant) {
+            AnmeldungMailVariant::ClientOrder => 'app.mail.registration.clientOrder.subject',
+            AnmeldungMailVariant::FulfillerReservation => 'app.mail.registration.fulfillerReservation.subject',
+        };
         $message = (new Email())
             ->from(new Address($this->fromAddress, $this->fromName))
             ->to($recipient)

@@ -1,0 +1,27 @@
+<main class="gl-page gl-stack gl-stack--section" aria-labelledby="reservation-confirmation-title">
+  @if (loading()) {
+    <p role="status">{{ 'app.common.loading' | translate }}</p>
+  } @else if (success()) {
+    <section class="gl-stack gl-stack--group">
+      <h1 id="reservation-confirmation-title">
+        {{ 'app.fulfiller.reservationConfirmationTitle' | translate }}
+      </h1>
+      <p>{{ 'app.fulfiller.reservationConfirmed' | translate }}</p>
+      @if (handover(); as details) {
+        <p>
+          {{
+            'app.fulfiller.handoverDetails'
+              | translate: { date: details.date, time: details.time, location: details.location }
+          }}
+        </p>
+      }
+    </section>
+  } @else if (error()) {
+    <section class="gl-stack gl-stack--group" role="alert">
+      <h1 id="reservation-confirmation-title">
+        {{ 'app.fulfiller.reservationConfirmationTitle' | translate }}
+      </h1>
+      <p>{{ 'app.fulfiller.reservationConfirmationFailed' | translate }}</p>
+    </section>
+  }
+</main>

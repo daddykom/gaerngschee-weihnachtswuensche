@@ -1,0 +1,48 @@
+<p>fulfiller-reservation-dialog works!</p>
+<h2 mat-dialog-title>{{ 'app.fulfiller.reservationDialog.title' | translate }}</h2>
+<mat-dialog-content class="gl-stack gl-stack--group">
+  <section class="gl-stack gl-stack--group" aria-labelledby="selected-wish-heading">
+    <h3 id="selected-wish-heading">{{ wish.wishNumber }}</h3>
+    <p class="gl-text--multiline">{{ wish.currentDescription }}</p>
+    @if (wish.currentReason) {
+    <p class="gl-text--multiline">{{ wish.currentReason }}</p>
+    }
+  </section>
+
+  <p>
+    {{ 'app.fulfiller.reservationDialog.commitment' | translate: { date: handoverDate(), time:
+    handoverTime(), location: handoverLocation() } }}
+  </p>
+
+  <form class="gl-stack gl-stack--group" (submit)="$event.preventDefault(); submit()">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>{{ 'app.fulfiller.reservationDialog.emailLabel' | translate }}</mat-label>
+      <input matInput type="email" autocomplete="email" [formField]="form.email" />
+      <app-control-error
+        matError
+        [control]="form.email()"
+        translationPrefix="app.fulfiller.reservationDialog.errors.email"
+      />
+    </mat-form-field>
+
+    <mat-checkbox [formField]="form.privacyAccepted">
+      {{ 'app.fulfiller.reservationDialog.privacyConsent' | translate }}
+      <a routerLink="/datenschutz" mat-dialog-close
+        >{{ 'app.fulfiller.privacyLink' | translate }}</a
+      >
+    </mat-checkbox>
+    <app-control-error
+      matError
+      [control]="form.privacyAccepted()"
+      translationPrefix="app.fulfiller.reservationDialog.errors.privacyAccepted"
+    />
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button type="button" mat-dialog-close>
+    {{ 'app.fulfiller.cancel' | translate }}
+  </button>
+  <button mat-flat-button type="button" (click)="submit()" [disabled]="status() === 'loading'">
+    {{ 'app.fulfiller.reservationDialog.submit' | translate }}
+  </button>
+</mat-dialog-actions>

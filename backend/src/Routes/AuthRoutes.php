@@ -13,7 +13,7 @@ use App\Auth\Actions\PasswordResetRequestAction;
 use App\Auth\Actions\RefreshSessionAction;
 use App\Auth\Actions\SessionStatusAction;
 use App\Registration\Actions\ClientRegistrationLoginAction;
-use App\Registration\Actions\FulfillerRegistrationLoginAction;
+use App\Registration\Actions\ConfirmFulfillerReservationAction;
 use App\Registration\Services\ClientRegistrationLoginService;
 use App\Users\Data\UserRepository;
 use App\Middleware\AuthMiddleware;
@@ -64,13 +64,13 @@ final class AuthRoutes
                 $registrationLoginService,
                 $sessionService,
             ));
-            $fulfillerRegistrationLogin = $group->post(
-                '/fulfiller-registration-login',
-                new FulfillerRegistrationLoginAction(),
+            $fulfillerReservationConfirmation = $group->post(
+                '/fulfiller-reservation-confirm',
+                new ConfirmFulfillerReservationAction(),
             );
             if ($rateLimitService !== null) {
                 $registrationLogin->add(new RateLimitMiddleware(10, 900, static fn ($request): string => RateLimitMiddleware::ip($request), $rateLimitService));
-                $fulfillerRegistrationLogin->add(new RateLimitMiddleware(10, 900, static fn ($request): string => RateLimitMiddleware::ip($request), $rateLimitService));
+                $fulfillerReservationConfirmation->add(new RateLimitMiddleware(10, 900, static fn ($request): string => RateLimitMiddleware::ip($request), $rateLimitService));
             }
 
             $login = $group->post('/login', new LoginAction($userRepository, $sessionService));

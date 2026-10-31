@@ -1,5 +1,5 @@
 export type FulfillerCategory = 'gift' | 'voucher';
-export type FulfillerWishStatus = 'available' | 'reserved';
+export type FulfillerWishStatus = 'available' | 'pending_confirmation' | 'reserved';
 
 export interface FulfillerWish {
   id: string;
@@ -10,6 +10,7 @@ export interface FulfillerWish {
   currentReason: string | null;
   fulfillmentStatus: FulfillerWishStatus;
   reservedAt: string | null;
+  reservationExpiresAt: string | null;
 }
 
 export interface FulfillerOrder {
@@ -24,12 +25,19 @@ export interface FulfillerOrdersResponse {
   orders: FulfillerOrder[];
 }
 
-export interface ReserveWishResponse {
-  item: {
-    orderId: string;
-    id: string;
-    itemNumber: number;
-    fulfillmentStatus: 'reserved';
-    reservedAt: string | null;
-  };
+export interface FulfillerWishStatusUpdate {
+  id: string;
+  fulfillmentStatus: FulfillerWishStatus;
+  reservedAt: string | null;
+  reservationExpiresAt: string | null;
+}
+
+export interface FulfillerWishStatusesResponse {
+  items: FulfillerWishStatusUpdate[];
+}
+
+export interface FulfillerReservationResponse {
+  sent: boolean;
+  itemId: string;
+  reservationExpiresAt: string;
 }

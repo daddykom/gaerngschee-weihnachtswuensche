@@ -1,18 +1,16 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
-import { take } from 'rxjs';
-import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog';
 import { FulfillerWish } from '../../../../shared/models/fulfiller-order.model';
 import { FulfillerOrdersActions } from '../../../../store/fulfiller-orders/fulfiller-orders.actions';
 import {
   selectFulfillerOrders,
   selectFulfillerOrdersCategory,
   selectFulfillerOrdersLoadStatus,
-  selectFulfillerOrdersReserveStatus,
   selectFulfillerOrdersSearch,
 } from '../../../../store/fulfiller-orders/fulfiller-orders.feature';
 import { FulfillmentListComponent } from '../../components/fulfillment-list/fulfillment-list.component';
+import { FulfillerReservationDialog } from '../../components/reservation-dialog/fulfiller-reservation-dialog';
 
 @Component({
   selector: 'app-fulfillment-page',
@@ -29,7 +27,10 @@ export class FulfillmentPageComponent {
   readonly search = this.store.selectSignal(selectFulfillerOrdersSearch);
   readonly category = this.store.selectSignal(selectFulfillerOrdersCategory);
   readonly loadStatus = this.store.selectSignal(selectFulfillerOrdersLoadStatus);
-  readonly reserveStatus = this.store.selectSignal(selectFulfillerOrdersReserveStatus);
+
+  constructor() {
+    this.store.dispatch(FulfillerOrdersActions.pollingStarted());
+  }
 
   searchChanged(search: string): void {
     this.store.dispatch(FulfillerOrdersActions.searchChanged({ search }));
@@ -40,26 +41,14 @@ export class FulfillmentPageComponent {
   }
 
   reserve(wish: FulfillerWish): void {
-    if (wish.fulfillmentStatus !== 'available' || this.reserveStatus() === 'loading') {
+    if (wish.fulfillmentStatus !== 'available') {
       return;
     }
 
-    const dialog = this.dialog.open(ConfirmDialogComponent, {
-      data: {
-        title: 'app.fulfiller.reserveTitle',
-        message: 'app.fulfiller.reserveMessage',
-        confirmLabel: 'app.fulfiller.reserveConfirm',
-        cancelLabel: 'app.fulfiller.cancel',
-      },
+    this.store.dispatch(FulfillerOrdersActions.reservationStarted({ itemId: wish.id }));
+    this.dialog.open(FulfillerReservationDialog, {
+      data: wish,
+      width: 'min(40rem, calc(100vw - 2rem))',
     });
-
-    dialog
-      .afterClosed()
-      .pipe(take(1))
-      .subscribe((confirmed) => {
-        if (confirmed) {
-          this.store.dispatch(FulfillerOrdersActions.reserve({ itemId: wish.id }));
-        }
-      });
   }
 }
