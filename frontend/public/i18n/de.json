@@ -38,32 +38,41 @@
         "ended": "Die Möglichkeit, Wünsche zu erfüllen, ist bereits beendet.",
         "unavailable": "Die Wunschliste ist momentan nicht verfügbar."
       },
-      "documents": {
-        "title": "Info Dokumente",
-        "text": "Bitte lies die folgenden Dokumente durch, bevor du mitmachst.",
-        "criteria": "Wunschzettel-Kriterien für Wünschende",
-        "givers": "Wunschzettel Infos für Schenkende"
-      },
       "faq": {
-        "1": {
-          "question": "Welche Wertgrenze gilt für Wünsche?",
-          "answer": "<p>Pro Person gilt ein Maximalwert von <strong>CHF 100.-</strong></p><p>Alternativ kann sich eine Familie auch für einen gemeinsamen Familienwunsch entscheiden, der diesen Betrag übersteigen darf.</p>"
+        "wunscher": {
+          "title": "Häufige Fragen für Wünschende",
+          "1": {
+            "question": "Welche Wertgrenze gilt für Wünsche?",
+            "answer": "<p>Pro Person gilt ein Maximalwert von <strong>CHF 100.-</strong></p><p>Alternativ kann sich eine Familie auch für einen gemeinsamen Familienwunsch entscheiden, der diesen Betrag übersteigen darf.</p>"
+          },
+          "2": {
+            "question": "Sind Freizeitpark-Wünsche möglich?",
+            "answer": "<p>Ja! Erlaubt sind Eintritte in Freizeit- und Erlebnisparks innerhalb der Schweiz.</p>"
+          },
+          "3": {
+            "question": "Kann ich Gutscheine wünschen?",
+            "answer": "<p>Ab dem <strong>12. Geburtstag</strong> sind Gutscheine möglich.</p><p>Für jüngere Kinder sind ausschliesslich <strong>Sachwünsche</strong> erlaubt.</p><p>💡 <em>Bei Gutscheinwünschen bestimmst du selber den Wert des Gutscheins.</em></p>"
+          },
+          "4": {
+            "question": "Werden alle Wünsche erfüllt?",
+            "answer": "<p>Gärngschee behält sich vor, Wünsche abzulehnen, die nicht den Richtlinien entsprechen. Wir prüfen jeden Wunsch sorgfältig, um sicherzustellen, dass möglichst viele Wünsche erfüllt werden können.</p>"
+          }
         },
-        "2": {
-          "question": "Sind Freizeitpark-Wünsche möglich?",
-          "answer": "<p>Ja! Erlaubt sind Eintritte in Freizeit- und Erlebnisparks innerhalb der Schweiz.</p>"
-        },
-        "3": {
-          "question": "Kann ich Gutscheine wünschen?",
-          "answer": "<p>Ab dem <strong>12. Geburtstag</strong> sind Gutscheine möglich.</p><p>Für jüngere Kinder sind ausschliesslich <strong>Sachwünsche</strong> erlaubt.</p><p>💡 <em>Bei Gutscheinwünschen bestimmst du selber den Wert des Gutscheins.</em></p>"
-        },
-        "4": {
-          "question": "Welche Produkte müssen neu sein?",
-          "answer": "<p><strong>Folgende Produkte müssen zwingend neu sein:</strong></p><ul><li>Elektronische Gegenstände (Handy, Laptop, Tablet, Konsolen – diese dürfen gebraucht sein, aber in gutem Zustand)</li><li>Hygieneprodukte</li><li>Textilien wie Kleidung und Schuhe</li></ul><p>💡 <em>Andere Geschenke dürfen auch gebraucht sein, solange sie in gutem Zustand sind.</em></p>"
-        },
-        "5": {
-          "question": "Werden alle Wünsche erfüllt?",
-          "answer": "<p>Gärngschee behält sich vor, Wünsche abzulehnen, die nicht den Richtlinien entsprechen. Wir prüfen jeden Wunsch sorgfältig, um sicherzustellen, dass möglichst viele Wünsche erfüllt werden können.</p>"
+        "wunscherfueller": {
+          "title": "Häufige Fragen für Wunscherfüller",
+          "intro": "Damit sich die Beschenkten wirklich freuen können, bitten wir dich, bei deiner Spende auf Folgendes zu achten:",
+          "1": {
+            "question": "In welchem Zustand dürfen Geschenke sein?",
+            "answer": "<p>Grundsätzlich nehmen wir nur Spenden in gutem Zustand an.</p><p>Ausnahmen werden von uns klar kommuniziert.</p>"
+          },
+          "2": {
+            "question": "Welche Produkte müssen zwingend neu sein?",
+            "answer": "<p><strong>Folgende Produkte müssen zwingend neu sein:</strong></p><ul><li>Elektronische Gegenstände – Handys, Laptops, Tablets und Konsolen dürfen gebraucht, müssen aber in gutem Zustand sein.</li><li>Hygieneprodukte</li><li>Textilien wie Kleidung und Schuhe</li></ul>"
+          },
+          "3": {
+            "question": "Wie viel darf ein Gutschein kosten?",
+            "answer": "<p>Bei Gutscheinwünschen bestimmst du selber den Wert des Gutscheins.</p>"
+          }
         }
       }
     },

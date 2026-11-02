@@ -56,55 +56,48 @@
       </section>
     </div>
 
-    <mat-card appearance="outlined" class="home-documents">
-      <mat-card-header>
-        <mat-card-title>
-          <mat-icon aria-hidden="true">description</mat-icon>
-          {{ 'app.home.documents.title' | translate }}
-        </mat-card-title>
-      </mat-card-header>
-      <mat-card-content class="gl-stack gl-stack--group">
-        <p>{{ 'app.home.documents.text' | translate }}</p>
-        <div class="home-documents__links gl-grid gl-grid--2">
-          <a
-            mat-stroked-button
-            href="/docs/Wunschzettel-Kriterien.pdf"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <mat-icon aria-hidden="true">download</mat-icon>
-            {{ 'app.home.documents.criteria' | translate }}
-          </a>
-          <a
-            mat-stroked-button
-            href="/docs/Wunschzettel-Merkzettel.pdf"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <mat-icon aria-hidden="true">download</mat-icon>
-            {{ 'app.home.documents.givers' | translate }}
-          </a>
-        </div>
-      </mat-card-content>
-    </mat-card>
-
     <mat-card appearance="outlined" class="home-faq">
-      <mat-card-content>
-        <mat-accordion displayMode="flat">
-          @for (item of faqItems; track item) {
-            <mat-expansion-panel>
-              <mat-expansion-panel-header>
-                <mat-panel-title>{{
-                  'app.home.faq.' + item + '.question' | translate
-                }}</mat-panel-title>
-              </mat-expansion-panel-header>
-              <div
-                class="home-faq__answer"
-                [innerHTML]="'app.home.faq.' + item + '.answer' | translate"
-              ></div>
-            </mat-expansion-panel>
-          }
-        </mat-accordion>
+      <mat-card-content class="gl-stack gl-stack--section">
+        <section class="home-faq__section" aria-labelledby="wunscher-faq-heading">
+          <h2 id="wunscher-faq-heading">{{ 'app.home.faq.wunscher.title' | translate }}</h2>
+          <mat-accordion displayMode="flat">
+            @for (item of wunscherFaqItems; track item) {
+              <mat-expansion-panel>
+                <mat-expansion-panel-header>
+                  <mat-panel-title>{{
+                    'app.home.faq.wunscher.' + item + '.question' | translate
+                  }}</mat-panel-title>
+                </mat-expansion-panel-header>
+                <div
+                  class="home-faq__answer"
+                  [innerHTML]="'app.home.faq.wunscher.' + item + '.answer' | translate"
+                ></div>
+              </mat-expansion-panel>
+            }
+          </mat-accordion>
+        </section>
+
+        <section class="home-faq__section" aria-labelledby="wunscherfueller-faq-heading">
+          <h2 id="wunscherfueller-faq-heading">
+            {{ 'app.home.faq.wunscherfueller.title' | translate }}
+          </h2>
+          <p>{{ 'app.home.faq.wunscherfueller.intro' | translate }}</p>
+          <mat-accordion displayMode="flat">
+            @for (item of wunscherfuellerFaqItems; track item) {
+              <mat-expansion-panel>
+                <mat-expansion-panel-header>
+                  <mat-panel-title>{{
+                    'app.home.faq.wunscherfueller.' + item + '.question' | translate
+                  }}</mat-panel-title>
+                </mat-expansion-panel-header>
+                <div
+                  class="home-faq__answer"
+                  [innerHTML]="'app.home.faq.wunscherfueller.' + item + '.answer' | translate"
+                ></div>
+              </mat-expansion-panel>
+            }
+          </mat-accordion>
+        </section>
       </mat-card-content>
     </mat-card>
 

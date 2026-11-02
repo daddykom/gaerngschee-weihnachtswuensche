@@ -114,7 +114,8 @@ export class HomeComponent {
     return 'open';
   });
   readonly formattedFulfillerStartDate = computed(() => this.formatDate(this.fulfillerStartDate()));
-  readonly faqItems = [1, 2, 3, 4, 5];
+  readonly wunscherFaqItems = [1, 2, 3, 4];
+  readonly wunscherfuellerFaqItems = [1, 2, 3];
 
   logout(): void {
     this.store.dispatch(AuthActions.logoutRequested());

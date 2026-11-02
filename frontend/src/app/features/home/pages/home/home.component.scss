@@ -19,8 +19,7 @@
   border-radius: 18px;
 }
 
-.home-choice h2,
-.home-documents mat-card-title {
+.home-choice h2 {
   display: flex;
   align-items: center;
   gap: var(--gl-space-sm);
@@ -44,18 +43,12 @@
   background: var(--gl-info-container);
 }
 
-.home-documents {
-  background: var(--gl-info-container);
-}
-
-.home-documents__links a {
-  justify-content: flex-start;
-  min-height: 3.5rem;
-  text-align: start;
-}
-
 .home-faq {
   overflow: hidden;
+}
+
+.home-faq__section h2 {
+  margin: 0;
 }
 
 .home-faq__answer {
