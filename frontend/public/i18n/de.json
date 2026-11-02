@@ -33,7 +33,10 @@
       "fulfill": {
         "title": "Wünsche erfüllen",
         "text": "Erfülle Weihnachtswünsche von anderen.",
-        "action": "Wünsche anzeigen"
+        "action": "Wünsche anzeigen",
+        "notStarted": "Die Möglichkeit, Wünsche zu erfüllen, beginnt am {{date}}.",
+        "ended": "Die Möglichkeit, Wünsche zu erfüllen, ist bereits beendet.",
+        "unavailable": "Die Wunschliste ist momentan nicht verfügbar."
       },
       "documents": {
         "title": "Info Dokumente",
@@ -442,6 +445,8 @@
         "PRIVACY_CONSENT_REQUIRED": "Bitte akzeptiere die Datenschutzerklärung.",
         "CAMPAIGN_NOT_STARTED": "Die Aktion hat noch nicht begonnen.",
         "CAMPAIGN_ENDED": "Die Aktion ist bereits beendet.",
+        "FULFILLER_NOT_STARTED": "Die Möglichkeit, Wünsche zu erfüllen, hat noch nicht begonnen.",
+        "FULFILLER_ENDED": "Die Möglichkeit, Wünsche zu erfüllen, ist bereits beendet.",
         "REQUEST_FAILED": "Der Anmeldelink konnte nicht gesendet werden. Bitte versuche es später erneut."
       }
     },

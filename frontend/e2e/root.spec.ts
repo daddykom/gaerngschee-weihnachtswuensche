@@ -11,6 +11,8 @@ test.describe('Root route', () => {
           { variableName: 'campaign_year', value: '2026' },
           { variableName: 'campaign_start_date', value: '2000-01-01' },
           { variableName: 'campaign_end_date', value: '2999-01-01' },
+          { variableName: 'fulfiller_start_date', value: '2000-01-01' },
+          { variableName: 'fulfiller_end_date', value: '2999-01-01' },
         ]),
       });
     });
@@ -51,6 +53,8 @@ test.describe('Root route', () => {
           { variableName: 'campaign_year', value: '2026' },
           { variableName: 'campaign_start_date', value: '2999-01-01' },
           { variableName: 'campaign_end_date', value: '2999-12-31' },
+          { variableName: 'fulfiller_start_date', value: '2000-01-01' },
+          { variableName: 'fulfiller_end_date', value: '2999-01-01' },
         ]),
       });
     });
@@ -89,6 +93,8 @@ test.describe('Root route', () => {
           { variableName: 'campaign_year', value: '2026' },
           { variableName: 'campaign_start_date', value: '2000-01-01' },
           { variableName: 'campaign_end_date', value: '2999-01-01' },
+          { variableName: 'fulfiller_start_date', value: '2000-01-01' },
+          { variableName: 'fulfiller_end_date', value: '2999-01-01' },
         ]),
       });
     });

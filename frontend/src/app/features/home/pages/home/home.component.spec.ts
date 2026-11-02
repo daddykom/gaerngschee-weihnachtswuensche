@@ -21,6 +21,8 @@ describe('HomeComponent', () => {
                 { variableName: 'campaign_year', value: '2026' },
                 { variableName: 'campaign_start_date', value: '2000-01-01' },
                 { variableName: 'campaign_end_date', value: '2999-01-01' },
+                { variableName: 'fulfiller_start_date', value: '2000-01-01' },
+                { variableName: 'fulfiller_end_date', value: '2999-01-01' },
               ],
             },
           },
@@ -36,6 +38,10 @@ describe('HomeComponent', () => {
     const component = fixture.componentInstance;
 
     expect(component.campaignYear()).toBe('2026');
+  });
+
+  it('opens fulfiller access within the configured date range', () => {
+    expect(fixture.componentInstance.fulfillerStatus()).toBe('open');
   });
 
   it('does not start the campaign before the configured start date', () => {

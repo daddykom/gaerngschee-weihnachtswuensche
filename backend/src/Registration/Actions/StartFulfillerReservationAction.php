@@ -45,6 +45,14 @@ final class StartFulfillerReservationAction
         if ($locale !== 'de') {
             return JsonResponse::error($response, 'UNSUPPORTED_LANGUAGE', 422);
         }
+        $fulfillerStatus = ($this->configs ?? new FrontendConfigRepository(Database::getConnection()))->fulfillerStatus($this->now);
+        if ($fulfillerStatus !== 'open') {
+            return JsonResponse::error(
+                $response,
+                $fulfillerStatus === 'ended' ? 'FULFILLER_ENDED' : 'FULFILLER_NOT_STARTED',
+                403,
+            );
+        }
 
         try {
             $acceptedAt = $this->now ?? new DateTimeImmutable('now', new DateTimeZone('UTC'));

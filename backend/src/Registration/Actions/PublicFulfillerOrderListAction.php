@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Registration\Actions;
 
+use App\Configuration\Data\FrontendConfigRepository;
 use App\Registration\Data\FulfillerReservationRepository;
 use App\Shared\Database\Database;
 use App\Shared\Http\JsonResponse;
@@ -14,12 +15,20 @@ use Psr\Http\Message\ServerRequestInterface;
 
 final class PublicFulfillerOrderListAction
 {
-    public function __construct(private readonly ?FulfillerReservationRepository $reservations = null)
-    {
+    public function __construct(
+        private readonly ?FulfillerReservationRepository $reservations = null,
+        private readonly ?FrontendConfigRepository $configs = null,
+        private readonly ?DateTimeImmutable $now = null,
+    ) {
     }
 
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
+        $configs = $this->configs ?? new FrontendConfigRepository(Database::getConnection());
+        if ($configs->fulfillerStatus($this->now) !== 'open') {
+            return JsonResponse::success($response, ['orders' => []]);
+        }
+
         $query = $request->getQueryParams();
         $search = is_string($query['q'] ?? null) ? trim($query['q']) : '';
         $category = is_string($query['category'] ?? null)

@@ -40,9 +40,19 @@
           </h2>
           <p>{{ 'app.home.fulfill.text' | translate: { year } }}</p>
         </div>
-        <a mat-stroked-button color="primary" routerLink="/erfuellen">
-          {{ 'app.home.fulfill.action' | translate }}
-        </a>
+        @if (fulfillerStatus() === 'open') {
+          <a mat-stroked-button color="primary" routerLink="/erfuellen">
+            {{ 'app.home.fulfill.action' | translate }}
+          </a>
+        } @else if (fulfillerStatus() === 'not_started') {
+          <p role="status">
+            {{ 'app.home.fulfill.notStarted' | translate: { date: formattedFulfillerStartDate() } }}
+          </p>
+        } @else if (fulfillerStatus() === 'ended') {
+          <p role="status">{{ 'app.home.fulfill.ended' | translate }}</p>
+        } @else {
+          <p role="status">{{ 'app.home.fulfill.unavailable' | translate }}</p>
+        }
       </section>
     </div>
 

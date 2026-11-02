@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Tests\Configuration;
 
 use App\Configuration\Data\FrontendConfigRepository;
+use DateTimeImmutable;
+use DateTimeZone;
 use PHPUnit\Framework\TestCase;
 use Tests\Support\TestDatabase;
 
@@ -58,6 +60,27 @@ final class FrontendConfigRepositoryTest extends TestCase
         (new FrontendConfigRepository($pdo))->update('config-3', 'admin', 'value');
     }
 
+    public function testReturnsFulfillerStatusForConfiguredDateRange(): void
+    {
+        $pdo = TestDatabase::create();
+        $this->insertDateConfig($pdo, 'fulfiller-start', 'fulfiller_start_date', '2026-08-01');
+        $this->insertDateConfig($pdo, 'fulfiller-end', 'fulfiller_end_date', '2026-08-31');
+        $repository = new FrontendConfigRepository($pdo);
+
+        self::assertSame(
+            'not_started',
+            $repository->fulfillerStatus(new DateTimeImmutable('2026-07-31 12:00:00', new DateTimeZone('UTC'))),
+        );
+        self::assertSame(
+            'open',
+            $repository->fulfillerStatus(new DateTimeImmutable('2026-08-31 12:00:00', new DateTimeZone('UTC'))),
+        );
+        self::assertSame(
+            'ended',
+            $repository->fulfillerStatus(new DateTimeImmutable('2026-09-01 00:00:00', new DateTimeZone('UTC'))),
+        );
+    }
+
     private function insertConfig(\PDO $pdo, string $id, ?string $pattern, ?string $placeholder, int $sortOrder = 0): void
     {
         $pdo->prepare(
@@ -75,6 +98,23 @@ final class FrontendConfigRepositoryTest extends TestCase
             'Label',
             $pattern,
             $placeholder,
+        ]);
+    }
+
+    private function insertDateConfig(\PDO $pdo, string $id, string $variableName, string $value): void
+    {
+        $pdo->prepare(
+            'INSERT INTO frontend_config
+                (id, variable_name, sort_order, value, description, access_group, update_group, label)
+             VALUES (?, ?, 0, ?, ?, ?, ?, ?)',
+        )->execute([
+            $id,
+            $variableName,
+            json_encode($value, JSON_THROW_ON_ERROR),
+            'Date configuration',
+            '["admin"]',
+            '["admin"]',
+            $variableName,
         ]);
     }
 }
