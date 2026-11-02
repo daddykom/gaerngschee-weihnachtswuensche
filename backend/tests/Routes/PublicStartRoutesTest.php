@@ -8,6 +8,7 @@ use App\Configuration\Data\FrontendConfigRepository;
 use App\Registration\Data\OrderRepository;
 use App\Routes\PublicRoutes;
 use App\Registration\Services\AnmeldungService;
+use App\Registration\Services\FulfillerAvailabilityService;
 use App\Registration\Services\RegistrationTokenService;
 use App\Shared\Mail\EmailSenderInterface;
 use Tests\Support\TestDatabase;
@@ -41,6 +42,13 @@ final class PublicStartRoutesTest extends TestCase
              VALUES (:id, :variable_name, :value, :description, :access_group, :update_group, :label)',
         );
         foreach ([
+            ['id' => 'campaign-year', 'variable_name' => 'campaign_year', 'value' => '2026', 'access_group' => ['wunschbesteller']],
+            ['id' => 'campaign-start', 'variable_name' => 'campaign_start_date', 'value' => '2026-01-01', 'access_group' => ['wunschbesteller']],
+            ['id' => 'campaign-end', 'variable_name' => 'campaign_end_date', 'value' => '2026-12-31', 'access_group' => ['wunschbesteller']],
+            ['id' => 'fulfiller-start', 'variable_name' => 'fulfiller_start_date', 'value' => '2026-01-01', 'access_group' => ['wunschbesteller']],
+            ['id' => 'fulfiller-end', 'variable_name' => 'fulfiller_end_date', 'value' => '2026-12-31', 'access_group' => ['wunschbesteller']],
+            ['id' => 'maximum-orders', 'variable_name' => 'maximum_orders_per_year', 'value' => '999999', 'access_group' => ['wunschbesteller']],
+            ['id' => 'maximum-order-items', 'variable_name' => 'maximum_order_items_per_year', 'value' => '600', 'access_group' => ['wunschbesteller']],
             ['id' => 'client-url', 'variable_name' => 'fairgate_url', 'value' => 'https://fairgate.example', 'access_group' => ['wunschbesteller']],
             ['id' => 'client-message', 'variable_name' => 'client_message', 'value' => 'Message', 'access_group' => ['admin', 'wunschbesteller']],
             ['id' => 'admin-email', 'variable_name' => 'fairgate_test_email', 'value' => 'admin@example.com', 'access_group' => ['admin']],
@@ -57,13 +65,22 @@ final class PublicStartRoutesTest extends TestCase
 
         $app = AppFactory::create();
         $app->addRoutingMiddleware();
-        PublicRoutes::register($app, null, null, new FrontendConfigRepository($pdo));
+        PublicRoutes::register(
+            $app,
+            null,
+            null,
+            new FrontendConfigRepository($pdo),
+            null,
+            null,
+            null,
+            new FulfillerAvailabilityService($pdo, new FrontendConfigRepository($pdo)),
+        );
 
         $response = $app->handle((new ServerRequestFactory())->createServerRequest('GET', '/public/configuration'));
 
         self::assertSame(200, $response->getStatusCode());
         self::assertSame(
-            '[{"variableName":"client_message","value":"Message"},{"variableName":"fairgate_url","value":"https:\/\/fairgate.example"}]',
+            '[{"variableName":"campaign_end_date","value":"2026-12-31"},{"variableName":"campaign_start_date","value":"2026-01-01"},{"variableName":"campaign_year","value":"2026"},{"variableName":"client_message","value":"Message"},{"variableName":"fairgate_url","value":"https:\/\/fairgate.example"},{"variableName":"fulfiller_end_date","value":"2026-12-31"},{"variableName":"fulfiller_start_date","value":"2026-01-01"},{"variableName":"maximum_order_items_per_year","value":"600"},{"variableName":"maximum_orders_per_year","value":"999999"},{"variableName":"fulfiller_availability_status","value":"open"}]',
             (string) $response->getBody(),
         );
     }

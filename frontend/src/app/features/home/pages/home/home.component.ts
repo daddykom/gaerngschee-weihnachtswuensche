@@ -81,6 +81,11 @@ export class HomeComponent {
         }).format(date);
   });
   readonly fulfillerStatus = computed(() => {
+    const availabilityStatus = this.configValue('fulfiller_availability_status');
+    if (availabilityStatus === 'ended' || availabilityStatus === 'open') {
+      return availabilityStatus;
+    }
+
     const startDate = this.fulfillerStartDate();
     const endDate = this.fulfillerEndDate();
     if (

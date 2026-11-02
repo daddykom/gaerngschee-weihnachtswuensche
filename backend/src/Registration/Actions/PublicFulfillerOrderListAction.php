@@ -6,6 +6,7 @@ namespace App\Registration\Actions;
 
 use App\Configuration\Data\FrontendConfigRepository;
 use App\Registration\Data\FulfillerReservationRepository;
+use App\Registration\Services\FulfillerAvailabilityService;
 use App\Shared\Database\Database;
 use App\Shared\Http\JsonResponse;
 use DateTimeImmutable;
@@ -19,14 +20,23 @@ final class PublicFulfillerOrderListAction
         private readonly ?FulfillerReservationRepository $reservations = null,
         private readonly ?FrontendConfigRepository $configs = null,
         private readonly ?DateTimeImmutable $now = null,
+        private readonly ?FulfillerAvailabilityService $availability = null,
     ) {
     }
 
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        $configs = $this->configs ?? new FrontendConfigRepository(Database::getConnection());
-        if ($configs->fulfillerStatus($this->now) !== 'open') {
-            return JsonResponse::success($response, ['orders' => []]);
+        $availability = $this->availability ?? new FulfillerAvailabilityService(
+            Database::getConnection(),
+            $this->configs,
+        );
+        $status = $availability->status($this->now);
+        if ($status !== 'open') {
+            return JsonResponse::error(
+                $response,
+                $status === 'ended' ? 'FULFILLER_ENDED' : 'FULFILLER_NOT_STARTED',
+                403,
+            );
         }
 
         $query = $request->getQueryParams();

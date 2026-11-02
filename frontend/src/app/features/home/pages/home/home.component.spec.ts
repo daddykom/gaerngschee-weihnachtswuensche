@@ -23,6 +23,7 @@ describe('HomeComponent', () => {
                 { variableName: 'campaign_end_date', value: '2999-01-01' },
                 { variableName: 'fulfiller_start_date', value: '2000-01-01' },
                 { variableName: 'fulfiller_end_date', value: '2999-01-01' },
+                { variableName: 'fulfiller_availability_status', value: 'open' },
               ],
             },
           },
@@ -42,6 +43,25 @@ describe('HomeComponent', () => {
 
   it('opens fulfiller access within the configured date range', () => {
     expect(fixture.componentInstance.fulfillerStatus()).toBe('open');
+  });
+
+  it('shows the ended status when the backend reports an exhausted capacity', () => {
+    const store = TestBed.inject(MockStore);
+    store.setState({
+      frontendConfig: {
+        publicConfigs: [
+          { variableName: 'campaign_year', value: '2026' },
+          { variableName: 'campaign_start_date', value: '2000-01-01' },
+          { variableName: 'campaign_end_date', value: '2999-01-01' },
+          { variableName: 'fulfiller_start_date', value: '2000-01-01' },
+          { variableName: 'fulfiller_end_date', value: '2999-01-01' },
+          { variableName: 'fulfiller_availability_status', value: 'ended' },
+        ],
+      },
+    });
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.fulfillerStatus()).toBe('ended');
   });
 
   it('does not start the campaign before the configured start date', () => {

@@ -412,6 +412,8 @@
       "errorTitle": "Wunsch konnte nicht reserviert werden",
       "loadErrorTitle": "Wünsche konnten nicht geladen werden",
       "loadErrors": {
+        "FULFILLER_ENDED": "Die Wunschliste ist wegen der erreichten Jahreslimite nicht mehr verfügbar.",
+        "FULFILLER_NOT_STARTED": "Die Wunschliste ist noch nicht verfügbar.",
         "REQUEST_FAILED": "Die Wunschliste konnte nicht geladen werden. Bitte versuche es später erneut."
       },
       "errors": {
@@ -420,6 +422,7 @@
         "INVALID_EMAIL": "Bitte prüfe deine E-Mail-Adresse.",
         "INVALID_WISH_DATA": "Der ausgewählte Wunsch ist ungültig.",
         "RATE_LIMITED": "Zu viele Versuche. Bitte warte kurz und versuche es später erneut.",
+        "FULFILLER_ENDED": "Die Wunschliste ist wegen der erreichten Jahreslimite nicht mehr verfügbar.",
         "REQUEST_FAILED": "Die Wünsche konnten nicht geladen werden. Bitte versuche es später erneut."
       }
     },

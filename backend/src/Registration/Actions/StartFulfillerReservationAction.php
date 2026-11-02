@@ -6,6 +6,7 @@ namespace App\Registration\Actions;
 
 use App\Configuration\Data\FrontendConfigRepository;
 use App\Registration\Services\AnmeldungService;
+use App\Registration\Services\FulfillerAvailabilityService;
 use App\Registration\Services\FulfillerReservationService;
 use App\Shared\Database\Database;
 use App\Shared\Http\JsonRequest;
@@ -24,6 +25,7 @@ final class StartFulfillerReservationAction
         private readonly ?FulfillerReservationService $reservations = null,
         private readonly ?FrontendConfigRepository $configs = null,
         private readonly ?DateTimeImmutable $now = null,
+        private readonly ?FulfillerAvailabilityService $availability = null,
     ) {
     }
 
@@ -45,7 +47,10 @@ final class StartFulfillerReservationAction
         if ($locale !== 'de') {
             return JsonResponse::error($response, 'UNSUPPORTED_LANGUAGE', 422);
         }
-        $fulfillerStatus = ($this->configs ?? new FrontendConfigRepository(Database::getConnection()))->fulfillerStatus($this->now);
+        $fulfillerStatus = ($this->availability ?? new FulfillerAvailabilityService(
+            Database::getConnection(),
+            $this->configs,
+        ))->status($this->now);
         if ($fulfillerStatus !== 'open') {
             return JsonResponse::error(
                 $response,
