@@ -835,8 +835,6 @@
             "body": "Vielen Dank für deine Geduld! Deine Anmeldung für das Weihnachtswünsche {{year}} wurde erfolgreich geprüft und zur administrativen Prüfung freigegeben.",
             "nextTitle": "Wie geht es weiter?",
             "nextText": "Wir informieren dich per E-Mail, sobald deine Anmeldung definitiv bestätigt wurde.",
-            "correction": "Wir haben die Anzahl der Erwachsenen und Kinder anhand der Angaben in Fairgate angepasst. Bitte prüfe deine Bestellübersicht.",
-            "correctionLink": "Anmeldung prüfen oder anpassen",
             "overviewTitle": "Bestellübersicht",
             "year": "Jahr:",
             "adults": "Erwachsene:",
@@ -848,14 +846,23 @@
             "highlight": "Danke für deine Anmeldung zum Weihnachtswünsche {{year}}.",
             "body": "",
             "fairgateTitle": "Fairgate-Prüfung steht noch aus",
-            "fairgateText": "Wichtig: Verwende die gleiche E-Mail-Adresse wie bei deiner Anmeldung.\n\nDanach prüfen wir deine Angaben und schicken dir die Bestätigung per E-Mail.",
-            "fairgateLink": "Zum Registrierungsformular",
+            "fairgateText": "Bitte melde dich bei Fairgate mit der gleichen E-Mail-Adresse wie bei deiner Anmeldung an. Danach prüfen wir deine Angaben automatisch.",
+            "fairgateLink": "Bei Fairgate anmelden",
             "expiredTitle": "Dein Bedürftigkeitsausweis ist abgelaufen",
             "expiredText": "Bitte sende uns einen aktuellen Bedürftigkeitsausweis an folgende Adresse:",
             "overviewTitle": "Bestellübersicht",
             "year": "Jahr:",
             "adults": "Erwachsene:",
             "children": "Kinder:"
+          },
+          "family_size_exceeded": {
+            "subject": "Bitte passe deine Weihnachtswünsche-Anmeldung an",
+            "title": "Bitte passe deine Anmeldung an",
+            "noticeTitle": "Die Personenzahlen stimmen nicht überein",
+            "noticeText": "Die Angaben in deiner Weihnachtswünsche-Anmeldung stimmen nicht mit den Angaben bei Fairgate überein.",
+            "counts": "In deiner Bestellung sind %orderAdults% Erwachsene und %orderChildren% Kinder angegeben. Bei Fairgate wurden %fairgateAdults% Erwachsene und %fairgateChildren% Kinder gefunden.",
+            "button": "Anmeldung anpassen",
+            "footer": "Bitte passe deine Bestellung an. Danach wird sie erneut geprüft."
           }
         }
       },

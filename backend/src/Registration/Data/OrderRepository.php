@@ -470,6 +470,30 @@ final class OrderRepository
         $this->recordStatusChanges($statement->rowCount());
     }
 
+    public function markFamilySizeExceeded(string $orderId): void
+    {
+        $statement = $this->pdo->prepare(
+            "UPDATE orders SET status = 'family_size_exceeded', updated_at = CURRENT_TIMESTAMP
+             WHERE id = :id AND status = 'waiting_for_fairgate'",
+        );
+        $statement->execute(['id' => $orderId]);
+        $this->recordStatusChanges($statement->rowCount());
+    }
+
+    public function recordFairgateCounts(string $orderId, int $adultsCount, int $childrenCount): void
+    {
+        $statement = $this->pdo->prepare(
+            'UPDATE orders SET fairgate_adults_count = :adults_count,
+             fairgate_children_count = :children_count, updated_at = CURRENT_TIMESTAMP
+             WHERE id = :id',
+        );
+        $statement->execute([
+            'id' => $orderId,
+            'adults_count' => $adultsCount,
+            'children_count' => $childrenCount,
+        ]);
+    }
+
     public function markFairgateReminderSent(string $orderId): void
     {
         $statement = $this->pdo->prepare(
@@ -480,8 +504,18 @@ final class OrderRepository
     }
 
     /** @param list<array<string, mixed>> $items Kept for compatibility with historical callers. */
-    public function saveForYear(string $userId, int $year, string $status, int $adultsCount, int $childrenCount, array $items = [], ?string $fairgateStatus = null, ?string $text = null): array
-    {
+    public function saveForYear(
+        string $userId,
+        int $year,
+        string $status,
+        int $adultsCount,
+        int $childrenCount,
+        array $items = [],
+        ?string $fairgateStatus = null,
+        ?string $text = null,
+        ?int $fairgateAdultsCount = null,
+        ?int $fairgateChildrenCount = null,
+    ): array {
         $this->pdo->beginTransaction();
         try {
             $find = $this->pdo->prepare('SELECT id, status FROM orders WHERE user_id = :user_id AND year = :year');
@@ -491,21 +525,22 @@ final class OrderRepository
             if (is_array($existing)) {
                 $update = $this->pdo->prepare(
                     'UPDATE orders SET status = :status, adults_count = :adults_count, children_count = :children_count,
-                      current_text = :current_text, fairgate_status = :fairgate_status,
+                       current_text = :current_text, fairgate_status = :fairgate_status,
+                       fairgate_adults_count = :fairgate_adults_count, fairgate_children_count = :fairgate_children_count,
                       released_at = CASE WHEN :released_status = \'released\' THEN COALESCE(released_at, CURRENT_TIMESTAMP) ELSE released_at END,
                       processing_year = COALESCE(processing_year, :processing_year), confirmation_email_sent_at = NULL,
                      updated_at = CURRENT_TIMESTAMP WHERE id = :id',
                 );
-                $update->execute(['id' => $orderId, 'status' => $status, 'released_status' => $status, 'processing_year' => $year, 'adults_count' => $adultsCount, 'children_count' => $childrenCount, 'current_text' => $text, 'fairgate_status' => $fairgateStatus]);
+                $update->execute(['id' => $orderId, 'status' => $status, 'released_status' => $status, 'processing_year' => $year, 'adults_count' => $adultsCount, 'children_count' => $childrenCount, 'current_text' => $text, 'fairgate_status' => $fairgateStatus, 'fairgate_adults_count' => $fairgateAdultsCount, 'fairgate_children_count' => $fairgateChildrenCount]);
                 if ((string) $existing['status'] !== $status) {
                     $this->recordStatusChanges(1);
                 }
             } else {
                 $insert = $this->pdo->prepare(
-                    'INSERT INTO orders (id, user_id, year, status, adults_count, children_count, original_text, current_text, fairgate_status, processing_year, released_at)
-                     VALUES (:id, :user_id, :year, :status, :adults_count, :children_count, :original_text, :current_text, :fairgate_status, :processing_year, CASE WHEN :released_status = \'released\' THEN CURRENT_TIMESTAMP ELSE NULL END)',
+                    'INSERT INTO orders (id, user_id, year, status, adults_count, children_count, original_text, current_text, fairgate_status, fairgate_adults_count, fairgate_children_count, processing_year, released_at)
+                      VALUES (:id, :user_id, :year, :status, :adults_count, :children_count, :original_text, :current_text, :fairgate_status, :fairgate_adults_count, :fairgate_children_count, :processing_year, CASE WHEN :released_status = \'released\' THEN CURRENT_TIMESTAMP ELSE NULL END)',
                 );
-                $insert->execute(['id' => $orderId, 'user_id' => $userId, 'year' => $year, 'status' => $status, 'released_status' => $status, 'processing_year' => $year, 'adults_count' => $adultsCount, 'children_count' => $childrenCount, 'original_text' => $text, 'current_text' => $text, 'fairgate_status' => $fairgateStatus]);
+                $insert->execute(['id' => $orderId, 'user_id' => $userId, 'year' => $year, 'status' => $status, 'released_status' => $status, 'processing_year' => $year, 'adults_count' => $adultsCount, 'children_count' => $childrenCount, 'original_text' => $text, 'current_text' => $text, 'fairgate_status' => $fairgateStatus, 'fairgate_adults_count' => $fairgateAdultsCount, 'fairgate_children_count' => $fairgateChildrenCount]);
                 $this->recordStatusChanges(1);
             }
             if ($items === [] || (isset($items[0]['category'], $items[0]['description'], $items[0]['reason']))) {

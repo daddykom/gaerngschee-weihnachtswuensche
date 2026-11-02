@@ -150,6 +150,30 @@ final class EmailSenderTest extends TestCase
         self::assertStringContainsString('Fairgate anmelden', $message['text']);
     }
 
+    public function testRendersFamilySizeCorrectionMailWithBothPersonCounts(): void
+    {
+        $sender = new EmailSender(
+            $this->createMock(MailerInterface::class),
+            'noreply@example.com',
+            'Gärngschee-Weihnachtswünsche',
+        );
+
+        $message = $sender->renderOrderConfirmation([
+            'year' => 2026,
+            'status' => 'family_size_exceeded',
+            'adultsCount' => 1,
+            'childrenCount' => 0,
+            'fairgateAdultsCount' => 2,
+            'fairgateChildrenCount' => 1,
+            'startUrl' => 'http://localhost:4200/start',
+        ], 'family_size_exceeded');
+
+        self::assertSame('Bitte passe deine Weihnachtswünsche-Anmeldung an', $message['subject']);
+        self::assertStringContainsString('1 Erwachsene', $message['html']);
+        self::assertStringContainsString('2 Erwachsene', $message['html']);
+        self::assertStringContainsString('http://localhost:4200/start', $message['text']);
+    }
+
     public function testRenderExpiredFairgateReminderRequestsTheDocument(): void
     {
         $sender = new EmailSender(
@@ -187,7 +211,7 @@ final class EmailSenderTest extends TestCase
         self::assertStringContainsString('https://fairgate.example/login', $message['html']);
         self::assertStringContainsString('Weihnachtswünsche 2026', $message['html']);
         self::assertStringNotContainsString('{{ YEAR }}', $message['html']);
-        self::assertStringContainsString('Zum Registrierungsformular', $message['text']);
+        self::assertStringContainsString('Bei Fairgate anmelden', $message['text']);
     }
 
     public function testSendUserEmailChangedNotifiesNewAddress(): void

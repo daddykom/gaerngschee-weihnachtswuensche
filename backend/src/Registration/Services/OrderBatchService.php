@@ -68,6 +68,8 @@ final class OrderBatchService
                 $this->queue->remove($email['id']);
                 if ($email['email_type'] === 'order_confirmation') {
                     $this->orders->markReleased($email['reference_id']);
+                } elseif ($email['email_type'] === 'family_size_correction') {
+                    $this->orders->markFamilySizeExceeded($email['reference_id']);
                 } elseif ($email['email_type'] === 'fairgate_reminder') {
                     $this->orders->markFairgateReminderSent($email['reference_id']);
                 }
@@ -106,14 +108,18 @@ final class OrderBatchService
 
                 $adults = $evaluation['adultsCount'];
                 $children = $evaluation['childrenCount'];
-                $corrected = $adults !== $order['adultsCount'] || $children !== $order['childrenCount'];
-                if ($corrected) {
-                    $this->orders->updateCountsFromBatch($order['id'], $adults, $children);
-                    $order = $this->orders->findForYear($order['userId'], $order['year']) ?? $order;
-                    $order['correctionNotice'] = true;
-                    $order['startUrl'] = rtrim(getenv('FRONTEND_BASE_URL') ?: 'http://localhost:4200', '/') . '/start';
+                $this->orders->recordFairgateCounts($order['id'], $adults, $children);
+                $order['fairgateAdultsCount'] = $adults;
+                $order['fairgateChildrenCount'] = $children;
+                $order['fairgateUrl'] = $this->fairgateUrl();
+                $order['startUrl'] = rtrim(getenv('FRONTEND_BASE_URL') ?: 'http://localhost:4200', '/') . '/start';
+
+                if ($adults !== $order['adultsCount'] || $children !== $order['childrenCount']) {
+                    $this->sendStatusEmail($order, $entry['email'], $result, 'family_size_exceeded');
+                    continue;
                 }
-                $this->sendConfirmation($order, $entry['email'], $result);
+
+                $this->sendStatusEmail($order, $entry['email'], $result, 'released');
             } catch (Throwable $exception) {
                 $this->log('Order batch failed', $order['id'], $exception);
                 $result['failed']++;
@@ -156,19 +162,22 @@ final class OrderBatchService
     }
 
     /** @param array<string, mixed> $order */
-    private function sendConfirmation(array $order, string $email, array &$result): void
+    private function sendStatusEmail(array $order, string $email, array &$result, string $status): void
     {
         if (($order['fairgateStatus'] ?? null) === 'expired') {
             $order['fairgateDocumentEmail'] = $this->documentEmail();
         }
-        $message = $this->emails->renderOrderConfirmation($order, 'released');
+        $message = $this->emails->renderOrderConfirmation($order, $status);
+        $emailType = $status === 'family_size_exceeded'
+            ? 'family_size_correction'
+            : 'order_confirmation';
         try {
             $this->emails->sendStoredEmail($email, $message['subject'], $message['html'], $message['text']);
         } catch (Throwable $exception) {
             $this->queue->enqueue(
                 'order',
                 $order['id'],
-                'order_confirmation',
+                $emailType,
                 $email,
                 $message,
                 $exception->getMessage(),
@@ -178,7 +187,11 @@ final class OrderBatchService
             return;
         }
 
-        $this->orders->markReleased($order['id']);
+        if ($status === 'family_size_exceeded') {
+            $this->orders->markFamilySizeExceeded($order['id']);
+        } else {
+            $this->orders->markReleased($order['id']);
+        }
         $result['sent']++;
     }
 
