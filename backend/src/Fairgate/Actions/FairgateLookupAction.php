@@ -38,7 +38,7 @@ final class FairgateLookupAction
         }
 
         try {
-            $lookup = $this->lookup ?? FairgateContactProviderFactory::createReal()->findContactDataByEmail(...);
+            $lookup = $this->lookup ?? FairgateContactProviderFactory::create()->findContactDataByEmail(...);
 
             return JsonResponse::success($response, [
                 'email' => $email,
