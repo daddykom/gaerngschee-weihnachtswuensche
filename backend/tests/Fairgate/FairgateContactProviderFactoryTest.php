@@ -15,11 +15,20 @@ final class FairgateContactProviderFactoryTest extends TestCase
     protected function tearDown(): void
     {
         putenv('APP_ENV');
+        putenv('FSA_MODE');
     }
 
     public function testTestEnvironmentUsesFakeClient(): void
     {
         self::assertInstanceOf(FakeFairgateClient::class, FairgateContactProviderFactory::create(['mode' => 'fake']));
+    }
+
+    public function testConfiguredFakeModeIsUsedByTheDefaultFactory(): void
+    {
+        putenv('APP_ENV=test');
+        putenv('FSA_MODE=fake');
+
+        self::assertInstanceOf(FakeFairgateClient::class, FairgateContactProviderFactory::create());
     }
 
     public function testProductionEnvironmentUsesRealClient(): void
