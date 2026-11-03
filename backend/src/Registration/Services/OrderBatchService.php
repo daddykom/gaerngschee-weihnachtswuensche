@@ -137,7 +137,7 @@ final class OrderBatchService
         }
 
         $contacts = [];
-        foreach ($this->fairgate->findAllContacts() as $contact) {
+        foreach ($this->fairgate->findAllContacts(ClientRegistrationLoginService::MEMBERSHIP) as $contact) {
             $contacts[strtolower(trim($contact['email']))] = $contact['contactId'];
         }
 

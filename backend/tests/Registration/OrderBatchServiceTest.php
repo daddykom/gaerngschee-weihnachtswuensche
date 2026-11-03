@@ -346,12 +346,12 @@ final class FixedFairgateProvider implements FairgateContactProvider
     {
     }
 
-    public function hasContactByEmail(string $email): bool
+    public function hasContactByEmail(string $email, string $membership): bool
     {
         return true;
     }
 
-    public function findContactDataByEmail(string $email, ?string $membership = null): array
+    public function findContactDataByEmail(string $email, string $membership): array
     {
         $data = ['wohnt_im_gleichen_haushalt' => $this->adults === 2 ? 'Ja' : 'Nein'];
         for ($index = 1; $index <= $this->children; $index++) {
@@ -364,12 +364,12 @@ final class FixedFairgateProvider implements FairgateContactProvider
 
 final class MissingFairgateProvider implements FairgateContactProvider
 {
-    public function hasContactByEmail(string $email): bool
+    public function hasContactByEmail(string $email, string $membership): bool
     {
         return false;
     }
 
-    public function findContactDataByEmail(string $email, ?string $membership = null): array
+    public function findContactDataByEmail(string $email, string $membership): array
     {
         return ['success' => false, 'data' => null];
     }

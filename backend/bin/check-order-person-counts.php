@@ -8,6 +8,7 @@ use App\Fairgate\Services\FairgateContactProviderFactory;
 use App\Fairgate\Services\FairgateException;
 use App\Fairgate\Services\FairgateOrderDataEvaluator;
 use App\Registration\Data\OrderRepository;
+use App\Registration\Services\ClientRegistrationLoginService;
 use App\Shared\Database\Database;
 
 require __DIR__ . '/../vendor/autoload.php';
@@ -40,7 +41,7 @@ try {
     if ($fairgate instanceof FairgateBatchContactProvider) {
         try {
             $contacts = contactMap(fairgateRequest(
-                $fairgate->findAllContacts(...),
+                    static fn (): array => $fairgate->findAllContacts(ClientRegistrationLoginService::MEMBERSHIP),
                 $fairgateRateLimitResponses,
             ));
         } catch (FairgateException $exception) {
@@ -76,7 +77,9 @@ try {
         try {
             $response = fairgateRequest(
                 $contactId === null
-                    ? ($contacts === null ? $fairgate->findContactDataByEmail(...) : static fn (): array => ['data' => null])
+                    ? ($contacts === null
+                        ? static fn (string $email): array => $fairgate->findContactDataByEmail($email, ClientRegistrationLoginService::MEMBERSHIP)
+                        : static fn (): array => ['data' => null])
                     : $fairgate->findContactDataById(...),
                 $fairgateRateLimitResponses,
                 $contactId === null ? [$order['email']] : [$contactId],

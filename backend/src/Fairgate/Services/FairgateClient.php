@@ -42,9 +42,9 @@ final class FairgateClient implements FairgateContactProvider, FairgateBatchCont
     /** @var callable(string): bool */
     private $tokenValidator;
 
-    public function hasContactByEmail(string $email): bool
+    public function hasContactByEmail(string $email, string $membership): bool
     {
-        $data = $this->findContactsByEmail($email);
+        $data = $this->findContactsByEmail($email, $membership);
         $contacts = $data['data']['contacts'] ?? [];
 
         foreach ($contacts as $contact) {
@@ -58,7 +58,7 @@ final class FairgateClient implements FairgateContactProvider, FairgateBatchCont
     }
 
     /** @return array<string, mixed> */
-    public function findContactsByEmail(string $email, ?string $membership = null): array
+    public function findContactsByEmail(string $email, string $membership): array
     {
         $email = strtolower(trim($email));
         if ($email === '') {
@@ -69,14 +69,14 @@ final class FairgateClient implements FairgateContactProvider, FairgateBatchCont
     }
 
     /** @return list<array{email: string, contactId: string}> */
-    public function findAllContacts(): array
+    public function findAllContacts(string $membership): array
     {
         $contacts = [];
         $page = 1;
         $pageLimit = 100;
 
         do {
-            $data = $this->requestContacts(null, $page, $pageLimit);
+            $data = $this->requestContacts(null, $page, $pageLimit, $membership);
             $pageContacts = $data['data']['contacts'] ?? [];
             if (!is_array($pageContacts)) {
                 break;
@@ -100,7 +100,7 @@ final class FairgateClient implements FairgateContactProvider, FairgateBatchCont
     }
 
     /** @return array<string, mixed> */
-    public function findContactDataByEmail(string $email, ?string $membership = null): array
+    public function findContactDataByEmail(string $email, string $membership): array
     {
         $email = strtolower(trim($email));
         $contactsResponse = $this->findContactsByEmail($email, $membership);
@@ -143,15 +143,18 @@ final class FairgateClient implements FairgateContactProvider, FairgateBatchCont
     }
 
     /** @return array<string, mixed> */
-    private function requestContacts(?string $email, int $page, int $pageLimit, ?string $membership = null): array
+    private function requestContacts(?string $email, int $page, int $pageLimit, string $membership): array
     {
+        $membership = trim($membership);
+        if ($membership === '') {
+            throw new FairgateException('Fairgate membership is required.');
+        }
+
         $query = ['pageNo' => $page, 'pageLimit' => $pageLimit];
         if ($email !== null) {
             $query['primary_email'] = $email;
         }
-        if ($membership !== null && trim($membership) !== '') {
-            $query['membership[]'] = trim($membership);
-        }
+        $query['membership[]'] = $membership;
 
         try {
             $path = $email === null ? self::CONTACTS_PATH : self::FILTERED_CONTACTS_PATH;

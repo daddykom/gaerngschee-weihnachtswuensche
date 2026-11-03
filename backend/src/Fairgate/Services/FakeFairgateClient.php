@@ -6,13 +6,15 @@ namespace App\Fairgate\Services;
 
 final class FakeFairgateClient implements FairgateContactProvider
 {
-    public function hasContactByEmail(string $email): bool
+    public function hasContactByEmail(string $email, string $membership): bool
     {
+        $this->validateMembership($membership);
         return $this->profileForEmail($email) !== null;
     }
 
-    public function findContactDataByEmail(string $email, ?string $membership = null): array
+    public function findContactDataByEmail(string $email, string $membership): array
     {
+        $this->validateMembership($membership);
         $profile = $this->profileForEmail($email);
         if ($profile === null) {
             return ['success' => true, 'data' => null];
@@ -22,6 +24,13 @@ final class FakeFairgateClient implements FairgateContactProvider
             'success' => true,
             'data' => $profile,
         ];
+    }
+
+    private function validateMembership(string $membership): void
+    {
+        if (trim($membership) === '') {
+            throw new \InvalidArgumentException('Fairgate membership is required.');
+        }
     }
 
     /** @return array<string, mixed>|null */
