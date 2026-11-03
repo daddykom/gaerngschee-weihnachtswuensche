@@ -73,6 +73,9 @@ final class OrderBatchService
                 } elseif ($email['email_type'] === 'fairgate_reminder') {
                     $this->orders->markFairgateReminderSent($email['reference_id']);
                 }
+                if (in_array($email['email_type'], ['order_confirmation', 'family_size_correction'], true)) {
+                    $this->orders->markConfirmationEmailSent($email['reference_id']);
+                }
                 $result['sent']++;
             } catch (Throwable $exception) {
                 $this->queue->recordFailure($email['id'], $exception->getMessage());
@@ -124,6 +127,18 @@ final class OrderBatchService
                 $this->log('Order batch failed', $order['id'], $exception);
                 $result['failed']++;
             }
+        }
+
+        foreach ($this->orders->findOrdersWithPendingStatusEmails() as $entry) {
+            $result['loaded']++;
+            $order = $entry['order'];
+            if ($this->queue->hasPendingForReference('order', $order['id'])) {
+                continue;
+            }
+
+            $order['fairgateUrl'] = $this->fairgateUrl();
+            $order['startUrl'] = rtrim(getenv('FRONTEND_BASE_URL') ?: 'http://localhost:4200', '/') . '/start';
+            $this->sendStatusEmail($order, $entry['email'], $result, (string) $order['status']);
         }
 
         return $result;
@@ -192,6 +207,7 @@ final class OrderBatchService
         } else {
             $this->orders->markReleased($order['id']);
         }
+        $this->orders->markConfirmationEmailSent($order['id']);
         $result['sent']++;
     }
 

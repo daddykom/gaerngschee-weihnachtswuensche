@@ -450,6 +450,27 @@ final class OrderRepository
         return $orders;
     }
 
+    /** @return list<array{order: array<string, mixed>, email: string}> */
+    public function findOrdersWithPendingStatusEmails(): array
+    {
+        $statement = $this->pdo->query(
+            "SELECT orders.id, orders.user_id, orders.year, users.email FROM orders
+             INNER JOIN users ON users.id = orders.user_id
+             WHERE orders.status IN ('released', 'family_size_exceeded')
+               AND orders.confirmation_email_sent_at IS NULL
+             ORDER BY orders.created_at, orders.id",
+        );
+        $orders = [];
+        foreach ($statement->fetchAll() as $row) {
+            $order = $this->findForYear((string) $row['user_id'], (int) $row['year']);
+            if ($order !== null) {
+                $orders[] = ['order' => $order, 'email' => (string) $row['email']];
+            }
+        }
+
+        return $orders;
+    }
+
     public function updateCountsFromBatch(string $orderId, int $adultsCount, int $childrenCount): void
     {
         $statement = $this->pdo->prepare(
