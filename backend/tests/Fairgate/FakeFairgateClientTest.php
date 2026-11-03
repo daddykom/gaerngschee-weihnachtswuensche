@@ -19,6 +19,18 @@ final class FakeFairgateClientTest extends TestCase
         self::assertTrue($client->hasContactByEmail('person+fair4-extra@example.com', 'Klient*innen'));
     }
 
+    public function testTheConfiguredCharleyFairgateAddressIsRecognized(): void
+    {
+        $client = new FakeFairgateClient();
+
+        $response = $client->findContactDataByEmail('charley+fair2-11-4@collins.ch', 'Klient*innen');
+
+        self::assertTrue($response['success']);
+        self::assertIsArray($response['data']);
+        self::assertSame('Nein', $response['data']['wohnt_im_gleichen_haushalt']);
+        self::assertSame('Kind 2', $response['data']['name_und_vorname_kind2']);
+    }
+
     public function testMissingOrDifferentMarkerReturnsFalse(): void
     {
         $client = new FakeFairgateClient();

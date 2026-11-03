@@ -81,6 +81,11 @@ final class SaveOrderAction
             : ['status' => 'not_found', 'valid' => false, 'childrenCount' => 0, 'adultsCount' => 1];
 
         $status = OrderStatus::WAITING_FOR_FAIRGATE;
+        if ($evaluation['valid']) {
+            $status = $evaluation['adultsCount'] === $adultsCount && $evaluation['childrenCount'] === $childrenCount
+                ? OrderStatus::RELEASED
+                : OrderStatus::FAMILY_SIZE_EXCEEDED;
+        }
         if (count($items) < 1 || count($items) > $adultsCount + $childrenCount) {
             return JsonResponse::error($response, 'INVALID_ORDER_ITEMS', 422);
         }
