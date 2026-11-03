@@ -7,7 +7,7 @@ namespace App\Fairgate\Services;
 interface FairgateBatchContactProvider
 {
     /** @return list<array{email: string, contactId: string}> */
-    public function findAllContacts(): array;
+    public function findAllContacts(string $membership): array;
 
     /** @return array<string, mixed> */
     public function findContactDataById(string $contactId): array;

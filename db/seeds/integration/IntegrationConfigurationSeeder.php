@@ -11,6 +11,10 @@ final class IntegrationConfigurationSeeder extends AbstractSeed
         $this->updateValue('campaign_year', '2026');
         $this->updateValue('campaign_start_date', '2026-01-01');
         $this->updateValue('campaign_end_date', '2026-12-31');
+        $this->updateValue('fulfiller_start_date', '2026-01-01');
+        $this->updateValue('fulfiller_end_date', '2026-12-31');
+        $this->updateValue('maximum_orders_per_year', '999999');
+        $this->updateValue('maximum_order_items_per_year', '600');
         $this->updateAccess('fairgate_test_email', ['admin'], ['admin']);
     }
 

@@ -32,6 +32,8 @@ export class HomeComponent {
   readonly campaignYear = computed(() => this.configValue('campaign_year'));
   readonly campaignStartDate = computed(() => this.configValue('campaign_start_date'));
   readonly campaignEndDate = computed(() => this.configValue('campaign_end_date'));
+  readonly fulfillerStartDate = computed(() => this.configValue('fulfiller_start_date'));
+  readonly fulfillerEndDate = computed(() => this.configValue('fulfiller_end_date'));
   readonly campaignStatus = computed(() => {
     const startDate = this.campaignStartDate();
     const endDate = this.campaignEndDate();
@@ -78,7 +80,42 @@ export class HomeComponent {
           timeZone: 'Europe/Zurich',
         }).format(date);
   });
-  readonly faqItems = [1, 2, 3, 4, 5];
+  readonly fulfillerStatus = computed(() => {
+    const availabilityStatus = this.configValue('fulfiller_availability_status');
+    if (availabilityStatus === 'ended' || availabilityStatus === 'open') {
+      return availabilityStatus;
+    }
+
+    const startDate = this.fulfillerStartDate();
+    const endDate = this.fulfillerEndDate();
+    if (
+      startDate === null ||
+      endDate === null ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(startDate) ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(endDate)
+    ) {
+      return 'unavailable';
+    }
+
+    const currentDate = new Intl.DateTimeFormat('en-CA', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      timeZone: 'Europe/Zurich',
+    }).format(new Date());
+
+    if (currentDate < startDate) {
+      return 'not_started';
+    }
+    if (currentDate > endDate) {
+      return 'ended';
+    }
+
+    return 'open';
+  });
+  readonly formattedFulfillerStartDate = computed(() => this.formatDate(this.fulfillerStartDate()));
+  readonly wunscherFaqItems = [1, 2, 3, 4];
+  readonly wunscherfuellerFaqItems = [1, 2, 3];
 
   logout(): void {
     this.store.dispatch(AuthActions.logoutRequested());
@@ -89,5 +126,23 @@ export class HomeComponent {
       (config) => config.variableName === variableName,
     )?.value;
     return typeof value === 'string' && value.trim() !== '' ? value.trim() : null;
+  }
+
+  private formatDate(value: string | null): string | null {
+    if (value === null) {
+      return null;
+    }
+
+    const [year, month, day] = value.split('-').map(Number);
+    const date = new Date(Date.UTC(year, month - 1, day, 12));
+
+    return Number.isNaN(date.getTime())
+      ? null
+      : new Intl.DateTimeFormat('de-CH', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          timeZone: 'Europe/Zurich',
+        }).format(date);
   }
 }

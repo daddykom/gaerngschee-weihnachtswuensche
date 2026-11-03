@@ -29,7 +29,7 @@ export class FairgateLookup {
       this.store.dispatch(
         FairgateLookupActions.lookup({
           email: this.email,
-          ...(this.membership === '' ? {} : { membership: this.membership }),
+          membership: this.membership,
         }),
       );
     }

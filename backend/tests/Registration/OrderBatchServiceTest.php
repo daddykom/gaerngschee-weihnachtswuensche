@@ -61,6 +61,71 @@ final class OrderBatchServiceTest extends TestCase
         self::assertCount(0, (new EmailQueueRepository($pdo))->pending());
     }
 
+    public function testMismatchingFairgateCountsQueueCorrectionEmailWithoutChangingOrderCounts(): void
+    {
+        $pdo = TestDatabase::create();
+        $user = (new UserRepository($pdo))->createUser('person+fair1@example.com', 'secret', 'wunschbesteller');
+        $orders = new OrderRepository($pdo);
+        $orders->saveForYear($user['id'], 2026, 'waiting_for_fairgate', 1, 0, [
+            ['personType' => 'adult', 'category' => 'catA', 'quantity' => 1],
+        ]);
+        $this->addInterval($pdo);
+        $emails = new RecordingEmailSender();
+        $emails->failStoredEmail = true;
+
+        $result = $this->service($pdo, $emails, new FixedFairgateProvider(2, 1))->run();
+        $order = $orders->findForYear($user['id'], 2026);
+
+        self::assertSame(1, $result['queued']);
+        self::assertSame('waiting_for_fairgate', $order['status']);
+        self::assertSame(1, $order['adultsCount']);
+        self::assertSame(0, $order['childrenCount']);
+        self::assertSame(2, $order['fairgateAdultsCount']);
+        self::assertSame(1, $order['fairgateChildrenCount']);
+        self::assertSame('family_size_correction', (new EmailQueueRepository($pdo))->pending()[0]['email_type']);
+    }
+
+    public function testSuccessfulCorrectionEmailMovesOrderToFamilySizeExceeded(): void
+    {
+        $pdo = TestDatabase::create();
+        $user = (new UserRepository($pdo))->createUser('person+fair1@example.com', 'secret', 'wunschbesteller');
+        $orders = new OrderRepository($pdo);
+        $orders->saveForYear($user['id'], 2026, 'waiting_for_fairgate', 1, 0, [
+            ['personType' => 'adult', 'category' => 'catA', 'quantity' => 1],
+        ]);
+        $this->addInterval($pdo);
+        $emails = new RecordingEmailSender();
+        $service = $this->service($pdo, $emails, new FixedFairgateProvider(2, 1));
+
+        $result = $service->run();
+
+        self::assertSame(1, $result['sent']);
+        self::assertSame('family_size_exceeded', $orders->findForYear($user['id'], 2026)['status']);
+        self::assertStringContainsString('family_size_exceeded', $emails->orderConfirmations[0]['order']['html']);
+    }
+
+    public function testNextBatchRunRetriesCorrectionEmailAndThenChangesStatus(): void
+    {
+        $pdo = TestDatabase::create();
+        $user = (new UserRepository($pdo))->createUser('person+fair1@example.com', 'secret', 'wunschbesteller');
+        $orders = new OrderRepository($pdo);
+        $orders->saveForYear($user['id'], 2026, 'waiting_for_fairgate', 1, 0, [
+            ['personType' => 'adult', 'category' => 'catA', 'quantity' => 1],
+        ]);
+        $this->addInterval($pdo);
+        $emails = new RecordingEmailSender();
+        $emails->failStoredEmail = true;
+        $service = $this->service($pdo, $emails, new FixedFairgateProvider(2, 1));
+
+        $service->run();
+        $emails->failStoredEmail = false;
+        $result = $service->run();
+
+        self::assertSame(1, $result['sent']);
+        self::assertSame('family_size_exceeded', $orders->findForYear($user['id'], 2026)['status']);
+        self::assertCount(0, (new EmailQueueRepository($pdo))->pending());
+    }
+
     public function testSendsFirstFairgateReminderAfterTheConfiguredInterval(): void
     {
         $pdo = TestDatabase::create();
@@ -281,12 +346,12 @@ final class FixedFairgateProvider implements FairgateContactProvider
     {
     }
 
-    public function hasContactByEmail(string $email): bool
+    public function hasContactByEmail(string $email, string $membership): bool
     {
         return true;
     }
 
-    public function findContactDataByEmail(string $email, ?string $membership = null): array
+    public function findContactDataByEmail(string $email, string $membership): array
     {
         $data = ['wohnt_im_gleichen_haushalt' => $this->adults === 2 ? 'Ja' : 'Nein'];
         for ($index = 1; $index <= $this->children; $index++) {
@@ -299,12 +364,12 @@ final class FixedFairgateProvider implements FairgateContactProvider
 
 final class MissingFairgateProvider implements FairgateContactProvider
 {
-    public function hasContactByEmail(string $email): bool
+    public function hasContactByEmail(string $email, string $membership): bool
     {
         return false;
     }
 
-    public function findContactDataByEmail(string $email, ?string $membership = null): array
+    public function findContactDataByEmail(string $email, string $membership): array
     {
         return ['success' => false, 'data' => null];
     }

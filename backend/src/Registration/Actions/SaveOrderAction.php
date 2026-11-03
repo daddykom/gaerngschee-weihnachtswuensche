@@ -80,10 +80,8 @@ final class SaveOrderAction
             )
             : ['status' => 'not_found', 'valid' => false, 'childrenCount' => 0, 'adultsCount' => 1];
 
-        $status = $evaluation['valid'] ? OrderStatus::RELEASED : OrderStatus::WAITING_FOR_FAIRGATE;
-        $savedAdults = $evaluation['valid'] ? $evaluation['adultsCount'] : $adultsCount;
-        $savedChildren = $evaluation['valid'] ? $evaluation['childrenCount'] : $childrenCount;
-        if (count($items) < 1 || count($items) > $savedAdults + $savedChildren) {
+        $status = OrderStatus::WAITING_FOR_FAIRGATE;
+        if (count($items) < 1 || count($items) > $adultsCount + $childrenCount) {
             return JsonResponse::error($response, 'INVALID_ORDER_ITEMS', 422);
         }
         if ($password !== null) {
@@ -94,11 +92,13 @@ final class SaveOrderAction
             $user['id'],
             $year,
             $status,
-            $savedAdults,
-            $savedChildren,
+            $adultsCount,
+            $childrenCount,
             $items,
             $evaluation['status'],
             $text,
+            $evaluation['valid'] ? $evaluation['adultsCount'] : null,
+            $evaluation['valid'] ? $evaluation['childrenCount'] : null,
         );
 
         return JsonResponse::success($response, [

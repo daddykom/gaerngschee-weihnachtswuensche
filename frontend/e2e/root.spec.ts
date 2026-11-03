@@ -11,6 +11,9 @@ test.describe('Root route', () => {
           { variableName: 'campaign_year', value: '2026' },
           { variableName: 'campaign_start_date', value: '2000-01-01' },
           { variableName: 'campaign_end_date', value: '2999-01-01' },
+          { variableName: 'fulfiller_start_date', value: '2000-01-01' },
+          { variableName: 'fulfiller_end_date', value: '2999-01-01' },
+          { variableName: 'fulfiller_availability_status', value: 'open' },
         ]),
       });
     });
@@ -27,14 +30,9 @@ test.describe('Root route', () => {
       'href',
       '/erfuellen',
     );
-    await expect(
-      page.getByRole('link', { name: 'Wunschzettel-Kriterien für Wünschende' }),
-    ).toHaveAttribute('href', '/docs/Wunschzettel-Kriterien.pdf');
-    await expect(
-      page.getByRole('link', { name: 'Wunschzettel Infos für Schenkende' }),
-    ).toHaveAttribute('href', '/docs/Wunschzettel-Merkzettel.pdf');
     const faqPanels = page.locator('mat-expansion-panel');
-    await expect(faqPanels).toHaveCount(5);
+    await expect(page.locator('.home-faq__section')).toHaveCount(2);
+    await expect(faqPanels).toHaveCount(7);
     await faqPanels.nth(0).locator('mat-expansion-panel-header').click();
     await expect(faqPanels.nth(0).locator('.home-faq__answer')).toBeVisible();
     await expect(page.getByRole('link', { name: 'Anmelden' })).toHaveAttribute('href', '/login');
@@ -51,6 +49,9 @@ test.describe('Root route', () => {
           { variableName: 'campaign_year', value: '2026' },
           { variableName: 'campaign_start_date', value: '2999-01-01' },
           { variableName: 'campaign_end_date', value: '2999-12-31' },
+          { variableName: 'fulfiller_start_date', value: '2000-01-01' },
+          { variableName: 'fulfiller_end_date', value: '2999-01-01' },
+          { variableName: 'fulfiller_availability_status', value: 'open' },
         ]),
       });
     });
@@ -89,6 +90,9 @@ test.describe('Root route', () => {
           { variableName: 'campaign_year', value: '2026' },
           { variableName: 'campaign_start_date', value: '2000-01-01' },
           { variableName: 'campaign_end_date', value: '2999-01-01' },
+          { variableName: 'fulfiller_start_date', value: '2000-01-01' },
+          { variableName: 'fulfiller_end_date', value: '2999-01-01' },
+          { variableName: 'fulfiller_availability_status', value: 'open' },
         ]),
       });
     });

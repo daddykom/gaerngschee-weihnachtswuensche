@@ -9,9 +9,9 @@ export class FairgateLookupService {
   private readonly http = inject(HttpClient);
   private readonly url = `${environment.apiUrl}/admin/fairgate-lookup`;
 
-  lookup(email: string, membership?: string): Observable<FairgateTestResult> {
+  lookup(email: string, membership: string): Observable<FairgateTestResult> {
     return this.http.get<FairgateTestResult>(this.url, {
-      params: membership ? { email, membership } : { email },
+      params: { email, membership },
       withCredentials: true,
     });
   }

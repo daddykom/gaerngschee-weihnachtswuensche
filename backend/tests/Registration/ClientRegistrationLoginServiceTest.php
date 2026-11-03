@@ -78,12 +78,12 @@ final class ClientRegistrationLoginServiceTest extends TestCase
 
 final class StubFairgateDataProvider implements FairgateContactProvider
 {
-    public function hasContactByEmail(string $email): bool
+    public function hasContactByEmail(string $email, string $membership): bool
     {
         return true;
     }
 
-    public function findContactDataByEmail(string $email, ?string $membership = null): array
+    public function findContactDataByEmail(string $email, string $membership): array
     {
         return [
             'success' => true,

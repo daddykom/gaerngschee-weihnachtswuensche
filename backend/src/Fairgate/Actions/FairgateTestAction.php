@@ -8,6 +8,7 @@ use Closure;
 use App\Configuration\Data\FrontendConfigRepository;
 use App\Fairgate\Services\FairgateContactProviderFactory;
 use App\Fairgate\Services\FairgateException;
+use App\Registration\Services\ClientRegistrationLoginService;
 use App\Shared\Database\Database;
 use App\Shared\Http\JsonResponse;
 use App\Shared\Logging\ExceptionLogger;
@@ -18,7 +19,7 @@ final class FairgateTestAction
 {
     private const TEST_EMAIL_VARIABLE = 'fairgate_test_email';
 
-    /** @param callable(string): array<string, mixed>|null $lookup */
+    /** @param callable(string, string): array<string, mixed>|null $lookup */
     public function __construct(
         ?callable $lookup = null,
         private readonly ?FrontendConfigRepository $configs = null,
@@ -37,7 +38,7 @@ final class FairgateTestAction
 
             return JsonResponse::success($response, [
                 'email' => $email,
-                'fairgate' => $lookup($email),
+                'fairgate' => $lookup($email, ClientRegistrationLoginService::MEMBERSHIP),
             ]);
         } catch (FairgateException $exception) {
             ExceptionLogger::log('Fairgate test failed', $exception);

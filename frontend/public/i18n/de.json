@@ -33,34 +33,46 @@
       "fulfill": {
         "title": "Wünsche erfüllen",
         "text": "Erfülle Weihnachtswünsche von anderen.",
-        "action": "Wünsche anzeigen"
-      },
-      "documents": {
-        "title": "Info Dokumente",
-        "text": "Bitte lies die folgenden Dokumente durch, bevor du mitmachst.",
-        "criteria": "Wunschzettel-Kriterien für Wünschende",
-        "givers": "Wunschzettel Infos für Schenkende"
+        "action": "Wünsche anzeigen",
+        "notStarted": "Die Möglichkeit, Wünsche zu erfüllen, beginnt am {{date}}.",
+        "ended": "Die Möglichkeit, Wünsche zu erfüllen, ist bereits beendet.",
+        "unavailable": "Die Wunschliste ist momentan nicht verfügbar."
       },
       "faq": {
-        "1": {
-          "question": "Welche Wertgrenze gilt für Wünsche?",
-          "answer": "<p>Pro Person gilt ein Maximalwert von <strong>CHF 100.-</strong></p><p>Alternativ kann sich eine Familie auch für einen gemeinsamen Familienwunsch entscheiden, der diesen Betrag übersteigen darf.</p>"
+        "wunscher": {
+          "title": "Häufige Fragen für Wünschende",
+          "1": {
+            "question": "Welche Wertgrenze gilt für Wünsche?",
+            "answer": "<p>Pro Person gilt ein Maximalwert von <strong>CHF 100.-</strong></p><p>Alternativ kann sich eine Familie auch für einen gemeinsamen Familienwunsch entscheiden, der diesen Betrag übersteigen darf.</p>"
+          },
+          "2": {
+            "question": "Sind Freizeitpark-Wünsche möglich?",
+            "answer": "<p>Ja! Erlaubt sind Eintritte in Freizeit- und Erlebnisparks innerhalb der Schweiz.</p>"
+          },
+          "3": {
+            "question": "Kann ich Gutscheine wünschen?",
+            "answer": "<p>Ab dem <strong>12. Geburtstag</strong> sind Gutscheine möglich.</p><p>Für jüngere Kinder sind ausschliesslich <strong>Sachwünsche</strong> erlaubt.</p><p>💡 <em>Bei Gutscheinwünschen bestimmst du selber den Wert des Gutscheins.</em></p>"
+          },
+          "4": {
+            "question": "Werden alle Wünsche erfüllt?",
+            "answer": "<p>Gärngschee behält sich vor, Wünsche abzulehnen, die nicht den Richtlinien entsprechen. Wir prüfen jeden Wunsch sorgfältig, um sicherzustellen, dass möglichst viele Wünsche erfüllt werden können.</p>"
+          }
         },
-        "2": {
-          "question": "Sind Freizeitpark-Wünsche möglich?",
-          "answer": "<p>Ja! Erlaubt sind Eintritte in Freizeit- und Erlebnisparks innerhalb der Schweiz.</p>"
-        },
-        "3": {
-          "question": "Kann ich Gutscheine wünschen?",
-          "answer": "<p>Ab dem <strong>12. Geburtstag</strong> sind Gutscheine möglich.</p><p>Für jüngere Kinder sind ausschliesslich <strong>Sachwünsche</strong> erlaubt.</p><p>💡 <em>Bei Gutscheinwünschen bestimmst du selber den Wert des Gutscheins.</em></p>"
-        },
-        "4": {
-          "question": "Welche Produkte müssen neu sein?",
-          "answer": "<p><strong>Folgende Produkte müssen zwingend neu sein:</strong></p><ul><li>Elektronische Gegenstände (Handy, Laptop, Tablet, Konsolen – diese dürfen gebraucht sein, aber in gutem Zustand)</li><li>Hygieneprodukte</li><li>Textilien wie Kleidung und Schuhe</li></ul><p>💡 <em>Andere Geschenke dürfen auch gebraucht sein, solange sie in gutem Zustand sind.</em></p>"
-        },
-        "5": {
-          "question": "Werden alle Wünsche erfüllt?",
-          "answer": "<p>Gärngschee behält sich vor, Wünsche abzulehnen, die nicht den Richtlinien entsprechen. Wir prüfen jeden Wunsch sorgfältig, um sicherzustellen, dass möglichst viele Wünsche erfüllt werden können.</p>"
+        "wunscherfueller": {
+          "title": "Häufige Fragen für Wunscherfüller",
+          "intro": "Damit sich die Beschenkten wirklich freuen können, bitten wir dich, bei deiner Spende auf Folgendes zu achten:",
+          "1": {
+            "question": "In welchem Zustand dürfen Geschenke sein?",
+            "answer": "<p>Grundsätzlich nehmen wir nur Spenden in gutem Zustand an.</p><p>Ausnahmen werden von uns klar kommuniziert.</p>"
+          },
+          "2": {
+            "question": "Welche Produkte müssen zwingend neu sein?",
+            "answer": "<p><strong>Folgende Produkte müssen zwingend neu sein:</strong></p><ul><li>Elektronische Gegenstände – Handys, Laptops, Tablets und Konsolen dürfen gebraucht, müssen aber in gutem Zustand sein.</li><li>Hygieneprodukte</li><li>Textilien wie Kleidung und Schuhe</li></ul>"
+          },
+          "3": {
+            "question": "Wie viel darf ein Gutschein kosten?",
+            "answer": "<p>Bei Gutscheinwünschen bestimmst du selber den Wert des Gutscheins.</p>"
+          }
         }
       }
     },
@@ -409,6 +421,8 @@
       "errorTitle": "Wunsch konnte nicht reserviert werden",
       "loadErrorTitle": "Wünsche konnten nicht geladen werden",
       "loadErrors": {
+        "FULFILLER_ENDED": "Die Wunschliste ist wegen der erreichten Jahreslimite nicht mehr verfügbar.",
+        "FULFILLER_NOT_STARTED": "Die Wunschliste ist noch nicht verfügbar.",
         "REQUEST_FAILED": "Die Wunschliste konnte nicht geladen werden. Bitte versuche es später erneut."
       },
       "errors": {
@@ -417,6 +431,7 @@
         "INVALID_EMAIL": "Bitte prüfe deine E-Mail-Adresse.",
         "INVALID_WISH_DATA": "Der ausgewählte Wunsch ist ungültig.",
         "RATE_LIMITED": "Zu viele Versuche. Bitte warte kurz und versuche es später erneut.",
+        "FULFILLER_ENDED": "Die Wunschliste ist wegen der erreichten Jahreslimite nicht mehr verfügbar.",
         "REQUEST_FAILED": "Die Wünsche konnten nicht geladen werden. Bitte versuche es später erneut."
       }
     },
@@ -442,6 +457,8 @@
         "PRIVACY_CONSENT_REQUIRED": "Bitte akzeptiere die Datenschutzerklärung.",
         "CAMPAIGN_NOT_STARTED": "Die Aktion hat noch nicht begonnen.",
         "CAMPAIGN_ENDED": "Die Aktion ist bereits beendet.",
+        "FULFILLER_NOT_STARTED": "Die Möglichkeit, Wünsche zu erfüllen, hat noch nicht begonnen.",
+        "FULFILLER_ENDED": "Die Möglichkeit, Wünsche zu erfüllen, ist bereits beendet.",
         "REQUEST_FAILED": "Der Anmeldelink konnte nicht gesendet werden. Bitte versuche es später erneut."
       }
     },
@@ -827,8 +844,6 @@
             "body": "Vielen Dank für deine Geduld! Deine Anmeldung für das Weihnachtswünsche {{year}} wurde erfolgreich geprüft und zur administrativen Prüfung freigegeben.",
             "nextTitle": "Wie geht es weiter?",
             "nextText": "Wir informieren dich per E-Mail, sobald deine Anmeldung definitiv bestätigt wurde.",
-            "correction": "Wir haben die Anzahl der Erwachsenen und Kinder anhand der Angaben in Fairgate angepasst. Bitte prüfe deine Bestellübersicht.",
-            "correctionLink": "Anmeldung prüfen oder anpassen",
             "overviewTitle": "Bestellübersicht",
             "year": "Jahr:",
             "adults": "Erwachsene:",
@@ -840,14 +855,23 @@
             "highlight": "Danke für deine Anmeldung zum Weihnachtswünsche {{year}}.",
             "body": "",
             "fairgateTitle": "Fairgate-Prüfung steht noch aus",
-            "fairgateText": "Wichtig: Verwende die gleiche E-Mail-Adresse wie bei deiner Anmeldung.\n\nDanach prüfen wir deine Angaben und schicken dir die Bestätigung per E-Mail.",
-            "fairgateLink": "Zum Registrierungsformular",
+            "fairgateText": "Bitte melde dich bei Fairgate mit der gleichen E-Mail-Adresse wie bei deiner Anmeldung an. Danach prüfen wir deine Angaben automatisch.",
+            "fairgateLink": "Bei Fairgate anmelden",
             "expiredTitle": "Dein Bedürftigkeitsausweis ist abgelaufen",
             "expiredText": "Bitte sende uns einen aktuellen Bedürftigkeitsausweis an folgende Adresse:",
             "overviewTitle": "Bestellübersicht",
             "year": "Jahr:",
             "adults": "Erwachsene:",
             "children": "Kinder:"
+          },
+          "family_size_exceeded": {
+            "subject": "Bitte passe deine Weihnachtswünsche-Anmeldung an",
+            "title": "Bitte passe deine Anmeldung an",
+            "noticeTitle": "Die Personenzahlen stimmen nicht überein",
+            "noticeText": "Die Angaben in deiner Weihnachtswünsche-Anmeldung stimmen nicht mit den Angaben bei Fairgate überein.",
+            "counts": "In deiner Bestellung sind %orderAdults% Erwachsene und %orderChildren% Kinder angegeben. Bei Fairgate wurden %fairgateAdults% Erwachsene und %fairgateChildren% Kinder gefunden.",
+            "button": "Anmeldung anpassen",
+            "footer": "Bitte passe deine Bestellung an. Danach wird sie erneut geprüft."
           }
         }
       },
