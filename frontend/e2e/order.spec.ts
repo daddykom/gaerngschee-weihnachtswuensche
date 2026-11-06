@@ -91,6 +91,16 @@ test.describe('Bestellung route', () => {
     await page.getByRole('button', { name: 'Speichern' }).click();
     await page.waitForURL('**/bestellung');
     await page.getByRole('button', { name: 'Speichern' }).click();
+    const confirmationDialog = page.getByRole('dialog');
+    await expect(confirmationDialog).toContainText('Du hast 1 von 4 möglichen Wünschen erfasst.');
+    await expect(confirmationDialog.getByRole('button', { name: 'Speichern' })).toBeVisible();
+    await expect(confirmationDialog.getByRole('button', { name: 'Abbrechen' })).toBeVisible();
+    await confirmationDialog.getByRole('button', { name: 'Abbrechen' }).click();
+    await expect(confirmationDialog).toHaveCount(0);
+    expect(saveRequestReceived).toBe(false);
+
+    await page.getByRole('button', { name: 'Speichern' }).click();
+    await confirmationDialog.getByRole('button', { name: 'Speichern' }).click();
 
     await page.waitForURL('**/bestellung/bestaetigung?status=released');
     expect(saveRequestReceived).toBe(true);
@@ -102,6 +112,39 @@ test.describe('Bestellung route', () => {
       'href',
       '/login',
     );
+  });
+
+  test('shows the standard confirmation when all possible wishes are used', async ({ page }) => {
+    let saveRequestReceived = false;
+    await mockClientLogin(page, {
+      order: orderWithItems('draft', [
+        orderItem('item-1', 'gift', 'Wunsch 1', 'Nachricht 1'),
+        orderItem('item-2', 'gift', 'Wunsch 2', 'Nachricht 2'),
+        orderItem('item-3', 'gift', 'Wunsch 3', 'Nachricht 3'),
+        orderItem('item-4', 'gift', 'Wunsch 4', 'Nachricht 4'),
+      ]),
+      onSave: async (route) => {
+        saveRequestReceived = true;
+        await fulfillSavedOrder(route);
+      },
+    });
+
+    await page.getByRole('button', { name: 'Speichern' }).click();
+    const confirmationDialog = page.getByRole('dialog');
+    await expect(confirmationDialog).toContainText(
+      'Willst Du wirklich speichern? Du kannst es nachher nicht mehr ändern.',
+    );
+    await expect(confirmationDialog).not.toContainText('möglichen Wünschen erfasst');
+    await expect(confirmationDialog.getByRole('button', { name: 'Speichern' })).toBeVisible();
+    await expect(confirmationDialog.getByRole('button', { name: 'Abbrechen' })).toBeVisible();
+    await confirmationDialog.getByRole('button', { name: 'Abbrechen' }).click();
+    await expect(confirmationDialog).toHaveCount(0);
+    expect(saveRequestReceived).toBe(false);
+
+    await page.getByRole('button', { name: 'Speichern' }).click();
+    await confirmationDialog.getByRole('button', { name: 'Speichern' }).click();
+    await page.waitForURL('**/bestellung/bestaetigung?status=released');
+    expect(saveRequestReceived).toBe(true);
   });
 
   test('edits an existing item before saving the order', async ({ page }) => {
@@ -123,6 +166,7 @@ test.describe('Bestellung route', () => {
     await page.waitForURL('**/bestellung');
     await expect(page.locator('tbody tr').first()).toContainText('Neuer Wunschtitel');
     await page.getByRole('button', { name: 'Speichern' }).click();
+    await page.getByRole('dialog').getByRole('button', { name: 'Speichern' }).click();
     await page.waitForURL('**/bestellung/bestaetigung?status=released');
 
     expect(savedItems).toEqual([

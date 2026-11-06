@@ -180,7 +180,26 @@ export class OrderComponent {
     }
 
     if (this.canEdit() && this.saving() !== 'loading') {
-      this.store.dispatch(OrderActions.save({ form: this.storeForm() }));
+      const itemCount = this.storeForm().items.length;
+      const maximumItemCount = this.maxItems();
+      const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+        data: {
+          title: 'app.order.confirmSave.title',
+          message:
+            itemCount < maximumItemCount
+              ? 'app.order.confirmSave.incompleteMessage'
+              : 'app.order.confirmSave.message',
+          messageParams: { itemCount, maximumItemCount },
+          confirmLabel: 'app.order.confirmSave.confirm',
+          cancelLabel: 'app.order.confirmSave.cancel',
+        },
+      });
+
+      dialogRef.afterClosed().subscribe((confirmed) => {
+        if (confirmed && this.saving() !== 'loading') {
+          this.store.dispatch(OrderActions.save({ form: this.storeForm() }));
+        }
+      });
     }
   }
 

@@ -255,6 +255,13 @@
         "newItem": "Neuen Wunsch aufnehmen",
         "save": "Speichern"
       },
+      "confirmSave": {
+        "title": "Wunschzettel speichern",
+        "message": "Willst Du wirklich speichern? Du kannst es nachher nicht mehr ändern.",
+        "incompleteMessage": "Willst Du wirklich speichern? Du kannst es nachher nicht mehr ändern. Du hast {{itemCount}} von {{maximumItemCount}} möglichen Wünschen erfasst.",
+        "confirm": "Speichern",
+        "cancel": "Abbrechen"
+      },
       "confirmation": {
         "pageTitle": "Bestellung gespeichert",
         "title": "Deine Bestellung wurde gespeichert",

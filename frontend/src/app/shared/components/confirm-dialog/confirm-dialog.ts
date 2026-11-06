@@ -5,6 +5,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 export interface ConfirmDialogData {
   title: string;
   message: string;
+  messageParams?: Record<string, string | number>;
   confirmLabel: string;
   cancelLabel: string;
 }
