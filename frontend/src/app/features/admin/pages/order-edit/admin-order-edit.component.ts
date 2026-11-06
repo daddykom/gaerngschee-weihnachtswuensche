@@ -83,6 +83,7 @@ export class AdminOrderEditComponent {
           childrenCount: currentOrder.childrenCount,
           items: currentOrder.items.map((item) => ({
             ...item,
+            currentTitle: item.currentTitle ?? item.currentDescription,
             currentReason: item.currentReason ?? '',
             adminNotes: item.adminNotes ?? '',
             publicationStatus: item.id === rejectItem ? 'rejected' : item.publicationStatus,

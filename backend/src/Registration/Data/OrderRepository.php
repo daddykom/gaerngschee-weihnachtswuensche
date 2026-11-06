@@ -60,8 +60,8 @@ final class OrderRepository
     public function findItems(string $orderId): array
     {
         $statement = $this->pdo->prepare(
-            'SELECT id, order_id, item_number, category, original_description, current_description,
-                    original_reason, current_reason, status, publication_status, fulfillment_status, admin_notes, fulfiller_email,
+            'SELECT id, order_id, item_number, category, original_title, current_title, original_description, current_description,
+                    gift_link, original_reason, current_reason, personal_message, status, publication_status, fulfillment_status, admin_notes, fulfiller_email,
                     reserved_at, due_at, received_at, created_at, updated_at
              FROM order_items WHERE order_id = :order_id ORDER BY created_at, id',
         );
@@ -72,10 +72,14 @@ final class OrderRepository
             'orderId' => (string) $item['order_id'],
             'itemNumber' => $item['item_number'] === null ? null : (int) $item['item_number'],
             'category' => (string) $item['category'],
+            'originalTitle' => (string) ($item['original_title'] ?? $item['original_description']),
+            'currentTitle' => (string) ($item['current_title'] ?? $item['current_description']),
             'originalDescription' => (string) $item['original_description'],
             'currentDescription' => (string) $item['current_description'],
+            'giftLink' => $item['gift_link'] ?? null,
             'originalReason' => $item['original_reason'],
             'currentReason' => $item['current_reason'],
+            'personalMessage' => $item['personal_message'] ?? $item['current_reason'],
             'status' => (string) $item['status'],
             'publicationStatus' => (string) ($item['publication_status'] ?? $item['status']),
             'fulfillmentStatus' => (string) ($item['fulfillment_status'] ?? 'available'),
@@ -197,7 +201,7 @@ final class OrderRepository
             $parameters['category'] = $category;
         }
         $statement = $this->pdo->prepare(
-            'SELECT id, item_number, category, current_description, current_reason, fulfillment_status, reserved_at
+            'SELECT id, item_number, category, current_title, current_description, gift_link, current_reason, personal_message, fulfillment_status, reserved_at
              FROM order_items WHERE ' . implode(' AND ', $conditions) . ' ORDER BY item_number ASC, id ASC',
         );
         $statement->execute($parameters);
@@ -207,8 +211,10 @@ final class OrderRepository
             'itemNumber' => (int) $item['item_number'],
             'wishNumber' => null,
             'category' => (string) $item['category'],
+            'title' => (string) ($item['current_title'] ?? $item['current_description']),
             'currentDescription' => (string) $item['current_description'],
-            'currentReason' => $item['current_reason'],
+            'giftLink' => $item['gift_link'] ?? null,
+            'currentReason' => $item['personal_message'] ?? $item['current_reason'],
             'fulfillmentStatus' => (string) $item['fulfillment_status'],
             'reservedAt' => $item['reserved_at'],
         ], $statement->fetchAll());
@@ -329,7 +335,8 @@ final class OrderRepository
             ]);
             foreach ($items as $item) {
                 $itemStatement = $this->pdo->prepare(
-                    'UPDATE order_items SET current_description = :description, current_reason = :reason,
+                    'UPDATE order_items SET current_title = :title, current_description = :description,
+                     personal_message = :personal_message, current_reason = :personal_message,
                      publication_status = :publication_status, status = :status, admin_notes = :admin_notes,
                      updated_at = CURRENT_TIMESTAMP WHERE id = :id AND order_id = :order_id',
                 );
@@ -337,7 +344,8 @@ final class OrderRepository
                     'id' => $item['id'],
                     'order_id' => $order['id'],
                     'description' => $item['currentDescription'],
-                    'reason' => $item['currentReason'] ?? null,
+                    'title' => $item['currentTitle'] ?? $item['currentDescription'],
+                    'personal_message' => $item['personalMessage'] ?? ($item['currentReason'] ?? null),
                     'publication_status' => $item['publicationStatus'],
                     'status' => $item['publicationStatus'],
                     'admin_notes' => $item['adminNotes'] ?? null,
@@ -564,7 +572,7 @@ final class OrderRepository
                 $insert->execute(['id' => $orderId, 'user_id' => $userId, 'year' => $year, 'status' => $status, 'released_status' => $status, 'processing_year' => $year, 'adults_count' => $adultsCount, 'children_count' => $childrenCount, 'original_text' => $text, 'current_text' => $text, 'fairgate_status' => $fairgateStatus, 'fairgate_adults_count' => $fairgateAdultsCount, 'fairgate_children_count' => $fairgateChildrenCount]);
                 $this->recordStatusChanges(1);
             }
-            if ($items === [] || (isset($items[0]['category'], $items[0]['description'], $items[0]['reason']))) {
+            if ($items === [] || isset($items[0]['category'], $items[0]['description'])) {
                 $this->saveItems($orderId, $items);
             }
             $this->pdo->commit();
@@ -575,7 +583,7 @@ final class OrderRepository
         return $this->findForYear($userId, $year) ?? throw new \RuntimeException('Order was not saved.');
     }
 
-    /** @param list<array{id?: string, category: string, description: string, reason: string}> $items */
+    /** @param list<array{id?: string, category: string, title: string, description: string, giftLink: ?string, personalMessage: string}> $items */
     private function saveItems(string $orderId, array $items): void
     {
         $existing = $this->pdo->prepare('SELECT id FROM order_items WHERE order_id = :order_id');
@@ -585,37 +593,47 @@ final class OrderRepository
 
         foreach ($items as $item) {
             $itemId = isset($item['id']) && $item['id'] !== '' ? $item['id'] : $this->createUuid();
+            $title = $item['title'] ?? $item['description'];
+            $personalMessage = $item['personalMessage'] ?? ($item['reason'] ?? '');
             $submittedIds[] = $itemId;
             if (in_array($itemId, $existingIds, true)) {
                 $statement = $this->pdo->prepare(
-                    'UPDATE order_items SET category = :category, current_description = :description,
-                     current_reason = :reason, status = \'submitted\', updated_at = CURRENT_TIMESTAMP
+                    'UPDATE order_items SET category = :category, current_title = :title, current_description = :description,
+                     gift_link = :gift_link, personal_message = :personal_message, current_reason = :personal_message,
+                     status = \'submitted\', updated_at = CURRENT_TIMESTAMP
                      WHERE id = :id AND order_id = :order_id',
                 );
                 $statement->execute([
                     'id' => $itemId,
                     'order_id' => $orderId,
                     'category' => $item['category'],
+                    'title' => $title,
                     'description' => $item['description'],
-                    'reason' => $item['reason'],
+                    'gift_link' => $item['giftLink'] ?? null,
+                    'personal_message' => $personalMessage,
                 ]);
                 continue;
             }
 
             $statement = $this->pdo->prepare(
                 'INSERT INTO order_items
-                 (id, order_id, category, original_description, current_description, original_reason, current_reason, status)
-                 VALUES (:id, :order_id, :category, :original_description, :current_description,
-                         :original_reason, :current_reason, \'submitted\')',
+                 (id, order_id, category, original_title, current_title, original_description, current_description,
+                  gift_link, original_reason, current_reason, personal_message, status)
+                 VALUES (:id, :order_id, :category, :original_title, :current_title, :original_description,
+                         :current_description, :gift_link, :original_reason, :current_reason, :personal_message, \'submitted\')',
             );
             $statement->execute([
                 'id' => $itemId,
                 'order_id' => $orderId,
                 'category' => $item['category'],
+                'original_title' => $title,
+                'current_title' => $title,
                 'original_description' => $item['description'],
                 'current_description' => $item['description'],
-                'original_reason' => $item['reason'],
-                'current_reason' => $item['reason'],
+                'gift_link' => $item['giftLink'] ?? null,
+                'original_reason' => $personalMessage !== '' ? $personalMessage : null,
+                'current_reason' => $personalMessage !== '' ? $personalMessage : null,
+                'personal_message' => $personalMessage !== '' ? $personalMessage : null,
             ]);
         }
 

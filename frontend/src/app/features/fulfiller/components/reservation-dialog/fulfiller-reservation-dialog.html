@@ -19,12 +19,12 @@
           <dd>{{ wish.wishNumber }}</dd>
         </div>
         <div>
-          <dt>{{ 'app.fulfiller.reservationDialog.wishLabel' | translate }}</dt>
-          <dd class="gl-text--multiline">{{ wish.currentDescription }}</dd>
+          <dt>{{ 'app.order.items.wishTitle' | translate }}</dt>
+          <dd>{{ wish.title || wish.wishNumber }}</dd>
         </div>
         @if (wish.currentReason) {
         <div>
-          <dt>{{ 'app.fulfiller.reservationDialog.reasonLabel' | translate }}</dt>
+          <dt>{{ 'app.order.items.personalMessage' | translate }}</dt>
           <dd class="gl-text--multiline">{{ wish.currentReason }}</dd>
         </div>
         }

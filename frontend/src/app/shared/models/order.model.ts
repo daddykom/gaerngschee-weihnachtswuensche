@@ -12,8 +12,9 @@ export type OrderItemCategory = 'voucher' | 'gift';
 export interface OrderItemFormValue {
   id: string;
   category: OrderItemCategory | null;
-  description: string;
-  reason: string;
+  title: string;
+  giftLink: string;
+  personalMessage: string;
 }
 
 export interface OrderItem {
@@ -21,10 +22,14 @@ export interface OrderItem {
   orderId: string;
   itemNumber?: number | null;
   category: OrderItemCategory;
+  originalTitle: string;
+  currentTitle: string;
   originalDescription: string;
   currentDescription: string;
+  giftLink: string | null;
   originalReason: string | null;
   currentReason: string | null;
+  personalMessage: string | null;
   status: OrderItemStatus;
   fulfillerEmail: string | null;
   reservedAt: string | null;

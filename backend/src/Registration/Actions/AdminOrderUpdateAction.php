@@ -53,8 +53,13 @@ final class AdminOrderUpdateAction
             $allApproved = $allApproved && $publicationStatus === 'approved';
             $normalizedItems[] = [
                 'id' => $item['id'],
+                'currentTitle' => is_string($item['currentTitle'] ?? null)
+                    ? $item['currentTitle']
+                    : (is_string($item['currentDescription'] ?? null) ? $item['currentDescription'] : ''),
                 'currentDescription' => is_string($item['currentDescription'] ?? null) ? $item['currentDescription'] : '',
-                'currentReason' => is_string($item['currentReason'] ?? null) ? $item['currentReason'] : null,
+                'personalMessage' => is_string($item['personalMessage'] ?? null)
+                    ? $item['personalMessage']
+                    : (is_string($item['currentReason'] ?? null) ? $item['currentReason'] : null),
                 'publicationStatus' => $publicationStatus,
                 'adminNotes' => is_string($adminNotes) ? $adminNotes : null,
             ];

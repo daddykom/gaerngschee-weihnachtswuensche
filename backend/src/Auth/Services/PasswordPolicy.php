@@ -6,7 +6,7 @@ namespace App\Auth\Services;
 
 final class PasswordPolicy
 {
-    public const MIN_LENGTH = 12;
+    public const MIN_LENGTH = 8;
     public const MAX_LENGTH = 128;
 
     public static function accepts(string $password): bool

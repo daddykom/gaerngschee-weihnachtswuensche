@@ -46,8 +46,12 @@ final class SaveOrderAction
         $text = $body['text'] ?? null;
         $items = $this->items($body['items'] ?? null);
         $password = $body['password'] ?? null;
+        $passwordConfirmation = $body['passwordConfirmation'] ?? null;
         if ($password === '') {
             $password = null;
+        }
+        if ($passwordConfirmation === '') {
+            $passwordConfirmation = null;
         }
         if ($adultsCount === null || $childrenCount === null || $adultsCount < 0 || $childrenCount < 0
             || !is_string($text) || trim($text) === '' || strlen($text) > 2000 || $items === null) {
@@ -64,6 +68,13 @@ final class SaveOrderAction
         $existingOrder = $orders->findForYear($user['id'], $year);
         if ($existingOrder !== null && !OrderStatus::canClientEdit((string) $existingOrder['status'])) {
             return JsonResponse::error($response, 'ORDER_NOT_EDITABLE', 409);
+        }
+        if ($existingOrder === null
+            && (!is_string($password)
+                || !PasswordPolicy::accepts($password)
+                || !is_string($passwordConfirmation)
+                || $password !== $passwordConfirmation)) {
+            return JsonResponse::error($response, 'WEAK_PASSWORD', 422);
         }
 
         try {
@@ -120,7 +131,7 @@ final class SaveOrderAction
     }
 
     /** @param mixed $value
-     *  @return list<array{id?: string, category: string, description: string, reason: string}>|null
+     *  @return list<array{id?: string, category: string, title: string, description: string, giftLink: ?string, personalMessage: string}>|null
      */
     private function items(mixed $value): ?array
     {
@@ -130,22 +141,34 @@ final class SaveOrderAction
 
         $items = [];
         foreach ($value as $item) {
-            if (!is_array($item)
-                || (isset($item['id']) && !is_string($item['id']))
+            if (!is_array($item)) {
+                return null;
+            }
+            $title = $item['title'] ?? ($item['description'] ?? '');
+            $description = $item['description'] ?? '';
+            $personalMessage = $item['personalMessage'] ?? ($item['reason'] ?? '');
+            if ((isset($item['id']) && !is_string($item['id']))
                 || !in_array($item['category'] ?? null, ['voucher', 'gift'], true)
-                || !is_string($item['description'] ?? null)
-                || trim($item['description']) === ''
-                || strlen($item['description']) > 2000
-                || !is_string($item['reason'] ?? null)
-                || trim($item['reason']) === ''
-                || strlen($item['reason']) > 2000) {
+                || !is_string($title)
+                || trim($title) === ''
+                || strlen($title) > 255
+                || !is_string($description)
+                || strlen($description) > 2000
+                || (isset($item['giftLink']) && $item['giftLink'] !== ''
+                    && (!is_string($item['giftLink'])
+                        || filter_var($item['giftLink'], FILTER_VALIDATE_URL) === false
+                        || strlen($item['giftLink']) > 2048))
+                || !is_string($personalMessage)
+                || strlen($personalMessage) > 2000) {
                 return null;
             }
             $items[] = [
                 ...(isset($item['id']) && $item['id'] !== '' ? ['id' => $item['id']] : []),
                 'category' => $item['category'],
-                'description' => trim($item['description']),
-                'reason' => trim($item['reason']),
+                'title' => trim($title),
+                'description' => trim($description),
+                'giftLink' => isset($item['giftLink']) && $item['giftLink'] !== '' ? trim((string) $item['giftLink']) : null,
+                'personalMessage' => trim($personalMessage),
             ];
         }
 

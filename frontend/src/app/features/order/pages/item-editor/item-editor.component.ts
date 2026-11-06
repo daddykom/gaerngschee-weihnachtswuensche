@@ -37,15 +37,16 @@ export class ItemEditorComponent {
   readonly formModel = signal<OrderItemFormValue>({
     id: this.itemId,
     category: null,
-    description: '',
-    reason: '',
+    title: '',
+    giftLink: '',
+    personalMessage: '',
   });
   readonly itemForm = form(this.formModel, (schema) => {
     required(schema.category);
-    required(schema.description);
-    maxLength(schema.description, 2000);
-    required(schema.reason);
-    maxLength(schema.reason, 2000);
+    required(schema.title);
+    maxLength(schema.title, 255);
+    maxLength(schema.giftLink, 2048);
+    maxLength(schema.personalMessage, 2000);
   });
 
   private initialized = false;
@@ -127,11 +128,14 @@ export class ItemEditorComponent {
     if (previous.category !== current.category) {
       changes.category = current.category;
     }
-    if (previous.description !== current.description) {
-      changes.description = current.description;
+    if (previous.title !== current.title) {
+      changes.title = current.title;
     }
-    if (previous.reason !== current.reason) {
-      changes.reason = current.reason;
+    if (previous.giftLink !== current.giftLink) {
+      changes.giftLink = current.giftLink;
+    }
+    if (previous.personalMessage !== current.personalMessage) {
+      changes.personalMessage = current.personalMessage;
     }
     return changes;
   }

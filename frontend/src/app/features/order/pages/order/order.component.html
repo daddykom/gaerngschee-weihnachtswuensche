@@ -117,7 +117,6 @@
 
     <section class="gl-stack gl-stack--group" aria-labelledby="items-heading">
       <h2 id="items-heading">{{ 'app.order.items.title' | translate }}</h2>
-      <p>{{ 'app.order.items.description' | translate }}</p>
       <div class="order-table-wrapper">
         <table>
           <caption class="visually-hidden">
@@ -127,9 +126,9 @@
           </caption>
           <thead>
             <tr>
+              <th scope="col">{{ 'app.order.items.wishTitle' | translate }}</th>
               <th scope="col">{{ 'app.order.items.category' | translate }}</th>
-              <th scope="col">{{ 'app.order.items.description' | translate }}</th>
-              <th scope="col">{{ 'app.order.items.reason' | translate }}</th>
+              <th scope="col">{{ 'app.order.items.personalMessage' | translate }}</th>
               <th scope="col">{{ 'app.order.items.status' | translate }}</th>
               <th scope="col">{{ 'app.order.items.actions' | translate }}</th>
             </tr>
@@ -137,9 +136,9 @@
           <tbody>
             @for (item of storeForm().items; track item.id) {
               <tr>
+                <td>{{ item.title }}</td>
                 <td>{{ 'app.order.items.categories.' + item.category | translate }}</td>
-                <td>{{ item.description }}</td>
-                <td>{{ item.reason }}</td>
+                <td>{{ item.personalMessage }}</td>
                 <td>{{ 'app.order.items.statuses.' + itemStatus(item.id) | translate }}</td>
                 <td>
                   @if (canEdit()) {

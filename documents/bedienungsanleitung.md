@@ -333,7 +333,7 @@ Sicherheitsgründen auch bei unbekannten E-Mail-Adressen neutral.
 3. Neues Passwort bestätigen.
 4. **Passwort setzen** auswählen.
 
-Das Passwort muss mindestens 12 und höchstens 128 Zeichen enthalten. Nach
+Das Passwort muss mindestens 8 und höchstens 128 Zeichen enthalten. Nach
 erfolgreicher Änderung kann man sich mit dem neuen Passwort anmelden.
 
 Ein abgelaufener oder bereits verwendeter Link kann nicht erneut verwendet
