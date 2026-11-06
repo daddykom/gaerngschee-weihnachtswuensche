@@ -269,8 +269,10 @@ export class OrderComponent {
         return (
           item.id === currentItem.id &&
           item.category === currentItem.category &&
+          item.title === currentItem.title &&
           item.description === currentItem.description &&
-          item.reason === currentItem.reason
+          item.giftLink === currentItem.giftLink &&
+          item.personalMessage === currentItem.personalMessage
         );
       })
     );

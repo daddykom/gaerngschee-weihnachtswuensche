@@ -25,8 +25,10 @@ export const orderFeature = createFeature({
           overview.order?.items.map((item) => ({
             id: item.id,
             category: item.category,
+            title: item.currentTitle,
             description: item.currentDescription,
-            reason: item.currentReason ?? '',
+            giftLink: item.giftLink ?? '',
+            personalMessage: item.personalMessage ?? item.currentReason ?? '',
           })) ?? [],
       },
       errorCode: null,

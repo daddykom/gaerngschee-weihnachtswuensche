@@ -212,7 +212,13 @@
       "items": {
         "title": "Deine Wünsche",
         "caption": "Deine Wünsche",
+        "wishTitle": "Wunschtitel",
         "description": "Wunschbeschreibung",
+        "descriptionHint": "z. B. Grösse, Farbe, Modell oder Ausführung",
+        "giftLink": "Link zum gewünschten Geschenk (freiwillig)",
+        "giftLinkHint": "Als Orientierung kannst du hier einen Beispiel-Link einfügen.",
+        "personalMessage": "Persönliche Nachricht zum Wunsch (freiwillig)",
+        "personalMessageHint": "Wenn du möchtest, erzähle uns kurz, weshalb du dir das wünschst.",
         "reason": "Begründung",
         "category": "Kategorie",
         "new": "Wunsch hinzufügen",
@@ -319,9 +325,19 @@
           "category": {
             "required": "Bitte wähle eine Kategorie aus."
           },
+          "title": {
+            "required": "Bitte gib einen Wunschtitel ein.",
+            "maxLength": "Der Wunschtitel darf höchstens 255 Zeichen lang sein."
+          },
           "description": {
             "required": "Bitte beschreibe deinen Wunsch.",
             "maxLength": "Die Wunschbeschreibung darf höchstens 2000 Zeichen lang sein."
+          },
+          "giftLink": {
+            "maxLength": "Der Link darf höchstens 2048 Zeichen lang sein."
+          },
+          "personalMessage": {
+            "maxLength": "Die persönliche Nachricht darf höchstens 2000 Zeichen lang sein."
           },
           "reason": {
             "required": "Bitte begründe deinen Wunsch.",
@@ -363,7 +379,7 @@
       "filters": {
         "title": "Wünsche suchen",
         "search": "Suche",
-        "searchHint": "Suche nach Familieninformationen, Wunschtext oder Begründung.",
+        "searchHint": "Suche nach Familieninformationen, Wunschtitel, Wunschtext oder persönlicher Nachricht.",
         "minimumSearchLength": "Die Suche startet ab drei Zeichen.",
         "category": "Kategorie",
         "allCategories": "Alle Kategorien"
@@ -392,7 +408,7 @@
         "wishDetailsTitle": "Wunschdetails",
         "wishNumberLabel": "Wunschnummer",
         "wishLabel": "Wunsch",
-        "reasonLabel": "Begründung",
+        "reasonLabel": "Persönliche Nachricht zum Wunsch",
         "commitmentTitle": "Verbindliche Zusage",
         "emailLabel": "Deine E-Mail-Adresse",
         "commitment": "Mit der Reservierung verpflichtest du dich, den Wunsch zu beschaffen, zu verpacken und zur angegebenen Zeit am angegebenen Ort abzugeben.",

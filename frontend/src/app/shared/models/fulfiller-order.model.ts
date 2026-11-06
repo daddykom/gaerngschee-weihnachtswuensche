@@ -6,7 +6,9 @@ export interface FulfillerWish {
   itemNumber: number;
   wishNumber: string;
   category: FulfillerCategory;
+  title?: string;
   currentDescription: string;
+  giftLink?: string | null;
   currentReason: string | null;
   fulfillmentStatus: FulfillerWishStatus;
   reservedAt: string | null;

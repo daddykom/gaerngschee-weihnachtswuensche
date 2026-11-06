@@ -10,6 +10,16 @@
         </div>
         <p>{{ currentOrder.requesterEmail }}</p>
         <p>
+          <strong>{{ 'app.order.items.wishTitle' | translate }}</strong>
+        </p>
+        <p class="original-text">
+          {{ currentItem.originalTitle || currentItem.originalDescription }}
+        </p>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>{{ 'app.order.items.wishTitle' | translate }}</mat-label>
+          <input matInput [formField]="itemForm.currentTitle" />
+        </mat-form-field>
+        <p>
           <strong>{{ 'app.admin.overview.originalDescription' | translate }}</strong>
         </p>
         <p class="original-text">{{ currentItem.originalDescription }}</p>
@@ -22,17 +32,13 @@
             translationPrefix="app.order.errors.items.description"
           />
         </mat-form-field>
-        <p>
-          <strong>{{ 'app.admin.overview.originalReason' | translate }}</strong>
-        </p>
-        <p class="original-text">{{ currentItem.originalReason }}</p>
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>{{ 'app.order.items.reason' | translate }}</mat-label>
-          <textarea matInput rows="3" [formField]="itemForm.currentReason"></textarea>
+          <mat-label>{{ 'app.order.items.personalMessage' | translate }}</mat-label>
+          <textarea matInput rows="3" [formField]="itemForm.personalMessage"></textarea>
           <app-control-error
             matError
-            [control]="itemForm.currentReason()"
-            translationPrefix="app.order.errors.items.reason"
+            [control]="itemForm.personalMessage()"
+            translationPrefix="app.order.errors.items.personalMessage"
           />
         </mat-form-field>
         <mat-form-field appearance="outline" subscriptSizing="dynamic">

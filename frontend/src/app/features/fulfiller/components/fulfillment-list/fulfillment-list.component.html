@@ -62,13 +62,18 @@
                 @for (wish of order.items; track wish.id) {
                   <li class="wish-entry gl-stack">
                     <div class="wish-entry__content gl-stack">
-                      <h3>{{ wish.wishNumber }}</h3>
+                      <h3>{{ wish.title || wish.wishNumber }}</h3>
                       <p>
                         <strong>{{
                           'app.order.items.categories.' + wish.category | translate
                         }}</strong>
                       </p>
                       <p class="gl-text--multiline">{{ wish.currentDescription }}</p>
+                      @if (wish.giftLink) {
+                        <a [href]="wish.giftLink" target="_blank" rel="noopener noreferrer">
+                          {{ 'app.order.items.giftLink' | translate }}
+                        </a>
+                      }
                       @if (wish.currentReason) {
                         <p class="gl-text--multiline wish-entry__reason">
                           {{ wish.currentReason }}

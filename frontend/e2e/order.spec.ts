@@ -52,8 +52,10 @@ test.describe('Bestellung route', () => {
         items: [
           {
             category: 'gift',
+            title: 'Winterjacke',
             description: 'Ein schönes Geschenk',
-            reason: 'Das würde mir Freude machen.',
+            giftLink: 'https://example.com/winterjacke',
+            personalMessage: 'Das würde mir Freude machen.',
           },
         ],
       });
@@ -80,8 +82,14 @@ test.describe('Bestellung route', () => {
     await page.waitForURL('**/bestellung/wunsch/neu');
     await page.getByRole('combobox', { name: 'Kategorie' }).click();
     await page.getByRole('option', { name: 'Geschenk' }).click();
+    await page.getByRole('textbox', { name: 'Wunschtitel' }).fill('Winterjacke');
     await page.locator('textarea').nth(0).fill('Ein schönes Geschenk');
-    await page.locator('textarea').nth(1).fill('Das würde mir Freude machen.');
+    await page
+      .getByRole('textbox', { name: /Link zum gewünschten Geschenk/ })
+      .fill('https://example.com/winterjacke');
+    await page
+      .getByRole('textbox', { name: /Persönliche Nachricht zum Wunsch/ })
+      .fill('Das würde mir Freude machen.');
     await page.getByRole('button', { name: 'Speichern' }).click();
     await page.waitForURL('**/bestellung');
     await page.getByRole('button', { name: 'Speichern' }).click();
@@ -123,7 +131,7 @@ test.describe('Bestellung route', () => {
       expect.objectContaining({
         id: 'item-1',
         description: 'Neue Beschreibung',
-        reason: 'Alte Begründung',
+        personalMessage: 'Alte Begründung',
       }),
     ]);
   });
@@ -162,11 +170,11 @@ test.describe('Bestellung route', () => {
     );
     await expectTranslatedText(
       page.locator('mat-form-field').nth(1).locator('.control-error'),
-      'app.order.errors.items.description.required',
+      'app.order.errors.items.title.required',
     );
     await expectTranslatedText(
       page.locator('mat-form-field').nth(2).locator('.control-error'),
-      'app.order.errors.items.reason.required',
+      'app.order.errors.items.description.required',
     );
   });
 
@@ -268,8 +276,11 @@ function orderItem(
     category,
     originalDescription: description,
     currentDescription: description,
+    originalTitle: description,
+    currentTitle: description,
     originalReason: reason,
     currentReason: reason,
+    personalMessage: reason,
     status: 'submitted',
   };
 }

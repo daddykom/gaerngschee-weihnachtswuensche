@@ -131,7 +131,7 @@ final class SaveOrderAction
     }
 
     /** @param mixed $value
-     *  @return list<array{id?: string, category: string, description: string, reason: string}>|null
+     *  @return list<array{id?: string, category: string, title: string, description: string, giftLink: ?string, personalMessage: string}>|null
      */
     private function items(mixed $value): ?array
     {
@@ -141,22 +141,34 @@ final class SaveOrderAction
 
         $items = [];
         foreach ($value as $item) {
-            if (!is_array($item)
-                || (isset($item['id']) && !is_string($item['id']))
+            if (!is_array($item)) {
+                return null;
+            }
+            $title = $item['title'] ?? ($item['description'] ?? '');
+            $personalMessage = $item['personalMessage'] ?? ($item['reason'] ?? '');
+            if ((isset($item['id']) && !is_string($item['id']))
                 || !in_array($item['category'] ?? null, ['voucher', 'gift'], true)
+                || !is_string($title)
+                || trim($title) === ''
+                || strlen($title) > 255
                 || !is_string($item['description'] ?? null)
                 || trim($item['description']) === ''
                 || strlen($item['description']) > 2000
-                || !is_string($item['reason'] ?? null)
-                || trim($item['reason']) === ''
-                || strlen($item['reason']) > 2000) {
+                || (isset($item['giftLink']) && $item['giftLink'] !== ''
+                    && (!is_string($item['giftLink'])
+                        || filter_var($item['giftLink'], FILTER_VALIDATE_URL) === false
+                        || strlen($item['giftLink']) > 2048))
+                || !is_string($personalMessage)
+                || strlen($personalMessage) > 2000) {
                 return null;
             }
             $items[] = [
                 ...(isset($item['id']) && $item['id'] !== '' ? ['id' => $item['id']] : []),
                 'category' => $item['category'],
+                'title' => trim($title),
                 'description' => trim($item['description']),
-                'reason' => trim($item['reason']),
+                'giftLink' => isset($item['giftLink']) && $item['giftLink'] !== '' ? trim((string) $item['giftLink']) : null,
+                'personalMessage' => trim($personalMessage),
             ];
         }
 
