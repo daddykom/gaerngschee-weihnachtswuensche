@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
+    "prebuild": "node scripts/write-version.mjs",
     "start": "nx serve",
     "build": "nx build",
     "test": "nx test",
