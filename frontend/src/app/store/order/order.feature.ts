@@ -26,7 +26,6 @@ export const orderFeature = createFeature({
             id: item.id,
             category: item.category,
             title: item.currentTitle,
-            description: item.currentDescription,
             giftLink: item.giftLink ?? '',
             personalMessage: item.personalMessage ?? item.currentReason ?? '',
           })) ?? [],

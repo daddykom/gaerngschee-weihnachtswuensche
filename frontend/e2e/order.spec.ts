@@ -53,7 +53,6 @@ test.describe('Bestellung route', () => {
           {
             category: 'gift',
             title: 'Winterjacke',
-            description: 'Ein schönes Geschenk',
             giftLink: 'https://example.com/winterjacke',
             personalMessage: 'Das würde mir Freude machen.',
           },
@@ -83,7 +82,6 @@ test.describe('Bestellung route', () => {
     await page.getByRole('combobox', { name: 'Kategorie' }).click();
     await page.getByRole('option', { name: 'Geschenk' }).click();
     await page.getByRole('textbox', { name: 'Wunschtitel' }).fill('Winterjacke');
-    await page.locator('textarea').nth(0).fill('Ein schönes Geschenk');
     await page
       .getByRole('textbox', { name: /Link zum gewünschten Geschenk/ })
       .fill('https://example.com/winterjacke');
@@ -120,17 +118,17 @@ test.describe('Bestellung route', () => {
 
     await page.getByRole('button', { name: 'Ändern' }).click();
     await page.waitForURL('**/bestellung/wunsch/item-1');
-    await page.locator('textarea').nth(0).fill('Neue Beschreibung');
+    await page.getByRole('textbox', { name: 'Wunschtitel' }).fill('Neuer Wunschtitel');
     await page.getByRole('button', { name: 'Speichern' }).click();
     await page.waitForURL('**/bestellung');
-    await expect(page.locator('tbody tr').first()).toContainText('Neue Beschreibung');
+    await expect(page.locator('tbody tr').first()).toContainText('Neuer Wunschtitel');
     await page.getByRole('button', { name: 'Speichern' }).click();
     await page.waitForURL('**/bestellung/bestaetigung?status=released');
 
     expect(savedItems).toEqual([
       expect.objectContaining({
         id: 'item-1',
-        description: 'Neue Beschreibung',
+        title: 'Neuer Wunschtitel',
         personalMessage: 'Alte Begründung',
       }),
     ]);
@@ -171,10 +169,6 @@ test.describe('Bestellung route', () => {
     await expectTranslatedText(
       page.locator('mat-form-field').nth(1).locator('.control-error'),
       'app.order.errors.items.title.required',
-    );
-    await expectTranslatedText(
-      page.locator('mat-form-field').nth(2).locator('.control-error'),
-      'app.order.errors.items.description.required',
     );
   });
 

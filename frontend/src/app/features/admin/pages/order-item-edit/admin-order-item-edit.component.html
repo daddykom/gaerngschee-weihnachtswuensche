@@ -19,19 +19,6 @@
           <mat-label>{{ 'app.order.items.wishTitle' | translate }}</mat-label>
           <input matInput [formField]="itemForm.currentTitle" />
         </mat-form-field>
-        <p>
-          <strong>{{ 'app.admin.overview.originalDescription' | translate }}</strong>
-        </p>
-        <p class="original-text">{{ currentItem.originalDescription }}</p>
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>{{ 'app.order.items.description' | translate }}</mat-label>
-          <textarea matInput rows="4" [formField]="itemForm.currentDescription"></textarea>
-          <app-control-error
-            matError
-            [control]="itemForm.currentDescription()"
-            translationPrefix="app.order.errors.items.description"
-          />
-        </mat-form-field>
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>{{ 'app.order.items.personalMessage' | translate }}</mat-label>
           <textarea matInput rows="3" [formField]="itemForm.personalMessage"></textarea>

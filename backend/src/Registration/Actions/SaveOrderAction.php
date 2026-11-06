@@ -145,15 +145,15 @@ final class SaveOrderAction
                 return null;
             }
             $title = $item['title'] ?? ($item['description'] ?? '');
+            $description = $item['description'] ?? '';
             $personalMessage = $item['personalMessage'] ?? ($item['reason'] ?? '');
             if ((isset($item['id']) && !is_string($item['id']))
                 || !in_array($item['category'] ?? null, ['voucher', 'gift'], true)
                 || !is_string($title)
                 || trim($title) === ''
                 || strlen($title) > 255
-                || !is_string($item['description'] ?? null)
-                || trim($item['description']) === ''
-                || strlen($item['description']) > 2000
+                || !is_string($description)
+                || strlen($description) > 2000
                 || (isset($item['giftLink']) && $item['giftLink'] !== ''
                     && (!is_string($item['giftLink'])
                         || filter_var($item['giftLink'], FILTER_VALIDATE_URL) === false
@@ -166,7 +166,7 @@ final class SaveOrderAction
                 ...(isset($item['id']) && $item['id'] !== '' ? ['id' => $item['id']] : []),
                 'category' => $item['category'],
                 'title' => trim($title),
-                'description' => trim($item['description']),
+                'description' => trim($description),
                 'giftLink' => isset($item['giftLink']) && $item['giftLink'] !== '' ? trim((string) $item['giftLink']) : null,
                 'personalMessage' => trim($personalMessage),
             ];

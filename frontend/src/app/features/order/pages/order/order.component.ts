@@ -270,7 +270,6 @@ export class OrderComponent {
           item.id === currentItem.id &&
           item.category === currentItem.category &&
           item.title === currentItem.title &&
-          item.description === currentItem.description &&
           item.giftLink === currentItem.giftLink &&
           item.personalMessage === currentItem.personalMessage
         );

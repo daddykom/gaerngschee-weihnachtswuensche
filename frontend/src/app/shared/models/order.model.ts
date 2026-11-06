@@ -13,7 +13,6 @@ export interface OrderItemFormValue {
   id: string;
   category: OrderItemCategory | null;
   title: string;
-  description: string;
   giftLink: string;
   personalMessage: string;
 }

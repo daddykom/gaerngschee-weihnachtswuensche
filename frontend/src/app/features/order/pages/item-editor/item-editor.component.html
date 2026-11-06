@@ -31,17 +31,6 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline" subscriptSizing="dynamic">
-      <mat-label>{{ 'app.order.items.description' | translate }}</mat-label>
-      <textarea matInput rows="4" [formField]="itemForm.description"></textarea>
-      <mat-hint>{{ 'app.order.items.descriptionHint' | translate }}</mat-hint>
-      <app-control-error
-        matError
-        [control]="itemForm.description()"
-        translationPrefix="app.order.errors.items.description"
-      />
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" subscriptSizing="dynamic">
       <mat-label>{{ 'app.order.items.giftLink' | translate }}</mat-label>
       <input matInput type="url" [formField]="itemForm.giftLink" />
       <mat-hint>{{ 'app.order.items.giftLinkHint' | translate }}</mat-hint>

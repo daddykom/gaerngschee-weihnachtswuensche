@@ -206,7 +206,7 @@
         "manualMessage": "Wir konnten keinen gültigen Fairgate-Zugang finden. Bitte gib die Anzahl der Erwachsenen und Kinder selbst ein."
       },
       "publicText": {
-        "label": "Erzähl uns etwas kleines warum du dir das wünschst (‼️ Bitte beachte, diese Informationen werden ÖFFENTLICH PUBLIZIERT ‼️)",
+        "label": "Erzähl doch kurz etwas über Dich und/oder Deine Familie",
         "hint": "Bitte teile keine privaten oder vertraulichen Informationen."
       },
       "items": {
@@ -214,10 +214,9 @@
         "caption": "Deine Wünsche",
         "wishTitle": "Wunschtitel",
         "description": "Wunschbeschreibung",
-        "descriptionHint": "z. B. Grösse, Farbe, Modell oder Ausführung",
         "giftLink": "Link zum gewünschten Geschenk (freiwillig)",
         "giftLinkHint": "Als Orientierung kannst du hier einen Beispiel-Link einfügen.",
-        "personalMessage": "Persönliche Nachricht zum Wunsch (freiwillig)",
+        "personalMessage": "Persönliche Nachricht zum Wunsch",
         "personalMessageHint": "Wenn du möchtest, erzähle uns kurz, weshalb du dir das wünschst.",
         "reason": "Begründung",
         "category": "Kategorie",
@@ -328,10 +327,6 @@
           "title": {
             "required": "Bitte gib einen Wunschtitel ein.",
             "maxLength": "Der Wunschtitel darf höchstens 255 Zeichen lang sein."
-          },
-          "description": {
-            "required": "Bitte beschreibe deinen Wunsch.",
-            "maxLength": "Die Wunschbeschreibung darf höchstens 2000 Zeichen lang sein."
           },
           "giftLink": {
             "maxLength": "Der Link darf höchstens 2048 Zeichen lang sein."
