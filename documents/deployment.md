@@ -102,6 +102,15 @@ Nx-Daemon und deaktiviertem Nx-Native-File-Cache ausgeführt, um die
 Hosting-Limits zu berücksichtigen. Die Apache-`.htaccess` wird unabhängig vom
 Angular-Asset-Build in das Frontend-Ziel kopiert.
 
+Bei jedem gemergten Pull Request nach `main` erzeugt GitHub Actions automatisch ein
+Release-Tag im Format `v<semver>+<build>`, zum Beispiel `v1.0.1+2`. Die
+SemVer-Komponente wird aus dem Conventional-Commit-Präfix des PR-Titels
+bestimmt: `feat:` erhöht Minor, ein Breaking Change erhöht Major und alle
+anderen Merges erhöhen Patch. Der globale Build-Zähler startet bei `1` und
+wird bei jedem Release erhöht. Der Frontend-Build ermittelt das erreichbare
+Release-Tag automatisch und stellt die Version als `version.json` für den
+Footer bereit. Nicht getaggte lokale Builds zeigen `0.0.0-dev` an.
+
 Der lokale Bats-Test des Scripts benötigt keinen Server und keinen GitHub-Zugriff.
 Bats Core muss lokal installiert sein:
 

@@ -5,6 +5,7 @@
       "product": "Weihnachtswünsche",
       "openSource": "Open Source auf GitHub",
       "developedBy": "entwickelt von",
+      "version": "Version {{version}}",
       "imprint": "Impressum",
       "privacy": "Datenschutzerklärung",
       "garngschee": "Gärngschee",

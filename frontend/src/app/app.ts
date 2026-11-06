@@ -5,6 +5,7 @@ import {
   computed,
   ElementRef,
   inject,
+  signal,
   viewChild,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -60,9 +61,19 @@ export class App {
   readonly authEmail = this.store.selectSignal(selectAuthEmail);
   readonly isAdmin = computed(() => this.authGroup() === 'admin');
   readonly isFulfiller = computed(() => this.authGroup() === 'wunscherfueller');
+  readonly version = signal('0.0.0-dev');
   private lastScrolledNotification: unknown = null;
 
   constructor() {
+    void fetch('/version.json', { cache: 'no-store' })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((payload: { version?: unknown } | null) => {
+        if (typeof payload?.version === 'string' && payload.version.length > 0) {
+          this.version.set(payload.version);
+        }
+      })
+      .catch(() => undefined);
+
     if (this.store.selectSignal(selectAuthGroup)() !== null) {
       this.store.dispatch(SessionActions.pollingStarted());
     }
