@@ -46,8 +46,12 @@ final class SaveOrderAction
         $text = $body['text'] ?? null;
         $items = $this->items($body['items'] ?? null);
         $password = $body['password'] ?? null;
+        $passwordConfirmation = $body['passwordConfirmation'] ?? null;
         if ($password === '') {
             $password = null;
+        }
+        if ($passwordConfirmation === '') {
+            $passwordConfirmation = null;
         }
         if ($adultsCount === null || $childrenCount === null || $adultsCount < 0 || $childrenCount < 0
             || !is_string($text) || trim($text) === '' || strlen($text) > 2000 || $items === null) {
@@ -64,6 +68,13 @@ final class SaveOrderAction
         $existingOrder = $orders->findForYear($user['id'], $year);
         if ($existingOrder !== null && !OrderStatus::canClientEdit((string) $existingOrder['status'])) {
             return JsonResponse::error($response, 'ORDER_NOT_EDITABLE', 409);
+        }
+        if ($existingOrder === null
+            && (!is_string($password)
+                || !PasswordPolicy::accepts($password)
+                || !is_string($passwordConfirmation)
+                || $password !== $passwordConfirmation)) {
+            return JsonResponse::error($response, 'WEAK_PASSWORD', 422);
         }
 
         try {

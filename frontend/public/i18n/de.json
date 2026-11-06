@@ -293,12 +293,12 @@
         "ORDER_SAVE_FAILED": "Bitte versuche es später erneut.",
         "password": {
           "required": "Bitte gib ein Passwort ein.",
-          "minLength": "Das Passwort muss mindestens 12 Zeichen lang sein.",
+          "minLength": "Das Passwort muss mindestens 8 Zeichen lang sein.",
           "maxLength": "Das Passwort darf höchstens 128 Zeichen lang sein."
         },
         "passwordConfirmation": {
           "required": "Bitte wiederhole das Passwort.",
-          "minLength": "Das Passwort muss mindestens 12 Zeichen lang sein.",
+          "minLength": "Das Passwort muss mindestens 8 Zeichen lang sein.",
           "maxLength": "Das Passwort darf höchstens 128 Zeichen lang sein.",
           "passwordsDoNotMatch": "Die Passwörter stimmen nicht überein."
         },
@@ -466,7 +466,7 @@
     "passwordChange": {
       "pageTitle": "Passwort ändern",
       "heading": "Passwort ändern",
-      "passwordRules": "Dein Passwort muss mindestens 12 Zeichen lang sein und darf höchstens 128 Zeichen enthalten. Leerzeichen und Sonderzeichen sind erlaubt.",
+      "passwordRules": "Dein Passwort muss mindestens 8 Zeichen lang sein und darf höchstens 128 Zeichen enthalten. Leerzeichen und Sonderzeichen sind erlaubt.",
       "emailLabel": "E-Mail-Adresse",
       "newPasswordLabel": "Neues Passwort",
       "confirmationLabel": "Neues Passwort bestätigen",
@@ -474,12 +474,12 @@
       "errors": {
         "newPassword": {
           "required": "Bitte gib ein neues Passwort ein.",
-          "minLength": "Das Passwort muss mindestens 12 Zeichen lang sein.",
+          "minLength": "Das Passwort muss mindestens 8 Zeichen lang sein.",
           "maxLength": "Das Passwort darf höchstens 128 Zeichen lang sein."
         },
         "passwordConfirmation": {
           "required": "Bitte bestätige dein neues Passwort.",
-          "minLength": "Das Passwort muss mindestens 12 Zeichen lang sein.",
+          "minLength": "Das Passwort muss mindestens 8 Zeichen lang sein.",
           "maxLength": "Das Passwort darf höchstens 128 Zeichen lang sein.",
           "passwordsDoNotMatch": "Die Passwörter stimmen nicht überein."
         },
@@ -505,7 +505,7 @@
     "passwordReset": {
       "pageTitle": "Neues Passwort setzen",
       "heading": "Neues Passwort setzen",
-      "passwordRules": "Dein Passwort muss mindestens 12 Zeichen lang sein und darf höchstens 128 Zeichen enthalten. Leerzeichen und Sonderzeichen sind erlaubt.",
+      "passwordRules": "Dein Passwort muss mindestens 8 Zeichen lang sein und darf höchstens 128 Zeichen enthalten. Leerzeichen und Sonderzeichen sind erlaubt.",
       "emailLabel": "E-Mail-Adresse",
       "newPasswordLabel": "Neues Passwort",
       "confirmationLabel": "Neues Passwort bestätigen",
@@ -517,12 +517,12 @@
         },
         "newPassword": {
           "required": "Bitte gib ein neues Passwort ein.",
-          "minLength": "Das Passwort muss mindestens 12 Zeichen lang sein.",
+          "minLength": "Das Passwort muss mindestens 8 Zeichen lang sein.",
           "maxLength": "Das Passwort darf höchstens 128 Zeichen lang sein."
         },
         "passwordConfirmation": {
           "required": "Bitte bestätige dein neues Passwort.",
-          "minLength": "Das Passwort muss mindestens 12 Zeichen lang sein.",
+          "minLength": "Das Passwort muss mindestens 8 Zeichen lang sein.",
           "maxLength": "Das Passwort darf höchstens 128 Zeichen lang sein.",
           "passwordsDoNotMatch": "Die Passwörter stimmen nicht überein."
         },

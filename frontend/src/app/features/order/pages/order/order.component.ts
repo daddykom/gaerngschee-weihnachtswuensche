@@ -108,10 +108,10 @@ export class OrderComponent {
       () => this.firstAccess(),
       (passwordSchema) => {
         required(passwordSchema.password);
-        minLength(passwordSchema.password, 12);
+        minLength(passwordSchema.password, 8);
         maxLength(passwordSchema.password, 128);
         required(passwordSchema.passwordConfirmation);
-        minLength(passwordSchema.passwordConfirmation, 12);
+        minLength(passwordSchema.passwordConfirmation, 8);
         maxLength(passwordSchema.passwordConfirmation, 128);
         validate(passwordSchema.passwordConfirmation, ({ valueOf }) =>
           valueOf(passwordSchema.password) === valueOf(passwordSchema.passwordConfirmation)
