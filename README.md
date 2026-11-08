@@ -169,6 +169,22 @@ composer update        # Dependencies aktualisieren
 vendor/bin/phinx       # Phinx CLI für Migrationen
 ```
 
+Der Batch für wartende Fairgate-Anmeldungen wird separat vom
+Bestellungs-Batch ausgeführt. Er prüft fällige Anfragen höchstens alle zwölf
+Stunden und sendet bei einem gefundenen Fairgate-Kontakt nur den allgemeinen
+Link zur `/start`-Seite:
+
+```bash
+cd backend && php bin/process-fairgate-registrations.php
+```
+
+In der Docker-Entwicklungsumgebung steht dafür zusätzlich folgendes Frontend-
+Script zur Verfügung:
+
+```bash
+npm run batch:fairgate-registrations
+```
+
 ### Tests
 ```bash
 # Unit Tests (Frontend)

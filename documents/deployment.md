@@ -67,6 +67,22 @@ Migrationen legen auch die für den Betrieb notwendigen Basisdaten an. Seeds
 werden beim Deployment nicht ausgeführt. Danach wird der Inhalt des
 Angular-Builds nach `<deployment>/frontend` veröffentlicht.
 
+## Regelmässige Batch-Prozesse
+
+Der Prozess für wartende Fairgate-Anmeldungen muss separat vom
+Bestellungs-Batch mindestens einmal innerhalb von zwölf Stunden ausgeführt
+werden. Empfohlen ist ein Cron-Eintrag alle zwölf Stunden:
+
+```cron
+0 */12 * * * cd /home/<user>/public_html/gaerngschee/weihnachtswuensche/prod/backend && php bin/process-fairgate-registrations.php >> /var/log/gaerngschee-fairgate-registrations.log 2>&1
+```
+
+Der Prozess verwendet die konfigurierte `backend/.env`, prüft nur wartende
+E-Mail-Adressen und versendet bei erfolgreicher Fairgate-Prüfung eine Nachricht
+mit dem allgemeinen `/start`-Link. Registrierungstokens werden dabei nicht
+erzeugt. Der bisherige `process-orders.php`-Batch führt keine Fairgate-
+Kontaktabfragen mehr aus.
+
 ## Deployment-Script
 
 Das versionierte Script deployt den `main`-Branch in die für die Umgebung
