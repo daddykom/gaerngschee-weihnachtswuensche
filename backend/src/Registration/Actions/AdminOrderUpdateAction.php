@@ -48,10 +48,15 @@ final class AdminOrderUpdateAction
 
         $normalizedItems = [];
         $allApproved = true;
+        $currentItems = [];
+        foreach ($current['items'] as $currentItem) {
+            $currentItems[(string) $currentItem['id']] = $currentItem;
+        }
         foreach ($items as $item) {
             if (!is_array($item) || !is_string($item['id'] ?? null) || !in_array($item['publicationStatus'] ?? null, ['approved', 'rejected', 'submitted'], true)) {
                 return JsonResponse::error($response, 'INVALID_ORDER_DATA', 422);
             }
+            $currentItem = $currentItems[(string) $item['id']] ?? [];
             $publicationStatus = (string) $item['publicationStatus'];
             $adminNotes = $item['adminNotes'] ?? null;
             if ($publicationStatus === 'rejected' && (!is_string($adminNotes) || trim($adminNotes) === '')) {
@@ -60,13 +65,31 @@ final class AdminOrderUpdateAction
             $allApproved = $allApproved && $publicationStatus === 'approved';
             $normalizedItems[] = [
                 'id' => $item['id'],
+                'category' => in_array($item['category'] ?? null, ['gift', 'voucher'], true)
+                    ? $item['category']
+                    : ($currentItem['category'] ?? 'gift'),
+                'personType' => array_key_exists('personType', $item)
+                    ? (in_array($item['personType'], ['adult', 'child'], true) ? $item['personType'] : null)
+                    : ($currentItem['personType'] ?? null),
+                'personIndex' => array_key_exists('personIndex', $item)
+                    ? $this->integer($item['personIndex'])
+                    : ($currentItem['personIndex'] ?? null),
                 'currentTitle' => is_string($item['currentTitle'] ?? null)
                     ? $item['currentTitle']
-                    : (is_string($item['currentDescription'] ?? null) ? $item['currentDescription'] : ''),
-                'currentDescription' => is_string($item['currentDescription'] ?? null) ? $item['currentDescription'] : '',
+                    : (is_string($item['currentDescription'] ?? null)
+                        ? $item['currentDescription']
+                        : ($currentItem['currentTitle'] ?? $currentItem['currentDescription'] ?? '')),
+                'currentDescription' => is_string($item['currentDescription'] ?? null)
+                    ? $item['currentDescription']
+                    : ($currentItem['currentDescription'] ?? ''),
+                'giftLink' => array_key_exists('giftLink', $item)
+                    ? (is_string($item['giftLink']) ? $item['giftLink'] : null)
+                    : ($currentItem['giftLink'] ?? null),
                 'personalMessage' => is_string($item['personalMessage'] ?? null)
                     ? $item['personalMessage']
-                    : (is_string($item['currentReason'] ?? null) ? $item['currentReason'] : null),
+                    : (is_string($item['currentReason'] ?? null)
+                        ? $item['currentReason']
+                        : ($currentItem['personalMessage'] ?? $currentItem['currentReason'] ?? null)),
                 'publicationStatus' => $publicationStatus,
                 'adminNotes' => is_string($adminNotes) ? $adminNotes : null,
             ];

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
-import { form, FormField, required } from '@angular/forms/signals';
+import { form, FormField, min, required } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -7,6 +7,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
+import { ControlErrorComponent } from '../../../../shared/components/control-error/control-error';
 import { AdminOrder, AdminOrderFormValue } from '../../../../shared/models/admin-order.model';
 import { OrderStatus } from '../../../../shared/models/order.model';
 import { AdminOrdersActions } from '../../../../store/admin-orders/admin-orders.actions';
@@ -21,6 +22,7 @@ import { NavigationActions } from '../../../../store/navigation/navigation.actio
   selector: 'app-admin-order-edit',
   imports: [
     TranslatePipe,
+    ControlErrorComponent,
     RouterLink,
     FormField,
     MatButtonModule,
@@ -47,7 +49,13 @@ export class AdminOrderEditComponent {
     childrenCount: 0,
     items: [],
   });
-  readonly orderForm = form(this.formModel, (schema) => required(schema.currentText));
+  readonly orderForm = form(this.formModel, (schema) => {
+    required(schema.currentText);
+    required(schema.adultsCount);
+    min(schema.adultsCount, 0);
+    required(schema.childrenCount);
+    min(schema.childrenCount, 0);
+  });
   readonly statusOptions: OrderStatus[] = [
     'draft',
     'waiting_for_fairgate',

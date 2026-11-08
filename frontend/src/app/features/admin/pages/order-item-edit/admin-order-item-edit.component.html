@@ -1,14 +1,74 @@
 @if (order(); as currentOrder) {
   @if (item(); as currentItem) {
     <div class="gl-stack gl-stack--section">
-      <section class="gl-stack gl-stack--group" aria-labelledby="item-edit-heading">
-        <div class="gl-cluster">
-          <h2 id="item-edit-heading">{{ 'app.admin.overview.itemEditTitle' | translate }}</h2>
-          <button mat-button type="button" (click)="cancel()">
-            {{ 'app.admin.overview.cancel' | translate }}
-          </button>
-        </div>
+      <section class="gl-stack gl-stack--group">
         <p>{{ currentOrder.requesterEmail }}</p>
+        <p>
+          <strong>{{ 'app.order.items.status' | translate }}:</strong>
+          {{ 'app.order.items.statuses.' + currentItem.publicationStatus | translate }}
+          <br />
+          <strong>{{ 'app.admin.overview.fulfillmentStatus' | translate }}:</strong>
+          {{ 'app.order.items.statuses.' + currentItem.fulfillmentStatus | translate }}
+          @if (currentItem.fulfillerEmail) {
+            <br />
+            <strong>{{ 'app.admin.overview.fulfillerEmail' | translate }}:</strong>
+            {{ currentItem.fulfillerEmail }}
+          }
+          @if (
+            currentItem.reservedAt ||
+            currentItem.reservationExpiresAt ||
+            currentItem.dueAt ||
+            currentItem.receivedAt
+          ) {
+            <br />
+            <strong>{{ 'app.admin.overview.fulfillmentDates' | translate }}:</strong>
+            {{ 'app.admin.overview.reservedAt' | translate }}: {{ currentItem.reservedAt ?? '—' }};
+            {{ 'app.admin.overview.reservationExpiresAt' | translate }}:
+            {{ currentItem.reservationExpiresAt ?? '—' }};
+            {{ 'app.admin.overview.dueAt' | translate }}: {{ currentItem.dueAt ?? '—' }};
+            {{ 'app.admin.overview.receivedAt' | translate }}: {{ currentItem.receivedAt ?? '—' }}
+          }
+        </p>
+        <div class="gl-grid gl-grid--2">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>{{ 'app.order.items.person' | translate }}</mat-label>
+            <mat-select
+              [value]="
+                itemForm.personType() && itemForm.personIndex()
+                  ? itemForm.personType() + ':' + itemForm.personIndex()
+                  : null
+              "
+              (selectionChange)="
+                formModel.update((item) => ({
+                  ...item,
+                  personType: $event.value.split(':')[0],
+                  personIndex: +$event.value.split(':')[1],
+                }))
+              "
+            >
+              @for (option of personOptions(); track option.value) {
+                <mat-option [value]="option.value">
+                  {{
+                    (option.type === 'adult' ? 'app.order.items.adult' : 'app.order.items.child')
+                      | translate
+                  }}
+                  {{ option.index }}
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>{{ 'app.order.items.category' | translate }}</mat-label>
+            <mat-select [formField]="itemForm.category">
+              <mat-option value="voucher">{{
+                'app.order.items.categories.voucher' | translate
+              }}</mat-option>
+              <mat-option value="gift">{{
+                'app.order.items.categories.gift' | translate
+              }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
         <p>
           <strong>{{ 'app.order.items.wishTitle' | translate }}</strong>
         </p>
@@ -18,6 +78,14 @@
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>{{ 'app.order.items.wishTitle' | translate }}</mat-label>
           <input matInput [formField]="itemForm.currentTitle" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>{{ 'app.admin.overview.currentDescription' | translate }}</mat-label>
+          <textarea matInput rows="4" [formField]="itemForm.currentDescription"></textarea>
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>{{ 'app.order.items.giftLink' | translate }}</mat-label>
+          <input matInput type="url" [formField]="itemForm.giftLink" />
         </mat-form-field>
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>{{ 'app.order.items.personalMessage' | translate }}</mat-label>
@@ -39,6 +107,9 @@
         </mat-form-field>
       </section>
       <div class="gl-cluster">
+        <button mat-button type="button" (click)="cancel()">
+          {{ 'app.admin.overview.cancel' | translate }}
+        </button>
         <button mat-button type="button" (click)="accept()">
           {{ 'app.admin.overview.accept' | translate }}
         </button>

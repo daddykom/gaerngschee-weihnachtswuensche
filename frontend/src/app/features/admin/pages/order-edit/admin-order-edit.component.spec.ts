@@ -24,6 +24,14 @@ describe('AdminOrderEditComponent', () => {
     originalText: 'Original',
     currentText: 'Aktuell',
     adminNotes: null,
+    fairgateStatus: null,
+    fairgateAdultsCount: null,
+    fairgateChildrenCount: null,
+    processingYear: 2026,
+    releasedAt: null,
+    definitiveAt: null,
+    confirmationEmailSentAt: null,
+    fairgateReminderEmailSentAt: null,
     items: [
       {
         id: 'item-1',

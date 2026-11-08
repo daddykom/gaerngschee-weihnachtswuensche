@@ -1,8 +1,16 @@
-import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import { form, FormField, required, validate } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -12,6 +20,7 @@ import {
   AdminOrderFormValue,
   AdminOrderItem,
 } from '../../../../shared/models/admin-order.model';
+import { OrderItemCategory, OrderItemPersonType } from '../../../../shared/models/order.model';
 import { AdminOrdersActions } from '../../../../store/admin-orders/admin-orders.actions';
 import {
   selectAdminOrders,
@@ -20,8 +29,12 @@ import {
 import { NavigationActions } from '../../../../store/navigation/navigation.actions';
 
 interface ItemFormValue {
+  category: OrderItemCategory;
+  personType: OrderItemPersonType | null;
+  personIndex: number | null;
   currentTitle: string;
   currentDescription: string;
+  giftLink: string;
   personalMessage: string;
   adminNotes: string;
 }
@@ -35,6 +48,7 @@ interface ItemFormValue {
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
+    MatSelectModule,
   ],
   templateUrl: './admin-order-item-edit.component.html',
   styleUrl: './admin-order-item-edit.component.scss',
@@ -49,13 +63,18 @@ export class AdminOrderItemEditComponent {
   readonly item = signal<AdminOrderItem | null>(null);
   readonly decision = signal<'accept' | 'reject' | null>(null);
   readonly formModel = signal<ItemFormValue>({
+    category: 'gift',
+    personType: null,
+    personIndex: null,
     currentTitle: '',
     currentDescription: '',
+    giftLink: '',
     personalMessage: '',
     adminNotes: '',
   });
   private previousItem: ItemFormValue | null = null;
   readonly itemForm = form(this.formModel, (schema) => {
+    required(schema.category);
     required(schema.currentDescription);
     validate(schema.adminNotes, ({ valueOf }) =>
       this.decision() === 'reject' && valueOf(schema.adminNotes).trim() === ''
@@ -63,6 +82,10 @@ export class AdminOrderItemEditComponent {
         : undefined,
     );
   });
+  readonly personOptions = computed(() => [
+    ...this.persons('adult', this.order()?.adultsCount ?? 0),
+    ...this.persons('child', this.order()?.childrenCount ?? 0),
+  ]);
 
   cancel(): void {
     this.store.dispatch(NavigationActions.navigate({ target: 'back' }));
@@ -78,8 +101,12 @@ export class AdminOrderItemEditComponent {
         this.order.set(currentOrder);
         this.item.set(currentItem);
         const formValue: ItemFormValue = {
+          category: currentItem.category,
+          personType: currentItem.personType ?? null,
+          personIndex: currentItem.personIndex ?? null,
           currentTitle: currentItem.currentTitle ?? currentItem.currentDescription,
           currentDescription: currentItem.currentDescription,
+          giftLink: currentItem.giftLink ?? '',
           personalMessage: currentItem.personalMessage ?? currentItem.currentReason ?? '',
           adminNotes: currentItem.adminNotes ?? '',
         };
@@ -174,11 +201,23 @@ export class AdminOrderItemEditComponent {
       return {};
     }
     const changes: Partial<ItemFormValue> = {};
+    if (previous.category !== current.category) {
+      changes.category = current.category;
+    }
+    if (previous.personType !== current.personType) {
+      changes.personType = current.personType;
+    }
+    if (previous.personIndex !== current.personIndex) {
+      changes.personIndex = current.personIndex;
+    }
     if (previous.currentDescription !== current.currentDescription) {
       changes.currentDescription = current.currentDescription;
     }
     if (previous.currentTitle !== current.currentTitle) {
       changes.currentTitle = current.currentTitle;
+    }
+    if (previous.giftLink !== current.giftLink) {
+      changes.giftLink = current.giftLink;
     }
     if (previous.personalMessage !== current.personalMessage) {
       changes.personalMessage = current.personalMessage;
@@ -187,5 +226,16 @@ export class AdminOrderItemEditComponent {
       changes.adminNotes = current.adminNotes;
     }
     return changes;
+  }
+
+  private persons(
+    type: OrderItemPersonType,
+    count: number,
+  ): Array<{ value: string; type: OrderItemPersonType; index: number }> {
+    return Array.from({ length: count }, (_, offset) => ({
+      value: `${type}:${offset + 1}`,
+      type,
+      index: offset + 1,
+    }));
   }
 }

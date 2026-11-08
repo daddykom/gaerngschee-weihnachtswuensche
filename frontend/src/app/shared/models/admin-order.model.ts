@@ -20,6 +20,13 @@ export interface AdminOrderItem {
   publicationStatus: AdminPublicationStatus;
   fulfillmentStatus: string;
   adminNotes: string | null;
+  fulfillerEmail?: string | null;
+  reservedAt?: string | null;
+  reservationExpiresAt?: string | null;
+  dueAt?: string | null;
+  receivedAt?: string | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
 }
 
 export interface AdminOrder {
@@ -34,6 +41,14 @@ export interface AdminOrder {
   originalText: string | null;
   currentText: string | null;
   adminNotes: string | null;
+  fairgateStatus: string | null;
+  fairgateAdultsCount: number | null;
+  fairgateChildrenCount: number | null;
+  processingYear: number | null;
+  releasedAt: string | null;
+  definitiveAt: string | null;
+  confirmationEmailSentAt: string | null;
+  fairgateReminderEmailSentAt: string | null;
   items: AdminOrderItem[];
   createdAt: string | null;
   updatedAt: string | null;

@@ -9,6 +9,70 @@
         <strong>{{ 'app.admin.overview.currentStatus' | translate }}:</strong>
         {{ 'app.admin.overview.statuses.' + currentOrder.status | translate }}
       </p>
+      <div class="gl-grid gl-grid--2">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>{{ 'app.order.adults' | translate }}</mat-label>
+          <input matInput type="number" [formField]="orderForm.adultsCount" />
+          <app-control-error
+            matError
+            [control]="orderForm.adultsCount()"
+            translationPrefix="app.order.errors.adultsCount"
+          />
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>{{ 'app.order.children' | translate }}</mat-label>
+          <input matInput type="number" [formField]="orderForm.childrenCount" />
+          <app-control-error
+            matError
+            [control]="orderForm.childrenCount()"
+            translationPrefix="app.order.errors.childrenCount"
+          />
+        </mat-form-field>
+      </div>
+      @if (
+        currentOrder.fairgateStatus !== null ||
+        currentOrder.fairgateAdultsCount !== null ||
+        currentOrder.fairgateChildrenCount !== null
+      ) {
+        <div class="gl-grid gl-grid--2">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>{{ 'app.admin.overview.fairgateStatus' | translate }}</mat-label>
+            <input matInput [value]="currentOrder.fairgateStatus ?? ''" readonly />
+          </mat-form-field>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>{{ 'app.admin.overview.processingYear' | translate }}</mat-label>
+            <input matInput [value]="currentOrder.processingYear ?? ''" readonly />
+          </mat-form-field>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>{{ 'app.admin.overview.fairgateAdults' | translate }}</mat-label>
+            <input
+              matInput
+              type="number"
+              [value]="currentOrder.fairgateAdultsCount ?? ''"
+              readonly
+            />
+          </mat-form-field>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>{{ 'app.admin.overview.fairgateChildren' | translate }}</mat-label>
+            <input
+              matInput
+              type="number"
+              [value]="currentOrder.fairgateChildrenCount ?? ''"
+              readonly
+            />
+          </mat-form-field>
+        </div>
+      }
+      <dl>
+        <dt>{{ 'app.admin.overview.releasedAt' | translate }}</dt>
+        <dd>{{ currentOrder.releasedAt ?? '—' }}</dd>
+        <dt>{{ 'app.admin.overview.definitiveAt' | translate }}</dt>
+        <dd>{{ currentOrder.definitiveAt ?? '—' }}</dd>
+        <dt>{{ 'app.admin.overview.confirmationEmailSentAt' | translate }}</dt>
+        <dd>{{ currentOrder.confirmationEmailSentAt ?? '—' }}</dd>
+        <dt>{{ 'app.admin.overview.fairgateReminderEmailSentAt' | translate }}</dt>
+        <dd>{{ currentOrder.fairgateReminderEmailSentAt ?? '—' }}</dd>
+      </dl>
       <p>
         <strong>{{ 'app.admin.overview.originalText' | translate }}</strong>
       </p>
@@ -38,7 +102,20 @@
               >
             }
             <strong>{{ 'app.order.items.categories.' + item.category | translate }}</strong>
-            <span>{{ 'app.order.items.statuses.' + item.publicationStatus | translate }}</span>
+            <span
+              >{{ 'app.order.items.status' | translate }}:
+              {{ 'app.order.items.statuses.' + item.publicationStatus | translate }}</span
+            >
+            <span
+              >{{ 'app.admin.overview.fulfillmentStatus' | translate }}:
+              {{ 'app.order.items.statuses.' + item.fulfillmentStatus | translate }}</span
+            >
+            @if (item.fulfillerEmail) {
+              <span
+                >{{ 'app.admin.overview.fulfillerEmail' | translate }}:
+                {{ item.fulfillerEmail }}</span
+              >
+            }
           </div>
           <div class="item-editor__text">
             <strong>{{ 'app.order.items.wishTitle' | translate }}</strong>
@@ -48,6 +125,30 @@
             <strong>{{ 'app.order.items.personalMessage' | translate }}</strong>
             <span>{{ item.personalMessage || item.currentReason }}</span>
           </div>
+          @if (item.giftLink) {
+            <div class="item-editor__text">
+              <strong>{{ 'app.order.items.giftLink' | translate }}</strong>
+              <span>{{ item.giftLink }}</span>
+            </div>
+          }
+          @if (item.reservedAt || item.reservationExpiresAt || item.dueAt || item.receivedAt) {
+            <div class="item-editor__text">
+              <strong>{{ 'app.admin.overview.fulfillmentDates' | translate }}</strong>
+              <span
+                >{{ 'app.admin.overview.reservedAt' | translate }}:
+                {{ item.reservedAt ?? '—' }}</span
+              >
+              <span
+                >{{ 'app.admin.overview.reservationExpiresAt' | translate }}:
+                {{ item.reservationExpiresAt ?? '—' }}</span
+              >
+              <span>{{ 'app.admin.overview.dueAt' | translate }}: {{ item.dueAt ?? '—' }}</span>
+              <span
+                >{{ 'app.admin.overview.receivedAt' | translate }}:
+                {{ item.receivedAt ?? '—' }}</span
+              >
+            </div>
+          }
           <a mat-button [routerLink]="['item', item.id]">{{
             'app.admin.overview.change' | translate
           }}</a>

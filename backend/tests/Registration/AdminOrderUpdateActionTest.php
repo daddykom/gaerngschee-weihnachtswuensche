@@ -88,6 +88,39 @@ final class AdminOrderUpdateActionTest extends TestCase
         self::assertSame('Nicht erfüllbar', $saved['items'][0]['adminNotes']);
     }
 
+    public function testSavesAllEditableWishFieldsFromTheAdminEditor(): void
+    {
+        [$pdo, $order] = $this->orderWithItems('released');
+        $action = new AdminOrderUpdateAction(new OrderRepository($pdo), new RecordingEmailSender());
+
+        $response = ($action)($this->request($order['id'], [
+            'order' => $this->orderPayload($order, 'released'),
+            'items' => [[
+                'id' => $order['items'][0]['id'],
+                'category' => 'voucher',
+                'personType' => 'adult',
+                'personIndex' => 1,
+                'currentTitle' => 'Neuer Titel',
+                'currentDescription' => 'Neue Beschreibung',
+                'giftLink' => 'https://example.com/gift',
+                'personalMessage' => 'Neue Nachricht',
+                'publicationStatus' => 'submitted',
+                'adminNotes' => null,
+            ]],
+            'action' => 'save',
+        ]), new Response(), ['orderId' => $order['id']]);
+
+        self::assertSame(200, $response->getStatusCode());
+        $saved = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR)['order'];
+        self::assertSame('voucher', $saved['items'][0]['category']);
+        self::assertSame('adult', $saved['items'][0]['personType']);
+        self::assertSame(1, $saved['items'][0]['personIndex']);
+        self::assertSame('Neuer Titel', $saved['items'][0]['currentTitle']);
+        self::assertSame('Neue Beschreibung', $saved['items'][0]['currentDescription']);
+        self::assertSame('https://example.com/gift', $saved['items'][0]['giftLink']);
+        self::assertSame('Neue Nachricht', $saved['items'][0]['personalMessage']);
+    }
+
     public function testSendsRejectionEmailWithoutAdminReason(): void
     {
         [$pdo, $order] = $this->orderWithItems('released');
