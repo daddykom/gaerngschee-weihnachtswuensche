@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace App\Registration\Actions;
 
 use App\Configuration\Data\FrontendConfigRepository;
+use App\Fairgate\Services\FairgateContactProvider;
+use App\Fairgate\Services\FairgateContactProviderFactory;
+use App\Registration\Data\FairgateRegistrationRequestRepository;
+use App\Registration\Services\ClientRegistrationLoginService;
 use App\Registration\Services\AnmeldungService;
 use App\Registration\Services\RegistrationTokenService;
 use DateTimeImmutable;
@@ -26,6 +30,8 @@ final class StartRegistrationAction
         private readonly ?RegistrationTokenService $tokens = null,
         private readonly ?FrontendConfigRepository $configs = null,
         private readonly ?DateTimeImmutable $now = null,
+        private readonly ?FairgateContactProvider $fairgate = null,
+        private readonly ?FairgateRegistrationRequestRepository $fairgateRequests = null,
     ) {
     }
 
@@ -50,7 +56,23 @@ final class StartRegistrationAction
         }
 
         try {
-            $token = ($this->tokens ?? new RegistrationTokenService())->issue(strtolower(trim($email)))['token'];
+            $normalizedEmail = strtolower(trim($email));
+            $fairgate = $this->fairgate ?? FairgateContactProviderFactory::create();
+            if (!$fairgate->hasContactByEmail($normalizedEmail, ClientRegistrationLoginService::MEMBERSHIP)) {
+                $fairgateUrl = ($this->configs ?? new FrontendConfigRepository(Database::getConnection()))
+                    ->findValueByVariableName('fairgate_url');
+                if (!is_string($fairgateUrl) || trim($fairgateUrl) === '') {
+                    throw new \RuntimeException('Fairgate registration URL is not configured.');
+                }
+
+                ($this->fairgateRequests ?? new FairgateRegistrationRequestRepository(Database::getConnection()))
+                    ->saveWaiting($normalizedEmail, $this->now ?? new DateTimeImmutable());
+                ($this->anmeldung ?? self::createService())->sendFairgateRegistrationRequired($email, $fairgateUrl, $locale);
+
+                return JsonResponse::success($response, ['sent' => true], 202);
+            }
+
+            $token = ($this->tokens ?? new RegistrationTokenService())->issue($normalizedEmail)['token'];
             $frontendBaseUrl = rtrim(getenv('FRONTEND_BASE_URL') ?: 'http://localhost:4200', '/');
             $loginUrl = $frontendBaseUrl . '/client-login?token=' . rawurlencode($token);
             ($this->anmeldung ?? self::createService())->sendRegistrationLink($email, $loginUrl, $locale);
