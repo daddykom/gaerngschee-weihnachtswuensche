@@ -210,8 +210,8 @@
         "manualMessage": "Wir konnten keinen gültigen Fairgate-Zugang finden. Bitte gib die Anzahl der Erwachsenen und Kinder selbst ein."
       },
       "publicText": {
-        "label": "Erzähl doch kurz etwas über Dich und/oder Deine Familie",
-        "hint": "Bitte teile keine privaten oder vertraulichen Informationen."
+        "label": "Erzähl uns kurz von deiner aktuellen Lebenssituation",
+        "hint": "Was ist gerade schwierig für dich? Wie ist es dazu gekommen?\n\nWichtig: Dein Text wird öffentlich auf der Website angezeigt. Schreibe deshalb keine Namen oder persönlichen Daten hinein."
       },
       "items": {
         "title": "Deine Wünsche",

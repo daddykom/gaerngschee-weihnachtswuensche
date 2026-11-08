@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  effect,
+  ElementRef,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { form, FormField, maxLength, minLength, required, validate } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
@@ -29,6 +37,10 @@ export class PasswordResetComponent {
   readonly loading = this.store.selectSignal(selectPasswordResetLoading);
   readonly storeForm = this.store.selectSignal(selectPasswordResetResetForm);
   readonly model = signal({ newPassword: '', passwordConfirmation: '' });
+  private readonly newPasswordInput = viewChild<ElementRef<HTMLInputElement>>('newPasswordInput');
+  private readonly passwordConfirmationInput = viewChild<ElementRef<HTMLInputElement>>(
+    'passwordConfirmationInput',
+  );
   readonly passwordResetForm = form(this.model, (schema) => {
     required(schema.newPassword);
     minLength(schema.newPassword, inputLimits.minimumPasswordLength);
@@ -85,6 +97,7 @@ export class PasswordResetComponent {
       this.passwordResetForm().markAsTouched();
       this.passwordResetForm.newPassword().markAsTouched();
       this.passwordResetForm.passwordConfirmation().markAsTouched();
+      this.focusFirstInvalidField();
       return;
     }
 
@@ -94,5 +107,18 @@ export class PasswordResetComponent {
         password: this.storeForm()?.newPassword ?? this.model().newPassword,
       }),
     );
+  }
+
+  private focusFirstInvalidField(): void {
+    const input = !this.passwordResetForm.newPassword().valid()
+      ? this.newPasswordInput()
+      : this.passwordConfirmationInput();
+    const element = input?.nativeElement;
+    if (!element) {
+      return;
+    }
+
+    element.focus({ preventScroll: true });
+    element.scrollIntoView?.({ behavior: 'smooth', block: 'center' });
   }
 }
