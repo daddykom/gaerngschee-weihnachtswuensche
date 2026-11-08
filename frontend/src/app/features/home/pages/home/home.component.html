@@ -3,31 +3,43 @@
     <p class="home__lead">{{ 'app.home.lead' | translate: { year } }}</p>
 
     <div class="home__choices gl-section-layout">
-      <section
-        class="home-choice home-choice--submit gl-stack gl-stack--group"
-        aria-labelledby="submit-heading"
-      >
-        <div class="home-choice__content gl-stack gl-stack--group">
-          <h2 id="submit-heading">
-            <mat-icon aria-hidden="true">card_giftcard</mat-icon>
-            {{ 'app.home.submit.title' | translate }}
-          </h2>
-          <p>{{ 'app.home.submit.text' | translate: { year } }}</p>
-        </div>
-        @if (campaignStatus() === 'open') {
-          <a mat-flat-button color="primary" routerLink="/start">
-            {{ 'app.home.submit.action' | translate }}
-          </a>
-        } @else if (campaignStatus() === 'not_started') {
-          <p role="status">
-            {{ 'app.home.submit.notStarted' | translate: { date: formattedCampaignStartDate() } }}
-          </p>
-        } @else if (campaignStatus() === 'ended') {
-          <p role="status">{{ 'app.home.submit.ended' | translate }}</p>
-        } @else {
-          <p role="status">{{ 'app.home.submit.unavailable' | translate }}</p>
-        }
-      </section>
+      <div class="gl-stack gl-stack--group">
+        <section
+          class="home-choice home-choice--submit gl-stack gl-stack--group"
+          aria-labelledby="submit-heading"
+        >
+          <div class="home-choice__content gl-stack gl-stack--group">
+            <h2 id="submit-heading">
+              <mat-icon aria-hidden="true">card_giftcard</mat-icon>
+              {{ 'app.home.submit.title' | translate }}
+            </h2>
+            <p>{{ 'app.home.submit.text' | translate: { year } }}</p>
+          </div>
+          @if (campaignStatus() === 'open') {
+            <a mat-flat-button color="primary" routerLink="/start">
+              {{ 'app.home.submit.action' | translate }}
+            </a>
+          } @else if (campaignStatus() === 'not_started') {
+            <p role="status">
+              {{ 'app.home.submit.notStarted' | translate: { date: formattedCampaignStartDate() } }}
+            </p>
+          } @else if (campaignStatus() === 'ended') {
+            <p role="status">{{ 'app.home.submit.ended' | translate }}</p>
+          } @else {
+            <p role="status">{{ 'app.home.submit.unavailable' | translate }}</p>
+          }
+        </section>
+
+        <p class="home__login">
+          @if (authGroup()) {
+            <button mat-button type="button" (click)="logout()">
+              {{ 'app.home.logout' | translate }}
+            </button>
+          } @else {
+            <a routerLink="/login">{{ 'app.home.login' | translate }}</a>
+          }
+        </p>
+      </div>
 
       <section
         class="home-choice home-choice--fulfill gl-stack gl-stack--group"
@@ -100,16 +112,6 @@
         </section>
       </mat-card-content>
     </mat-card>
-
-    <p class="home__login">
-      @if (authGroup()) {
-        <button mat-button type="button" (click)="logout()">
-          {{ 'app.home.logout' | translate }}
-        </button>
-      } @else {
-        <a routerLink="/login">{{ 'app.home.login' | translate }}</a>
-      }
-    </p>
   } @else {
     <p role="status" aria-live="polite">{{ 'app.home.loading' | translate }}</p>
   }

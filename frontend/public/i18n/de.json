@@ -18,14 +18,14 @@
       "privacyPageTitle": "Datenschutz – Gärngschee Weihnachtswünsche"
     },
     "home": {
-      "title": "Weihnachtsaktion",
+      "title": "Wunschzettel",
       "lead": "Hilf mit, Weihnachtswünsche zu erfüllen",
       "loading": "Die Aktionsseite wird geladen ...",
-      "login": "Anmelden",
+      "login": "Login",
       "logout": "Abmelden",
       "submit": {
         "title": "Wunsch einreichen",
-        "text": "Reiche deinen Weihnachtswunsch ein.",
+        "text": "Reiche einen Wunsch für dich oder deine Familie ein.",
         "action": "Wunsch einreichen",
         "notStarted": "Die nächste Weihnachtswünsche-Aktion beginnt am {{date}}.",
         "ended": "Wegen zu grosser Nachfrage sind leider keine Neuanmeldungen mehr möglich.",
@@ -33,8 +33,8 @@
       },
       "fulfill": {
         "title": "Wünsche erfüllen",
-        "text": "Erfülle Weihnachtswünsche von anderen.",
-        "action": "Wünsche anzeigen",
+        "text": "Erfülle Weihnachtswünsche von armutsbetroffenen Familien.",
+        "action": "Wünsche erfüllen",
         "notStarted": "Die Möglichkeit, Wünsche zu erfüllen, beginnt am {{date}}.",
         "ended": "Die Möglichkeit, Wünsche zu erfüllen, ist bereits beendet.",
         "unavailable": "Die Wunschliste ist momentan nicht verfügbar."
@@ -44,7 +44,7 @@
           "title": "Häufige Fragen für Wünschende",
           "1": {
             "question": "Welche Wertgrenze gilt für Wünsche?",
-            "answer": "<p>Pro Person gilt ein Maximalwert von <strong>CHF 100.-</strong></p><p>Alternativ kann sich eine Familie auch für einen gemeinsamen Familienwunsch entscheiden, der diesen Betrag übersteigen darf.</p>"
+            "answer": "<p>Pro Person gilt ein Richtwert von ca. <strong>CHF 100.-</strong></p><p>Alternativ kann sich eine Familie auch für einen gemeinsamen Familienwunsch entscheiden, der diesen Betrag übersteigen darf.</p>"
           },
           "2": {
             "question": "Sind Freizeitpark-Wünsche möglich?",
@@ -52,7 +52,7 @@
           },
           "3": {
             "question": "Kann ich Gutscheine wünschen?",
-            "answer": "<p>Ab dem <strong>12. Geburtstag</strong> sind Gutscheine möglich.</p><p>Für jüngere Kinder sind ausschliesslich <strong>Sachwünsche</strong> erlaubt.</p><p>💡 <em>Bei Gutscheinwünschen bestimmst du selber den Wert des Gutscheins.</em></p>"
+            "answer": "<p>Ab dem <strong>12. Geburtstag</strong> sind Gutscheine möglich.</p><p>Für jüngere Kinder sind ausschliesslich <strong>Sachwünsche</strong> erlaubt.</p><p>💡 <em>Den Wert des Gutscheins bestimmen die Erfüllenden.</em></p>"
           },
           "4": {
             "question": "Werden alle Wünsche erfüllt?",
@@ -64,7 +64,7 @@
           "intro": "Damit sich die Beschenkten wirklich freuen können, bitten wir dich, bei deiner Spende auf Folgendes zu achten:",
           "1": {
             "question": "In welchem Zustand dürfen Geschenke sein?",
-            "answer": "<p>Grundsätzlich nehmen wir nur Spenden in gutem Zustand an.</p><p>Ausnahmen werden von uns klar kommuniziert.</p>"
+            "answer": "<p>Grundsätzlich nehmen wir nur Spenden in neuwertigem Zustand an.</p><p>Ausnahmen werden von uns klar kommuniziert.</p>"
           },
           "2": {
             "question": "Welche Produkte müssen zwingend neu sein?",
@@ -72,7 +72,7 @@
           },
           "3": {
             "question": "Wie viel darf ein Gutschein kosten?",
-            "answer": "<p>Bei Gutscheinwünschen bestimmst du selber den Wert des Gutscheins.</p>"
+            "answer": "<p>Bei Gutscheinwünschen bestimmst du als erfüllende Person selber den Wert des Gutscheins.</p>"
           }
         }
       }
