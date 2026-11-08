@@ -84,7 +84,7 @@
     },
     "anmeldung": {
       "title": "Weihnachtswünsche Anmeldung",
-      "lead": "Schreib deine E-Mail-Adresse hier hinein. Wir schicken dir dann einen direkten Link zum Bestellformular.",
+      "lead": "Melde dich hier mit deiner E-Mail-Adresse für deinen Weihnachtswunsch an:",
       "fairgate": "Bist Du bereits bei Gärngschee angemeldet? Dann gib hier die E-Mail-Adresse ein, die Du bei deiner Anmeldung bei Fairgate verwendet hast.",
       "emailHeading": "Deine E-Mail-Adresse",
       "emailLabel": "E-Mail-Adresse",
@@ -93,10 +93,14 @@
         "email": {
           "required": "Bitte gib deine E-Mail-Adresse ein.",
           "email": "Bitte prüfe deine E-Mail-Adresse."
+        },
+        "privacyAccepted": {
+          "required": "Bitte stimme den Datenschutzbestimmungen zu."
         }
       },
       "continue": "Weiter",
       "privacyHint": "Wir behandeln deine Daten vertraulich.",
+      "privacyConsent": "Ich stimme den Datenschutzbestimmungen zu.",
       "sendError": "Die E-Mail konnte gerade nicht gesendet werden. Bitte versuche es später noch einmal.",
       "errorTitle": "Fehler",
       "registrationTokenError": "Der Anmeldelink ist ungültig oder abgelaufen. Bitte fordere auf der Startseite einen neuen Link an.",
@@ -104,7 +108,7 @@
       "emailSentMessage": "Wir haben dir eine E-Mail mit deinem persönlichen Anmeldelink geschickt. Der Link ist 10 Minuten gültig.",
       "privacyTitle": "Warum brauchen wir deine E-Mail-Adresse?",
       "privacyText": "Wir schicken dir per E-Mail einen persönlichen Link für deine Anmeldung zur Weihnachtswünsche-Aktion.\n\nBei der Anmeldung prüfen wir bei Fairgate, ob du bei Gärngschee registriert bist und wie viele Erwachsene und Kinder zu deiner Anmeldung gehören.\n\nWir speichern nur deine E-Mail-Adresse und die Anzahl Erwachsene und Kinder.",
-      "privacyLink": "Mehr zum Datenschutz"
+      "privacyLink": "Datenschutzerklärung lesen"
     },
     "user": {
       "profile": {

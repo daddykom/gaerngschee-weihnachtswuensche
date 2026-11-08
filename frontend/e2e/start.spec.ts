@@ -7,14 +7,17 @@ test.describe('Start route', () => {
     await expectTranslatedText(page.locator('h1'), 'app.anmeldung.title');
     await expect(page.locator('input[type="email"]')).toBeVisible();
     await expect(page.locator('button[type="submit"]')).toBeVisible();
-    await expect(
-      page.getByRole('main').getByRole('link', { name: 'Mehr zum Datenschutz' }),
-    ).toHaveAttribute('href', '/datenschutz');
+    await expect(page.getByRole('checkbox')).toBeVisible();
+    await expect(page.locator('app-info-box')).toBeVisible();
+    await expect(page.locator('.privacy-box')).toHaveCount(0);
+    await expect(page.locator('.privacy-consent a[href="/datenschutz"]')).toHaveAttribute(
+      'href',
+      '/datenschutz',
+    );
   });
 
   test('displays the Fairgate info box with a background color', async ({ page }) => {
     await page.goto('/start');
-
     const backgroundColor = await page
       .locator('app-info-box .info-box')
       .evaluate((element) => getComputedStyle(element).backgroundColor);
@@ -33,7 +36,28 @@ test.describe('Start route', () => {
     await page.locator('input[type="email"]').fill('invalid');
     await page.getByRole('button', { name: 'Weiter' }).click();
 
-    await expectTranslatedText(page.getByRole('alert'), 'app.anmeldung.errors.email.email');
+    await expectTranslatedText(
+      page.locator('.email-field .control-error'),
+      'app.anmeldung.errors.email.email',
+    );
+    expect(requestCalled).toBe(false);
+  });
+
+  test('requires privacy consent before sending the email request', async ({ page }) => {
+    let requestCalled = false;
+    await page.route('http://localhost:8083/public/start', async (route) => {
+      requestCalled = true;
+      await route.continue();
+    });
+
+    await page.goto('/start');
+    await page.locator('input[type="email"]').fill('person@example.com');
+    await page.getByRole('button', { name: 'Weiter' }).click();
+
+    await expectTranslatedText(
+      page.locator('.privacy-consent .control-error'),
+      'app.anmeldung.errors.privacyAccepted.required',
+    );
     expect(requestCalled).toBe(false);
   });
 
@@ -52,6 +76,7 @@ test.describe('Start route', () => {
 
     await page.goto('/start');
     await page.locator('input[type="email"]').fill('person@example.com');
+    await page.getByRole('checkbox').check();
     await page.getByRole('button', { name: 'Weiter' }).click();
 
     await expect(page).toHaveURL(/\/start\/success$/);

@@ -40,6 +40,19 @@
         </mat-form-field>
       </div>
 
+      <div class="privacy-consent">
+        <mat-checkbox [formField]="form.privacyAccepted">
+          {{ 'app.anmeldung.privacyConsent' | translate }}
+          <a href="/datenschutz" (click)="$event.stopPropagation()">
+            {{ 'app.anmeldung.privacyLink' | translate }}
+          </a>
+        </mat-checkbox>
+        <app-control-error
+          [control]="form.privacyAccepted()"
+          translationPrefix="app.anmeldung.errors.privacyAccepted"
+        />
+      </div>
+
       <button
         mat-flat-button
         type="submit"
@@ -54,18 +67,5 @@
       <mat-icon aria-hidden="true">lock</mat-icon>
       {{ 'app.anmeldung.privacyHint' | translate }}
     </p>
-  </section>
-
-  <section class="privacy-box gl-cluster">
-    <mat-icon aria-hidden="true">shield</mat-icon>
-    <div class="gl-stack gl-stack--group">
-      <h2>{{ 'app.anmeldung.privacyTitle' | translate }}</h2>
-      <p>
-        {{ 'app.anmeldung.privacyText' | translate }}
-      </p>
-      <p>
-        <a href="/datenschutz">{{ 'app.anmeldung.privacyLink' | translate }}</a>
-      </p>
-    </div>
   </section>
 </section>

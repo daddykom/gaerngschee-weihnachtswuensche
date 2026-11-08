@@ -24,7 +24,7 @@ describe('WeihnachtswuenscheStartComponent', () => {
   it('does not dispatch for an invalid email', () => {
     const fixture = TestBed.createComponent(WeihnachtswuenscheStartComponent);
     const component = fixture.componentInstance;
-    component.model.set({ email: 'invalid-email' });
+    component.model.set({ email: 'invalid-email', privacyAccepted: false });
 
     component.submit();
 
@@ -35,7 +35,7 @@ describe('WeihnachtswuenscheStartComponent', () => {
   it('dispatches the email in the submit action', () => {
     const fixture = TestBed.createComponent(WeihnachtswuenscheStartComponent);
     const component = fixture.componentInstance;
-    component.model.set({ email: 'person@example.com' });
+    component.model.set({ email: 'person@example.com', privacyAccepted: true });
 
     component.submit();
 

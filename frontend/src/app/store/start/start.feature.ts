@@ -14,7 +14,7 @@ export const startFeature = createFeature({
       ...state,
       status: 'loading',
       sent: null,
-      form: { email, language },
+      form: { ...state.form, email, language },
     })),
     on(StartActions.submitSuccess, (state, { sent }) => ({
       ...state,
