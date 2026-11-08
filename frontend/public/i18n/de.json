@@ -856,6 +856,20 @@
             "adults": "Erwachsene:",
             "children": "Kinder:"
           },
+          "saved": {
+            "subject": "Dein Wunschzettel wurde gespeichert",
+            "title": "Dein Wunschzettel wurde gespeichert",
+            "body": "Dein Wunschzettel für {{year}} wurde erfolgreich gespeichert.",
+            "nextText": "Wir prüfen deine Angaben und informieren dich per E-Mail über den nächsten Schritt.",
+            "button": "Zur Anmeldung"
+          },
+          "changes_requested": {
+            "subject": "Bitte passe deinen Wunschzettel an",
+            "title": "Dein Wunschzettel wurde zurückgewiesen",
+            "body": "Dein Wunschzettel für {{year}} wurde zurückgewiesen.",
+            "nextText": "Bitte melde dich an und passe deine Wünsche an. Danach kannst du den Wunschzettel erneut speichern.",
+            "button": "Wunschzettel anpassen"
+          },
           "released": {
             "subject": "Deine Weihnachtswünsche-Anmeldung wurde freigegeben",
             "title": "Deine Weihnachtswünsche-Anmeldung wurde freigegeben",

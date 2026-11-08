@@ -19,11 +19,12 @@ final class OrderRepository
     public function findForYear(string $userId, int $year): ?array
     {
         $statement = $this->pdo->prepare(
-            'SELECT id, user_id, year, order_number, status, adults_count, children_count, original_text, current_text,
-                    admin_notes, fairgate_adults_count, fairgate_children_count, processing_year,
-                    released_at, definitive_at, fairgate_status, confirmation_email_sent_at, fairgate_reminder_email_sent_at,
-                    created_at, updated_at
-             FROM orders WHERE user_id = :user_id AND year = :year',
+            'SELECT orders.id, orders.user_id, users.email AS requester_email, orders.year, orders.order_number, orders.status, orders.adults_count, orders.children_count, orders.original_text, orders.current_text,
+                    orders.admin_notes, orders.fairgate_adults_count, orders.fairgate_children_count, orders.processing_year,
+                    orders.released_at, orders.definitive_at, orders.fairgate_status, orders.confirmation_email_sent_at, orders.fairgate_reminder_email_sent_at,
+                    orders.created_at, orders.updated_at
+             FROM orders INNER JOIN users ON users.id = orders.user_id
+             WHERE orders.user_id = :user_id AND orders.year = :year',
         );
         $statement->execute(['user_id' => $userId, 'year' => $year]);
         $order = $statement->fetch();
@@ -34,6 +35,7 @@ final class OrderRepository
         return [
             'id' => $order['id'],
             'userId' => $order['user_id'],
+            'requesterEmail' => (string) $order['requester_email'],
             'year' => (int) $order['year'],
             'orderNumber' => $order['order_number'] === null ? null : (int) $order['order_number'],
             'status' => $order['status'],

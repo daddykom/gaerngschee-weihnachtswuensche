@@ -12,6 +12,7 @@ use Slim\Psr7\Response;
 use Slim\Psr7\Stream;
 use Slim\Psr7\Factory\ServerRequestFactory;
 use Tests\Support\TestDatabase;
+use Tests\Support\RecordingEmailSender;
 
 final class AdminOrderUpdateActionTest extends TestCase
 {
@@ -66,7 +67,7 @@ final class AdminOrderUpdateActionTest extends TestCase
     public function testSavesWholeOrderAndPreservesOriginalValues(): void
     {
         [$pdo, $order] = $this->orderWithItems('released');
-        $action = new AdminOrderUpdateAction(new OrderRepository($pdo));
+        $action = new AdminOrderUpdateAction(new OrderRepository($pdo), new RecordingEmailSender());
 
         $response = ($action)($this->request($order['id'], [
             'order' => [
@@ -85,6 +86,42 @@ final class AdminOrderUpdateActionTest extends TestCase
         self::assertSame('Originalbeschreibung', $saved['items'][0]['originalDescription']);
         self::assertSame('Aktualisierter Ordertext', $saved['currentText']);
         self::assertSame('Nicht erfüllbar', $saved['items'][0]['adminNotes']);
+    }
+
+    public function testSendsRejectionEmailWithoutAdminReason(): void
+    {
+        [$pdo, $order] = $this->orderWithItems('released');
+        $emails = new RecordingEmailSender();
+        $action = new AdminOrderUpdateAction(new OrderRepository($pdo), $emails);
+
+        ($action)($this->request($order['id'], [
+            'order' => [
+                ...$this->orderPayload($order, 'changes_requested'),
+                'adminNotes' => 'Interne Begründung',
+            ],
+            'items' => [$this->itemPayload($order['items'][0], 'rejected', 'Interne Begründung')],
+            'action' => 'rejectOrder',
+        ]), new Response(), ['orderId' => $order['id']]);
+
+        self::assertCount(1, $emails->orderConfirmations);
+        self::assertStringContainsString('changes_requested', $emails->orderConfirmations[0]['order']['html']);
+        self::assertStringNotContainsString('Interne Begründung', $emails->orderConfirmations[0]['order']['html']);
+    }
+
+    public function testSendsAcceptanceEmailWhenOrderBecomesDefinitive(): void
+    {
+        [$pdo, $order] = $this->orderWithItems('released');
+        $emails = new RecordingEmailSender();
+        $action = new AdminOrderUpdateAction(new OrderRepository($pdo), $emails);
+
+        ($action)($this->request($order['id'], [
+            'order' => $this->orderPayload($order, 'definitive'),
+            'items' => [$this->itemPayload($order['items'][0], 'approved')],
+            'action' => 'release',
+        ]), new Response(), ['orderId' => $order['id']]);
+
+        self::assertCount(1, $emails->orderConfirmations);
+        self::assertStringContainsString('definitive', $emails->orderConfirmations[0]['order']['html']);
     }
 
     public function testRejectsUnknownOrderAndMismatchedPayload(): void

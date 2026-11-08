@@ -16,6 +16,9 @@ use App\Registration\Services\OrderStatus;
 use App\Shared\Database\Database;
 use App\Shared\Http\JsonRequest;
 use App\Shared\Http\JsonResponse;
+use App\Shared\Mail\EmailQueueRepository;
+use App\Shared\Mail\EmailSender;
+use App\Shared\Mail\EmailSenderInterface;
 use App\Users\Data\UserRepository;
 use DateTimeImmutable;
 use DateTimeZone;
@@ -30,6 +33,8 @@ final class SaveOrderAction
         private readonly ?FairgateContactProvider $fairgate = null,
         private readonly ?FairgateOrderDataEvaluator $evaluator = null,
         private readonly ?UserRepository $users = null,
+        private readonly ?EmailSenderInterface $emails = null,
+        private readonly ?EmailQueueRepository $emailQueue = null,
     ) {
     }
 
@@ -116,6 +121,21 @@ final class SaveOrderAction
             $evaluation['valid'] ? $evaluation['adultsCount'] : null,
             $evaluation['valid'] ? $evaluation['childrenCount'] : null,
         );
+        $order['loginUrl'] = rtrim(getenv('FRONTEND_BASE_URL') ?: 'http://localhost:4200', '/') . '/login';
+        $emails = $this->emails ?? new EmailSender();
+        $message = $emails->renderOrderConfirmation($order, 'saved');
+        try {
+            $emails->sendStoredEmail($user['email'], $message['subject'], $message['html'], $message['text']);
+        } catch (\Throwable $exception) {
+            ($this->emailQueue ?? new EmailQueueRepository(Database::getConnection()))->enqueue(
+                'order',
+                (string) $order['id'],
+                'order_saved_confirmation',
+                $user['email'],
+                $message,
+                $exception->getMessage(),
+            );
+        }
 
         return JsonResponse::success($response, [
             'order' => $order,

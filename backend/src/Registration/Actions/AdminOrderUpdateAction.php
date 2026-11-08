@@ -8,12 +8,19 @@ use App\Registration\Data\OrderRepository;
 use App\Shared\Database\Database;
 use App\Shared\Http\JsonRequest;
 use App\Shared\Http\JsonResponse;
+use App\Shared\Mail\EmailQueueRepository;
+use App\Shared\Mail\EmailSender;
+use App\Shared\Mail\EmailSenderInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 final class AdminOrderUpdateAction
 {
-    public function __construct(private readonly ?OrderRepository $orders = null)
+    public function __construct(
+        private readonly ?OrderRepository $orders = null,
+        private readonly ?EmailSenderInterface $emails = null,
+        private readonly ?EmailQueueRepository $emailQueue = null,
+    )
     {
     }
 
@@ -104,6 +111,39 @@ final class AdminOrderUpdateAction
             ], $normalizedItems);
         } catch (\Throwable) {
             return JsonResponse::error($response, 'ORDER_UPDATE_FAILED', 500);
+        }
+
+        $mailStatus = null;
+        $emailType = null;
+        if ($requestedStatus === 'changes_requested' && $current['status'] !== 'changes_requested') {
+            $mailStatus = 'changes_requested';
+            $emailType = 'order_changes_requested';
+        } elseif ($requestedStatus === 'definitive' && $current['status'] !== 'definitive') {
+            $mailStatus = 'definitive';
+            $emailType = 'order_definitive';
+        }
+        if ($mailStatus !== null && $emailType !== null && is_string($saved['requesterEmail'] ?? null)) {
+            $emailOrder = $saved;
+            unset($emailOrder['adminNotes']);
+            $emailOrder['items'] = array_map(static function (array $item): array {
+                unset($item['adminNotes']);
+                return $item;
+            }, $emailOrder['items'] ?? []);
+            $emailOrder['loginUrl'] = rtrim(getenv('FRONTEND_BASE_URL') ?: 'http://localhost:4200', '/') . '/login';
+            $emails = $this->emails ?? new EmailSender();
+            $message = $emails->renderOrderConfirmation($emailOrder, $mailStatus);
+            try {
+                $emails->sendStoredEmail($saved['requesterEmail'], $message['subject'], $message['html'], $message['text']);
+            } catch (\Throwable $exception) {
+                ($this->emailQueue ?? new EmailQueueRepository(Database::getConnection()))->enqueue(
+                    'order',
+                    $orderId,
+                    $emailType,
+                    $saved['requesterEmail'],
+                    $message,
+                    $exception->getMessage(),
+                );
+            }
         }
 
         return JsonResponse::success($response, ['order' => $saved]);
