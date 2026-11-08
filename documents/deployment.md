@@ -69,19 +69,18 @@ Angular-Builds nach `<deployment>/frontend` veröffentlicht.
 
 ## Regelmässige Batch-Prozesse
 
-Der Prozess für wartende Fairgate-Anmeldungen muss separat vom
-Bestellungs-Batch mindestens einmal innerhalb von zwölf Stunden ausgeführt
-werden. Empfohlen ist ein Cron-Eintrag alle zwölf Stunden:
+Die beiden Backend-Batches werden im Regelbetrieb über den gemeinsamen Runner
+`process-all-batches.php` mindestens einmal innerhalb von zwölf Stunden
+ausgeführt. Empfohlen ist ein einziger Cron-Eintrag:
 
 ```cron
-0 */12 * * * cd /home/<user>/public_html/gaerngschee/weihnachtswuensche/prod/backend && php bin/process-fairgate-registrations.php >> /var/log/gaerngschee-fairgate-registrations.log 2>&1
+0 */12 * * * cd /home/<user>/public_html/gaerngschee/weihnachtswuensche/prod/backend && php bin/process-all-batches.php >> /var/log/gaerngschee-batches.log 2>&1
 ```
 
-Der Prozess verwendet die konfigurierte `backend/.env`, prüft nur wartende
-E-Mail-Adressen und versendet bei erfolgreicher Fairgate-Prüfung eine Nachricht
-mit dem allgemeinen `/start`-Link. Registrierungstokens werden dabei nicht
-erzeugt. Der bisherige `process-orders.php`-Batch führt keine Fairgate-
-Kontaktabfragen mehr aus.
+Der Runner verwendet die konfigurierte `backend/.env` und führt beide Prozesse
+nacheinander aus. Ein Fehler in einem Prozess wird protokolliert; der jeweils
+andere Prozess wird trotzdem gestartet. Der Runner beendet sich mit Exit-Code
+`1`, wenn mindestens ein Prozess fehlgeschlagen ist.
 
 ## Deployment-Script
 

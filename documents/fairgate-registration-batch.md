@@ -20,11 +20,18 @@ Startseite erneut ein und erhält dann den normalen persönlichen Link.
 
 ## Betrieb
 
-Der Batch benötigt dieselbe `backend/.env` wie das Backend und wird unabhängig
-vom Bestellungsbatch ausgeführt:
+Der Batch benötigt dieselbe `backend/.env` wie das Backend. Im Regelbetrieb
+wird er über den gemeinsamen Runner zusammen mit dem Bestellungsbatch
+ausgeführt:
 
 ```bash
 cd backend
+php bin/process-all-batches.php
+```
+
+Für eine gezielte manuelle Ausführung bleibt der Einzelaufruf möglich:
+
+```bash
 php bin/process-fairgate-registrations.php
 ```
 
@@ -35,4 +42,5 @@ der Prozess den Lauf mit Exit-Code `1`, damit die Prozessüberwachung dies
 erkennen kann.
 
 Der frühere Order-Batch fragt Fairgate nicht mehr ab. `process-orders.php`
-verarbeitet nur noch die bestehende E-Mail-Queue und die Token-Bereinigung.
+verarbeitet nur noch die bestehende E-Mail-Queue und die Token-Bereinigung;
+`process-all-batches.php` verbindet beide Aufgaben für den Cronbetrieb.

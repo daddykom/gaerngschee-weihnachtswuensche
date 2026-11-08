@@ -21,6 +21,7 @@
     "db:migrate": "cd .. && docker compose exec -T backend vendor/bin/phinx migrate -c /var/www/db/phinx.php",
     "batch:orders": "cd .. && docker compose exec -T backend php /var/www/html/bin/process-orders.php",
     "batch:fairgate-registrations": "cd .. && docker compose exec -T backend php /var/www/html/bin/process-fairgate-registrations.php",
+    "batch:all": "cd .. && docker compose exec -T backend php /var/www/html/bin/process-all-batches.php",
     "db:setup": "npm run db:start && sleep 5 && npm run db:provision && npm run db:migrate",
     "db:reset": "npm run db:stop && npm run db:start && sleep 5 && npm run db:migrate",
     "integration:start": "cd .. && docker compose -f docker-compose.integration.yml up -d --build --wait integration-database integration-backend",
