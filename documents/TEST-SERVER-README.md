@@ -3,17 +3,19 @@
 Der Testserver soll ermöglichen, eine Version der Weihnachtswünsche Applikation fachlich zu testen, bevor sie ins Produktive Umfeld gespielt wird.
 ## Unterschied zur Produktion
 1. Der Zugang ist nicht öffentlich bekannt, sondern nur eingeweihte Personen kennen den Zugang.
-2. Die Daten von Fairgate werden nicht abgefragt, ausser zum Verbindungstest mit einer festen Email-Adresse.
-   In allen anderen Punkten funktioniert sie wie die normale Applikation.
+2. Fairgate wird bei der Eingabe der E-Mail-Adresse synchron geprüft. Wartende
+   Adressen werden zusätzlich im 12-Stunden-Batch geprüft.
 ## Ablauf Bezüger
-1. Bezüger gibt die Email-Adresse ein, er erhält eine Email mit dem Zugangslink
+1. Bezüger gibt die Email-Adresse ein.
+   Bei einem Fairgate-Kontakt erhält er den persönlichen Zugangslink.
+   Ohne Fairgate-Kontakt erhält er nur den Fairgate-Anmeldelink und keinen
+   Zugangslink für die Weihnachtswünsche.
 2. Die Bezüger setzen kein Passwort, sie können nur über Email und Zugangslink anmelden
-3. Bezüger wird bei Fairgate gefunden: er kann gleich seine definitive Bestellung eingeben
-   er erhält eine Bestätigungsmail mit der Bestellung
-4. Bezüger wird **nicht** bei Fairgate gefunden: er kann nur provisorisch bestellen.
-   Er erhält eine provisorische Bestätigung
-   Solange er noch nicht angemeldet ist, erhält er eine regelmässige Mahnung, das noch zu tun
-   Sobald er bei Fairgate angemeldet ist, erhält er die definitive Bestellbestätigung
+3. Bezüger wird bei Fairgate gefunden: er kann gleich seine Wünsche erfassen.
+4. Bezüger wird **nicht** bei Fairgate gefunden: Nach der Anmeldung bei Fairgate
+   prüft der 12-Stunden-Batch die Adresse erneut. Bei einem Treffer erhält er
+   eine E-Mail mit dem allgemeinen Startseiten-Link und muss seine E-Mail-Adresse
+   dort erneut eingeben.
 5. Weihnachtswünsche-Admin gibt die definitiven Bestellungen frei.
    Bezüger erhält eine Email mit dem Scan-Code
 6. Bezüger holt die Weihnachtswünsche ab
@@ -33,8 +35,6 @@ Der Testserver soll ermöglichen, eine Version der Weihnachtswünsche Applikatio
 4. Admin kann User und andere Admin Accounts erstellen
 5. Admin kann auch ausliefern (siehe User)
 6. Admin kann die Konfigurationen ändern
-- Abstand der Mahnungen (siehe Bezüger)
-- Periode. während denen die provisorischen Bestellungen in der Übersicht angezeigt werden.
 - Anmeldelink Fairgat
 7. Fairgate-Test: es kann getestet werden, ob der Fairgate-Zugang aktuell funktioniert.
 ## Spezielle Testverfahren
@@ -50,7 +50,10 @@ Das bedeutet, dass alles vom ersten + bis zum @ ignoriert wird.
 
 **Und das ermöglicht uns, den Fake-Modus der Fairgate-Schnittstelle zu steuern!**
 
-Steht nach dem + (vor dem @) irgendwo fair1, fair2, fair3, oder fair4, dann meldet die Fairgate-Schnittstelle einen erfolgreichen Zugriff zurück und die Bestellung ist definitiv. Anderfalls ist sie provisorisch.
+Steht nach dem + (vor dem @) irgendwo fair1, fair2, fair3, oder fair4, dann
+meldet die Fairgate-Schnittstelle einen erfolgreichen Zugriff zurück. Andernfalls
+wird die Adresse als wartend gespeichert und im Fairgate-Registrierungsbatch
+erneut geprüft.
 
 Das ermöglicht auch, mit empfang der selben Email-Adresse bei Weihnachtswünsche-Test viele verschiedene Bezüger erfassen zu können, denn es wird die ganze Email verwendet, inkl. + usw.
 ### Beispiele

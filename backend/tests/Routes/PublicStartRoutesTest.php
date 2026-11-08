@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Tests\Routes;
 
 use App\Configuration\Data\FrontendConfigRepository;
+use App\Fairgate\Services\FakeFairgateClient;
+use App\Registration\Data\FairgateRegistrationRequestRepository;
 use App\Registration\Data\OrderRepository;
 use App\Routes\PublicRoutes;
 use App\Registration\Services\AnmeldungService;
@@ -105,9 +107,20 @@ final class PublicStartRoutesTest extends TestCase
         $pdo = TestDatabase::create();
         $app = AppFactory::create();
         $app->addRoutingMiddleware();
-        PublicRoutes::register($app, $this->service(), new RegistrationTokenService($pdo), $this->campaignConfig($pdo, '2026-08-01'), new OrderRepository($pdo));
+        PublicRoutes::register(
+            $app,
+            $this->service(),
+            new RegistrationTokenService($pdo),
+            $this->campaignConfig($pdo, '2026-08-01'),
+            new OrderRepository($pdo),
+            null,
+            null,
+            null,
+            new FakeFairgateClient(),
+            new FairgateRegistrationRequestRepository($pdo),
+        );
 
-        $response = $app->handle($this->request('person@example.com'));
+        $response = $app->handle($this->request('person+fair1@example.com'));
 
         self::assertSame(202, $response->getStatusCode());
         self::assertSame(
@@ -136,7 +149,18 @@ final class PublicStartRoutesTest extends TestCase
         $pdo = TestDatabase::create();
         $app = AppFactory::create();
         $app->addRoutingMiddleware();
-        PublicRoutes::register($app, $this->service(true), new RegistrationTokenService($pdo), $this->campaignConfig($pdo, '2026-08-01'), new OrderRepository($pdo));
+        PublicRoutes::register(
+            $app,
+            $this->service(true),
+            new RegistrationTokenService($pdo),
+            $this->campaignConfig($pdo, '2026-08-01'),
+            new OrderRepository($pdo),
+            null,
+            null,
+            null,
+            new FakeFairgateClient(),
+            new FairgateRegistrationRequestRepository($pdo),
+        );
 
         $response = $app->handle($this->request('person@example.com'));
 
@@ -295,6 +319,19 @@ final class PublicStartRoutesTest extends TestCase
             'id' => 'campaign-year',
             'variable_name' => 'campaign_year',
             'value' => json_encode('2026', JSON_THROW_ON_ERROR),
+            'description' => '',
+            'access_group' => json_encode(['admin', 'wunschbesteller'], JSON_THROW_ON_ERROR),
+            'update_group' => json_encode(['admin'], JSON_THROW_ON_ERROR),
+            'label' => '',
+        ]);
+
+        $pdo->prepare(
+            'INSERT INTO frontend_config (id, variable_name, value, description, access_group, update_group, label)
+             VALUES (:id, :variable_name, :value, :description, :access_group, :update_group, :label)',
+        )->execute([
+            'id' => 'fairgate-url',
+            'variable_name' => 'fairgate_url',
+            'value' => json_encode('https://www.fairgate.ch', JSON_THROW_ON_ERROR),
             'description' => '',
             'access_group' => json_encode(['admin', 'wunschbesteller'], JSON_THROW_ON_ERROR),
             'update_group' => json_encode(['admin'], JSON_THROW_ON_ERROR),

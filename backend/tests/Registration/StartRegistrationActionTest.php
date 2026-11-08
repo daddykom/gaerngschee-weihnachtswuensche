@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace Tests\Registration;
 
 use App\Configuration\Data\FrontendConfigRepository;
-use App\Registration\Data\OrderRepository;
+use App\Fairgate\Services\FakeFairgateClient;
+use App\Registration\Data\FairgateRegistrationRequestRepository;
 use App\Registration\Actions\StartRegistrationAction;
 use App\Registration\Services\AnmeldungService;
 use App\Registration\Services\RegistrationTokenService;
 use App\Shared\Mail\EmailSenderInterface;
 use Tests\Support\TestDatabase;
+use Tests\Support\RecordingEmailSender;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Slim\Psr7\Response;
@@ -23,9 +25,9 @@ final class StartRegistrationActionTest extends TestCase
     public function testAcceptsValidEmailAndLanguage(): void
     {
         $pdo = TestDatabase::create();
-        $action = new StartRegistrationAction($this->service(), new RegistrationTokenService($pdo), $this->config($pdo, '2026-08-01'), new DateTimeImmutable('2026-08-25 12:00:00', new DateTimeZone('UTC')), new OrderRepository($pdo));
+        $action = new StartRegistrationAction($this->service(), new RegistrationTokenService($pdo), $this->config($pdo, '2026-08-01'), new DateTimeImmutable('2026-08-25 12:00:00', new DateTimeZone('UTC')), new FakeFairgateClient());
 
-        $response = ($action)($this->request('person@example.com', 'de'), new Response());
+        $response = ($action)($this->request('person+fair1@example.com', 'de'), new Response());
 
         self::assertSame(202, $response->getStatusCode());
         self::assertSame(['sent' => true], json_decode((string) $response->getBody(), true));
@@ -34,7 +36,7 @@ final class StartRegistrationActionTest extends TestCase
     public function testRejectsEmailBeforeCampaignStart(): void
     {
         $pdo = TestDatabase::create();
-        $action = new StartRegistrationAction($this->service(), new RegistrationTokenService($pdo), $this->config($pdo, '2026-10-01'), new DateTimeImmutable('2026-08-25 12:00:00', new DateTimeZone('UTC')), new OrderRepository($pdo));
+        $action = new StartRegistrationAction($this->service(), new RegistrationTokenService($pdo), $this->config($pdo, '2026-10-01'), new DateTimeImmutable('2026-08-25 12:00:00', new DateTimeZone('UTC')), new FakeFairgateClient());
 
         $response = ($action)($this->request('person@example.com', 'de'), new Response());
 
@@ -61,6 +63,32 @@ final class StartRegistrationActionTest extends TestCase
 
         self::assertSame(422, $response->getStatusCode());
         self::assertSame('UNSUPPORTED_LANGUAGE', json_decode((string) $response->getBody(), true)['error']['code']);
+    }
+
+    public function testStoresAndNotifiesWhenEmailIsNotFoundInFairgate(): void
+    {
+        $pdo = TestDatabase::create();
+        $sender = new RecordingEmailSender();
+        $action = new StartRegistrationAction(
+            new AnmeldungService($sender),
+            new RegistrationTokenService($pdo),
+            $this->config($pdo, '2026-08-01'),
+            new DateTimeImmutable('2026-08-25 12:00:00', new DateTimeZone('UTC')),
+            new FakeFairgateClient(),
+            new FairgateRegistrationRequestRepository($pdo),
+        );
+
+        $response = ($action)($this->request('person@example.com', 'de'), new Response());
+
+        self::assertSame(202, $response->getStatusCode());
+        self::assertSame(['sent' => true], json_decode((string) $response->getBody(), true));
+        self::assertSame('person@example.com', $pdo->query('SELECT email FROM fairgate_registration_requests')->fetchColumn());
+        self::assertSame(0, (int) $pdo->query('SELECT COUNT(*) FROM registration_tokens')->fetchColumn());
+        self::assertSame(
+            \App\Registration\Services\AnmeldungMailVariant::FairgateRegistrationRequired,
+            $sender->variants[0],
+        );
+        self::assertSame('https://www.fairgate.ch', $sender->loginUrls[0]);
     }
 
     private function service(): AnmeldungService
@@ -143,6 +171,19 @@ final class StartRegistrationActionTest extends TestCase
             'id' => 'campaign-year',
             'variable_name' => 'campaign_year',
             'value' => json_encode('2026', JSON_THROW_ON_ERROR),
+            'description' => '',
+            'access_group' => json_encode(['admin', 'wunschbesteller'], JSON_THROW_ON_ERROR),
+            'update_group' => json_encode(['admin'], JSON_THROW_ON_ERROR),
+            'label' => '',
+        ]);
+
+        $pdo->prepare(
+            'INSERT INTO frontend_config (id, variable_name, value, description, access_group, update_group, label)
+             VALUES (:id, :variable_name, :value, :description, :access_group, :update_group, :label)',
+        )->execute([
+            'id' => 'fairgate-url',
+            'variable_name' => 'fairgate_url',
+            'value' => json_encode('https://www.fairgate.ch', JSON_THROW_ON_ERROR),
             'description' => '',
             'access_group' => json_encode(['admin', 'wunschbesteller'], JSON_THROW_ON_ERROR),
             'update_group' => json_encode(['admin'], JSON_THROW_ON_ERROR),

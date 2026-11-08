@@ -40,6 +40,19 @@ final class TestDatabase
             )',
         );
         $pdo->exec(
+            'CREATE TABLE fairgate_registration_requests (
+                id TEXT PRIMARY KEY,
+                email TEXT UNIQUE NOT NULL,
+                status TEXT NOT NULL DEFAULT \'waiting_for_fairgate\',
+                requested_at TEXT NOT NULL,
+                last_checked_at TEXT NULL,
+                fairgate_found_at TEXT NULL,
+                notification_sent_at TEXT NULL,
+                created_at TEXT,
+                updated_at TEXT
+            )',
+        );
+        $pdo->exec(
             'CREATE TABLE password_reset_tokens (
                 id TEXT PRIMARY KEY,
                 user_id TEXT NOT NULL,

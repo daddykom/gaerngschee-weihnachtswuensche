@@ -98,6 +98,8 @@ final class EmailSender implements EmailSenderInterface
         $subjectKey = match ($variant) {
             AnmeldungMailVariant::ClientOrder => 'app.mail.registration.clientOrder.subject',
             AnmeldungMailVariant::FulfillerReservation => 'app.mail.registration.fulfillerReservation.subject',
+            AnmeldungMailVariant::FairgateRegistrationRequired => 'app.mail.registration.fairgateRegistrationRequired.subject',
+            AnmeldungMailVariant::FairgateRegistrationAvailable => 'app.mail.registration.fairgateRegistrationAvailable.subject',
         };
         $message = (new Email())
             ->from(new Address($this->fromAddress, $this->fromName))

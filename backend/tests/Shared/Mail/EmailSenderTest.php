@@ -85,6 +85,56 @@ final class EmailSenderTest extends TestCase
         );
     }
 
+    public function testSendFairgateRegistrationRequiredUsesTheFairgateUrlWithoutAClientLink(): void
+    {
+        $mailer = $this->createMock(MailerInterface::class);
+        $mailer->expects(self::once())
+            ->method('send')
+            ->with(self::callback(static function (Email $email): bool {
+                self::assertSame('Bitte zuerst bei Fairgate anmelden', $email->getSubject());
+                self::assertStringContainsString('https://fairgate.example/register', $email->getHtmlBody());
+                self::assertStringContainsString('Bei Fairgate anmelden', $email->getTextBody());
+                self::assertStringNotContainsString('/client-login', $email->getHtmlBody());
+                self::assertStringNotContainsString('token=', $email->getHtmlBody());
+
+                return true;
+            }));
+
+        $sender = new EmailSender($mailer, 'noreply@example.com', 'Gärngschee-Weihnachtswünsche');
+
+        $sender->sendAnmeldung(
+            'person@example.com',
+            AnmeldungMailVariant::FairgateRegistrationRequired,
+            'de',
+            'https://fairgate.example/register',
+        );
+    }
+
+    public function testSendFairgateRegistrationAvailableUsesTheGenericStartUrl(): void
+    {
+        $mailer = $this->createMock(MailerInterface::class);
+        $mailer->expects(self::once())
+            ->method('send')
+            ->with(self::callback(static function (Email $email): bool {
+                self::assertSame('Du kannst jetzt Weihnachtswünsche anmelden', $email->getSubject());
+                self::assertStringContainsString('http://localhost:4200/start', $email->getHtmlBody());
+                self::assertStringContainsString('http://localhost:4200/start', $email->getTextBody());
+                self::assertStringNotContainsString('/client-login', $email->getHtmlBody());
+                self::assertStringNotContainsString('fairgate.example', $email->getHtmlBody());
+
+                return true;
+            }));
+
+        $sender = new EmailSender($mailer, 'noreply@example.com', 'Gärngschee-Weihnachtswünsche');
+
+        $sender->sendAnmeldung(
+            'person@example.com',
+            AnmeldungMailVariant::FairgateRegistrationAvailable,
+            'de',
+            'http://localhost:4200/start',
+        );
+    }
+
     public function testRendersFulfillerReservationConfirmationWithoutAConfirmationLink(): void
     {
         $sender = new EmailSender(

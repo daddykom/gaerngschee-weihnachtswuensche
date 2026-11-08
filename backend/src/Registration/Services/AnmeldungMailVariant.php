@@ -8,4 +8,6 @@ enum AnmeldungMailVariant: string
 {
     case ClientOrder = 'client-order';
     case FulfillerReservation = 'fulfiller-reservation';
+    case FairgateRegistrationRequired = 'fairgate-registration-required';
+    case FairgateRegistrationAvailable = 'fairgate-registration-available';
 }

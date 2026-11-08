@@ -67,6 +67,21 @@ Migrationen legen auch die für den Betrieb notwendigen Basisdaten an. Seeds
 werden beim Deployment nicht ausgeführt. Danach wird der Inhalt des
 Angular-Builds nach `<deployment>/frontend` veröffentlicht.
 
+## Regelmässige Batch-Prozesse
+
+Die beiden Backend-Batches werden im Regelbetrieb über den gemeinsamen Runner
+`process-all-batches.php` mindestens einmal innerhalb von zwölf Stunden
+ausgeführt. Empfohlen ist ein einziger Cron-Eintrag:
+
+```cron
+0 */12 * * * cd /home/<user>/public_html/gaerngschee/weihnachtswuensche/prod/backend && php bin/process-all-batches.php >> /var/log/gaerngschee-batches.log 2>&1
+```
+
+Der Runner verwendet die konfigurierte `backend/.env` und führt beide Prozesse
+nacheinander aus. Ein Fehler in einem Prozess wird protokolliert; der jeweils
+andere Prozess wird trotzdem gestartet. Der Runner beendet sich mit Exit-Code
+`1`, wenn mindestens ein Prozess fehlgeschlagen ist.
+
 ## Deployment-Script
 
 Das versionierte Script deployt den `main`-Branch in die für die Umgebung

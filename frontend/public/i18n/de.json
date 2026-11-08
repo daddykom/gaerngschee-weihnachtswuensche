@@ -983,6 +983,20 @@
           "button": "Weihnachtswünsche auswählen",
           "subject": "Dein Link zur Weihnachtswünsche-Bestellung"
         },
+        "fairgateRegistrationRequired": {
+          "title": "Zuerst bei Fairgate anmelden",
+          "highlight": "Deine Anmeldung ist fast bereit.",
+          "body": "Damit du Weihnachtswünsche erfassen kannst, musst du dich zuerst bei Fairgate anmelden.",
+          "button": "Bei Fairgate anmelden",
+          "subject": "Bitte zuerst bei Fairgate anmelden"
+        },
+        "fairgateRegistrationAvailable": {
+          "title": "Du kannst dich jetzt anmelden",
+          "highlight": "Deine Fairgate-Anmeldung wurde gefunden.",
+          "body": "Du kannst jetzt deine Weihnachtswünsche erfassen. Starte den Vorgang erneut mit deiner E-Mail-Adresse.",
+          "button": "Wünsche anmelden",
+          "subject": "Du kannst jetzt Weihnachtswünsche anmelden"
+        },
         "fulfillerReservation": {
           "title": "Deine Wunschreservierung bestätigen",
           "intro": "Bitte bestätige, dass du den folgenden Wunsch erfüllen möchtest:",

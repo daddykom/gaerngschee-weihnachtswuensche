@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Configuration\Data\FrontendConfigRepository;
 use App\Configuration\Environment;
-use App\Fairgate\Services\FairgateContactProviderFactory;
 use App\Registration\Data\OrderRepository;
 use App\Registration\Data\RegistrationTokenRepository;
 use App\Registration\Services\OrderBatchService;
@@ -21,7 +20,6 @@ try {
         new OrderRepository($pdo),
         new EmailQueueRepository($pdo),
         new FrontendConfigRepository($pdo),
-        FairgateContactProviderFactory::create(),
         new EmailSender(),
         new RegistrationTokenRepository($pdo),
     );

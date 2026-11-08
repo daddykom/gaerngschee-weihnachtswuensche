@@ -12,6 +12,8 @@ use App\Registration\Actions\PublicFulfillerWishStatusesAction;
 use App\Registration\Actions\StartRegistrationAction;
 use App\Registration\Actions\StartFulfillerReservationAction;
 use App\Registration\Data\OrderRepository;
+use App\Registration\Data\FairgateRegistrationRequestRepository;
+use App\Fairgate\Services\FairgateContactProvider;
 use App\Registration\Services\AnmeldungService;
 use App\Registration\Services\FulfillerAvailabilityService;
 use App\Registration\Services\FulfillerReservationService;
@@ -34,6 +36,8 @@ final class PublicRoutes
         ?RateLimitService $rateLimitService = null,
         ?FulfillerReservationService $fulfillerReservations = null,
         ?FulfillerAvailabilityService $fulfillerAvailability = null,
+        ?FairgateContactProvider $fairgate = null,
+        ?FairgateRegistrationRequestRepository $fairgateRequests = null,
     ): void {
         $app->get('/public/php-test', static function (ServerRequestInterface $request, ResponseInterface $response): ResponseInterface {
             $response->getBody()->write('PHP backend is reachable.');
@@ -41,8 +45,15 @@ final class PublicRoutes
             return $response->withHeader('Content-Type', 'text/plain; charset=utf-8');
         });
 
-        $app->group('/public', function (RouteCollectorProxy $group) use ($anmeldungService, $registrationTokens, $configRepository, $rateLimitService, $fulfillerReservations, $fulfillerAvailability): void {
-            $start = $group->post('/start', new StartRegistrationAction($anmeldungService, $registrationTokens, $configRepository));
+        $app->group('/public', function (RouteCollectorProxy $group) use ($anmeldungService, $registrationTokens, $configRepository, $rateLimitService, $fulfillerReservations, $fulfillerAvailability, $fairgate, $fairgateRequests): void {
+            $start = $group->post('/start', new StartRegistrationAction(
+                $anmeldungService,
+                $registrationTokens,
+                $configRepository,
+                null,
+                $fairgate,
+                $fairgateRequests,
+            ));
             $fulfillerStart = $group->post('/fulfiller-reservation-start', new StartFulfillerReservationAction($anmeldungService, $fulfillerReservations, $configRepository, null, $fulfillerAvailability));
             $group->get('/fulfiller/orders', new PublicFulfillerOrderListAction(null, $configRepository, null, $fulfillerAvailability));
             $group->get('/fulfiller/availability-version', new PublicFulfillerAvailabilityVersionAction());
