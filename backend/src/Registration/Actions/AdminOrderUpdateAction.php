@@ -20,8 +20,7 @@ final class AdminOrderUpdateAction
         private readonly ?OrderRepository $orders = null,
         private readonly ?EmailSenderInterface $emails = null,
         private readonly ?EmailQueueRepository $emailQueue = null,
-    )
-    {
+    ) {
     }
 
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface

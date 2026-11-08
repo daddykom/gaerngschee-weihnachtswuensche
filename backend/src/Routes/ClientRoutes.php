@@ -18,8 +18,7 @@ final class ClientRoutes
         App $app,
         ?UserRepository $userRepository = null,
         ?EmailSenderInterface $emailSender = null,
-    ): void
-    {
+    ): void {
         $order = $app->get('/client/order', new OrderOverviewAction());
         $order->add(new GroupMiddleware(['wunschbesteller'], $userRepository))->add(new AuthMiddleware());
         $save = $app->post('/client/order', new SaveOrderAction(emails: $emailSender));
