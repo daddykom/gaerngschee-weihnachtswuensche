@@ -37,7 +37,7 @@ final class FairgateClientTest extends TestCase
             static fn (string $token): bool => $token === 'test-token',
         );
 
-        self::assertTrue($client->hasContactByEmail(' Person@Example.com '));
+        self::assertTrue($client->hasContactByEmail(' Person@Example.com ', 'Klient*innen'));
         self::assertCount(2, $history);
         self::assertSame('/fsa/v1.1/auth/create/org-123/token', $history[0]['request']->getUri()->getPath());
         self::assertSame('/fsa/v1.1/contact/org-123/contacts/list', $history[1]['request']->getUri()->getPath());
@@ -73,9 +73,35 @@ final class FairgateClientTest extends TestCase
 
         self::assertSame(
             ['contactId' => 42, 'custom_field' => 'value'],
-            $client->findContactDataByEmail('person@example.com')['data'],
+            $client->findContactDataByEmail('person@example.com', 'Klient*innen')['data'],
         );
         self::assertSame('/fsa/v2.0/contact/org-123/data/42', $history[2]['request']->getUri()->getPath());
+    }
+
+    public function testFindContactDataByEmailPassesMembershipFilter(): void
+    {
+        $history = [];
+        $handler = HandlerStack::create(new MockHandler([
+            new Response(200, [], '{"success":true,"data":{"token":"test-token"}}'),
+            new Response(200, [], '{"success":true,"data":{"contacts":[]}}'),
+        ]));
+        $handler->push(Middleware::history($history));
+
+        $client = new FairgateClient(
+            new Client(['handler' => $handler, 'base_uri' => 'https://fsa-test.fairgate.ch']),
+            'https://fsa-test.fairgate.ch',
+            'org-123',
+            'access-key',
+            null,
+            static fn (string $token): bool => $token === 'test-token',
+        );
+
+        $client->findContactDataByEmail('person@example.com', 'Aktivmitglied');
+
+        self::assertSame(
+            'pageNo=1&pageLimit=1&primary_email=person%40example.com&membership%5B%5D=Aktivmitglied',
+            $history[1]['request']->getUri()->getQuery(),
+        );
     }
 
     public function testFindAllContactsLoadsEmailAndContactIdWithoutEmailFilter(): void
@@ -96,7 +122,7 @@ final class FairgateClientTest extends TestCase
         self::assertSame([
             ['email' => 'person@example.com', 'contactId' => '42'],
             ['email' => 'other@example.com', 'contactId' => '43'],
-        ], $client->findAllContacts());
+        ], $client->findAllContacts('Klient*innen'));
     }
 
     public function testHasContactByEmailReturnsFalseWhenContactIsNotFound(): void
@@ -114,7 +140,7 @@ final class FairgateClientTest extends TestCase
             static fn (string $token): bool => true,
         );
 
-        self::assertFalse($client->hasContactByEmail('missing@example.com'));
+        self::assertFalse($client->hasContactByEmail('missing@example.com', 'Klient*innen'));
     }
 
     public function testInvalidAuthenticationResponseThrowsFairgateException(): void
@@ -132,7 +158,7 @@ final class FairgateClientTest extends TestCase
         );
 
         $this->expectException(FairgateException::class);
-        $client->hasContactByEmail('person@example.com');
+        $client->hasContactByEmail('person@example.com', 'Klient*innen');
     }
 
     public function testAuthenticationWithUnsuccessfulResponseThrowsFairgateException(): void
@@ -150,7 +176,7 @@ final class FairgateClientTest extends TestCase
         );
 
         $this->expectException(FairgateException::class);
-        $client->hasContactByEmail('person@example.com');
+        $client->hasContactByEmail('person@example.com', 'Klient*innen');
     }
 
     public function testAuthenticationWithInvalidTokenThrowsFairgateException(): void
@@ -167,7 +193,7 @@ final class FairgateClientTest extends TestCase
         );
 
         $this->expectException(FairgateException::class);
-        $client->hasContactByEmail('person@example.com');
+        $client->hasContactByEmail('person@example.com', 'Klient*innen');
     }
 
     public function testEmptyEmailDoesNotCallFairgate(): void
@@ -184,7 +210,7 @@ final class FairgateClientTest extends TestCase
             static fn (string $token): bool => true,
         );
 
-        self::assertFalse($client->hasContactByEmail('   '));
+        self::assertFalse($client->hasContactByEmail('   ', 'Klient*innen'));
     }
 
     public function testInvalidContactJsonThrowsFairgateException(): void
@@ -202,7 +228,7 @@ final class FairgateClientTest extends TestCase
         );
 
         $this->expectException(FairgateException::class);
-        $client->hasContactByEmail('person@example.com');
+        $client->hasContactByEmail('person@example.com', 'Klient*innen');
     }
 
     public function testContactHttpErrorThrowsFairgateException(): void
@@ -221,7 +247,7 @@ final class FairgateClientTest extends TestCase
         );
 
         $this->expectException(FairgateException::class);
-        $client->hasContactByEmail('person@example.com');
+        $client->hasContactByEmail('person@example.com', 'Klient*innen');
     }
 
     public function testBearerTokenIsReusedForSubsequentRequests(): void
@@ -242,8 +268,8 @@ final class FairgateClientTest extends TestCase
             static fn (string $token): bool => true,
         );
 
-        self::assertFalse($client->hasContactByEmail('first@example.com'));
-        self::assertFalse($client->hasContactByEmail('second@example.com'));
+        self::assertFalse($client->hasContactByEmail('first@example.com', 'Klient*innen'));
+        self::assertFalse($client->hasContactByEmail('second@example.com', 'Klient*innen'));
         self::assertCount(3, $history);
     }
 }

@@ -14,7 +14,7 @@
         <article class="user-row gl-cluster" role="listitem">
           <div class="user-row__details gl-stack">
             <strong>{{ user.email }}</strong>
-            <span>{{ ('app.admin.users.groups.' + user.group) | translate }}</span>
+            <span>{{ 'app.admin.users.groups.' + user.group | translate }}</span>
             @if (user.required_password_reset) {
               <span>{{ 'app.admin.users.passwordResetRequired' | translate }}</span>
             }

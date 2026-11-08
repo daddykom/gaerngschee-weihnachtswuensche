@@ -1,11 +1,13 @@
+import { Component, effect, inject, signal, untracked } from '@angular/core';
 import {
-  Component,
-  effect,
-  inject,
-  signal,
-  untracked,
-} from '@angular/core';
-import { applyEach, FieldTree, form, FormField, maxLength, SchemaPath, validate } from '@angular/forms/signals';
+  applyEach,
+  FieldTree,
+  form,
+  FormField,
+  maxLength,
+  SchemaPath,
+  validate,
+} from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -16,6 +18,7 @@ import { inputLimits } from '../../../../shared/constants/input-limits';
 import { FrontendConfig } from '../../../../shared/models/frontend-config.model';
 import { FrontendConfigActions } from '../../../../store/frontend-config/frontend-config.actions';
 import {
+  selectFrontendConfigForm,
   selectFrontendConfigLoading,
   selectFrontendConfigs,
   selectFrontendConfigSaving,
@@ -23,7 +26,14 @@ import {
 
 @Component({
   selector: 'app-admin-configuration',
-  imports: [MatButtonModule, MatFormFieldModule, MatInputModule, FormField, TranslatePipe, ControlErrorComponent],
+  imports: [
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    FormField,
+    TranslatePipe,
+    ControlErrorComponent,
+  ],
   templateUrl: './configuration.component.html',
   styleUrl: './configuration.component.scss',
 })
@@ -33,6 +43,7 @@ export class ConfigurationComponent {
   readonly configs = this.store.selectSignal(selectFrontendConfigs);
   readonly loading = this.store.selectSignal(selectFrontendConfigLoading);
   readonly saving = this.store.selectSignal(selectFrontendConfigSaving);
+  readonly storeForm = this.store.selectSignal(selectFrontendConfigForm);
   readonly model = signal<Record<string, string | string[]>>({});
   readonly form = form(this.model, (schema) => {
     this.configs().forEach((config) => {
@@ -42,22 +53,59 @@ export class ConfigurationComponent {
         applyEach(schema[config.id] as unknown as SchemaPath<string[]>, (item) => {
           maxLength(item, inputLimits.configurationValue);
           if (regex !== null) {
-            validate(item, ({ value }) => regex.test(value()) ? undefined : { kind: 'pattern' });
+            validate(item, ({ value }) => (regex.test(value()) ? undefined : { kind: 'pattern' }));
           }
         });
       } else {
-        maxLength(schema[config.id] as unknown as SchemaPath<string>, inputLimits.configurationValue);
+        maxLength(
+          schema[config.id] as unknown as SchemaPath<string>,
+          inputLimits.configurationValue,
+        );
         if (regex !== null) {
-          validate(schema[config.id] as unknown as SchemaPath<string>, ({ value }) => (
-            regex.test(value()) ? undefined : { kind: 'pattern' }
-          ));
+          validate(schema[config.id] as unknown as SchemaPath<string>, ({ value }) =>
+            regex.test(value()) ? undefined : { kind: 'pattern' },
+          );
         }
       }
     });
   });
 
   constructor() {
-    effect(() => this.syncForm(this.configs()));
+    let initialized = false;
+    let previousModel: Record<string, string | string[]> = {};
+
+    effect(() => {
+      const configs = this.configs();
+      const storeForm = this.storeForm();
+      const currentModel = untracked(this.model);
+      const source = storeForm ?? currentModel;
+      const values = configs.reduce<Record<string, string | string[]>>(
+        (model, config) => ({
+          ...model,
+          [config.id]:
+            source[config.id] ??
+            (Array.isArray(config.value) ? [...config.value] : (config.value ?? '')),
+        }),
+        {},
+      );
+      this.model.set(this.cloneModel(values));
+      if (!initialized) {
+        previousModel = this.cloneModel(values);
+        initialized = true;
+      }
+    });
+
+    effect(() => {
+      if (!initialized) {
+        return;
+      }
+      const currentModel = this.model();
+      const changes = this.modelChanges(previousModel, currentModel);
+      if (Object.keys(changes).length > 0) {
+        this.store.dispatch(FrontendConfigActions.formChanged({ changes }));
+        previousModel = this.cloneModel(currentModel);
+      }
+    });
   }
 
   isArray(config: FrontendConfig): boolean {
@@ -102,7 +150,9 @@ export class ConfigurationComponent {
     if (!this.form()['valid']()) {
       this.configs().forEach((config) => {
         if (this.isArray(config)) {
-          this.values(config).forEach((_, index) => this.arrayField(config, index)().markAsTouched());
+          this.values(config).forEach((_, index) =>
+            this.arrayField(config, index)().markAsTouched(),
+          );
         } else {
           this.field(config)().markAsTouched();
         }
@@ -132,6 +182,40 @@ export class ConfigurationComponent {
       {},
     );
     this.model.set(values);
+  }
+
+  private valuesFromConfigs(configs: FrontendConfig[]): Record<string, string | string[]> {
+    return configs.reduce<Record<string, string | string[]>>(
+      (model, config) => ({
+        ...model,
+        [config.id]: Array.isArray(config.value) ? [...config.value] : (config.value ?? ''),
+      }),
+      {},
+    );
+  }
+
+  private cloneModel(model: Record<string, string | string[]>): Record<string, string | string[]> {
+    return Object.fromEntries(
+      Object.entries(model).map(([id, value]) => [id, Array.isArray(value) ? [...value] : value]),
+    );
+  }
+
+  private modelChanges(
+    previous: Record<string, string | string[]>,
+    current: Record<string, string | string[]>,
+  ): Record<string, string | string[]> {
+    const changes: Record<string, string | string[]> = {};
+    const ids = new Set([...Object.keys(previous), ...Object.keys(current)]);
+    ids.forEach((id) => {
+      const previousValue = previous[id];
+      const currentValue = current[id];
+      if (JSON.stringify(previousValue) !== JSON.stringify(currentValue)) {
+        if (currentValue !== undefined) {
+          changes[id] = Array.isArray(currentValue) ? [...currentValue] : currentValue;
+        }
+      }
+    });
+    return changes;
   }
 }
 

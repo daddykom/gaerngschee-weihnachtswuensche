@@ -1,6 +1,6 @@
 # Project Overview
 
-**Gärngschee-Mässpäggli** - Open-source Webplattform für die Verwaltung von Spenden und die Verteilung von Mässpäggli an Menschen mit knappen finanziellen Mitteln.
+**Gärngschee-Weihnachtswünsche** - Open-source Webplattform für die Verwaltung und Erfüllung einzelner Weihnachtswünsche von Menschen mit knappen finanziellen Mitteln.
 
 ## Benutzerrollen
 
@@ -8,13 +8,13 @@
 |-------|--------------|
 | Besucher | Nicht angemeldete Benutzer |
 | Klient | Personen/Familien mit knappen finanziellen Mitteln |
-| Spender | Finanzieren Mässpäggli |
+| Erfüller | Wählen einzelne Weihnachtswünsche aus und erfüllen sie |
 | Mitarbeiter | Vereinsmitarbeiter, Zugriff auf administrative Funktionen |
 | Administrator | Systemverwaltung |
 
 ## Kernfunktionen
 
-- Spendenverwaltung (Payrexx)
+- Verwaltung und Erfüllung einzelner Weihnachtswünsche
 - Anmeldungen mit Kindern
 - Berechtigungsprüfung (Fairgate)
 - Warteliste
@@ -34,7 +34,7 @@
 
 ## Vollständige Dokumentation
 
-→ Siehe [openspec/specs/maesspaeggli.md](../openspec/specs/maesspaeggli.md) für das Fachkonzept.
+→ Siehe [openspec/specs/weihnachtswuensche.md](../openspec/specs/weihnachtswuensche.md) für das Fachkonzept.
 
 → Siehe [architecture.md](./architecture.md) für die Systemarchitektur.
 

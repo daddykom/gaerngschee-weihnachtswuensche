@@ -1,10 +1,10 @@
-import { expect, test } from './support/test';
 import { expectTranslatedText } from './support/assertions';
+import { expect, test } from './support/test';
 
 test.describe('Password reset request route', () => {
   test('requests a password reset link without revealing account existence', async ({ page }) => {
     let requestBody: unknown;
-    await page.route('http://localhost:8080/auth/password-reset-request', async (route) => {
+    await page.route('http://localhost:8083/auth/password-reset-request', async (route) => {
       requestBody = route.request().postDataJSON();
       await route.fulfill({
         status: 202,

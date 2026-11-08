@@ -4,7 +4,7 @@ Die Anwendung wird pro Umgebung in einem eigenen Verzeichnis installiert. Das
 Verzeichnis kann `prod` oder `pre-prod` heissen:
 
 ```text
-$HOME/public_html/gaerngschee/maesspaeggli/<umgebung>/
+$HOME/public_html/gaerngschee/weihnachtswuensche/<umgebung>/
 ├── backend/
 │   ├── .env
 │   └── public/
@@ -41,7 +41,7 @@ JWT_SECRET=...
 FRONTEND_BASE_URL=https://example.org
 MAILER_DSN=smtp://...
 MAIL_FROM_ADDRESS=...
-MAIL_FROM_NAME=Gärngschee-Mässpäggli
+MAIL_FROM_NAME=Gärngschee-Weihnachtswünsche
 FSA_MODE=real
 FSA_BASE_URL=https://...
 FSA_ORGANIZATION_ID=...
@@ -71,18 +71,18 @@ Angular-Builds nach `<deployment>/frontend` veröffentlicht.
 
 Das versionierte Script deployt den `main`-Branch in die für die Umgebung
 vorgesehene Installation. Standardmässig wird
-`$HOME/public_html/gaerngschee/maesspaeggli` als Basisverzeichnis verwendet:
+`$HOME/public_html/gaerngschee/weihnachtswuensche` als Basisverzeichnis verwendet:
 
 ```bash
-scripts/deploy.sh pre-prod
-scripts/deploy.sh prod
+scripts/deploy-weihnachtswuensche.sh pre-prod
+scripts/deploy-weihnachtswuensche.sh prod
 ```
 
 Die Ziele sind damit:
 
 ```text
-$HOME/public_html/gaerngschee/maesspaeggli/pre-prod/
-$HOME/public_html/gaerngschee/maesspaeggli/prod/
+$HOME/public_html/gaerngschee/weihnachtswuensche/pre-prod/
+$HOME/public_html/gaerngschee/weihnachtswuensche/prod/
 ```
 
 Vor dem ersten Lauf muss in jeder Umgebung die Datei
@@ -101,6 +101,15 @@ Der Frontend-Production-Build wird auf einem CPU-Kern mit deaktiviertem
 Nx-Daemon und deaktiviertem Nx-Native-File-Cache ausgeführt, um die
 Hosting-Limits zu berücksichtigen. Die Apache-`.htaccess` wird unabhängig vom
 Angular-Asset-Build in das Frontend-Ziel kopiert.
+
+Bei jedem gemergten Pull Request nach `main` erzeugt GitHub Actions automatisch ein
+Release-Tag im Format `v<semver>+<build>`, zum Beispiel `v1.0.1+2`. Die
+SemVer-Komponente wird aus dem Conventional-Commit-Präfix des PR-Titels
+bestimmt: `feat:` erhöht Minor, ein Breaking Change erhöht Major und alle
+anderen Merges erhöhen Patch. Der globale Build-Zähler startet bei `1` und
+wird bei jedem Release erhöht. Der Frontend-Build ermittelt das erreichbare
+Release-Tag automatisch und stellt die Version als `version.json` für den
+Footer bereit. Nicht getaggte lokale Builds zeigen `0.0.0-dev` an.
 
 Der lokale Bats-Test des Scripts benötigt keinen Server und keinen GitHub-Zugriff.
 Bats Core muss lokal installiert sein:

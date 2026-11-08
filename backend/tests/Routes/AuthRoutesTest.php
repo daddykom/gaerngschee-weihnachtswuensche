@@ -92,21 +92,20 @@ final class AuthRoutesTest extends TestCase
         self::assertSame($user['id'], (new SessionService())->getUserId());
     }
 
-    public function testClientCannotLoginEvenWithCorrectPassword(): void
+    public function testWunschbestellerCanLoginWithCorrectPassword(): void
     {
-        $this->repository->createUser('client@example.com', 'secret', 'client');
+        $this->repository->createUser('client@example.com', 'secret', 'wunschbesteller');
 
         $response = $this->createAuthApp()->handle($this->request('/auth/login', [
             'email' => 'client@example.com',
             'password' => 'secret',
         ]));
 
-        self::assertSame(401, $response->getStatusCode());
-        self::assertSame(
-            '{"error":{"code":"INVALID_CREDENTIALS","details":[]}}',
-            (string) $response->getBody(),
-        );
-        self::assertNull((new SessionService())->getUserId());
+        $data = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
+
+        self::assertSame(200, $response->getStatusCode());
+        self::assertSame('wunschbesteller', $data['group']);
+        self::assertNotNull((new SessionService())->getUserId());
     }
 
     public function testWrongPasswordCannotLogin(): void
@@ -223,8 +222,11 @@ final class AuthRoutesTest extends TestCase
             $registrationTokens,
             $this->repository,
             new class () implements FairgateContactProvider {
-                public function hasContactByEmail(string $email): bool { return true; }
-                public function findContactDataByEmail(string $email): array
+                public function hasContactByEmail(string $email, string $membership): bool
+                {
+                    return true;
+                }
+                public function findContactDataByEmail(string $email, string $membership): array
                 {
                     return [
                         'success' => true,
@@ -247,7 +249,7 @@ final class AuthRoutesTest extends TestCase
         $data = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
 
         self::assertSame(200, $response->getStatusCode());
-        self::assertSame('client', $data['group']);
+        self::assertSame('wunschbesteller', $data['group']);
         self::assertTrue($data['fairgateUserExists']);
         self::assertSame(1, $data['childrenCount']);
         self::assertSame(2, $data['adultsCount']);

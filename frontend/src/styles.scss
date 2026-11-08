@@ -13,12 +13,12 @@ html {
     (
       color: mat.$rose-palette,
       typography: Inter,
-      density: 0
+      density: 0,
     ),
     $overrides: (
       primary: #8a2858,
       on-primary: #ffffff,
-       primary-container: #f5b6d3,
+      primary-container: #f5b6d3,
       on-primary-container: #000000,
       secondary: #2f6f60,
       on-secondary: #ffffff,
@@ -33,7 +33,7 @@ html {
       on-surface: #000000,
       on-surface-variant: #6f6069,
       outline: #8c7b85,
-       outline-variant: #8c7b85,
+      outline-variant: #8c7b85,
       error: #b3261e,
       error-container: #ffdad6
     )

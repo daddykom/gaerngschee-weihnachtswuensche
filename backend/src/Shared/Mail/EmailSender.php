@@ -81,8 +81,8 @@ final class EmailSender implements EmailSenderInterface
         AnmeldungMailVariant $variant,
         string $locale = 'de',
         ?string $loginUrl = null,
-    ): void
-    {
+        ?array $wish = null,
+    ): void {
         if ($this->translator instanceof LocaleAwareInterface) {
             $this->translator->setLocale($locale);
         }
@@ -92,12 +92,17 @@ final class EmailSender implements EmailSenderInterface
             'LOGO_CID' => 'cid:gaerngschee-logo',
             'REGISTRATION_URL' => $frontendBaseUrl . '/register',
             'FAIRGATE_URL' => getenv('FAIRGATE_URL') ?: 'https://www.fairgate.ch',
+            'WISH' => $wish,
         ]);
 
+        $subjectKey = match ($variant) {
+            AnmeldungMailVariant::ClientOrder => 'app.mail.registration.clientOrder.subject',
+            AnmeldungMailVariant::FulfillerReservation => 'app.mail.registration.fulfillerReservation.subject',
+        };
         $message = (new Email())
             ->from(new Address($this->fromAddress, $this->fromName))
             ->to($recipient)
-            ->subject($this->translator->trans('app.mail.registration.clientOrder.subject', [], null, $locale))
+            ->subject($this->translator->trans($subjectKey, [], null, $locale))
             ->text($this->plainText($html))
             ->html($html)
             ->embedFromPath(
@@ -118,41 +123,31 @@ final class EmailSender implements EmailSenderInterface
         }
     }
 
-    public function sendOrderStatus(string $recipient, string $status, string $locale = 'de'): void
-    {
-        if (!in_array($status, ['toDeliver', 'qrcode', 'delivered'], true)) {
-            throw new \InvalidArgumentException('Invalid order status.');
-        }
+    /** @param array<string, mixed> $wish @param array<string, mixed> $handover */
+    public function renderFulfillerReservationConfirmation(
+        array $wish,
+        array $handover,
+        string $locale = 'de',
+    ): array {
         if ($this->translator instanceof LocaleAwareInterface) {
             $this->translator->setLocale($locale);
         }
-
-        $html = $this->twig->render('anmeldung/client-order-status.html.twig', [
-            'STATUS_MESSAGE' => $this->translator->trans('app.mail.registration.clientOrderStatus.' . $status, [], null, $locale),
+        $html = $this->twig->render('fulfiller-reservation-confirmation.html.twig', [
             'LOGO_CID' => 'cid:' . self::LOGO_CID,
+            'WISH' => $wish,
+            'HANDOVER' => $handover,
         ]);
-        $message = (new Email())
-            ->from(new Address($this->fromAddress, $this->fromName))
-            ->to($recipient)
-            ->subject($this->translator->trans('app.mail.registration.clientOrderStatus.subject', [], null, $locale))
-            ->text($this->plainText($html))
-            ->html($html)
-            ->embedFromPath(
-                dirname(__DIR__, 3) . '/resources/pictures/gaerngschee-logo.png',
-                self::LOGO_CID,
-                'image/png',
-            );
 
-        try {
-            $this->mailer->send($message);
-        } catch (TransportExceptionInterface $exception) {
-            ExternalErrorLogger::log('email', 'order_status_email', $exception->getMessage());
-            throw new EmailDeliveryException(
-                'The email could not be sent: ' . $exception->getMessage(),
-                0,
-                $exception,
-            );
-        }
+        return [
+            'subject' => $this->translator->trans(
+                'app.mail.registration.fulfillerReservationConfirmation.subject',
+                [],
+                null,
+                $locale,
+            ),
+            'html' => $html,
+            'text' => $this->plainText($html),
+        ];
     }
 
     public function sendUserCreated(string $recipient, string $temporaryPassword): void
@@ -200,24 +195,9 @@ final class EmailSender implements EmailSenderInterface
     /** @return array{subject: string, html: string, text: string} */
     public function renderOrderConfirmation(array $order, string $mailStatus): array
     {
-        if (!in_array($mailStatus, ['definitive', 'provisional'], true)) {
+        if (!in_array($mailStatus, ['released', 'waiting_for_fairgate', 'family_size_exceeded', 'definitive'], true)) {
             throw new \InvalidArgumentException('Invalid order confirmation mail status.');
         }
-        $order['items'] = array_map(function (array $item): array {
-            $item['categoryLabel'] = $this->translator->trans(
-                'app.order.categories.options.' . $item['category'],
-                [],
-                null,
-                'de',
-            );
-            $item['personTypeLabel'] = $this->translator->trans(
-                $item['personType'] === 'adult' ? 'app.order.categories.adult' : 'app.order.categories.child',
-                [],
-                null,
-                'de',
-            );
-            return $item;
-        }, $order['items'] ?? []);
         $html = $this->twig->render('order-confirmation-' . $mailStatus . '.html.twig', [
             'LOGO_CID' => 'cid:' . self::LOGO_CID,
             'ORDER' => $order,
@@ -225,22 +205,6 @@ final class EmailSender implements EmailSenderInterface
         $subject = $this->translator->trans('app.mail.order.confirmation.' . $mailStatus . '.subject', [], null, 'de');
 
         return ['subject' => $subject, 'html' => $html, 'text' => $this->plainText($html)];
-    }
-
-    /** @param array<string, mixed> $order */
-    public function renderDeliveryNotification(array $order, string $deliveryUrl, string $qrDataUri): array
-    {
-        $html = $this->twig->render('delivery-notification.html.twig', [
-            'LOGO_CID' => 'cid:' . self::LOGO_CID,
-            'QR_DATA_URI' => $qrDataUri,
-            'DELIVERY_URL' => $deliveryUrl,
-        ]);
-
-        return [
-            'subject' => $this->translator->trans('app.mail.delivery.subject'),
-            'html' => $html,
-            'text' => $this->plainText($html),
-        ];
     }
 
     /** @return array{subject: string, html: string, text: string} */

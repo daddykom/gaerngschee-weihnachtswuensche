@@ -1,5 +1,4 @@
 name: CI
-
 on:
   pull_request:
     branches:
@@ -71,6 +70,8 @@ jobs:
         run: npm ci
       - name: Run lint
         run: npm run lint
+      - name: Check Prettier formatting
+        run: npx prettier --check . --ignore-path .prettierignore
 
   deployment-script-test:
     name: deployment-script-test
@@ -102,6 +103,26 @@ jobs:
       - name: Run PHPUnit tests
         working-directory: backend
         run: vendor/bin/phpunit
+
+  backend-code-style:
+    name: backend-code-style
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          extensions: mbstring, pdo, pdo_sqlite, pdo_mysql, zip
+          tools: composer
+          coverage: none
+      - name: Install dependencies
+        working-directory: backend
+        run: composer install --no-interaction --prefer-dist
+      - name: Check PHP code style
+        working-directory: backend
+        run: vendor/bin/php-cs-fixer fix --dry-run --diff
 
   backend-production-dependencies:
     name: backend-production-dependencies

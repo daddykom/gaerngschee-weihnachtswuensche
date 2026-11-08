@@ -9,7 +9,14 @@ import { AuthActions } from '../../../store/auth/auth.actions';
 
 @Component({
   selector: 'app-admin-navigation',
-  imports: [MatButtonModule, MatIconModule, MatMenuModule, RouterLink, RouterLinkActive, TranslatePipe],
+  imports: [
+    MatButtonModule,
+    MatIconModule,
+    MatMenuModule,
+    RouterLink,
+    RouterLinkActive,
+    TranslatePipe,
+  ],
   templateUrl: './admin-navigation.html',
   styleUrl: './admin-navigation.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

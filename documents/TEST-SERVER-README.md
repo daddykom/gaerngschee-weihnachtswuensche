@@ -1,6 +1,6 @@
-# Alles über den Testserver Mässpäggli
+# Alles über den Testserver Weihnachtswünsche
 ## Ziel des Testservers
-Der Testserver soll ermöglichen, eine Version der Mässpäggli Applikation fachlich zu testen, bevor sie ins Produktive Umfeld gespielt wird.
+Der Testserver soll ermöglichen, eine Version der Weihnachtswünsche Applikation fachlich zu testen, bevor sie ins Produktive Umfeld gespielt wird.
 ## Unterschied zur Produktion
 1. Der Zugang ist nicht öffentlich bekannt, sondern nur eingeweihte Personen kennen den Zugang.
 2. Die Daten von Fairgate werden nicht abgefragt, ausser zum Verbindungstest mit einer festen Email-Adresse.
@@ -14,9 +14,9 @@ Der Testserver soll ermöglichen, eine Version der Mässpäggli Applikation fach
    Er erhält eine provisorische Bestätigung
    Solange er noch nicht angemeldet ist, erhält er eine regelmässige Mahnung, das noch zu tun
    Sobald er bei Fairgate angemeldet ist, erhält er die definitive Bestellbestätigung
-5. Mässpäggli-Admin gibt die definitiven Bestellungen frei.
+5. Weihnachtswünsche-Admin gibt die definitiven Bestellungen frei.
    Bezüger erhält eine Email mit dem Scan-Code
-6. Bezüger holt die Mässpäggli ab
+6. Bezüger holt die Weihnachtswünsche ab
 ## Ablauf User
 1. User benötigen einen Zugangsaccount mit Passwort, der ihnen vom Admin vergeben wurde.
 2. User haben nur Zugang zur Lieferseite
@@ -52,7 +52,7 @@ Das bedeutet, dass alles vom ersten + bis zum @ ignoriert wird.
 
 Steht nach dem + (vor dem @) irgendwo fair1, fair2, fair3, oder fair4, dann meldet die Fairgate-Schnittstelle einen erfolgreichen Zugriff zurück und die Bestellung ist definitiv. Anderfalls ist sie provisorisch.
 
-Das ermöglicht auch, mit empfang der selben Email-Adresse bei Mässpäggli-Test viele verschiedene Bezüger erfassen zu können, denn es wird die ganze Email verwendet, inkl. + usw.
+Das ermöglicht auch, mit empfang der selben Email-Adresse bei Weihnachtswünsche-Test viele verschiedene Bezüger erfassen zu können, denn es wird die ganze Email verwendet, inkl. + usw.
 ### Beispiele
 
 | E-Mail-Adresse | Simuliertes Ergebnis |  

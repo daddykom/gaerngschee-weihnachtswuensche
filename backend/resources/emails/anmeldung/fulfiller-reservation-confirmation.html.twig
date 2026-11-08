@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ 'app.mail.registration.fulfillerReservationConfirmation.title'|trans }}</title>
+</head>
+<body style="margin:0; padding:0; background-color:{{ EMAIL_THEME.pageBackground }}; font-family:Arial,Helvetica,sans-serif; color:{{ EMAIL_THEME.text }};">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%; background-color:{{ EMAIL_THEME.pageBackground }};">
+    <tr>
+      <td align="center" style="padding:24px 12px;">
+        <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="width:100%; max-width:600px; background-color:{{ EMAIL_THEME.surface }}; border:1px solid {{ EMAIL_THEME.outline }}; border-radius:20px;">
+          <tr>
+            <td style="padding:32px; text-align:center; background-color:{{ EMAIL_THEME.primaryContainer }}; border-radius:20px 20px 0 0;">
+              <img src="{{ LOGO_CID }}" width="210" alt="Gärngschee" style="display:block; width:210px; max-width:100%; height:auto; margin:0 auto 22px auto;">
+              <h1 style="margin:0; font-size:28px; color:{{ EMAIL_THEME.text }};">{{ 'app.mail.registration.fulfillerReservationConfirmation.title'|trans }}</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:24px 32px 8px;">
+              <p style="font-size:17px; line-height:1.55; color:{{ EMAIL_THEME.text }};">{{ 'app.mail.registration.fulfillerReservationConfirmation.body'|trans }}</p>
+              <p style="font-size:17px; line-height:1.55; color:{{ EMAIL_THEME.text }};"><strong>{{ 'app.mail.registration.fulfillerReservationConfirmation.wishNumber'|trans }}:</strong> {{ WISH.wishNumber }}<br><strong>{{ 'app.mail.registration.fulfillerReservationConfirmation.wish'|trans }}:</strong> {{ WISH.currentDescription }}</p>
+              <h2 style="margin:24px 0 8px; font-size:21px; color:{{ EMAIL_THEME.text }};">{{ 'app.mail.registration.fulfillerReservationConfirmation.handoverTitle'|trans }}</h2>
+              <p style="margin:0; font-size:17px; line-height:1.55; color:{{ EMAIL_THEME.text }};">
+                <strong>{{ 'app.mail.registration.fulfillerReservationConfirmation.date'|trans }}:</strong> {{ HANDOVER.date }}<br>
+                <strong>{{ 'app.mail.registration.fulfillerReservationConfirmation.time'|trans }}:</strong> {{ HANDOVER.time }}<br>
+                <strong>{{ 'app.mail.registration.fulfillerReservationConfirmation.location'|trans }}:</strong> {{ HANDOVER.location }}
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:22px 32px 34px; border-radius:0 0 20px 20px;">
+              <p style="margin:0; font-size:13px; color:{{ EMAIL_THEME.mutedText }};">{{ 'app.mail.registration.fulfillerReservationConfirmation.keepMessage'|trans }}</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

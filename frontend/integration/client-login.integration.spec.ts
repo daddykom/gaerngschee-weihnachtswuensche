@@ -7,8 +7,8 @@ test.describe('Integration client login', () => {
     const token = issueRegistrationToken(email);
 
     await page.goto(`/client-login?token=${encodeURIComponent(token)}`);
-    await page.waitForURL('**/order/edit');
-    await expect(page.locator('h2')).toHaveText('Mässpäggli anfordern');
+    await page.waitForURL('**/bestellung');
+    await expect(page.getByRole('heading', { name: 'Deine Bestellung' })).toBeVisible();
   });
 
   test('rejects an already consumed registration token', async ({ page }) => {
@@ -22,13 +22,17 @@ test.describe('Integration client login', () => {
 
     await page.goto(`/client-login?token=${encodeURIComponent(token)}`);
     await expect(page).toHaveURL(/\/start$/);
-    await expect(page.locator('.info-box--error')).toContainText('Der Anmeldelink ist ungültig oder abgelaufen. Bitte fordere auf der Startseite einen neuen Link an.');
+    await expect(page.locator('.info-box--error')).toContainText(
+      'Der Anmeldelink ist ungültig oder abgelaufen. Bitte fordere auf der Startseite einen neuen Link an.',
+    );
   });
 
   test('rejects a missing registration token', async ({ page }) => {
     await page.goto('/client-login');
     await expect(page).toHaveURL(/\/start$/);
-    await expect(page.locator('.info-box--error')).toContainText('Der Anmeldelink ist ungültig oder abgelaufen. Bitte fordere auf der Startseite einen neuen Link an.');
+    await expect(page.locator('.info-box--error')).toContainText(
+      'Der Anmeldelink ist ungültig oder abgelaufen. Bitte fordere auf der Startseite einen neuen Link an.',
+    );
   });
 
   test('counts only eligible children from Fairgate data', async ({ page }) => {
@@ -45,7 +49,7 @@ test.describe('Integration client login', () => {
     expect(data.childrenCount).toBe(1);
   });
 
-  test('rejects an invalid Fairgate validity date', async ({ page }) => {
+  test('ignores the Fairgate validity date when the membership is present', async ({ page }) => {
     const email = `invalid+invalid-date-${Date.now()}@example.com`;
     const token = issueRegistrationToken(email);
 
@@ -55,7 +59,7 @@ test.describe('Integration client login', () => {
     expect(response.status()).toBe(200);
 
     const data = await response.json();
-    expect(data.fairgateUserExists).toBe(false);
-    expect(data.childrenCount).toBe(0);
+    expect(data.fairgateUserExists).toBe(true);
+    expect(data.childrenCount).toBe(1);
   });
 });

@@ -47,10 +47,12 @@ export const saveFrontendConfigEffect = createEffect(
       ofType(FrontendConfigActions.save),
       exhaustMap(({ configs }) =>
         forkJoin(configs.map(({ id, value }) => service.update(id, value))).pipe(
-          mergeMap((updated) => from([
-            FrontendConfigActions.saveSuccess({ configs: updated }),
-            FrontendConfigActions.loadPublic(),
-          ])),
+          mergeMap((updated) =>
+            from([
+              FrontendConfigActions.saveSuccess({ configs: updated }),
+              FrontendConfigActions.loadPublic(),
+            ]),
+          ),
           catchError((error: HttpErrorResponse) =>
             of(FrontendConfigActions.saveFailure({ errorCode: errorCode(error) })),
           ),

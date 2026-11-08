@@ -1,6 +1,5 @@
 @if (page(); as currentPage) {
   <article class="legal-page gl-stack gl-stack--group">
-    <h1>{{ currentPage.title }}</h1>
     <div class="legal-page__content" [innerHTML]="currentPage.content"></div>
   </article>
 }

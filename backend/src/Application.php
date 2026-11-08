@@ -9,8 +9,8 @@ use App\Routes\ConfigurationRoutes;
 use App\Middleware\CsrfMiddleware;
 use App\Routes\AuthRoutes;
 use App\Routes\ClientRoutes;
-use App\Routes\DeliveryRoutes;
 use App\Routes\PublicRoutes;
+use App\Routes\UserRoutes;
 use App\Auth\Services\SessionService;
 use App\Shared\Http\RateLimitService;
 use App\Shared\Http\JsonResponse;
@@ -74,7 +74,7 @@ final class Application
         PublicRoutes::register($app, null, null, null, null, $rateLimitService);
         AuthRoutes::register($app, null, null, null, null, $rateLimitService);
         ClientRoutes::register($app);
-        DeliveryRoutes::register($app, null, null, null, null, $rateLimitService);
+        UserRoutes::register($app);
         AdminRoutes::register($app, null, null, null, null, null, $rateLimitService);
         ConfigurationRoutes::register($app);
 

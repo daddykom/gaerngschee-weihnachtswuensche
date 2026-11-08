@@ -4,7 +4,13 @@
   <button class="confirm-dialog__cancel" mat-button type="button" (click)="cancel()">
     {{ data.cancelLabel | translate }}
   </button>
-  <button class="confirm-dialog__confirm" mat-flat-button color="primary" type="button" (click)="confirm()">
+  <button
+    class="confirm-dialog__confirm"
+    mat-flat-button
+    color="primary"
+    type="button"
+    (click)="confirm()"
+  >
     {{ data.confirmLabel | translate }}
   </button>
 </mat-dialog-actions>

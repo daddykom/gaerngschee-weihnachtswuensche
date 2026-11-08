@@ -9,7 +9,7 @@ use PDO;
 
 final class UserRepository
 {
-    private const USER_GROUPS = ['user', 'admin', 'client'];
+    private const USER_GROUPS = ['user', 'admin', 'wunschbesteller', 'wunscherfueller'];
 
     private PDO $pdo;
 
@@ -58,6 +58,15 @@ final class UserRepository
         return $value !== false && (bool) $value;
     }
 
+    public function getTokenVersion(string $id): ?int
+    {
+        $stmt = $this->pdo->prepare('SELECT token_version FROM users WHERE id = :id');
+        $stmt->execute(['id' => $id]);
+        $value = $stmt->fetchColumn();
+
+        return $value === false ? null : (int) $value;
+    }
+
     public function verifyPassword(string $email, string $password): ?array
     {
         $stmt = $this->pdo->prepare('SELECT * FROM users WHERE email = :email');
@@ -76,8 +85,7 @@ final class UserRepository
         string $password,
         string $group = 'user',
         bool $requiredPasswordReset = false,
-    ): array
-    {
+    ): array {
         if (!in_array($group, self::USER_GROUPS, true)) {
             throw new \InvalidArgumentException('Invalid user group.');
         }
@@ -117,7 +125,7 @@ final class UserRepository
 
         $stmt = $this->pdo->prepare(
             'UPDATE users SET password = :password, required_password_reset = 0, '
-            . 'updated_at = CURRENT_TIMESTAMP WHERE id = :id',
+            . 'token_version = token_version + 1, updated_at = CURRENT_TIMESTAMP WHERE id = :id',
         );
         $stmt->execute(['password' => $passwordHash, 'id' => $id]);
 
@@ -142,7 +150,7 @@ final class UserRepository
         $stmt = $this->pdo->prepare(
             'UPDATE users SET email = :email, `group` = :group, '
             . 'required_password_reset = :required_password_reset, '
-            . 'updated_at = CURRENT_TIMESTAMP WHERE id = :id',
+            . 'token_version = token_version + 1, updated_at = CURRENT_TIMESTAMP WHERE id = :id',
         );
         $stmt->execute([
             'id' => $id,

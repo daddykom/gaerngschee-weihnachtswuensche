@@ -8,7 +8,17 @@ test.describe('Integration admin edge cases', () => {
     const response = await page.request.get('http://localhost:8082/admin/users');
 
     expect(response.status()).toBe(401);
-    await expect(response.json()).resolves.toEqual({ error: { code: 'SESSION_EXPIRED', details: [] } });
+    await expect(response.json()).resolves.toEqual({
+      error: { code: 'SESSION_EXPIRED', details: [] },
+    });
+  });
+
+  test('rejects request bodies above the configured limit', async ({ page }) => {
+    const response = await page.request.post('http://localhost:8082/public/start', {
+      data: { email: 'person@example.com', padding: 'x'.repeat(65536) },
+    });
+
+    expect(response.status()).toBe(413);
   });
 
   test('denies configuration changes for a normal user', async ({ page }) => {

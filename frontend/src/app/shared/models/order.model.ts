@@ -1,44 +1,89 @@
-import { FairgateStatus } from './fairgate.model';
+export type OrderItemStatus =
+  | 'draft'
+  | 'submitted'
+  | 'rejected'
+  | 'approved'
+  | 'reserved'
+  | 'received'
+  | 'completed';
 
-export const adultCategories = ['catA', 'catB'] as const;
-export type AdultCategory = (typeof adultCategories)[number];
+export type OrderItemCategory = 'voucher' | 'gift';
 
-export const childCategories = ['catC', 'catD', 'catE', 'catF', 'catG'] as const;
-export type ChildCategory = (typeof childCategories)[number];
-
-export type OrderCategory = AdultCategory | ChildCategory;
-export const orderCategories = [...adultCategories, ...childCategories] as const;
-export type CategorySelection = OrderCategory | '';
-export type OrderPersonType = 'adult' | 'child';
-
-export interface OrderForm {
-  adultsCount: number;
-  childrenCount: number;
-  adults: CategorySelection[];
-  children: CategorySelection[];
+export interface OrderItemFormValue {
+  id: string;
+  category: OrderItemCategory | null;
+  description: string;
+  reason: string;
 }
 
 export interface OrderItem {
-  personType: OrderPersonType;
-  category: OrderCategory;
-  quantity: number;
-}
-
-export type OrderStatus = 'provisional' | 'definitive' | 'toDeliver' | 'qrcode' | 'delivered';
-
-export interface ClientOrder {
   id: string;
-  userId: string;
-  year: number;
-  status: OrderStatus;
-  fairgateStatus?: FairgateStatus | null;
-  adultsCount: number;
-  childrenCount: number;
-  items: OrderItem[];
+  orderId: string;
+  itemNumber?: number | null;
+  category: OrderItemCategory;
+  originalDescription: string;
+  currentDescription: string;
+  originalReason: string | null;
+  currentReason: string | null;
+  status: OrderItemStatus;
+  fulfillerEmail: string | null;
+  reservedAt: string | null;
+  dueAt: string | null;
+  receivedAt: string | null;
   createdAt: string | null;
   updatedAt: string | null;
 }
 
-export interface ClientOrderResponse {
-  order: ClientOrder | null;
+export type OrderStatus =
+  | 'draft'
+  | 'waiting_for_fairgate'
+  | 'released'
+  | 'family_size_exceeded'
+  | 'in_review'
+  | 'changes_requested'
+  | 'definitive'
+  | 'ready_for_pickup'
+  | 'completed';
+
+export interface Order {
+  id: string;
+  userId: string;
+  year: number;
+  orderNumber?: number | null;
+  status: OrderStatus;
+  adultsCount: number;
+  childrenCount: number;
+  originalText: string | null;
+  currentText: string | null;
+  items: OrderItem[];
+  fairgateStatus: string | null;
+  confirmationEmailSentAt: string | null;
+  fairgateReminderEmailSentAt: string | null;
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+export interface OrderOverviewResponse {
+  order: Order | null;
+  year: number;
+  fairgateStatus: string;
+  fairgateUserExists: boolean;
+  childrenCount: number | null;
+  adultsCount: number | null;
+  canEdit: boolean;
+}
+
+export interface OrderFormValue {
+  password: string;
+  passwordConfirmation: string;
+  adultsCount: number | null;
+  childrenCount: number | null;
+  text: string;
+  items: OrderItemFormValue[];
+}
+
+export interface SaveOrderResponse {
+  order: Order;
+  status: OrderStatus;
+  fairgateUserExists: boolean;
 }

@@ -15,7 +15,7 @@ final class FairgateTestActionTest extends TestCase
 {
     public function testReturnsExtendedFairgateDataForConfiguredTestContact(): void
     {
-        $action = new FairgateTestAction(static fn (string $email): array => [
+        $action = new FairgateTestAction(static fn (string $email, string $membership): array => [
             'success' => true,
             'data' => ['contactId' => 42, 'email' => $email],
         ], $this->configRepository());
@@ -43,7 +43,7 @@ final class FairgateTestActionTest extends TestCase
 
     public function testReturnsBadGatewayWhenFairgateRequestFails(): void
     {
-        $action = new FairgateTestAction(static function (): array {
+        $action = new FairgateTestAction(static function (string $email, string $membership): array {
             throw new \App\Fairgate\Services\FairgateException('FSA unavailable.');
         }, $this->configRepository());
 

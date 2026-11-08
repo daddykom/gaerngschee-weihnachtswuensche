@@ -2,7 +2,7 @@
 
 ## Overview
 
-Verwaltung von Anmeldungen bei ungenügender Mässpäggli-Verfügbarkeit.
+Verwaltung von Anmeldungen bei ungenügender Weihnachtswünsche-Verfügbarkeit.
 
 ## Features
 
@@ -13,7 +13,7 @@ Verwaltung von Anmeldungen bei ungenügender Mässpäggli-Verfügbarkeit.
 
 ### F2: Nachträgliche Qualifikation
 
-- Anmeldungen können qualifiziert werden sobald Mässpäggli verfügbar
+- Anmeldungen können qualifiziert werden sobald Weihnachtswünsche verfügbar
 - Automatische Benachrichtigung
 
 ## Data Model
@@ -35,7 +35,7 @@ interface WaitlistEntry {
 |--------|----------|-------------|
 | GET | `/api/waitlist` | List waitlisted registrations |
 | POST | `/api/waitlist/{id}/qualify` | Qualify from waitlist |
-| GET | `/api/waitlist/available-count` | Get available Mässpäggli count |
+| GET | `/api/waitlist/available-count` | Get available Weihnachtswünsche count |
 
 ## Fachliche Regeln
 

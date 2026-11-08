@@ -1,0 +1,107 @@
+<div class="gl-stack gl-stack--section">
+  <section class="gl-stack gl-stack--group" aria-labelledby="fulfillment-filter-heading">
+    <h2 id="fulfillment-filter-heading">{{ 'app.fulfiller.filters.title' | translate }}</h2>
+    <div class="gl-grid gl-grid--2">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>{{ 'app.fulfiller.filters.search' | translate }}</mat-label>
+        <input
+          matInput
+          type="search"
+          [value]="search()"
+          aria-describedby="fulfillment-search-hint"
+          (input)="searchChanged.emit($any($event.target).value)"
+        />
+        <mat-hint id="fulfillment-search-hint">{{
+          'app.fulfiller.filters.searchHint' | translate
+        }}</mat-hint>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>{{ 'app.fulfiller.filters.category' | translate }}</mat-label>
+        <mat-select [value]="category()" (selectionChange)="categoryChanged.emit($event.value)">
+          <mat-option value="">{{ 'app.fulfiller.filters.allCategories' | translate }}</mat-option>
+          @for (option of categories; track option) {
+            <mat-option [value]="option">{{
+              'app.order.items.categories.' + option | translate
+            }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+    @if (search().trim().length > 0 && search().trim().length < 3) {
+      <p role="status">{{ 'app.fulfiller.filters.minimumSearchLength' | translate }}</p>
+    }
+  </section>
+
+  <section class="gl-stack gl-stack--group" aria-labelledby="fulfillment-orders-heading">
+    <h2 id="fulfillment-orders-heading">{{ 'app.fulfiller.ordersTitle' | translate }}</h2>
+    @if (loadStatus() === 'loading') {
+      <p role="status" aria-live="polite">{{ 'app.fulfiller.loading' | translate }}</p>
+    } @else if (loadStatus() === 'error') {
+      <p role="alert">{{ 'app.fulfiller.errors.REQUEST_FAILED' | translate }}</p>
+    } @else {
+      <div class="gl-stack gl-stack--group">
+        @for (order of orders(); track order.id) {
+          <mat-card appearance="outlined" class="fulfillment-order">
+            <mat-card-header>
+              <mat-card-title>
+                {{ 'app.fulfiller.orderTitle' | translate: { orderNumber: order.orderNumber } }}
+              </mat-card-title>
+              <mat-card-subtitle>{{
+                'app.fulfiller.year' | translate: { year: order.year }
+              }}</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content class="gl-stack gl-stack--group">
+              @if (order.currentText) {
+                <div class="gl-stack">
+                  <strong>{{ 'app.fulfiller.familyInformation' | translate }}</strong>
+                  <p class="gl-text--multiline">{{ order.currentText }}</p>
+                </div>
+              }
+              <ul class="list-as-form gl-stack">
+                @for (wish of order.items; track wish.id) {
+                  <li class="wish-entry gl-stack">
+                    <div class="wish-entry__content gl-stack">
+                      <h3>{{ wish.wishNumber }}</h3>
+                      <p>
+                        <strong>{{
+                          'app.order.items.categories.' + wish.category | translate
+                        }}</strong>
+                      </p>
+                      <p class="gl-text--multiline">{{ wish.currentDescription }}</p>
+                      @if (wish.currentReason) {
+                        <p class="gl-text--multiline wish-entry__reason">
+                          {{ wish.currentReason }}
+                        </p>
+                      }
+                    </div>
+                    @if (wish.fulfillmentStatus === 'pending_confirmation') {
+                      <p class="wish-entry__reserved" role="status">
+                        {{ 'app.fulfiller.pendingConfirmation' | translate }}
+                      </p>
+                    } @else if (wish.fulfillmentStatus === 'reserved') {
+                      <p class="wish-entry__reserved" role="status">
+                        {{ 'app.fulfiller.reserved' | translate }}
+                      </p>
+                    } @else {
+                      <button
+                        mat-flat-button
+                        color="primary"
+                        type="button"
+                        (click)="reserve.emit(wish)"
+                      >
+                        {{ 'app.fulfiller.reserve' | translate }}
+                      </button>
+                    }
+                  </li>
+                }
+              </ul>
+            </mat-card-content>
+          </mat-card>
+        } @empty {
+          <p>{{ 'app.fulfiller.empty' | translate }}</p>
+        }
+      </div>
+    }
+  </section>
+</div>

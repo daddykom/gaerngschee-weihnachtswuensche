@@ -1,163 +1,278 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   computed,
   effect,
   inject,
   signal,
-  untracked,
 } from '@angular/core';
-import { applyEach, disabled, FieldTree, form, FormField, max, required } from '@angular/forms/signals';
+import {
+  applyWhen,
+  form,
+  FormField,
+  maxLength,
+  min,
+  minLength,
+  required,
+  validate,
+} from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDividerModule } from '@angular/material/divider';
+import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
+import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
-import { InfoBoxComponent } from '../../../../shared/components/info-box/info-box';
+import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog';
 import { ControlErrorComponent } from '../../../../shared/components/control-error/control-error';
 import {
-  adultCategories,
-  CategorySelection,
-  childCategories,
-  OrderForm,
+  OrderFormValue,
+  OrderItemStatus,
+  OrderStatus,
 } from '../../../../shared/models/order.model';
+import { selectAuthFirstAccess } from '../../../../store/auth/auth.feature';
+import { NotificationActions } from '../../../../store/notification/notification.actions';
 import { OrderActions } from '../../../../store/order/order.actions';
-import { selectOrderForm } from '../../../../store/order/order.feature';
-import { NavigationActions } from '../../../../store/navigation/navigation.actions';
-import { selectFrontendPublicConfigs } from '../../../../store/frontend-config/frontend-config.feature';
 import {
-  selectAuthAdultsCount,
-  selectAuthChildrenCount,
-  selectAuthFairgateStatus,
-  selectAuthFairgateUserExists,
-  selectAuthSalutation,
-} from '../../../../store/auth/auth.feature';
-import { selectCurrentOrder } from '../../../../store/order/order.feature';
-import { inputLimits } from '../../../../shared/constants/input-limits';
+  selectOrder,
+  selectOrderAdultsCount,
+  selectOrderChildrenCount,
+  selectOrderFairgateUserExists,
+  selectOrderForm,
+  selectOrderSaveStatus,
+  selectOrderStatus,
+} from '../../../../store/order/order.feature';
 
 @Component({
   selector: 'app-order',
-  standalone: true,
   imports: [
+    TranslatePipe,
     FormField,
-    ControlErrorComponent,
-    InfoBoxComponent,
     MatButtonModule,
-    MatDividerModule,
     MatFormFieldModule,
     MatInputModule,
-    MatSelectModule,
-    TranslatePipe,
+    ControlErrorComponent,
   ],
   templateUrl: './order.component.html',
+  styleUrl: './order.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OrderComponent {
   private readonly store = inject(Store);
+  private readonly router = inject(Router);
+  private readonly dialog = inject(MatDialog);
+  readonly status = this.store.selectSignal(selectOrderStatus);
+  readonly saving = this.store.selectSignal(selectOrderSaveStatus);
+  readonly order = this.store.selectSignal(selectOrder);
+  readonly fairgateUserExists = this.store.selectSignal(selectOrderFairgateUserExists);
+  readonly fairgateAdultsCount = this.store.selectSignal(selectOrderAdultsCount);
+  readonly fairgateChildrenCount = this.store.selectSignal(selectOrderChildrenCount);
+  readonly firstAccess = this.store.selectSignal(selectAuthFirstAccess);
+  readonly storeForm = this.store.selectSignal(selectOrderForm);
+  readonly canEdit = computed(() => {
+    const currentOrder = this.order();
+    return (
+      currentOrder === null ||
+      ['draft', 'family_size_exceeded', 'changes_requested'].includes(
+        currentOrder.status as OrderStatus,
+      )
+    );
+  });
+  readonly maxItems = computed(() => {
+    const adults =
+      this.fairgateUserExists() === true
+        ? this.fairgateAdultsCount()
+        : this.storeForm().adultsCount;
+    const children =
+      this.fairgateUserExists() === true
+        ? this.fairgateChildrenCount()
+        : this.storeForm().childrenCount;
+    return (adults ?? 0) + (children ?? 0);
+  });
+  readonly canAddItem = computed(
+    () => this.canEdit() && this.storeForm().items.length < this.maxItems(),
+  );
 
-  readonly fairgateUserExists = this.store.selectSignal(selectAuthFairgateUserExists);
-  readonly fairgateStatus = this.store.selectSignal(selectAuthFairgateStatus);
-  readonly childrenCount = this.store.selectSignal(selectAuthChildrenCount);
-  readonly adultsCount = this.store.selectSignal(selectAuthAdultsCount);
-  readonly salutation = this.store.selectSignal(selectAuthSalutation);
-  readonly publicConfigs = this.store.selectSignal(selectFrontendPublicConfigs);
-  readonly orderForm = this.store.selectSignal(selectOrderForm);
-  readonly currentOrder = this.store.selectSignal(selectCurrentOrder);
-  readonly adultCategories = adultCategories;
-  readonly childCategories = childCategories;
-  readonly model = signal<OrderForm>({
-    adultsCount: this.adultsCount() ?? 0,
-    childrenCount: this.childrenCount() ?? 0,
-    adults: [],
-    children: [],
+  readonly formModel = signal<OrderFormValue>({
+    password: '',
+    passwordConfirmation: '',
+    adultsCount: null,
+    childrenCount: null,
+    text: '',
+    items: [],
   });
-  readonly form = form(this.model, (schema) => {
-    max(schema.adultsCount, inputLimits.persons);
-    max(schema.childrenCount, inputLimits.persons);
-    applyEach(schema.adults, (category) => {
-      required(category);
-      disabled(category, () => this.orderLocked());
-    });
-    applyEach(schema.children, (category) => {
-      required(category);
-      disabled(category, () => this.orderLocked());
-    });
+
+  readonly orderForm = form(this.formModel, (schema) => {
+    applyWhen(
+      schema,
+      () => this.firstAccess(),
+      (passwordSchema) => {
+        required(passwordSchema.password);
+        minLength(passwordSchema.password, 12);
+        maxLength(passwordSchema.password, 128);
+        required(passwordSchema.passwordConfirmation);
+        minLength(passwordSchema.passwordConfirmation, 12);
+        maxLength(passwordSchema.passwordConfirmation, 128);
+        validate(passwordSchema.passwordConfirmation, ({ valueOf }) =>
+          valueOf(passwordSchema.password) === valueOf(passwordSchema.passwordConfirmation)
+            ? undefined
+            : { kind: 'passwordsDoNotMatch' },
+        );
+      },
+    );
+    required(schema.adultsCount);
+    min(schema.adultsCount, 0);
+    required(schema.childrenCount);
+    min(schema.childrenCount, 0);
+    required(schema.text);
+    maxLength(schema.text, 2000);
   });
-  readonly displayAdultsCount = computed(() => this.model().adultsCount);
-  readonly displayChildrenCount = computed(() => this.model().childrenCount);
-  readonly fairgateUrl = computed(() => {
-    const config = this.publicConfigs().find(({ variableName }) => variableName === 'fairgate_url');
-    return typeof config?.value === 'string' ? config.value : null;
-  });
-  readonly fairgateDocumentEmail = computed(() => {
-    const config = this.publicConfigs().find(({ variableName }) => variableName === 'fairgate_document_email');
-    return typeof config?.value === 'string' ? config.value : null;
-  });
-  readonly orderLocked = computed(() => ['toDeliver', 'qrcode', 'delivered'].includes(this.currentOrder()?.status ?? ''));
 
   constructor() {
+    let initialized = false;
+    let previousForm: OrderFormValue | null = null;
     effect(() => {
-      const orderForm = this.orderForm();
-      if (orderForm !== null) {
-        untracked(() => this.model.set(orderForm));
+      const status = this.status();
+      if (status === 'loaded' && !initialized) {
+        const currentForm = this.storeForm();
+        this.formModel.set(this.cloneFormValue(currentForm));
+        previousForm = this.cloneFormValue(currentForm);
+        initialized = true;
       }
     });
-    effect(() => this.resizeCategories(this.displayAdultsCount(), this.displayChildrenCount()));
+
+    effect(() => {
+      if (initialized) {
+        const currentForm = this.formModel();
+        const changes = this.formChanges(previousForm, currentForm);
+        if (Object.keys(changes).length > 0) {
+          this.store.dispatch(OrderActions.formChanged({ changes }));
+          previousForm = this.cloneFormValue(currentForm);
+        }
+      }
+    });
   }
 
-  adultField(index: number): FieldTree<CategorySelection> {
-    return (this.form.adults as unknown as FieldTree<CategorySelection[]>)[index] as FieldTree<CategorySelection>;
+  markTouched(): void {
+    this.orderForm().markAsTouched();
   }
 
-  childField(index: number): FieldTree<CategorySelection> {
-    return (this.form.children as unknown as FieldTree<CategorySelection[]>)[index] as FieldTree<CategorySelection>;
-  }
+  save(): void {
+    const itemCount = this.storeForm().items.length;
+    if (itemCount < 1 || itemCount > this.maxItems()) {
+      this.store.dispatch(
+        NotificationActions.show({
+          variant: 'error',
+          titleKey: 'app.order.errors.INVALID_ORDER',
+          messageKey: 'app.order.errors.items.itemCount',
+          preserveOnRoutes: ['/bestellung'],
+        }),
+      );
+    }
 
-  personId(group: 'adult' | 'child', index: number): string {
-    return `${group}-${index + 1}`;
-  }
-
-  onSubmit(): void {
-    if (!this.form().valid()) {
-      this.form().markAsTouched();
-      this.model().adults.forEach((_, index) => this.adultField(index)().markAsTouched());
-      this.model().children.forEach((_, index) => this.childField(index)().markAsTouched());
+    if (!this.orderForm().valid()) {
+      this.markTouched();
       return;
     }
 
-    this.store.dispatch(NavigationActions.navigate({ target: '/order/summary' }));
-  }
-
-  onCountChange(field: 'adultsCount' | 'childrenCount', value: string): void {
-    const count = Number(value);
-    this.model.update((model) => ({ ...model, [field]: count }));
-    this.store.dispatch(OrderActions.orderFormUpdated({ form: { [field]: count } }));
-  }
-
-  onCategoryChange(field: 'adults' | 'children', index: number, value: CategorySelection): void {
-    const values = [...this.model()[field]];
-    values[index] = value;
-    this.store.dispatch(OrderActions.orderFormUpdated({ form: { [field]: values } }));
-  }
-
-  private resizeCategories(adultCount: number, childCount: number): void {
-    const current = untracked(this.model);
-    const adults = this.resize(current.adults, childCount > 0 ? 0 : adultCount);
-    const children = this.resize(current.children, childCount);
-    if (adults.length === current.adults.length && children.length === current.children.length) {
+    if (itemCount < 1 || itemCount > this.maxItems()) {
       return;
     }
-    this.model.update((model) => ({ ...model, adults, children }));
-    if (adults.length !== current.adults.length) {
-      this.store.dispatch(OrderActions.orderFormUpdated({ form: { adults } }));
-    }
-    if (children.length !== current.children.length) {
-      this.store.dispatch(OrderActions.orderFormUpdated({ form: { children } }));
+
+    if (this.canEdit() && this.saving() !== 'loading') {
+      this.store.dispatch(OrderActions.save({ form: this.storeForm() }));
     }
   }
 
-  private resize(values: CategorySelection[], count: number): CategorySelection[] {
-    return Array.from({ length: Math.max(0, count) }, (_, index) => values[index] ?? '');
+  addItem(): void {
+    if (!this.canAddItem()) {
+      return;
+    }
+    void this.router.navigate(['/bestellung/wunsch/neu']);
   }
 
+  removeItem(id: string): void {
+    const items = this.formModel().items;
+    if (!this.canEdit() || items.length <= 1) {
+      return;
+    }
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'app.order.items.deleteTitle',
+        message: 'app.order.items.deleteMessage',
+        confirmLabel: 'app.order.items.deleteConfirm',
+        cancelLabel: 'app.order.items.cancel',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        this.store.dispatch(
+          OrderActions.formChanged({
+            changes: { items: this.storeForm().items.filter((item) => item.id !== id) },
+          }),
+        );
+      }
+    });
+  }
+
+  editItem(id: string): void {
+    void this.router.navigate(['/bestellung/wunsch', id]);
+  }
+
+  itemStatus(id: string): OrderItemStatus {
+    return this.order()?.items.find((item) => item.id === id)?.status ?? 'draft';
+  }
+
+  private cloneFormValue(value: OrderFormValue): OrderFormValue {
+    return {
+      ...value,
+      items: value.items.map((item) => ({ ...item })),
+    };
+  }
+
+  private formChanges(
+    previous: OrderFormValue | null,
+    current: OrderFormValue,
+  ): Partial<OrderFormValue> {
+    if (previous === null) {
+      return {};
+    }
+
+    const changes: Partial<OrderFormValue> = {};
+    if (previous.password !== current.password) {
+      changes.password = current.password;
+    }
+    if (previous.passwordConfirmation !== current.passwordConfirmation) {
+      changes.passwordConfirmation = current.passwordConfirmation;
+    }
+    if (previous.adultsCount !== current.adultsCount) {
+      changes.adultsCount = current.adultsCount;
+    }
+    if (previous.childrenCount !== current.childrenCount) {
+      changes.childrenCount = current.childrenCount;
+    }
+    if (previous.text !== current.text) {
+      changes.text = current.text;
+    }
+    if (!this.itemsEqual(previous.items, current.items)) {
+      changes.items = current.items.map((item) => ({ ...item }));
+    }
+    return changes;
+  }
+
+  private itemsEqual(previous: OrderFormValue['items'], current: OrderFormValue['items']): boolean {
+    return (
+      previous.length === current.length &&
+      previous.every((item, index) => {
+        const currentItem = current[index];
+        return (
+          item.id === currentItem.id &&
+          item.category === currentItem.category &&
+          item.description === currentItem.description &&
+          item.reason === currentItem.reason
+        );
+      })
+    );
+  }
 }

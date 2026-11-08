@@ -7,11 +7,9 @@ namespace App\Routes;
 use App\Users\Data\UserRepository;
 use App\Fairgate\Actions\FairgateTestAction;
 use App\Fairgate\Actions\FairgateLookupAction;
-use App\Registration\Actions\GetAdminOverviewAction;
-use App\Registration\Actions\DeliverAdminOrdersAction;
-use App\Registration\Actions\GetClientDeletionOrderAction;
-use App\Registration\Actions\DeleteClientOrderAction;
 use App\Registration\Data\OrderRepository;
+use App\Registration\Actions\AdminOrderListAction;
+use App\Registration\Actions\AdminOrderUpdateAction;
 use App\Configuration\Data\FrontendConfigRepository;
 use App\Middleware\AuthMiddleware;
 use App\Middleware\GroupMiddleware;
@@ -39,34 +37,32 @@ final class AdminRoutes
         ?FrontendConfigRepository $configRepository = null,
         ?RateLimitService $rateLimitService = null,
         ?FairgateLookupAction $fairgateLookupAction = null,
+        ?AdminOrderListAction $adminOrderListAction = null,
+        ?AdminOrderUpdateAction $adminOrderUpdateAction = null,
     ): void {
-        $app->group('/admin', function (RouteCollectorProxy $group) use ($userRepository, $emailSender, $fairgateTestAction, $orderRepository, $configRepository, $rateLimitService, $fairgateLookupAction): void {
-            $overview = $group->get('/overview', new GetAdminOverviewAction($orderRepository, $configRepository));
-            $overview->add(new GroupMiddleware(['admin', 'user'], $userRepository))->add(new AuthMiddleware());
-            $deliver = $group->post('/overview/deliver', new DeliverAdminOrdersAction($orderRepository, $configRepository));
-            $deliver->add(new GroupMiddleware(['admin'], $userRepository))->add(new AuthMiddleware());
+        $app->group('/admin', function (RouteCollectorProxy $group) use ($userRepository, $emailSender, $fairgateTestAction, $orderRepository, $configRepository, $rateLimitService, $fairgateLookupAction, $adminOrderListAction, $adminOrderUpdateAction): void {
 
-            $clientOrder = $group->get('/client-deletion', new GetClientDeletionOrderAction($orderRepository, $configRepository, $userRepository));
-            $clientOrder->add(new GroupMiddleware(['admin'], $userRepository))->add(new AuthMiddleware());
+            $orders = $group->get('/orders', $adminOrderListAction ?? new AdminOrderListAction($orderRepository));
+            $orders->add(new GroupMiddleware(['admin'], $userRepository))->add(new AuthMiddleware());
 
-            $deleteClientOrder = $group->delete('/client-deletion/{userId}', new DeleteClientOrderAction($orderRepository, $configRepository, $userRepository));
-            $deleteClientOrder->add(new GroupMiddleware(['admin'], $userRepository))->add(new AuthMiddleware());
+            $orderUpdate = $group->patch('/orders/{orderId}', $adminOrderUpdateAction ?? new AdminOrderUpdateAction($orderRepository));
+            $orderUpdate->add(new GroupMiddleware(['admin'], $userRepository))->add(new AuthMiddleware());
 
             $list = $group->get('/users', new ListUsersAction($userRepository));
             $list->add(new GroupMiddleware(['admin'], $userRepository))->add(new AuthMiddleware());
 
             $detail = $group->get('/users/{userId}', new GetUserAction($userRepository));
-            $detail->add(new GroupMiddleware(['admin', 'user'], $userRepository))->add(new AuthMiddleware());
+            $detail->add(new GroupMiddleware(['admin'], $userRepository))->add(new AuthMiddleware());
 
             $create = $group->post('/users', new CreateUserAction($userRepository, $emailSender));
             $create->add(new GroupMiddleware(['admin'], $userRepository))->add(new AuthMiddleware());
 
             $update = $group->patch('/users/{userId}', new UpdateUserAction($userRepository, $emailSender));
-            $update->add(new GroupMiddleware(['admin', 'user'], $userRepository))->add(new AuthMiddleware());
+            $update->add(new GroupMiddleware(['admin'], $userRepository))->add(new AuthMiddleware());
 
             $passwordReset = $group->post('/users/{userId}/password-reset', new SendPasswordResetLinkAction($userRepository, null, $emailSender));
             if ($rateLimitService !== null) {
-                $passwordReset->add(new RateLimitMiddleware(10, 3600, static fn ($request): string => RateLimitMiddleware::session($request), $rateLimitService));
+                $passwordReset->add(new RateLimitMiddleware(10, 60, static fn ($request): string => RateLimitMiddleware::session($request), $rateLimitService));
             }
             $passwordReset->add(new GroupMiddleware(['admin'], $userRepository))->add(new AuthMiddleware());
 

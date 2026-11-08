@@ -1,3 +1,5 @@
+name: gaerngschee-weihnachtswuensche-integration
+
 services:
   integration-database:
     image: mariadb:10.11

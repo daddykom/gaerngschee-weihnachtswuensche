@@ -11,6 +11,7 @@ use App\Registration\Services\AnmeldungService;
 use App\Registration\Services\RegistrationTokenService;
 use App\Shared\Mail\EmailSenderInterface;
 use Tests\Support\TestDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Slim\Psr7\Response;
 use Slim\Psr7\Stream;
@@ -52,45 +53,6 @@ final class StartRegistrationActionTest extends TestCase
         self::assertSame('CAMPAIGN_ENDED', json_decode((string) $response->getBody(), true)['error']['code']);
     }
 
-    /** @dataProvider nonEditableOrderStatuses */
-    public function testSendsStatusInformationWithoutCreatingALink(string $status): void
-    {
-        $pdo = TestDatabase::create();
-        $sender = new \Tests\Support\RecordingEmailSender();
-        $userId = 'client-user-00000000-000000000001';
-        $pdo->prepare(
-            'INSERT INTO users (id, email, password, `group`, required_password_reset)
-             VALUES (:id, :email, :password, :group, :required_password_reset)',
-        )->execute([
-            'id' => $userId,
-            'email' => 'person@example.com',
-            'password' => password_hash('secret', PASSWORD_DEFAULT),
-            'group' => 'client',
-            'required_password_reset' => 0,
-        ]);
-        $pdo->prepare(
-            'INSERT INTO orders (id, user_id, year, status, adults_count, children_count)
-             VALUES (:id, :user_id, :year, :status, 0, 0)',
-        )->execute([
-            'id' => 'order-00000000-000000000001',
-            'user_id' => $userId,
-            'year' => 2026,
-            'status' => $status,
-        ]);
-        $action = new StartRegistrationAction(new AnmeldungService($sender), new RegistrationTokenService($pdo), $this->config($pdo, '2026-08-01'), new DateTimeImmutable('2026-08-25 12:00:00', new DateTimeZone('UTC')), new OrderRepository($pdo));
-
-        $response = ($action)($this->request('person@example.com', 'de'), new Response());
-
-        self::assertSame(202, $response->getStatusCode());
-        self::assertSame([$status], $sender->orderStatuses);
-        self::assertSame([], $sender->variants);
-    }
-
-    public static function nonEditableOrderStatuses(): array
-    {
-        return [['toDeliver'], ['qrcode'], ['delivered']];
-    }
-
     public function testRejectsUnsupportedLanguageBeforeCallingService(): void
     {
         $action = new StartRegistrationAction($this->service(), new RegistrationTokenService(TestDatabase::create()));
@@ -105,16 +67,43 @@ final class StartRegistrationActionTest extends TestCase
     {
         return new AnmeldungService(
             new class () implements EmailSenderInterface {
-                public function sendAnmeldung(string $recipient, \App\Registration\Services\AnmeldungMailVariant $variant, string $locale = 'de', ?string $loginUrl = null): void {}
-                public function sendOrderStatus(string $recipient, string $status, string $locale = 'de'): void {}
-                public function sendUserCreated(string $recipient, string $temporaryPassword): void {}
-                public function sendUserEmailChanged(string $recipient): void {}
-                public function sendPasswordReset(string $recipient, string $resetUrl): void {}
-                public function sendOrderConfirmation(string $recipient, array $order): void {}
-                public function renderOrderConfirmation(array $order, string $mailStatus): array { return []; }
-                public function renderDeliveryNotification(array $order, string $deliveryUrl, string $qrDataUri): array { return []; }
-                public function renderFairgateReminder(string $fairgateUrl, string $status = 'not_found', ?string $documentEmail = null): array { return []; }
-                public function sendStoredEmail(string $recipient, string $subject, string $html, string $text): void {}
+                public function sendAnmeldung(string $recipient, \App\Registration\Services\AnmeldungMailVariant $variant, string $locale = 'de', ?string $loginUrl = null, ?array $wish = null): void
+                {
+                }
+                public function renderFulfillerReservationConfirmation(array $wish, array $handover, string $locale = 'de'): array
+                {
+                    return [];
+                }
+                public function sendOrderStatus(string $recipient, string $status, string $locale = 'de'): void
+                {
+                }
+                public function sendUserCreated(string $recipient, string $temporaryPassword): void
+                {
+                }
+                public function sendUserEmailChanged(string $recipient): void
+                {
+                }
+                public function sendPasswordReset(string $recipient, string $resetUrl): void
+                {
+                }
+                public function sendOrderConfirmation(string $recipient, array $order): void
+                {
+                }
+                public function renderOrderConfirmation(array $order, string $mailStatus): array
+                {
+                    return [];
+                }
+                public function renderDeliveryNotification(array $order, string $deliveryUrl, string $qrDataUri): array
+                {
+                    return [];
+                }
+                public function renderFairgateReminder(string $fairgateUrl, string $status = 'not_found', ?string $documentEmail = null): array
+                {
+                    return [];
+                }
+                public function sendStoredEmail(string $recipient, string $subject, string $html, string $text): void
+                {
+                }
             },
         );
     }
@@ -129,7 +118,7 @@ final class StartRegistrationActionTest extends TestCase
             'variable_name' => 'campaign_start_date',
             'value' => json_encode($startDate, JSON_THROW_ON_ERROR),
             'description' => '',
-            'access_group' => json_encode(['admin', 'client'], JSON_THROW_ON_ERROR),
+            'access_group' => json_encode(['admin', 'wunschbesteller'], JSON_THROW_ON_ERROR),
             'update_group' => json_encode(['admin'], JSON_THROW_ON_ERROR),
             'label' => '',
         ]);
@@ -142,7 +131,7 @@ final class StartRegistrationActionTest extends TestCase
             'variable_name' => 'campaign_end_date',
             'value' => json_encode($endDate, JSON_THROW_ON_ERROR),
             'description' => '',
-            'access_group' => json_encode(['admin', 'client'], JSON_THROW_ON_ERROR),
+            'access_group' => json_encode(['admin', 'wunschbesteller'], JSON_THROW_ON_ERROR),
             'update_group' => json_encode(['admin'], JSON_THROW_ON_ERROR),
             'label' => '',
         ]);
@@ -155,7 +144,7 @@ final class StartRegistrationActionTest extends TestCase
             'variable_name' => 'campaign_year',
             'value' => json_encode('2026', JSON_THROW_ON_ERROR),
             'description' => '',
-            'access_group' => json_encode(['admin', 'client'], JSON_THROW_ON_ERROR),
+            'access_group' => json_encode(['admin', 'wunschbesteller'], JSON_THROW_ON_ERROR),
             'update_group' => json_encode(['admin'], JSON_THROW_ON_ERROR),
             'label' => '',
         ]);

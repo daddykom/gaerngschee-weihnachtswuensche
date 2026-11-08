@@ -1,9 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideTranslateService } from '@ngx-translate/core';
-import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-import { HomeComponent } from './home.component';
+import { MockStore, provideMockStore } from '@ngrx/store/testing';
+import { provideTranslateService } from '@ngx-translate/core';
 import { AuthActions } from '../../../../store/auth/auth.actions';
+import { HomeComponent } from './home.component';
 
 describe('HomeComponent', () => {
   let fixture: ComponentFixture<HomeComponent>;
@@ -13,15 +13,17 @@ describe('HomeComponent', () => {
       imports: [HomeComponent, RouterTestingModule],
       providers: [
         provideTranslateService(),
-          provideMockStore({
+        provideMockStore({
           initialState: {
-              auth: { group: null },
+            auth: { group: null },
             frontendConfig: {
               publicConfigs: [
                 { variableName: 'campaign_year', value: '2026' },
-                { variableName: 'donation_url', value: 'https://donate.example/maesspaeggli' },
                 { variableName: 'campaign_start_date', value: '2000-01-01' },
                 { variableName: 'campaign_end_date', value: '2999-01-01' },
+                { variableName: 'fulfiller_start_date', value: '2000-01-01' },
+                { variableName: 'fulfiller_end_date', value: '2999-01-01' },
+                { variableName: 'fulfiller_availability_status', value: 'open' },
               ],
             },
           },
@@ -33,28 +35,46 @@ describe('HomeComponent', () => {
     fixture.detectChanges();
   });
 
-  it('reads the campaign year and donation URL from public configuration', () => {
+  it('reads the campaign year from public configuration', () => {
     const component = fixture.componentInstance;
 
     expect(component.campaignYear()).toBe('2026');
-    expect(component.donationUrl()).toBe('https://donate.example/maesspaeggli');
   });
 
-  it('does not expose an insecure donation URL', () => {
+  it('opens fulfiller access within the configured date range', () => {
+    expect(fixture.componentInstance.fulfillerStatus()).toBe('open');
+  });
+
+  it('shows the ended status when the backend reports an exhausted capacity', () => {
     const store = TestBed.inject(MockStore);
-    store.setState({ frontendConfig: { publicConfigs: [{ variableName: 'campaign_year', value: '2026' }, { variableName: 'donation_url', value: 'http://donate.example' }] } });
+    store.setState({
+      frontendConfig: {
+        publicConfigs: [
+          { variableName: 'campaign_year', value: '2026' },
+          { variableName: 'campaign_start_date', value: '2000-01-01' },
+          { variableName: 'campaign_end_date', value: '2999-01-01' },
+          { variableName: 'fulfiller_start_date', value: '2000-01-01' },
+          { variableName: 'fulfiller_end_date', value: '2999-01-01' },
+          { variableName: 'fulfiller_availability_status', value: 'ended' },
+        ],
+      },
+    });
     fixture.detectChanges();
 
-    expect(fixture.componentInstance.donationUrl()).toBeNull();
+    expect(fixture.componentInstance.fulfillerStatus()).toBe('ended');
   });
 
   it('does not start the campaign before the configured start date', () => {
     const store = TestBed.inject(MockStore);
-    store.setState({ frontendConfig: { publicConfigs: [
-      { variableName: 'campaign_year', value: '2026' },
-      { variableName: 'campaign_start_date', value: '2999-01-01' },
-      { variableName: 'campaign_end_date', value: '2999-12-31' },
-    ] } });
+    store.setState({
+      frontendConfig: {
+        publicConfigs: [
+          { variableName: 'campaign_year', value: '2026' },
+          { variableName: 'campaign_start_date', value: '2999-01-01' },
+          { variableName: 'campaign_end_date', value: '2999-12-31' },
+        ],
+      },
+    });
     fixture.detectChanges();
 
     expect(fixture.componentInstance.campaignStatus()).toBe('not_started');

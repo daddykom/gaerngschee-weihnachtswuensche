@@ -64,8 +64,9 @@ describe('ConfigurationComponent', () => {
           initialState: {
             frontendConfig: {
               configs,
-              loading: false,
-              saving: false,
+              loadStatus: 'success',
+              saveStatus: 'initial',
+              errorCode: null,
             },
           },
         }),
@@ -133,11 +134,15 @@ describe('ConfigurationComponent', () => {
     component.onSubmit();
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('.control-error')?.textContent).toContain('app.admin.configuration.errors.pattern');
+    expect(fixture.nativeElement.querySelector('.control-error')?.textContent).toContain(
+      'app.admin.configuration.errors.pattern',
+    );
   });
 
   it('shows a pattern error on the field after entering an invalid value and leaving it', async () => {
-    const input = fixture.nativeElement.querySelector('input[placeholder="z. B. 120"]') as HTMLInputElement;
+    const input = fixture.nativeElement.querySelector(
+      'input[placeholder="z. B. 120"]',
+    ) as HTMLInputElement;
     input.value = 'not-a-number';
     input.dispatchEvent(new Event('input', { bubbles: true }));
     input.dispatchEvent(new Event('blur', { bubbles: true }));
@@ -148,7 +153,9 @@ describe('ConfigurationComponent', () => {
     const field = input.closest('mat-form-field');
 
     expect(component.model()[configs[0].id]).toBe('not-a-number');
-    expect(field?.querySelector('.control-error')?.textContent).toContain('app.admin.configuration.errors.pattern');
+    expect(field?.querySelector('.control-error')?.textContent).toContain(
+      'app.admin.configuration.errors.pattern',
+    );
   });
 
   it('validates the maximum length for configurations without a pattern', () => {
@@ -162,7 +169,17 @@ describe('ConfigurationComponent', () => {
   });
 
   it('does not save while a save is already in progress', () => {
-    store.setState({ frontendConfig: { configs, loading: false, saving: true } });
+    store.setState({
+      frontendConfig: {
+        configs,
+        loadStatus: 'success',
+        saveStatus: 'loading',
+        errorCode: null,
+        publicConfigs: [],
+        publicStatus: 'initial',
+        publicErrorCode: null,
+      },
+    });
     const dispatch = vi.spyOn(store, 'dispatch');
 
     component.onSubmit();
@@ -173,7 +190,17 @@ describe('ConfigurationComponent', () => {
   });
 
   it('shows the loading state and does not render the form fields', () => {
-    store.setState({ frontendConfig: { configs: [], loading: true, saving: false } });
+    store.setState({
+      frontendConfig: {
+        configs: [],
+        loadStatus: 'loading',
+        saveStatus: 'initial',
+        errorCode: null,
+        publicConfigs: [],
+        publicStatus: 'initial',
+        publicErrorCode: null,
+      },
+    });
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('app.admin.configuration.loading');
@@ -186,8 +213,9 @@ describe('ConfigurationComponent', () => {
     store.setState({
       frontendConfig: {
         configs: [{ ...configs[0], value: null }],
-        loading: false,
-        saving: false,
+        loadStatus: 'success',
+        saveStatus: 'initial',
+        errorCode: null,
       },
     });
     fixture.detectChanges();
@@ -195,18 +223,37 @@ describe('ConfigurationComponent', () => {
 
     expect(component.model()[configs[0].id]).toBe('');
 
-    store.setState({ frontendConfig: { configs: [], loading: false, saving: false } });
+    store.setState({
+      frontendConfig: {
+        configs: [],
+        loadStatus: 'success',
+        saveStatus: 'initial',
+        errorCode: null,
+        publicConfigs: [],
+        publicStatus: 'initial',
+        publicErrorCode: null,
+      },
+    });
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('app.admin.configuration.empty');
   });
 
   it('removes controls for configurations no longer in the store', async () => {
-    store.setState({ frontendConfig: { configs: [configs[0]], loading: false, saving: false } });
+    store.setState({
+      frontendConfig: {
+        configs: [configs[0]],
+        loadStatus: 'success',
+        saveStatus: 'initial',
+        errorCode: null,
+        publicConfigs: [],
+        publicStatus: 'initial',
+        publicErrorCode: null,
+      },
+    });
     fixture.detectChanges();
     await fixture.whenStable();
 
     expect(component.model()[configs[1].id]).toBeUndefined();
     expect(component.model()[configs[0].id]).toBe('120');
   });
-
 });

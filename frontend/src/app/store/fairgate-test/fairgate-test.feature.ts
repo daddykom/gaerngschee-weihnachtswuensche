@@ -8,18 +8,18 @@ export const fairgateTestFeature = createFeature({
     initialState,
     on(FairgateTestActions.test, (state) => ({
       ...state,
-      loading: true,
+      status: 'loading',
       errorCode: null,
     })),
     on(FairgateTestActions.testSuccess, (state, { result }) => ({
       ...state,
       result,
-      loading: false,
+      status: 'loaded',
       errorCode: null,
     })),
     on(FairgateTestActions.testFailure, (state, { errorCode }) => ({
       ...state,
-      loading: false,
+      status: 'error',
       errorCode,
     })),
   ),
@@ -29,6 +29,9 @@ export const {
   name: fairgateTestFeatureName,
   reducer: fairgateTestReducer,
   selectResult: selectFairgateTestResult,
-  selectLoading: selectFairgateTestLoading,
+  selectStatus: selectFairgateTestStatus,
   selectErrorCode: selectFairgateTestErrorCode,
 } = fairgateTestFeature;
+
+export const selectFairgateTestLoading = (state: { fairgateTest: FairgateTestState }): boolean =>
+  state.fairgateTest.status === 'loading';

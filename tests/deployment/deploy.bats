@@ -7,7 +7,7 @@ setup() {
 }
 
 @test 'rejects an invalid environment' {
-  run "$project_directory/scripts/deploy.sh" staging
+  run "$project_directory/scripts/deploy-weihnachtswuensche.sh" staging
 
   [ "$status" -eq 2 ]
   [[ "$output" == *'Usage:'* ]]

@@ -1,4 +1,5 @@
 RewriteEngine On
+LimitRequestBody 65536
 
 # Security headers for the static frontend and client-side routes.
 <IfModule mod_headers.c>

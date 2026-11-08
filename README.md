@@ -1,21 +1,21 @@
-# Gärngschee-Mässpäggli
+# Gärngschee-Weihnachtswünsche
 
-Open-Source-Webplattform für die Verwaltung von Spenden und die Verteilung von Mässpäggli an Menschen mit knappen finanziellen Mitteln.
+Open-Source-Webplattform für die Verwaltung und Erfüllung einzelner Weihnachtswünsche von Menschen mit knappen finanziellen Mitteln.
 
 ## Über das Projekt
 
-Die Gärngschee-Mässpäggli-Plattform ermöglicht es Spendern, Mässpäggli zu finanzieren, und Klienten, sich für den Erhalt von Mässpäggli zu registrieren. Die Anwendung verwaltet Anmeldungen, Wartelisten und die QR-code-basierte Abgabe.
+Die Gärngschee-Weihnachtswünsche-Plattform ermöglicht es Erfüllern, einzelne Weihnachtswünsche auszuwählen und zu erfüllen, und Klienten, sich für Weihnachtswünsche zu registrieren. Die Anwendung verwaltet Wünsche, Anmeldungen und die Zuordnung erfüllter Wünsche.
 
 ## Benutzerrollen
 
 ### Besucher
-Nicht angemeldete Benutzer können öffentliche Informationen ansehen, zur Spendenseite wechseln und sich für Mässpäggli anmelden.
+Nicht angemeldete Benutzer können öffentliche Informationen ansehen, verfügbare Weihnachtswünsche entdecken und sich für Weihnachtswünsche anmelden.
 
 ### Klient
 Personen oder Familien mit knappen finanziellen Mitteln. Klienten können ihre Anmeldung bearbeiten, den Status verfolgen, Benachrichtigungen empfangen und erhalten einen QR-Code für die Abholung.
 
-### Spender
-Personen, welche Mässpäggli finanzieren. Spender wählen die Anzahl Mässpäggli aus und werden zur Payrexx-Spendenseite weitergeleitet.
+### Erfüller
+Personen, welche einzelne Weihnachtswünsche auswählen und erfüllen. Erfüller wählen einen konkreten Wunsch aus und bestätigen dessen Erfüllung.
 
 ### Mitarbeiter
 Mitarbeiter des Vereins Gärngschee mit Zugriff auf alle administrativen Funktionen: Anmeldungen verwalten, Warteliste führen, QR-Codes prüfen, Abgaben bestätigen und E-Mail-Vorlagen konfigurieren.
@@ -25,10 +25,10 @@ Verwaltung der Anwendung: Stammdaten, Systemkonfiguration und Benutzerverwaltung
 
 ## Kernfunktionen
 
-### Spenden
-- Weiterleitung zu Payrexx für sichere Zahlungsabwicklung
-- Auswahl der Anzahl Mässpäggli
-- Automatische Erfassung erfolgreicher Spenden
+### Wünsche erfüllen
+- Übersicht der verfügbaren Weihnachtswünsche
+- Auswahl eines einzelnen Wunsches
+- Bestätigung der Erfüllung durch den Erfüller
 
 ### Anmeldung
 - Erfassung und Bearbeitung von Anmeldungen
@@ -45,7 +45,7 @@ Verwaltung der Anwendung: Stammdaten, Systemkonfiguration und Benutzerverwaltung
 - Nachträgliche Qualifikation bei Verfügbarkeit
 
 ### Qualifikation
-- Automatische Zusage bei genügend Mässpäggli
+- Automatische Zusage bei genügend Weihnachtswünsche
 - Versand der Informations-E-Mail mit QR-Code
 
 ### Abgabe

@@ -12,245 +12,457 @@ final class OrderRepository
     public function __construct(
         private readonly PDO $pdo,
         private readonly ?EventRepository $events = null,
-    )
-    {
+    ) {
     }
 
     /** @return array<string, mixed>|null */
     public function findForYear(string $userId, int $year): ?array
     {
         $statement = $this->pdo->prepare(
-            'SELECT id, user_id, year, status, adults_count, children_count,
-                    fairgate_status, confirmation_email_sent_at, fairgate_reminder_email_sent_at, delivery_token, created_at, updated_at
-             FROM orders
-             WHERE user_id = :user_id AND year = :year',
+            'SELECT id, user_id, year, order_number, status, adults_count, children_count, original_text, current_text,
+                    admin_notes, fairgate_adults_count, fairgate_children_count, processing_year,
+                    released_at, definitive_at, fairgate_status, confirmation_email_sent_at, fairgate_reminder_email_sent_at,
+                    created_at, updated_at
+             FROM orders WHERE user_id = :user_id AND year = :year',
         );
         $statement->execute(['user_id' => $userId, 'year' => $year]);
         $order = $statement->fetch();
-        if ($order === false) {
+        if (!is_array($order)) {
             return null;
         }
-
-        $items = $this->pdo->prepare(
-            'SELECT person_type, category, quantity
-             FROM order_items
-             WHERE order_id = :order_id
-             ORDER BY person_type, category',
-        );
-        $items->execute(['order_id' => $order['id']]);
 
         return [
             'id' => $order['id'],
             'userId' => $order['user_id'],
             'year' => (int) $order['year'],
+            'orderNumber' => $order['order_number'] === null ? null : (int) $order['order_number'],
             'status' => $order['status'],
             'adultsCount' => (int) $order['adults_count'],
             'childrenCount' => (int) $order['children_count'],
+            'originalText' => $order['original_text'],
+             'currentText' => $order['current_text'],
+            'adminNotes' => $order['admin_notes'],
+            'fairgateAdultsCount' => $order['fairgate_adults_count'] === null ? null : (int) $order['fairgate_adults_count'],
+            'fairgateChildrenCount' => $order['fairgate_children_count'] === null ? null : (int) $order['fairgate_children_count'],
+            'processingYear' => $order['processing_year'] === null ? null : (int) $order['processing_year'],
+            'releasedAt' => $order['released_at'],
+            'definitiveAt' => $order['definitive_at'],
+            'items' => $this->findItems((string) $order['id']),
             'fairgateStatus' => $order['fairgate_status'],
             'confirmationEmailSentAt' => $order['confirmation_email_sent_at'],
             'fairgateReminderEmailSentAt' => $order['fairgate_reminder_email_sent_at'],
-            'deliveryToken' => $order['delivery_token'],
-            'items' => array_map(
-                static fn (array $item): array => [
-                    'personType' => $item['person_type'],
-                    'category' => $item['category'],
-                    'quantity' => (int) $item['quantity'],
-                ],
-                $items->fetchAll(),
-            ),
             'createdAt' => $order['created_at'],
             'updatedAt' => $order['updated_at'],
         ];
     }
 
-    /** @return array<string, mixed>|null */
-    public function findClientOrderByEmail(string $email, int $year): ?array
+    /** @return list<array<string, mixed>> */
+    public function findItems(string $orderId): array
     {
         $statement = $this->pdo->prepare(
-            'SELECT users.id
-             FROM users
-             INNER JOIN orders ON orders.user_id = users.id
-             WHERE LOWER(users.email) = LOWER(:email)
-               AND users.`group` = \'client\'
-               AND orders.year = :year
-             LIMIT 1',
+            'SELECT id, order_id, item_number, category, original_description, current_description,
+                    original_reason, current_reason, status, publication_status, fulfillment_status, admin_notes, fulfiller_email,
+                    reserved_at, due_at, received_at, created_at, updated_at
+             FROM order_items WHERE order_id = :order_id ORDER BY created_at, id',
         );
-        $statement->execute([
-            'email' => trim($email),
-            'year' => $year,
-        ]);
-        $userId = $statement->fetchColumn();
+        $statement->execute(['order_id' => $orderId]);
 
-        return is_string($userId) ? $this->findForYear($userId, $year) : null;
+        return array_map(static fn (array $item): array => [
+            'id' => (string) $item['id'],
+            'orderId' => (string) $item['order_id'],
+            'itemNumber' => $item['item_number'] === null ? null : (int) $item['item_number'],
+            'category' => (string) $item['category'],
+            'originalDescription' => (string) $item['original_description'],
+            'currentDescription' => (string) $item['current_description'],
+            'originalReason' => $item['original_reason'],
+            'currentReason' => $item['current_reason'],
+            'status' => (string) $item['status'],
+            'publicationStatus' => (string) ($item['publication_status'] ?? $item['status']),
+            'fulfillmentStatus' => (string) ($item['fulfillment_status'] ?? 'available'),
+            'adminNotes' => $item['admin_notes'] ?? null,
+            'fulfillerEmail' => $item['fulfiller_email'],
+            'reservedAt' => $item['reserved_at'],
+            'dueAt' => $item['due_at'],
+            'receivedAt' => $item['received_at'],
+            'createdAt' => $item['created_at'],
+            'updatedAt' => $item['updated_at'],
+        ], $statement->fetchAll());
     }
 
-    public function deleteCurrentYearOrder(string $userId, int $year): bool
+    /** @return list<array<string, mixed>> */
+    public function findForFulfiller(string $email, ?string $search = null, ?string $category = null): array
+    {
+        $parameters = ['fulfiller_email' => strtolower(trim($email))];
+        $conditions = [
+            "orders.status = 'definitive'",
+            "EXISTS (
+                SELECT 1 FROM order_items available_items
+                WHERE available_items.order_id = orders.id
+                  AND available_items.publication_status = 'approved'
+                  AND (
+                    available_items.fulfillment_status = 'available'
+                    OR (available_items.fulfillment_status = 'reserved' AND LOWER(available_items.fulfiller_email) = :fulfiller_email)
+                  )
+            )",
+        ];
+
+        if ($category !== null) {
+            $conditions[] = "EXISTS (
+                SELECT 1 FROM order_items category_items
+                WHERE category_items.order_id = orders.id
+                  AND category_items.category = :category
+                  AND category_items.publication_status = 'approved'
+                  AND (
+                    category_items.fulfillment_status = 'available'
+                    OR (category_items.fulfillment_status = 'reserved' AND LOWER(category_items.fulfiller_email) = :category_fulfiller_email)
+                  )
+            )";
+            $parameters['category'] = $category;
+            $parameters['category_fulfiller_email'] = strtolower(trim($email));
+        }
+
+        if ($search !== null && trim($search) !== '') {
+            $conditions[] = "(
+                LOWER(COALESCE(orders.current_text, '')) LIKE :search_order
+                OR EXISTS (
+                    SELECT 1 FROM order_items search_items
+                    WHERE search_items.order_id = orders.id
+                      AND search_items.publication_status = 'approved'
+                      AND (
+                        search_items.fulfillment_status = 'available'
+                        OR (search_items.fulfillment_status = 'reserved' AND LOWER(search_items.fulfiller_email) = :search_fulfiller_email)
+                      )
+                      AND (
+                        LOWER(COALESCE(search_items.current_description, '')) LIKE :search_description
+                        OR LOWER(COALESCE(search_items.current_reason, '')) LIKE :search_reason
+                      )
+                )
+            )";
+            $term = '%' . strtolower(trim($search)) . '%';
+            $parameters['search_order'] = $term;
+            $parameters['search_fulfiller_email'] = strtolower(trim($email));
+            $parameters['search_description'] = $term;
+            $parameters['search_reason'] = $term;
+        }
+
+        $statement = $this->pdo->prepare(
+            'SELECT id, year, order_number, current_text
+             FROM orders WHERE ' . implode(' AND ', $conditions) . ' ORDER BY year DESC, order_number ASC, id ASC',
+        );
+        $statement->execute($parameters);
+        $orders = [];
+        foreach ($statement->fetchAll() as $row) {
+            $orderText = is_string($row['current_text']) ? $row['current_text'] : null;
+            $items = $this->findFulfillerItems((string) $row['id'], $email, $category);
+            $items = array_map(static fn (array $item): array => [
+                ...$item,
+                'wishNumber' => $item['itemNumber'] === null
+                    ? null
+                    : (string) $row['order_number'] . '-' . (string) $item['itemNumber'],
+            ], $items);
+            if ($search !== null && trim($search) !== '' && !self::contains($orderText, $search)) {
+                $items = array_values(array_filter($items, static fn (array $item): bool =>
+                    self::contains($item['currentDescription'] ?? null, $search)
+                    || self::contains($item['currentReason'] ?? null, $search)));
+            }
+            if ($items === []) {
+                continue;
+            }
+            $orders[] = [
+                'id' => (string) $row['id'],
+                'year' => (int) $row['year'],
+                'orderNumber' => (int) $row['order_number'],
+                'currentText' => $orderText,
+                'items' => $items,
+            ];
+        }
+
+        return $orders;
+    }
+
+    /** @return list<array<string, mixed>> */
+    private function findFulfillerItems(string $orderId, string $email, ?string $category): array
+    {
+        $conditions = [
+            'order_id = :order_id',
+            "publication_status = 'approved'",
+            "(fulfillment_status = 'available' OR (fulfillment_status = 'reserved' AND LOWER(fulfiller_email) = :fulfiller_email))",
+        ];
+        $parameters = [
+            'order_id' => $orderId,
+            'fulfiller_email' => strtolower(trim($email)),
+        ];
+        if ($category !== null) {
+            $conditions[] = 'category = :category';
+            $parameters['category'] = $category;
+        }
+        $statement = $this->pdo->prepare(
+            'SELECT id, item_number, category, current_description, current_reason, fulfillment_status, reserved_at
+             FROM order_items WHERE ' . implode(' AND ', $conditions) . ' ORDER BY item_number ASC, id ASC',
+        );
+        $statement->execute($parameters);
+
+        return array_map(static fn (array $item): array => [
+            'id' => (string) $item['id'],
+            'itemNumber' => (int) $item['item_number'],
+            'wishNumber' => null,
+            'category' => (string) $item['category'],
+            'currentDescription' => (string) $item['current_description'],
+            'currentReason' => $item['current_reason'],
+            'fulfillmentStatus' => (string) $item['fulfillment_status'],
+            'reservedAt' => $item['reserved_at'],
+        ], $statement->fetchAll());
+    }
+
+    /** @return array<string, mixed>|null */
+    public function reserveItemForFulfiller(string $itemId, string $email): ?array
+    {
+        $statement = $this->pdo->prepare(
+            "UPDATE order_items
+             SET fulfillment_status = 'reserved', fulfiller_email = :email, reserved_at = CURRENT_TIMESTAMP,
+                 updated_at = CURRENT_TIMESTAMP
+             WHERE id = :id AND publication_status = 'approved' AND fulfillment_status = 'available'
+               AND EXISTS (SELECT 1 FROM orders WHERE orders.id = order_items.order_id AND orders.status = 'definitive')",
+        );
+        $statement->execute(['id' => $itemId, 'email' => strtolower(trim($email))]);
+        if ($statement->rowCount() !== 1) {
+            return null;
+        }
+
+        $result = $this->pdo->prepare(
+            'SELECT order_id, id, item_number, fulfillment_status, reserved_at
+             FROM order_items WHERE id = :id',
+        );
+        $result->execute(['id' => $itemId]);
+        $item = $result->fetch();
+        if (!is_array($item)) {
+            return null;
+        }
+
+        return [
+            'orderId' => (string) $item['order_id'],
+            'id' => (string) $item['id'],
+            'itemNumber' => (int) $item['item_number'],
+            'fulfillmentStatus' => (string) $item['fulfillment_status'],
+            'reservedAt' => $item['reserved_at'],
+        ];
+    }
+
+    private static function contains(?string $value, string $search): bool
+    {
+        return $value !== null && str_contains(strtolower($value), strtolower($search));
+    }
+
+    /** @return list<array<string, mixed>> */
+    public function findForAdministration(array $statuses, array $categories): array
+    {
+        $parameters = [];
+        $conditions = [];
+        if ($statuses !== []) {
+            $placeholders = [];
+            foreach (array_values($statuses) as $index => $status) {
+                $key = 'status_' . $index;
+                $placeholders[] = ':' . $key;
+                $parameters[$key] = $status;
+            }
+            $conditions[] = 'orders.status IN (' . implode(', ', $placeholders) . ')';
+        }
+        if ($categories !== []) {
+            $placeholders = [];
+            foreach (array_values($categories) as $index => $category) {
+                $key = 'category_' . $index;
+                $placeholders[] = ':' . $key;
+                $parameters[$key] = $category;
+            }
+            $conditions[] = 'EXISTS (SELECT 1 FROM order_items filter_items WHERE filter_items.order_id = orders.id AND filter_items.category IN (' . implode(', ', $placeholders) . '))';
+        }
+        $where = $conditions === [] ? '' : 'WHERE ' . implode(' AND ', $conditions);
+        $statement = $this->pdo->prepare(
+            'SELECT orders.id, orders.user_id, users.email, orders.year, orders.order_number, orders.status,
+                    orders.adults_count, orders.children_count, orders.original_text, orders.current_text,
+                    orders.admin_notes, orders.created_at, orders.updated_at
+             FROM orders INNER JOIN users ON users.id = orders.user_id
+             ' . $where . ' ORDER BY orders.created_at, orders.id',
+        );
+        $statement->execute($parameters);
+        $orders = [];
+        foreach ($statement->fetchAll() as $row) {
+            $orders[] = [
+                'id' => (string) $row['id'],
+                'userId' => (string) $row['user_id'],
+                'requesterEmail' => (string) $row['email'],
+                'year' => (int) $row['year'],
+                'orderNumber' => $row['order_number'] === null ? null : (int) $row['order_number'],
+                'status' => (string) $row['status'],
+                'adultsCount' => (int) $row['adults_count'],
+                'childrenCount' => (int) $row['children_count'],
+                'originalText' => $row['original_text'],
+                'currentText' => $row['current_text'],
+                'adminNotes' => $row['admin_notes'],
+                'items' => $this->findItems((string) $row['id']),
+                'createdAt' => $row['created_at'],
+                'updatedAt' => $row['updated_at'],
+            ];
+        }
+        return $orders;
+    }
+
+    /** @param array<string, mixed> $order @param list<array<string, mixed>> $items */
+    public function saveAdministration(array $order, array $items): array
     {
         $this->pdo->beginTransaction();
-
         try {
             $statement = $this->pdo->prepare(
-                "DELETE FROM orders
-                 WHERE user_id = :user_id
-                   AND year = :year
-                   AND status IN ('provisional', 'definitive')",
+                'UPDATE orders SET current_text = :current_text, admin_notes = :admin_notes,
+                 adults_count = :adults_count, children_count = :children_count,
+                  status = :status, definitive_at = CASE WHEN :is_definitive = 1 THEN COALESCE(definitive_at, CURRENT_TIMESTAMP) ELSE definitive_at END,
+                 updated_at = CURRENT_TIMESTAMP WHERE id = :id',
             );
             $statement->execute([
-                'user_id' => $userId,
-                'year' => $year,
+                'id' => $order['id'],
+                'current_text' => $order['currentText'] ?? null,
+                'admin_notes' => $order['adminNotes'] ?? null,
+                'adults_count' => $order['adultsCount'] ?? 0,
+                'children_count' => $order['childrenCount'] ?? 0,
+                'status' => $order['status'],
+                'is_definitive' => $order['status'] === 'definitive' ? 1 : 0,
             ]);
-            $deleted = $statement->rowCount() === 1;
-            if ($deleted) {
-                $this->recordStatusChanges(1);
+            foreach ($items as $item) {
+                $itemStatement = $this->pdo->prepare(
+                    'UPDATE order_items SET current_description = :description, current_reason = :reason,
+                     publication_status = :publication_status, status = :status, admin_notes = :admin_notes,
+                     updated_at = CURRENT_TIMESTAMP WHERE id = :id AND order_id = :order_id',
+                );
+                $itemStatement->execute([
+                    'id' => $item['id'],
+                    'order_id' => $order['id'],
+                    'description' => $item['currentDescription'],
+                    'reason' => $item['currentReason'] ?? null,
+                    'publication_status' => $item['publicationStatus'],
+                    'status' => $item['publicationStatus'],
+                    'admin_notes' => $item['adminNotes'] ?? null,
+                ]);
+            }
+            if ($order['status'] === 'definitive') {
+                $this->assignDefinitiveNumbers((string) $order['id']);
             }
             $this->pdo->commit();
-
-            return $deleted;
         } catch (\Throwable $exception) {
             $this->pdo->rollBack();
             throw $exception;
         }
+        $result = $this->findById((string) $order['id']);
+        return $result ?? throw new \RuntimeException('Order was not saved.');
+    }
+
+    private function assignDefinitiveNumbers(string $orderId): void
+    {
+        $orderStatement = $this->pdo->prepare('SELECT year, order_number FROM orders WHERE id = :id');
+        $orderStatement->execute(['id' => $orderId]);
+        $order = $orderStatement->fetch();
+        if (!is_array($order)) {
+            throw new \RuntimeException('Order was not found.');
+        }
+
+        if ($order['order_number'] === null) {
+            $next = $this->pdo->prepare('SELECT COALESCE(MAX(order_number), 0) + 1 FROM orders WHERE year = :year');
+            $next->execute(['year' => $order['year']]);
+            $update = $this->pdo->prepare('UPDATE orders SET order_number = :order_number WHERE id = :id');
+            $update->execute(['order_number' => (int) $next->fetchColumn(), 'id' => $orderId]);
+        }
+
+        $items = $this->pdo->prepare('SELECT id, item_number FROM order_items WHERE order_id = :order_id ORDER BY created_at, id');
+        $items->execute(['order_id' => $orderId]);
+        $rows = $items->fetchAll();
+        $hasUnnumbered = array_filter($rows, static fn (array $row): bool => $row['item_number'] === null) !== [];
+        if ($hasUnnumbered) {
+            $update = $this->pdo->prepare('UPDATE order_items SET item_number = :item_number WHERE id = :id AND order_id = :order_id');
+            foreach ($rows as $index => $row) {
+                $update->execute(['item_number' => $index + 1, 'id' => $row['id'], 'order_id' => $orderId]);
+            }
+        }
+    }
+
+    /** @return array<string, mixed>|null */
+    public function findById(string $orderId): ?array
+    {
+        $statement = $this->pdo->prepare('SELECT user_id, year FROM orders WHERE id = :id');
+        $statement->execute(['id' => $orderId]);
+        $row = $statement->fetch();
+        return is_array($row) ? $this->findForYear((string) $row['user_id'], (int) $row['year']) : null;
+    }
+
+    /** @return list<array{orderId: string, email: string, year: int, status: string, adultsCount: int, childrenCount: int, fairgateStatus: ?string, createdAt: ?string}> */
+    public function findAllForFairgatePersonCountCheck(?int $year = null): array
+    {
+        $query = 'SELECT orders.id, users.email, orders.year, orders.status,
+                         orders.adults_count, orders.children_count,
+                         orders.fairgate_status, orders.created_at
+                  FROM orders INNER JOIN users ON users.id = orders.user_id
+                  WHERE orders.status IN (\'released\', \'in_review\', \'definitive\', \'ready_for_pickup\', \'completed\')';
+        $parameters = [];
+        if ($year !== null) {
+            $query .= ' AND orders.year = :year';
+            $parameters['year'] = $year;
+        }
+        $query .= ' ORDER BY orders.year, orders.id';
+        $statement = $this->pdo->prepare($query);
+        $statement->execute($parameters);
+
+        return array_map(static fn (array $row): array => [
+            'orderId' => (string) $row['id'],
+            'email' => (string) $row['email'],
+            'year' => (int) $row['year'],
+            'status' => (string) $row['status'],
+            'adultsCount' => (int) $row['adults_count'],
+            'childrenCount' => (int) $row['children_count'],
+            'fairgateStatus' => is_string($row['fairgate_status']) ? $row['fairgate_status'] : null,
+            'createdAt' => is_string($row['created_at']) ? $row['created_at'] : null,
+        ], $statement->fetchAll());
     }
 
     public function findStatusForEmailAndYear(string $email, int $year): ?string
     {
         $statement = $this->pdo->prepare(
-            'SELECT orders.status
-             FROM orders
-             INNER JOIN users ON users.id = orders.user_id
-             WHERE users.email = :email AND orders.year = :year',
+            'SELECT orders.status FROM orders INNER JOIN users ON users.id = orders.user_id
+             WHERE LOWER(users.email) = LOWER(:email) AND orders.year = :year',
         );
         $statement->execute(['email' => strtolower(trim($email)), 'year' => $year]);
         $status = $statement->fetchColumn();
-
         return $status === false ? null : (string) $status;
     }
 
     /** @return list<array{order: array<string, mixed>, email: string}> */
-    public function findProvisionalWithUsers(): array
+    public function findWaitingForFairgateWithUsers(): array
     {
         $statement = $this->pdo->query(
-            "SELECT orders.id, orders.user_id, users.email
-             FROM orders
+            "SELECT orders.id, orders.user_id, users.email FROM orders
              INNER JOIN users ON users.id = orders.user_id
-             WHERE orders.status = 'provisional'
-             ORDER BY orders.created_at, orders.id",
+              WHERE orders.status = 'waiting_for_fairgate' ORDER BY orders.created_at, orders.id",
         );
-
         $orders = [];
         foreach ($statement->fetchAll() as $row) {
-            $order = $this->findForId((string) $row['id']);
+            $order = $this->findForYear((string) $row['user_id'], (int) $this->findYear((string) $row['id']));
             if ($order !== null) {
                 $orders[] = ['order' => $order, 'email' => (string) $row['email']];
             }
         }
-
         return $orders;
-    }
-
-    /** @return array{orders: array{provisional: int, recentProvisional: int, definitive: int, toDeliver: int, qrcode: int, delivered: int}, categories: list<array{category: string, provisional: int, recentProvisional: int, definitive: int, toDeliver: int, qrcode: int, delivered: int}>} */
-    public function findAdminOverview(int $year, string $recentSince): array
-    {
-        $aggregates = array_map(
-            fn (string $status): array => $this->aggregateStatus($status, $year),
-            ['provisional', 'definitive', 'toDeliver', 'qrcode', 'delivered'],
-        );
-        $recent = $this->aggregateStatus('provisional', $year, $recentSince);
-        $categories = array_map(
-            static fn (string $category): array => [
-                'category' => $category,
-                'provisional' => $aggregates[0]['categories'][$category] ?? 0,
-                'recentProvisional' => $recent['categories'][$category] ?? 0,
-                'definitive' => $aggregates[1]['categories'][$category] ?? 0,
-                'toDeliver' => $aggregates[2]['categories'][$category] ?? 0,
-                'qrcode' => $aggregates[3]['categories'][$category] ?? 0,
-                'delivered' => $aggregates[4]['categories'][$category] ?? 0,
-            ],
-            OrderCategories::ALL,
-        );
-
-        return [
-            'orders' => [
-                'provisional' => $aggregates[0]['orderCount'],
-                'recentProvisional' => $recent['orderCount'],
-                'definitive' => $aggregates[1]['orderCount'],
-                'toDeliver' => $aggregates[2]['orderCount'],
-                'qrcode' => $aggregates[3]['orderCount'],
-                'delivered' => $aggregates[4]['orderCount'],
-            ],
-            'categories' => $categories,
-        ];
-    }
-
-    /** @return array{orderCount: int, categories: array<string, int>} */
-    private function aggregateStatus(string $status, int $year, ?string $recentSince = null): array
-    {
-        $conditions = ['orders.status = :status', 'orders.year = :year'];
-        $parameters = ['status' => $status, 'year' => $year];
-        if ($recentSince !== null) {
-            $conditions[] = '(orders.created_at >= :created_since OR orders.updated_at >= :updated_since)';
-            $parameters['created_since'] = $recentSince;
-            $parameters['updated_since'] = $recentSince;
-        }
-
-        $where = implode(' AND ', $conditions);
-        $count = $this->pdo->prepare("SELECT COUNT(*) FROM orders WHERE {$where}");
-        $count->execute($parameters);
-
-        $items = $this->pdo->prepare(
-            "SELECT order_items.category, COALESCE(SUM(order_items.quantity), 0) AS package_count
-             FROM order_items
-             INNER JOIN orders ON orders.id = order_items.order_id
-             WHERE {$where}
-             GROUP BY order_items.category
-             ORDER BY order_items.category",
-        );
-        $items->execute($parameters);
-        $categoryCounts = [];
-        foreach ($items->fetchAll() as $item) {
-            $categoryCounts[(string) $item['category']] = (int) $item['package_count'];
-        }
-
-        return [
-            'orderCount' => (int) $count->fetchColumn(),
-            'categories' => $categoryCounts,
-        ];
-    }
-
-    public function markDefinitiveForDelivery(int $year): int
-    {
-        $this->pdo->beginTransaction();
-        try {
-            $statement = $this->pdo->prepare(
-                "UPDATE orders SET status = 'toDeliver', updated_at = CURRENT_TIMESTAMP
-                 WHERE year = :year AND status = 'definitive'",
-            );
-            $statement->execute(['year' => $year]);
-            $changed = $statement->rowCount();
-            $this->recordStatusChanges($changed);
-            $this->pdo->commit();
-
-            return $changed;
-        } catch (\Throwable $exception) {
-            $this->pdo->rollBack();
-            throw $exception;
-        }
     }
 
     /** @return list<array{order: array<string, mixed>, email: string}> */
-    public function findToDeliverWithUsers(): array
+    public function findOrdersWithPendingStatusEmails(): array
     {
         $statement = $this->pdo->query(
-            "SELECT orders.id, orders.user_id, users.email
-             FROM orders
+            "SELECT orders.id, orders.user_id, orders.year, users.email FROM orders
              INNER JOIN users ON users.id = orders.user_id
-             WHERE orders.status = 'toDeliver'
+             WHERE orders.status IN ('released', 'family_size_exceeded')
+               AND orders.confirmation_email_sent_at IS NULL
              ORDER BY orders.created_at, orders.id",
         );
-
         $orders = [];
         foreach ($statement->fetchAll() as $row) {
-            $order = $this->findForId((string) $row['id']);
+            $order = $this->findForYear((string) $row['user_id'], (int) $row['year']);
             if ($order !== null) {
                 $orders[] = ['order' => $order, 'email' => (string) $row['email']];
             }
@@ -259,256 +471,171 @@ final class OrderRepository
         return $orders;
     }
 
-    public function setDeliveryToken(string $orderId, string $token): void
+    public function updateCountsFromBatch(string $orderId, int $adultsCount, int $childrenCount): void
     {
         $statement = $this->pdo->prepare(
-            "UPDATE orders SET delivery_token = :token, updated_at = CURRENT_TIMESTAMP
-             WHERE id = :id AND status = 'toDeliver' AND delivery_token IS NULL",
+            "UPDATE orders SET adults_count = :adults_count, children_count = :children_count,
+             fairgate_adults_count = :fairgate_adults_count, fairgate_children_count = :fairgate_children_count,
+             updated_at = CURRENT_TIMESTAMP WHERE id = :id AND status = 'waiting_for_fairgate'",
         );
-        $statement->execute(['id' => $orderId, 'token' => $token]);
+        $statement->execute(['id' => $orderId, 'adults_count' => $adultsCount, 'children_count' => $childrenCount, 'fairgate_adults_count' => $adultsCount, 'fairgate_children_count' => $childrenCount]);
     }
 
-    public function markQrCodeSent(string $orderId): void
-    {
-        $this->pdo->beginTransaction();
-        try {
-        $statement = $this->pdo->prepare(
-            "UPDATE orders SET status = 'qrcode', updated_at = CURRENT_TIMESTAMP
-             WHERE id = :id AND status = 'toDeliver'",
-        );
-        $statement->execute(['id' => $orderId]);
-            $this->recordStatusChanges($statement->rowCount());
-            $this->pdo->commit();
-        } catch (\Throwable $exception) {
-            $this->pdo->rollBack();
-            throw $exception;
-        }
-    }
-
-    /** @return array<string, mixed>|null */
-    public function findDeliveryOrderByToken(string $token, int $year): ?array
+    public function markReleased(string $orderId): void
     {
         $statement = $this->pdo->prepare(
-            "SELECT user_id FROM orders WHERE delivery_token = :token AND status IN ('qrcode', 'delivered') LIMIT 1",
-        );
-        $statement->execute(['token' => $token]);
-        $userId = $statement->fetchColumn();
-        if (!is_string($userId)) {
-            return null;
-        }
-
-        return $this->findForYear($userId, $year);
-    }
-
-    /** @return array<string, mixed>|null */
-    public function findDeliveryOrderByEmail(string $email, int $year): ?array
-    {
-        $statement = $this->pdo->prepare(
-            "SELECT orders.user_id FROM orders
-             INNER JOIN users ON users.id = orders.user_id
-              WHERE LOWER(users.email) = LOWER(:email)
-                AND orders.year = :year
-               AND orders.status IN ('qrcode', 'delivered')
-             LIMIT 1",
-        );
-        $statement->execute(['email' => trim($email), 'year' => $year]);
-        $userId = $statement->fetchColumn();
-        if (!is_string($userId)) {
-            return null;
-        }
-
-        return $this->findForYear($userId, $year);
-    }
-
-    public function markDelivered(string $orderId): bool
-    {
-        $this->pdo->beginTransaction();
-        try {
-        $statement = $this->pdo->prepare(
-            "UPDATE orders SET status = 'delivered', updated_at = CURRENT_TIMESTAMP
-             WHERE id = :id AND status = 'qrcode'",
+            "UPDATE orders SET status = 'released', confirmation_email_sent_at = CURRENT_TIMESTAMP,
+             updated_at = CURRENT_TIMESTAMP WHERE id = :id AND status = 'waiting_for_fairgate'",
         );
         $statement->execute(['id' => $orderId]);
-            $changed = $statement->rowCount() === 1;
-            $this->recordStatusChanges($changed ? 1 : 0);
-            $this->pdo->commit();
-
-            return $changed;
-        } catch (\Throwable $exception) {
-            $this->pdo->rollBack();
-            throw $exception;
-        }
+        $this->recordStatusChanges($statement->rowCount());
     }
 
-    public function undoDelivery(string $orderId): bool
+    public function markFamilySizeExceeded(string $orderId): void
     {
-        $this->pdo->beginTransaction();
-        try {
         $statement = $this->pdo->prepare(
-            "UPDATE orders SET status = 'qrcode', updated_at = CURRENT_TIMESTAMP
-             WHERE id = :id AND status = 'delivered'",
+            "UPDATE orders SET status = 'family_size_exceeded', updated_at = CURRENT_TIMESTAMP
+             WHERE id = :id AND status = 'waiting_for_fairgate'",
         );
         $statement->execute(['id' => $orderId]);
-            $changed = $statement->rowCount() === 1;
-            $this->recordStatusChanges($changed ? 1 : 0);
-            $this->pdo->commit();
-
-            return $changed;
-        } catch (\Throwable $exception) {
-            $this->pdo->rollBack();
-            throw $exception;
-        }
+        $this->recordStatusChanges($statement->rowCount());
     }
 
-    /** @param list<array{personType: string, category: string, quantity: int}> $items */
-    public function updateFromBatch(
-        string $orderId,
-        int $adultsCount,
-        int $childrenCount,
-        array $items,
-        ?string $fairgateStatus = null,
-    ): void {
-        $this->pdo->beginTransaction();
-        try {
-            $update = $this->pdo->prepare(
-                'UPDATE orders SET adults_count = :adults_count, children_count = :children_count,
-                    updated_at = CURRENT_TIMESTAMP WHERE id = :id AND status = \'provisional\'',
-            );
-            $update->execute([
-                'id' => $orderId,
-                'adults_count' => $adultsCount,
-                'children_count' => $childrenCount,
-            ]);
-            $this->pdo->prepare('DELETE FROM order_items WHERE order_id = :order_id')
-                ->execute(['order_id' => $orderId]);
-            $insert = $this->pdo->prepare(
-                'INSERT INTO order_items (id, order_id, person_type, category, quantity)
-                 VALUES (:id, :order_id, :person_type, :category, :quantity)',
-            );
-            foreach ($items as $item) {
-                $insert->execute([
-                    'id' => $this->createUuid(),
-                    'order_id' => $orderId,
-                    'person_type' => $item['personType'],
-                    'category' => $item['category'],
-                    'quantity' => $item['quantity'],
-                ]);
-            }
-            $this->pdo->commit();
-        } catch (\Throwable $exception) {
-            $this->pdo->rollBack();
-            throw $exception;
-        }
-    }
-
-    public function markBatchEmailSent(string $orderId): void
+    public function recordFairgateCounts(string $orderId, int $adultsCount, int $childrenCount): void
     {
-        $this->pdo->beginTransaction();
-        try {
         $statement = $this->pdo->prepare(
-            "UPDATE orders SET status = 'definitive', confirmation_email_sent_at = CURRENT_TIMESTAMP,
-             updated_at = CURRENT_TIMESTAMP WHERE id = :id AND status = 'provisional'",
+            'UPDATE orders SET fairgate_adults_count = :adults_count,
+             fairgate_children_count = :children_count, updated_at = CURRENT_TIMESTAMP
+             WHERE id = :id',
         );
-        $statement->execute(['id' => $orderId]);
-            $this->recordStatusChanges($statement->rowCount());
-            $this->pdo->commit();
-        } catch (\Throwable $exception) {
-            $this->pdo->rollBack();
-            throw $exception;
-        }
+        $statement->execute([
+            'id' => $orderId,
+            'adults_count' => $adultsCount,
+            'children_count' => $childrenCount,
+        ]);
     }
 
     public function markFairgateReminderSent(string $orderId): void
     {
         $statement = $this->pdo->prepare(
             'UPDATE orders SET fairgate_reminder_email_sent_at = CURRENT_TIMESTAMP,
-                updated_at = CURRENT_TIMESTAMP WHERE id = :id',
+             updated_at = CURRENT_TIMESTAMP WHERE id = :id',
         );
         $statement->execute(['id' => $orderId]);
     }
 
-    /** @param list<array{personType: string, category: string, quantity: int}> $items */
+    /** @param list<array<string, mixed>> $items Kept for compatibility with historical callers. */
     public function saveForYear(
         string $userId,
         int $year,
         string $status,
         int $adultsCount,
         int $childrenCount,
-        array $items,
+        array $items = [],
         ?string $fairgateStatus = null,
+        ?string $text = null,
+        ?int $fairgateAdultsCount = null,
+        ?int $fairgateChildrenCount = null,
     ): array {
         $this->pdo->beginTransaction();
-
         try {
-            $find = $this->pdo->prepare(
-                'SELECT id, status FROM orders WHERE user_id = :user_id AND year = :year',
-            );
+            $find = $this->pdo->prepare('SELECT id, status FROM orders WHERE user_id = :user_id AND year = :year');
             $find->execute(['user_id' => $userId, 'year' => $year]);
             $existing = $find->fetch();
-            if (is_array($existing) && in_array($existing['status'], ['toDeliver', 'qrcode', 'delivered'], true)) {
-                throw new OrderNotEditableException();
-            }
             $orderId = is_array($existing) ? (string) $existing['id'] : $this->createUuid();
-
             if (is_array($existing)) {
                 $update = $this->pdo->prepare(
-                    'UPDATE orders
-                     SET status = :status, adults_count = :adults_count,
-                          children_count = :children_count, fairgate_status = :fairgate_status, updated_at = CURRENT_TIMESTAMP
-                          , confirmation_email_sent_at = NULL
-                     WHERE id = :id',
+                    'UPDATE orders SET status = :status, adults_count = :adults_count, children_count = :children_count,
+                       current_text = :current_text, fairgate_status = :fairgate_status,
+                       fairgate_adults_count = :fairgate_adults_count, fairgate_children_count = :fairgate_children_count,
+                      released_at = CASE WHEN :released_status = \'released\' THEN COALESCE(released_at, CURRENT_TIMESTAMP) ELSE released_at END,
+                      processing_year = COALESCE(processing_year, :processing_year), confirmation_email_sent_at = NULL,
+                     updated_at = CURRENT_TIMESTAMP WHERE id = :id',
                 );
-                $update->execute([
-                    'id' => $orderId,
-                    'status' => $status,
-                    'adults_count' => $adultsCount,
-                    'children_count' => $childrenCount,
-                    'fairgate_status' => $fairgateStatus,
-                ]);
+                $update->execute(['id' => $orderId, 'status' => $status, 'released_status' => $status, 'processing_year' => $year, 'adults_count' => $adultsCount, 'children_count' => $childrenCount, 'current_text' => $text, 'fairgate_status' => $fairgateStatus, 'fairgate_adults_count' => $fairgateAdultsCount, 'fairgate_children_count' => $fairgateChildrenCount]);
                 if ((string) $existing['status'] !== $status) {
                     $this->recordStatusChanges(1);
                 }
-                $delete = $this->pdo->prepare('DELETE FROM order_items WHERE order_id = :order_id');
-                $delete->execute(['order_id' => $orderId]);
             } else {
                 $insert = $this->pdo->prepare(
-                    'INSERT INTO orders
-                        (id, user_id, year, status, adults_count, children_count, fairgate_status)
-                     VALUES (:id, :user_id, :year, :status, :adults_count, :children_count, :fairgate_status)',
+                    'INSERT INTO orders (id, user_id, year, status, adults_count, children_count, original_text, current_text, fairgate_status, fairgate_adults_count, fairgate_children_count, processing_year, released_at)
+                      VALUES (:id, :user_id, :year, :status, :adults_count, :children_count, :original_text, :current_text, :fairgate_status, :fairgate_adults_count, :fairgate_children_count, :processing_year, CASE WHEN :released_status = \'released\' THEN CURRENT_TIMESTAMP ELSE NULL END)',
                 );
-                $insert->execute([
-                    'id' => $orderId,
-                    'user_id' => $userId,
-                    'year' => $year,
-                    'status' => $status,
-                    'adults_count' => $adultsCount,
-                    'children_count' => $childrenCount,
-                    'fairgate_status' => $fairgateStatus,
-                ]);
+                $insert->execute(['id' => $orderId, 'user_id' => $userId, 'year' => $year, 'status' => $status, 'released_status' => $status, 'processing_year' => $year, 'adults_count' => $adultsCount, 'children_count' => $childrenCount, 'original_text' => $text, 'current_text' => $text, 'fairgate_status' => $fairgateStatus, 'fairgate_adults_count' => $fairgateAdultsCount, 'fairgate_children_count' => $fairgateChildrenCount]);
                 $this->recordStatusChanges(1);
             }
-
-            $insertItem = $this->pdo->prepare(
-                'INSERT INTO order_items (id, order_id, person_type, category, quantity)
-                 VALUES (:id, :order_id, :person_type, :category, :quantity)',
-            );
-            foreach ($items as $item) {
-                $insertItem->execute([
-                    'id' => $this->createUuid(),
-                    'order_id' => $orderId,
-                    'person_type' => $item['personType'],
-                    'category' => $item['category'],
-                    'quantity' => $item['quantity'],
-                ]);
+            if ($items === [] || (isset($items[0]['category'], $items[0]['description'], $items[0]['reason']))) {
+                $this->saveItems($orderId, $items);
             }
-
             $this->pdo->commit();
         } catch (\Throwable $exception) {
             $this->pdo->rollBack();
             throw $exception;
         }
-
         return $this->findForYear($userId, $year) ?? throw new \RuntimeException('Order was not saved.');
+    }
+
+    /** @param list<array{id?: string, category: string, description: string, reason: string}> $items */
+    private function saveItems(string $orderId, array $items): void
+    {
+        $existing = $this->pdo->prepare('SELECT id FROM order_items WHERE order_id = :order_id');
+        $existing->execute(['order_id' => $orderId]);
+        $existingIds = array_map(static fn (array $row): string => (string) $row['id'], $existing->fetchAll());
+        $submittedIds = [];
+
+        foreach ($items as $item) {
+            $itemId = isset($item['id']) && $item['id'] !== '' ? $item['id'] : $this->createUuid();
+            $submittedIds[] = $itemId;
+            if (in_array($itemId, $existingIds, true)) {
+                $statement = $this->pdo->prepare(
+                    'UPDATE order_items SET category = :category, current_description = :description,
+                     current_reason = :reason, status = \'submitted\', updated_at = CURRENT_TIMESTAMP
+                     WHERE id = :id AND order_id = :order_id',
+                );
+                $statement->execute([
+                    'id' => $itemId,
+                    'order_id' => $orderId,
+                    'category' => $item['category'],
+                    'description' => $item['description'],
+                    'reason' => $item['reason'],
+                ]);
+                continue;
+            }
+
+            $statement = $this->pdo->prepare(
+                'INSERT INTO order_items
+                 (id, order_id, category, original_description, current_description, original_reason, current_reason, status)
+                 VALUES (:id, :order_id, :category, :original_description, :current_description,
+                         :original_reason, :current_reason, \'submitted\')',
+            );
+            $statement->execute([
+                'id' => $itemId,
+                'order_id' => $orderId,
+                'category' => $item['category'],
+                'original_description' => $item['description'],
+                'current_description' => $item['description'],
+                'original_reason' => $item['reason'],
+                'current_reason' => $item['reason'],
+            ]);
+        }
+
+        $delete = $this->pdo->prepare('DELETE FROM order_items WHERE order_id = :order_id AND id = :id');
+        foreach (array_diff($existingIds, $submittedIds) as $itemId) {
+            $delete->execute(['order_id' => $orderId, 'id' => $itemId]);
+        }
+    }
+
+    public function markConfirmationEmailSent(string $orderId): void
+    {
+        $statement = $this->pdo->prepare('UPDATE orders SET confirmation_email_sent_at = CURRENT_TIMESTAMP WHERE id = :id');
+        $statement->execute(['id' => $orderId]);
+    }
+
+    private function findYear(string $orderId): int
+    {
+        $statement = $this->pdo->prepare('SELECT year FROM orders WHERE id = :id');
+        $statement->execute(['id' => $orderId]);
+        return (int) $statement->fetchColumn();
     }
 
     private function recordStatusChanges(int $count): void
@@ -518,31 +645,11 @@ final class OrderRepository
         }
     }
 
-    public function markConfirmationEmailSent(string $orderId): void
-    {
-        $statement = $this->pdo->prepare(
-            'UPDATE orders SET confirmation_email_sent_at = CURRENT_TIMESTAMP WHERE id = :id',
-        );
-        $statement->execute(['id' => $orderId]);
-    }
-
     private function createUuid(): string
     {
         $data = random_bytes(16);
         $data[6] = chr((ord($data[6]) & 0x0f) | 0x40);
         $data[8] = chr((ord($data[8]) & 0x3f) | 0x80);
-
         return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
-    }
-
-    /** @return array<string, mixed>|null */
-    private function findForId(string $orderId): ?array
-    {
-        $statement = $this->pdo->prepare(
-            'SELECT user_id, year FROM orders WHERE id = :id',
-        );
-        $statement->execute(['id' => $orderId]);
-        $row = $statement->fetch();
-        return is_array($row) ? $this->findForYear((string) $row['user_id'], (int) $row['year']) : null;
     }
 }

@@ -1,8 +1,8 @@
-import { expect, test as base, type Page } from '@playwright/test';
+import { test as base, expect, type Page } from '@playwright/test';
 
 export const test = base.extend({
   page: async ({ page }, use) => {
-    await page.route('http://localhost:8080/public/configuration**', async (route) => {
+    await page.route('http://localhost:8083/public/configuration**', async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -13,24 +13,11 @@ export const test = base.extend({
       });
     });
 
-    await page.route('http://localhost:8080/admin/overview**', async (route) => {
+    await page.route('http://localhost:8083/auth/email-check', async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({
-          year: 2026,
-          recentDays: 14,
-          orders: { provisional: 0, recentProvisional: 0, definitive: 0, toDeliver: 0, qrcode: 0, delivered: 0 },
-          categories: [],
-        }),
-      });
-    });
-
-    await page.route('http://localhost:8080/client/order**', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ order: null }),
+        body: JSON.stringify({ mode: 'password', processingYear: 2026 }),
       });
     });
 
@@ -42,6 +29,29 @@ export const test = base.extend({
           expiresAt: new Date(Date.now() + 3_600_000).toISOString(),
           secondsRemaining: 3_600,
         }),
+      });
+    });
+
+    await page.route('**/client/order', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          order: null,
+          year: 2026,
+          fairgateStatus: 'valid',
+          fairgateUserExists: true,
+          childrenCount: 2,
+          adultsCount: 2,
+        }),
+      });
+    });
+
+    await page.route('**/admin/orders**', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ orders: [], statuses: ['released', 'in_review'], categories: [] }),
       });
     });
 

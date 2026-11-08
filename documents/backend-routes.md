@@ -4,7 +4,7 @@ Diese Uebersicht beschreibt alle HTTP-Routen, die das Backend in `backend/src/Ap
 
 ## Basis
 
-Das Backend verwendet keinen globalen URL-Praefix. In der lokalen Docker-Umgebung ist es unter `http://localhost:8080` erreichbar.
+Das Backend verwendet keinen globalen URL-Praefix. In der lokalen Docker-Umgebung ist es unter `http://localhost:8083` erreichbar.
 
 Standardantworten werden als JSON geliefert. CORS ist global fuer alle nicht-`OPTIONS`-Antworten mit `Access-Control-Allow-Origin: *` aktiviert.
 
@@ -37,7 +37,7 @@ Unterstuetzte Sprache fuer `/public/start`: `de`.
 | `PATCH` | `/admin/users/{userId}` | `UpdateUserAction` | `AuthMiddleware`, Gruppe `admin` oder `user` | `{ email?, group?, required_password_reset? }` |
 | `DELETE` | `/admin/users/{userId}` | `DeleteUserAction` | `AuthMiddleware`, Gruppe `admin` | keiner |
 
-Moegliche Gruppen werden durch das Backend validiert und umfassen `admin`, `user` und `client`. Die Berechtigungen der jeweiligen Route sind in der Tabelle angegeben.
+Mögliche Gruppen werden durch das Backend validiert und umfassen `admin`, `user`, `wunschbesteller` und `wunscherfueller`. Die Berechtigungen der jeweiligen Route sind in der Tabelle angegeben.
 
 ## Fairgate
 

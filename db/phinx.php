@@ -27,7 +27,7 @@ return [
         'development' => [
             'adapter' => 'mysql',
             'host' => getenv('DB_HOST') ?: 'localhost',
-            'name' => getenv('DB_NAME') ?: 'gaerngschee_maesspaeggli',
+            'name' => getenv('DB_NAME') ?: 'gaerngschee_weihnachtswuensche',
             'user' => getenv('DB_USER') ?: 'root',
             'pass' => getenv('DB_PASS') ?: '',
             'port' => getenv('DB_PORT') ?: '3306',

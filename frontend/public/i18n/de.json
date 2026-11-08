@@ -1,35 +1,80 @@
 {
   "app": {
-    "title": "Mässpäggli",
+    "title": "Weihnachtswünsche",
     "footer": {
-      "product": "Mässpäggli",
+      "product": "Weihnachtswünsche",
       "openSource": "Open Source auf GitHub",
       "developedBy": "entwickelt von",
+      "version": "Version {{version}}",
       "imprint": "Impressum",
       "privacy": "Datenschutzerklärung",
       "garngschee": "Gärngschee",
       "navigationLabel": "Rechtliche und weiterführende Links"
     },
+    "legal": {
+      "imprintTitle": "Impressum",
+      "privacyTitle": "Datenschutzerklärung",
+      "imprintPageTitle": "Impressum",
+      "privacyPageTitle": "Datenschutz – Gärngschee Weihnachtswünsche"
+    },
     "home": {
-      "title": "Mässpäggli",
-      "lead": "Gemeinsam machen wir einen Herbstmess-Besuch möglich - auch wenn das Geld knapp ist.",
-      "externalLink": "(öffnet in einem neuen Fenster)",
+      "title": "Weihnachtsaktion",
+      "lead": "Hilf mit, Weihnachtswünsche zu erfüllen",
       "loading": "Die Aktionsseite wird geladen ...",
       "login": "Anmelden",
       "logout": "Abmelden",
-      "donate": {
-        "title": "Mässpäggli spenden",
-        "text": "Erfülle einer Familie einen Besuch an der Messe {{year}}.",
-        "action": "Jetzt spenden",
-        "unavailable": "Der Spendenlink ist momentan nicht verfügbar."
+      "submit": {
+        "title": "Wunsch einreichen",
+        "text": "Reiche deinen Weihnachtswunsch ein.",
+        "action": "Wunsch einreichen",
+        "notStarted": "Die nächste Weihnachtswünsche-Aktion beginnt am {{date}}.",
+        "ended": "Wegen zu grosser Nachfrage sind leider keine Neuanmeldungen mehr möglich.",
+        "unavailable": "Die Weihnachtswünsche-Aktion ist momentan nicht verfügbar."
       },
-      "receive": {
-        "title": "Mässpäggli erhalten",
-        "text": "Möchtest Du ein Mässpäggli für Dich und deine Famile? Starte hier deine Anfrage.",
-        "action": "Mässpäggli anfragen",
-        "notStarted": "Die nächste Mässpäggli-Aktion beginnt am {{date}}.",
-        "ended": "Die Mässpäggli-Aktion ist bereits beendet.",
-        "unavailable": "Die Mässpäggli-Aktion ist momentan nicht verfügbar."
+      "fulfill": {
+        "title": "Wünsche erfüllen",
+        "text": "Erfülle Weihnachtswünsche von anderen.",
+        "action": "Wünsche anzeigen",
+        "notStarted": "Die Möglichkeit, Wünsche zu erfüllen, beginnt am {{date}}.",
+        "ended": "Die Möglichkeit, Wünsche zu erfüllen, ist bereits beendet.",
+        "unavailable": "Die Wunschliste ist momentan nicht verfügbar."
+      },
+      "faq": {
+        "wunscher": {
+          "title": "Häufige Fragen für Wünschende",
+          "1": {
+            "question": "Welche Wertgrenze gilt für Wünsche?",
+            "answer": "<p>Pro Person gilt ein Maximalwert von <strong>CHF 100.-</strong></p><p>Alternativ kann sich eine Familie auch für einen gemeinsamen Familienwunsch entscheiden, der diesen Betrag übersteigen darf.</p>"
+          },
+          "2": {
+            "question": "Sind Freizeitpark-Wünsche möglich?",
+            "answer": "<p>Ja! Erlaubt sind Eintritte in Freizeit- und Erlebnisparks innerhalb der Schweiz.</p>"
+          },
+          "3": {
+            "question": "Kann ich Gutscheine wünschen?",
+            "answer": "<p>Ab dem <strong>12. Geburtstag</strong> sind Gutscheine möglich.</p><p>Für jüngere Kinder sind ausschliesslich <strong>Sachwünsche</strong> erlaubt.</p><p>💡 <em>Bei Gutscheinwünschen bestimmst du selber den Wert des Gutscheins.</em></p>"
+          },
+          "4": {
+            "question": "Werden alle Wünsche erfüllt?",
+            "answer": "<p>Gärngschee behält sich vor, Wünsche abzulehnen, die nicht den Richtlinien entsprechen. Wir prüfen jeden Wunsch sorgfältig, um sicherzustellen, dass möglichst viele Wünsche erfüllt werden können.</p>"
+          }
+        },
+        "wunscherfueller": {
+          "title": "Häufige Fragen für Wunscherfüller",
+          "intro": "Damit sich die Beschenkten wirklich freuen können, bitten wir dich, bei deiner Spende auf Folgendes zu achten:",
+          "1": {
+            "question": "In welchem Zustand dürfen Geschenke sein?",
+            "answer": "<p>Grundsätzlich nehmen wir nur Spenden in gutem Zustand an.</p><p>Ausnahmen werden von uns klar kommuniziert.</p>"
+          },
+          "2": {
+            "question": "Welche Produkte müssen zwingend neu sein?",
+            "answer": "<p><strong>Folgende Produkte müssen zwingend neu sein:</strong></p><ul><li>Elektronische Gegenstände – Handys, Laptops, Tablets und Konsolen dürfen gebraucht, müssen aber in gutem Zustand sein.</li><li>Hygieneprodukte</li><li>Textilien wie Kleidung und Schuhe</li></ul>"
+          },
+          "3": {
+            "question": "Wie viel darf ein Gutschein kosten?",
+            "answer": "<p>Bei Gutscheinwünschen bestimmst du selber den Wert des Gutscheins.</p>"
+          }
+        }
       }
     },
     "publicConfiguration": {
@@ -38,7 +83,7 @@
       "error": "Die erforderlichen Einstellungen konnten nicht geladen werden. Bitte versuche es später erneut."
     },
     "anmeldung": {
-      "title": "Mässpäggli Anmeldung",
+      "title": "Weihnachtswünsche Anmeldung",
       "lead": "Schreib deine E-Mail-Adresse hier hinein. Wir schicken dir dann einen direkten Link zum Bestellformular.",
       "fairgate": "Bist Du bereits bei Gärngschee angemeldet? Dann gib hier die E-Mail-Adresse ein, die Du bei deiner Anmeldung bei Fairgate verwendet hast.",
       "emailHeading": "Deine E-Mail-Adresse",
@@ -58,16 +103,24 @@
       "emailSentTitle": "E-Mail versandt",
       "emailSentMessage": "Wir haben dir eine E-Mail mit deinem persönlichen Anmeldelink geschickt. Der Link ist 10 Minuten gültig.",
       "privacyTitle": "Warum brauchen wir deine E-Mail-Adresse?",
-      "privacyText": "Wir schicken dir per E-Mail einen persönlichen Link für deine Anmeldung zur Mässpäggli-Aktion.\n\nBei der Anmeldung prüfen wir bei Fairgate, ob du bei Gärngschee registriert bist und wie viele Erwachsene und Kinder zu deiner Anmeldung gehören.\n\nWir speichern nur deine E-Mail-Adresse und die Anzahl Erwachsene und Kinder.",
+      "privacyText": "Wir schicken dir per E-Mail einen persönlichen Link für deine Anmeldung zur Weihnachtswünsche-Aktion.\n\nBei der Anmeldung prüfen wir bei Fairgate, ob du bei Gärngschee registriert bist und wie viele Erwachsene und Kinder zu deiner Anmeldung gehören.\n\nWir speichern nur deine E-Mail-Adresse und die Anzahl Erwachsene und Kinder.",
       "privacyLink": "Mehr zum Datenschutz"
     },
+    "user": {
+      "profile": {
+        "title": "Mein Profil",
+        "heading": "Mein Profil"
+      }
+    },
     "login": {
-      "pageTitle": "Mässpäggli verwalten",
+      "pageTitle": "Weihnachtswünsche verwalten",
       "heading": "Anmelden",
       "emailLabel": "E-Mail-Adresse",
       "passwordLabel": "Passwort",
       "submit": "Anmelden",
+      "continue": "Weiter",
       "forgotPassword": "Passwort vergessen?",
+      "orderInfo": "Falls du bereits eine Bestellung im Jahr {{ year }} erstellt hast, senden wir dir eine E-Mail mit dem Link, um die Bestellung zu ändern.",
       "errors": {
         "email": {
           "required": "Bitte gib deine E-Mail-Adresse ein.",
@@ -78,12 +131,17 @@
         }
       }
     },
+    "bestellung": {
+      "pageTitle": "Bestellung",
+      "title": "Weihnachtswünsche",
+      "message": "Die Bestellfunktion wird derzeit vorbereitet."
+    },
     "order": {
-      "pageTitle": "Mässpäggli bestellen",
-      "heading": "Mässpäggli bestellen",
+      "pageTitle": "Weihnachtswünsche bestellen",
+      "heading": "Weihnachtswünsche bestellen",
       "description": "Dies ist die vorbereitete Bestellseite.",
       "intro": "Für deine Bestellung sind {{adults}} Erwachsene und {{children}} Kinder erfasst.",
-      "introInstruction": "Wähle für jede Person das passende Mässpäggli aus.",
+      "introInstruction": "Wähle für jede Person das passende Weihnachtswünsche aus.",
       "adults": "Erwachsene",
       "children": "Kinder",
       "fairgate": "Fairgate-Konto vorhanden",
@@ -91,7 +149,7 @@
       "no": "Nein",
       "noFairgate": {
         "title": "Lieber Besteller",
-        "messageBeforeLink": "Wir können Dich leider nicht bei Fairgate finden. Bitte melde Dich dort an, damit Du berechtigt bist, ein oder mehrere Mässpäggli zu bestellen. Verwende dabei die E-Mail, die Du hier verwendet hast. Du kannst Dich trotzdem provisorisch anmelden, Du musst uns einfach die richtige Anzahl Erwachsene und Kinder angeben. Sobald wir deine Anmeldung bei Fairgate erhalten haben, wird deine Anmeldung automatisch definitiv. Anmelden kannst Du Dich",
+        "messageBeforeLink": "Wir können Dich leider nicht bei Fairgate finden. Bitte melde Dich dort an, damit Du berechtigt bist, ein oder mehrere Weihnachtswünsche zu bestellen. Verwende dabei die E-Mail, die Du hier verwendet hast. Du kannst deine Bestellung trotzdem speichern, musst uns aber die richtige Anzahl Erwachsene und Kinder angeben. Sobald wir deine Anmeldung bei Fairgate erhalten haben, wird deine Bestellung automatisch zur Prüfung freigegeben. Anmelden kannst Du Dich",
         "link": "hier",
         "messageAfterLink": "."
       },
@@ -106,13 +164,13 @@
         "children": "Anzahl Kinder"
       },
       "categories": {
-        "title": "Mässpäggli anfordern",
-        "description": "Du kannst die Kategorien für dein Mässpäggli selbst auswählen. \nBitte beachte: Bei einigen Bahnen gibt es Vorgaben zu Grösse, Gewicht oder Alter. ",
+        "title": "Weihnachtswünsche anfordern",
+        "description": "Du kannst die Kategorien für dein Weihnachtswünsche selbst auswählen. \nBitte beachte: Bei einigen Bahnen gibt es Vorgaben zu Grösse, Gewicht oder Alter. ",
         "adults": "Erwachsene",
         "children": "Kinder",
         "adult": "Erwachsene Person",
         "child": "Kind",
-        "category": "Mässpäggli-Kategorie",
+        "category": "Weihnachtswünsche-Kategorie",
         "pleaseSelect": "Bitte auswählen",
         "errors": {
           "required": "Bitte auswählen."
@@ -130,13 +188,154 @@
         }
       },
       "submit": "Weiter",
+      "password": {
+        "title": "Passwort festlegen",
+        "description": "Lege für zukünftige Anmeldungen ein persönliches Passwort fest.",
+        "label": "Passwort"
+      },
+      "passwordConfirmation": {
+        "label": "Passwort wiederholen"
+      },
+      "details": {
+        "title": "Deine Bestellung"
+      },
+      "fairgate": {
+        "validTitle": "Fairgate-Zugang gefunden",
+        "validMessage": "Die Anzahl der Erwachsenen und Kinder wurde aus Fairgate übernommen.",
+        "manualTitle": "Angaben zur Familie",
+        "manualMessage": "Wir konnten keinen gültigen Fairgate-Zugang finden. Bitte gib die Anzahl der Erwachsenen und Kinder selbst ein."
+      },
+      "publicText": {
+        "label": "Erzähl uns etwas kleines warum du dir das wünschst (‼️ Bitte beachte, diese Informationen werden ÖFFENTLICH PUBLIZIERT ‼️)",
+        "hint": "Bitte teile keine privaten oder vertraulichen Informationen."
+      },
+      "items": {
+        "title": "Deine Wünsche",
+        "caption": "Deine Wünsche",
+        "description": "Wunschbeschreibung",
+        "reason": "Begründung",
+        "category": "Kategorie",
+        "new": "Wunsch hinzufügen",
+        "categories": {
+          "voucher": "Gutschein",
+          "gift": "Geschenk"
+        },
+        "statuses": {
+          "draft": "Entwurf",
+          "submitted": "Eingereicht",
+          "rejected": "Änderung erforderlich",
+          "approved": "Freigegeben",
+          "reserved": "Übernommen",
+          "received": "Eingegangen",
+          "completed": "Abgeschlossen"
+        },
+        "delete": "Löschen",
+        "edit": "Ändern",
+        "status": "Status",
+        "actions": "Aktionen",
+        "deleteTitle": "Wunsch löschen",
+        "deleteMessage": "Möchtest du diesen Wunsch wirklich löschen?",
+        "deleteConfirm": "Löschen",
+        "cancel": "Abbrechen",
+        "empty": "Du hast bisher noch keinen Wunsch erfasst."
+      },
+      "itemEditor": {
+        "newTitle": "Wunsch hinzufügen",
+        "editTitle": "Wunsch ändern",
+        "description": "Bitte erfasse deinen Wunsch.",
+        "back": "Zurück",
+        "save": "Speichern"
+      },
+      "actions": {
+        "newItem": "Neuen Wunsch aufnehmen",
+        "save": "Speichern"
+      },
+      "confirmation": {
+        "pageTitle": "Bestellung gespeichert",
+        "title": "Deine Bestellung wurde gespeichert",
+        "releasedTitle": "Bestellung freigegeben",
+        "releasedMessage": "Deine Daten werden den Administratoren zur Prüfung vorgelegt.",
+        "waitingForFairgateTitle": "Fairgate-Zugang noch nicht gefunden",
+        "waitingForFairgateMessage": "Sobald Du bei Fairgate angemeldet bist, senden wir dir eine E-Mail darüber, wie es weitergeht.",
+        "login": "Zur Login-Seite"
+      },
+      "status": {
+        "waiting_for_fairgate": {
+          "title": "Warten auf Fairgate",
+          "message": "Deine Anmeldung wird bearbeitet, sobald du bei Fairgate gefunden wurdest. Darum kann sie gerade nicht verändert werden."
+        },
+        "released": {
+          "title": "Zur Prüfung freigegeben",
+          "message": "Deine Anmeldung wurde zur administrativen Prüfung freigegeben. Darum kann sie gerade nicht verändert werden."
+        },
+        "in_review": {
+          "title": "In Prüfung",
+          "message": "Deine Anmeldung wird derzeit administrativ geprüft. Darum kann sie gerade nicht verändert werden."
+        },
+        "definitive": {
+          "title": "Anmeldung bestätigt",
+          "message": "Deine Anmeldung wurde definitiv bestätigt. Darum kann sie gerade nicht verändert werden."
+        },
+        "ready_for_pickup": {
+          "title": "Bereit zur Abholung",
+          "message": "Deine Geschenke sind bereit zur Abholung. Darum kann sie gerade nicht verändert werden."
+        },
+        "completed": {
+          "title": "Abgeschlossen",
+          "message": "Deine Anmeldung ist abgeschlossen. Darum kann sie gerade nicht verändert werden."
+        }
+      },
+      "errors": {
+        "INVALID_ORDER": "Bitte prüfe deine Angaben.",
+        "WEAK_PASSWORD": "Das Passwort erfüllt die Anforderungen nicht.",
+        "FAIRGATE_LOOKUP_FAILED": "Die Fairgate-Daten konnten nicht geprüft werden.",
+        "ORDER_NOT_EDITABLE": "Diese Bestellung kann in ihrem aktuellen Status nicht mehr geändert werden.",
+        "ORDER_SAVE_FAILED": "Bitte versuche es später erneut.",
+        "password": {
+          "required": "Bitte gib ein Passwort ein.",
+          "minLength": "Das Passwort muss mindestens 12 Zeichen lang sein.",
+          "maxLength": "Das Passwort darf höchstens 128 Zeichen lang sein."
+        },
+        "passwordConfirmation": {
+          "required": "Bitte wiederhole das Passwort.",
+          "minLength": "Das Passwort muss mindestens 12 Zeichen lang sein.",
+          "maxLength": "Das Passwort darf höchstens 128 Zeichen lang sein.",
+          "passwordsDoNotMatch": "Die Passwörter stimmen nicht überein."
+        },
+        "adultsCount": {
+          "required": "Bitte gib die Anzahl der Erwachsenen ein.",
+          "min": "Die Anzahl darf nicht negativ sein."
+        },
+        "childrenCount": {
+          "required": "Bitte gib die Anzahl der Kinder ein.",
+          "min": "Die Anzahl darf nicht negativ sein."
+        },
+        "text": {
+          "required": "Bitte erzähl uns kurz, warum du dir das wünschst.",
+          "maxLength": "Der Text darf höchstens 2000 Zeichen lang sein."
+        },
+        "items": {
+          "itemCount": "Bitte erfasse mindestens einen Wunsch und höchstens einen Wunsch pro Familienmitglied.",
+          "category": {
+            "required": "Bitte wähle eine Kategorie aus."
+          },
+          "description": {
+            "required": "Bitte beschreibe deinen Wunsch.",
+            "maxLength": "Die Wunschbeschreibung darf höchstens 2000 Zeichen lang sein."
+          },
+          "reason": {
+            "required": "Bitte begründe deinen Wunsch.",
+            "maxLength": "Die Begründung darf höchstens 2000 Zeichen lang sein."
+          }
+        }
+      },
       "summary": {
         "pageTitle": "Bestellübersicht",
         "title": "Bestellübersicht",
         "description": "Deine Bestellung für das Jahr {{year}}.",
         "status": "Status",
         "statuses": {
-          "provisional": "Provisorisch",
+          "waiting_for_fairgate": "Wartet auf Fairgate",
           "definitive": "Definitiv"
         },
         "back": "Zurück",
@@ -147,10 +346,121 @@
         "successTitle": "Bestellung gespeichert",
         "success": "Deine Bestellung wurde erfolgreich gespeichert.",
         "loadErrorTitle": "Bestellung konnte nicht geladen werden",
+        "loadError": "Die Daten für deine Bestellung konnten nicht geladen werden.",
+        "saveErrorTitle": "Bestellung konnte nicht gespeichert werden",
         "errorTitle": "Bestellung konnte nicht gespeichert werden",
         "errors": {
-          "REQUEST_FAILED": "Die Bestellung konnte nicht gespeichert werden."
+          "REQUEST_FAILED": "Die Bestellung konnte nicht gespeichert werden.",
+          "INVALID_ORDER": "Bitte prüfe deine Angaben.",
+          "WEAK_PASSWORD": "Das Passwort erfüllt die Anforderungen nicht.",
+          "FAIRGATE_LOOKUP_FAILED": "Die Fairgate-Daten konnten nicht geprüft werden.",
+          "ORDER_SAVE_FAILED": "Bitte versuche es später erneut."
         }
+      }
+    },
+    "fulfiller": {
+      "pageTitle": "Weihnachtswünsche erfüllen",
+      "filters": {
+        "title": "Wünsche suchen",
+        "search": "Suche",
+        "searchHint": "Suche nach Familieninformationen, Wunschtext oder Begründung.",
+        "minimumSearchLength": "Die Suche startet ab drei Zeichen.",
+        "category": "Kategorie",
+        "allCategories": "Alle Kategorien"
+      },
+      "ordersTitle": "Definitive Bestellungen",
+      "orderTitle": "Bestellung {{orderNumber}}",
+      "year": "Aktionsjahr {{year}}",
+      "familyInformation": "Anonymisierte Familieninformation",
+      "loading": "Wünsche werden geladen ...",
+      "empty": "Es wurden keine passenden verfügbaren Wünsche gefunden.",
+      "reserve": "Diesen Wunsch erfüllen",
+      "reserved": "Von dir reserviert",
+      "pendingConfirmation": "Bestätigung per E-Mail ausstehend",
+      "reservationEmailSentTitle": "Bestätigungs-E-Mail versandt",
+      "reservationEmailSentMessage": "Bitte bestätige die Reservierung über den Link in deiner E-Mail. Der Wunsch bleibt bis dahin vorübergehend blockiert.",
+      "reservationConfirmationTitle": "Wunschreservierung bestätigen",
+      "reservationConfirmedTitle": "Wunschreservierung bestätigt",
+      "reservationConfirmed": "Die Reservierung wurde bestätigt. Bitte bringe den Wunsch zum angegebenen Abgabezeitpunkt an den angegebenen Ort.",
+      "moreWishes": "Weitere Weihnachtswünsche erfüllen",
+      "handoverDetails": "Abgabe: {{date}}, {{time}}, {{location}}",
+      "reservationConfirmationFailedTitle": "Wunschreservierung konnte nicht bestätigt werden",
+      "reservationConfirmationFailed": "Der Bestätigungslink ist ungültig, abgelaufen oder der Wunsch wurde inzwischen anderweitig reserviert.",
+      "privacyLink": "Datenschutzerklärung lesen",
+      "reservationDialog": {
+        "title": "Wunsch erfüllen",
+        "wishDetailsTitle": "Wunschdetails",
+        "wishNumberLabel": "Wunschnummer",
+        "wishLabel": "Wunsch",
+        "reasonLabel": "Begründung",
+        "commitmentTitle": "Verbindliche Zusage",
+        "emailLabel": "Deine E-Mail-Adresse",
+        "commitment": "Mit der Reservierung verpflichtest du dich, den Wunsch zu beschaffen, zu verpacken und zur angegebenen Zeit am angegebenen Ort abzugeben.",
+        "handoverTitle": "Übergabe",
+        "handoverDateLabel": "Datum",
+        "handoverTimeLabel": "Zeitfenster",
+        "handoverLocationLabel": "Ort",
+        "privacyConsent": "Ich akzeptiere die Datenschutzerklärung.",
+        "submit": "Bestätigungslink senden",
+        "errors": {
+          "email": {
+            "required": "Bitte gib deine E-Mail-Adresse ein.",
+            "email": "Bitte prüfe deine E-Mail-Adresse.",
+            "maxLength": "Die E-Mail-Adresse ist zu lang."
+          },
+          "privacyAccepted": {
+            "required": "Bitte akzeptiere die Datenschutzerklärung."
+          }
+        }
+      },
+      "reserveTitle": "Wunsch reservieren",
+      "reserveMessage": "Möchtest du diesen Wunsch reservieren? Du beschaffst, verpackst und bringst das Geschenk anschliessend selbst.",
+      "reserveConfirm": "Wunsch reservieren",
+      "cancel": "Abbrechen",
+      "successTitle": "Wunsch reserviert",
+      "reservedMessage": "Der Wunsch wurde für dich reserviert.",
+      "errorTitle": "Wunsch konnte nicht reserviert werden",
+      "loadErrorTitle": "Wünsche konnten nicht geladen werden",
+      "loadErrors": {
+        "FULFILLER_ENDED": "Die Wunschliste ist wegen der erreichten Jahreslimite nicht mehr verfügbar.",
+        "FULFILLER_NOT_STARTED": "Die Wunschliste ist noch nicht verfügbar.",
+        "REQUEST_FAILED": "Die Wunschliste konnte nicht geladen werden. Bitte versuche es später erneut."
+      },
+      "errors": {
+        "WISH_NOT_AVAILABLE": "Dieser Wunsch wurde inzwischen von jemand anderem reserviert.",
+        "PRIVACY_CONSENT_REQUIRED": "Bitte akzeptiere die Datenschutzerklärung.",
+        "INVALID_EMAIL": "Bitte prüfe deine E-Mail-Adresse.",
+        "INVALID_WISH_DATA": "Der ausgewählte Wunsch ist ungültig.",
+        "RATE_LIMITED": "Zu viele Versuche. Bitte warte kurz und versuche es später erneut.",
+        "FULFILLER_ENDED": "Die Wunschliste ist wegen der erreichten Jahreslimite nicht mehr verfügbar.",
+        "REQUEST_FAILED": "Die Wünsche konnten nicht geladen werden. Bitte versuche es später erneut."
+      }
+    },
+    "fulfillerRegistration": {
+      "pageTitle": "Als Wunscherfüller anmelden",
+      "lead": "Gib deine E-Mail-Adresse ein. Wir schicken dir einen persönlichen Link für die passwortlose Anmeldung.",
+      "emailHeading": "Deine E-Mail-Adresse",
+      "emailLabel": "E-Mail-Adresse",
+      "privacyConsent": "Ich akzeptiere die Datenschutzerklärung und möchte per E-Mail einen Anmeldelink erhalten.",
+      "privacyLink": "Datenschutzerklärung lesen",
+      "submit": "Anmeldelink senden",
+      "emailSentTitle": "E-Mail versandt",
+      "emailSentMessage": "Wir haben dir einen persönlichen Anmeldelink geschickt. Der Link ist 10 Minuten gültig.",
+      "errorTitle": "Anmeldung konnte nicht gestartet werden",
+      "errors": {
+        "email": {
+          "required": "Bitte gib deine E-Mail-Adresse ein.",
+          "email": "Bitte prüfe deine E-Mail-Adresse."
+        },
+        "privacyAccepted": {
+          "required": "Bitte akzeptiere die Datenschutzerklärung."
+        },
+        "PRIVACY_CONSENT_REQUIRED": "Bitte akzeptiere die Datenschutzerklärung.",
+        "CAMPAIGN_NOT_STARTED": "Die Aktion hat noch nicht begonnen.",
+        "CAMPAIGN_ENDED": "Die Aktion ist bereits beendet.",
+        "FULFILLER_NOT_STARTED": "Die Möglichkeit, Wünsche zu erfüllen, hat noch nicht begonnen.",
+        "FULFILLER_ENDED": "Die Möglichkeit, Wünsche zu erfüllen, ist bereits beendet.",
+        "REQUEST_FAILED": "Der Anmeldelink konnte nicht gesendet werden. Bitte versuche es später erneut."
       }
     },
     "passwordChange": {
@@ -224,13 +534,16 @@
       "pageTitle": "Seite nicht gefunden",
       "heading": "Diese Seite gibt es nicht",
       "login": "Anmelden",
-      "start": "Mässpäggli bestellen"
+      "start": "Weihnachtswünsche bestellen"
     },
     "auth": {
       "loginErrorTitle": "Anmeldung fehlgeschlagen",
       "errors": {
         "INVALID_CREDENTIALS": "E-Mail-Adresse oder Passwort ist ungültig.",
-        "LOGIN_FAILED": "Die Anmeldung konnte nicht durchgeführt werden. Bitte versuche es später erneut."
+        "RATE_LIMITED": "Zu viele Versuche. Bitte warte kurz und versuche es später erneut.",
+        "LOGIN_FAILED": "Die Anmeldung konnte nicht durchgeführt werden. Bitte versuche es später erneut.",
+        "INVALID_EMAIL": "Bitte prüfe deine E-Mail-Adresse.",
+        "REQUEST_FAILED": "Die Anfrage konnte nicht durchgeführt werden. Bitte versuche es später erneut."
       },
       "sessionExpiredTitle": "Sitzung abgelaufen",
       "sessionExpiredMessage": "Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.",
@@ -240,6 +553,10 @@
     },
     "admin": {
       "overview": {
+        "stub": {
+          "title": "Übersicht",
+          "message": "Die Übersicht für Weihnachtswünsche wird derzeit vorbereitet."
+        },
         "title": "Admin-Übersicht"
       },
       "fairgateTest": {
@@ -287,16 +604,62 @@
       },
       "overview": {
         "title": "Admin-Übersicht",
+        "filters": {
+          "title": "Filter",
+          "status": "Status",
+          "category": "Kategorie",
+          "active": "Aktive Filter",
+          "removeStatus": "Statusfilter entfernen",
+          "removeCategory": "Kategoriefilter entfernen"
+        },
+        "statuses": {
+          "released": "Freigegeben",
+          "in_review": "In Prüfung",
+          "changes_requested": "Änderungen verlangt",
+          "definitive": "Definitiv",
+          "ready_for_pickup": "Bereit zur Abholung",
+          "completed": "Abgeschlossen"
+        },
+        "ordersTitle": "Bestellungen",
+        "orderNotFound": "Die Bestellung wurde nicht gefunden.",
+        "back": "Zurück zur Übersicht",
+        "change": "Ändern",
+        "save": "Speichern",
+        "email": "E-Mail-Adresse",
+        "orderNumber": "Ordernummer",
+        "wishNumber": "Wunschnummer",
+        "status": "Status",
+        "itemCountHeader": "Anzahl Wünsche",
+        "actions": "Aktionen",
+        "itemCount": "{{ count }} Wünsche",
+        "process": "Bestellung verarbeiten",
+        "editTitle": "Bestellung bearbeiten",
+        "itemEditTitle": "Wunsch bearbeiten",
+        "currentText": "Aktueller Order-Text",
+        "originalText": "Ursprünglicher Order-Text",
+        "adminNotes": "Interne Bemerkung oder Begründung der Order-Zurückweisung",
+        "itemsTitle": "Wünsche",
+        "originalDescription": "Ursprüngliche Wunschbeschreibung",
+        "originalReason": "Ursprüngliche Begründung",
+        "rejectionReason": "Begründung der Zurückweisung",
+        "accept": "Wunsch akzeptieren",
+        "reject": "Wunsch zurückweisen",
+        "rejectOrder": "Zurückweisen",
+        "release": "Freigeben",
+        "cancel": "Abbrechen",
+        "successTitle": "Erfolgreich",
+        "saved": "Die Bestellung wurde gespeichert.",
+        "saveErrorTitle": "Bestellung konnte nicht gespeichert werden",
         "loading": "Übersicht wird geladen ...",
         "definitiveTitle": "Definitive Bestellungen",
-        "provisionalTitle": "Provisorische Bestellungen",
-        "recentProvisionalTitle": "Provisorische Bestellungen in den letzten {{ days }} Tagen",
+        "waiting_for_fairgateTitle": "Bestellungen warten auf Fairgate",
+        "recentProvisionalTitle": "Bestellungen warten in den letzten {{ days }} Tagen auf Fairgate",
         "orderCount": "Anzahl Bestellungen",
         "category": "Bestellungen/Kategorie",
         "orders": "Bestellungen",
-        "provisional": "Provisorisch",
-        "provisionalShort": "Prov.",
-        "recentProvisional": "Provisorisch letzte {{ days }} Tage",
+        "waiting_for_fairgate": "Wartet",
+        "waiting_for_fairgateShort": "Prov.",
+        "recentProvisional": "Wartet letzte {{ days }} Tage",
         "recentProvisionalShort": "P. {{ days }} Tg",
         "definitive": "Definitiv",
         "definitiveShort": "Def.",
@@ -310,8 +673,8 @@
         "empty": "Keine Bestellungen vorhanden.",
         "legend": {
           "title": "Legende",
-          "provisional": "Provisorische Bestellungen, noch nicht bei Fairgate vorhanden",
-          "recentProvisional": "Provisorische Bestellungen der letzten {{ days }} Tage",
+          "waiting_for_fairgate": "Bestellungen, deren Person noch nicht bei Fairgate gefunden wurde",
+          "recentProvisional": "Bestellungen, die in den letzten {{ days }} Tagen auf Fairgate warten",
           "definitive": "Definitive Bestellungen",
           "toDeliver": "Zur Auslieferung gekennzeichnet",
           "qrcode": "QR-Code per E-Mail versandt",
@@ -329,6 +692,16 @@
         "deliveredMessage": "{{ updated }} definitive Bestellungen wurden zur Auslieferung markiert.",
         "errorTitle": "Übersicht konnte nicht geladen werden",
         "errors": {
+          "INVALID_ORDER_DATA": "Die Bestelldaten sind ungültig.",
+          "ORDER_NOT_FOUND": "Die Bestellung wurde nicht gefunden.",
+          "REJECTION_REASON_REQUIRED": "Für eine Zurückweisung ist eine Begründung erforderlich.",
+          "ITEMS_NOT_ACCEPTED": "Alle Wünsche müssen zuerst akzeptiert werden.",
+          "ITEM_REJECTION_REQUIRED": "Mindestens ein Wunsch muss zurückgewiesen werden.",
+          "ORDER_REJECTION_REASON_REQUIRED": "Für die Zurückweisung der Order ist eine Begründung erforderlich.",
+          "rejectionReason": {
+            "required": "Bitte gib eine Begründung für die Zurückweisung ein."
+          },
+          "ORDER_UPDATE_FAILED": "Die Bestellung konnte nicht gespeichert werden.",
           "INVALID_OVERVIEW_CONFIGURATION": "Die Konfiguration für die Übersicht ist ungültig.",
           "REQUEST_FAILED": "Die Übersicht konnte nicht geladen werden.",
           "DELIVERY_FAILED": "Die definitiven Bestellungen konnten nicht zur Auslieferung markiert werden."
@@ -442,6 +815,7 @@
       "delivery": "Auslieferung",
       "configuration": "Konfiguration",
       "fairgateTest": "Fairgate-Test",
+      "fulfillment": "Wünsche erfüllen",
       "userManagement": "Benutzerverwaltung",
       "clientDeletion": "Client-Bestellung löschen",
       "myUser": "Meine Daten",
@@ -451,12 +825,12 @@
       "order": {
         "confirmation": {
           "definitive": {
-            "subject": "Deine Mässpäggli-Anmeldung ist definitiv bestätigt",
-            "title": "Deine Mässpäggli-Anmeldung ist definitiv bestätigt",
+            "subject": "Deine Weihnachtswünsche-Anmeldung ist definitiv bestätigt",
+            "title": "Deine Weihnachtswünsche-Anmeldung ist definitiv bestätigt",
             "highlight": "Danke für deine Geduld.",
-            "body": "Vielen Dank für deine Geduld! Deine Anmeldung für das Mässpäggli {{year}} wurde erfolgreich geprüft und ist nun definitiv bestätigt.",
+            "body": "Vielen Dank für deine Geduld! Deine Anmeldung für das Weihnachtswünsche {{year}} wurde erfolgreich geprüft und ist nun definitiv bestätigt.",
             "nextTitle": "Wie geht es weiter?",
-            "nextText": "Sobald die Mässpäggli abholbereit sind, senden wir dir eine E-Mail mit deinem persönlichen QR-Code. Diesen QR-Code zeigst du einfach bei der Ausgabe vor, um dein Mässpäggli in Empfang zu nehmen.",
+            "nextText": "Sobald die Weihnachtswünsche abholbereit sind, senden wir dir eine E-Mail mit deinem persönlichen QR-Code. Diesen QR-Code zeigst du einfach bei der Ausgabe vor, um dein Weihnachtswünsche in Empfang zu nehmen.",
             "correction": "Wir haben die Anzahl der Erwachsenen und Kinder anhand der Angaben in Fairgate angepasst. Bitte prüfe deine Bestellübersicht.",
             "correctionLink": "Anmeldung prüfen oder anpassen",
             "overviewTitle": "Bestellübersicht",
@@ -464,20 +838,41 @@
             "adults": "Erwachsene:",
             "children": "Kinder:"
           },
-          "provisional": {
+          "released": {
+            "subject": "Deine Weihnachtswünsche-Anmeldung wurde freigegeben",
+            "title": "Deine Weihnachtswünsche-Anmeldung wurde freigegeben",
+            "highlight": "Danke für deine Geduld.",
+            "body": "Vielen Dank für deine Geduld! Deine Anmeldung für das Weihnachtswünsche {{year}} wurde erfolgreich geprüft und zur administrativen Prüfung freigegeben.",
+            "nextTitle": "Wie geht es weiter?",
+            "nextText": "Wir informieren dich per E-Mail, sobald deine Anmeldung definitiv bestätigt wurde.",
+            "overviewTitle": "Bestellübersicht",
+            "year": "Jahr:",
+            "adults": "Erwachsene:",
+            "children": "Kinder:"
+          },
+          "waiting_for_fairgate": {
             "subject": "Fast geschafft!",
             "title": "Fast geschafft!",
-            "highlight": "Danke für deine Anmeldung zum Mässpäggli {{year}}.",
+            "highlight": "Danke für deine Anmeldung zum Weihnachtswünsche {{year}}.",
             "body": "",
             "fairgateTitle": "Fairgate-Prüfung steht noch aus",
-            "fairgateText": "Wichtig: Verwende die gleiche E-Mail-Adresse wie bei deiner Anmeldung.\n\nDanach prüfen wir deine Angaben und schicken dir die Bestätigung per E-Mail.",
-            "fairgateLink": "Zum Registrierungsformular",
+            "fairgateText": "Bitte melde dich bei Fairgate mit der gleichen E-Mail-Adresse wie bei deiner Anmeldung an. Danach prüfen wir deine Angaben automatisch.",
+            "fairgateLink": "Bei Fairgate anmelden",
             "expiredTitle": "Dein Bedürftigkeitsausweis ist abgelaufen",
             "expiredText": "Bitte sende uns einen aktuellen Bedürftigkeitsausweis an folgende Adresse:",
             "overviewTitle": "Bestellübersicht",
             "year": "Jahr:",
             "adults": "Erwachsene:",
             "children": "Kinder:"
+          },
+          "family_size_exceeded": {
+            "subject": "Bitte passe deine Weihnachtswünsche-Anmeldung an",
+            "title": "Bitte passe deine Anmeldung an",
+            "noticeTitle": "Die Personenzahlen stimmen nicht überein",
+            "noticeText": "Die Angaben in deiner Weihnachtswünsche-Anmeldung stimmen nicht mit den Angaben bei Fairgate überein.",
+            "counts": "In deiner Bestellung sind %orderAdults% Erwachsene und %orderChildren% Kinder angegeben. Bei Fairgate wurden %fairgateAdults% Erwachsene und %fairgateChildren% Kinder gefunden.",
+            "button": "Anmeldung anpassen",
+            "footer": "Bitte passe deine Bestellung an. Danach wird sie erneut geprüft."
           }
         }
       },
@@ -508,10 +903,10 @@
         "ignore": "Wenn du diese Anfrage nicht gestellt hast, kannst du diese E-Mail ignorieren."
       },
       "delivery": {
-        "subject": "Das Mässpäggli ist bereit zur Abholung!",
-        "title": "Das Mässpäggli ist bereit zur Abholung!",
+        "subject": "Das Weihnachtswünsche ist bereit zur Abholung!",
+        "title": "Das Weihnachtswünsche ist bereit zur Abholung!",
         "greeting": "Liebe/r Bezüger/in",
-        "introduction": "Es ist so weit: Dein Mässpäggli liegt für dich bereit! Wir freuen uns riesig, dir damit eine unbeschwerte Zeit an der Herbstmesse zu ermöglichen.",
+        "introduction": "Es ist so weit: Dein Weihnachtswünsche liegt für dich bereit! Wir freuen uns riesig, dir damit eine unbeschwerte Zeit an der Herbstmesse zu ermöglichen.",
         "pickupInformationTitle": "Hier sind alle Infos zur Abholung:",
         "pickupDateLabel": "Wann",
         "pickupDate": "Freitag, 30. Oktober 2026",
@@ -522,38 +917,56 @@
         "pickupImportantTitle": "Wichtig für die Abholung:",
         "pickupQrInstruction": "Bitte zeige bei der Ausgabe diesen QR-Code (ausgedruckt oder direkt auf dem Smartphone) vor:",
         "qrAlt": "QR-Code für die Abholung",
-        "pickupProxy": "Falls du es persönlich nicht schaffst, kann auch eine Vertrauensperson dein Mässpäggli mit diesem QR-Code für dich abholen.",
+        "pickupProxy": "Falls du es persönlich nicht schaffst, kann auch eine Vertrauensperson dein Weihnachtswünsche mit diesem QR-Code für dich abholen.",
         "closingMessage": "Wir wünschen dir und deinen Liebsten ganz viel Freude und tolle Erlebnisse an der Basler Herbstmesse!",
         "closing": "Herzliche Grüsse",
         "team": "Dein Gärngschee-Team"
       },
       "fairgateReminder": {
-        "subject": "Bitte schliesse deine Mässpäggli-Anmeldung ab",
+        "subject": "Bitte schliesse deine Weihnachtswünsche-Anmeldung ab",
         "notFound": "Wir haben dich bei Fairgate noch nicht gefunden.",
-        "body": "Bitte registriere dich bei Fairgate.\nWichtig: Verwende die gleiche E-Mail-Adresse wie für deine Mässpäggli-Anmeldung.\n\nDanach prüfen wir deine Anmeldung automatisch.",
+        "body": "Bitte registriere dich bei Fairgate.\nWichtig: Verwende die gleiche E-Mail-Adresse wie für deine Weihnachtswünsche-Anmeldung.\n\nDanach prüfen wir deine Anmeldung automatisch.",
         "button": "Bei Fairgate anmelden",
         "expired": "Dein Bedürftigkeitsausweis bei Fairgate ist abgelaufen.",
         "expiredBody": "Bitte sende uns einen aktuellen Bedürftigkeitsausweis an folgende Adresse:"
       },
       "registration": {
         "clientOrder": {
-          "title": "Jetzt für Mässpäggli anmelden",
-          "highlight": "Dein Anmeldelink für das Mässpäggli ist bereit.",
-          "body": "Schön, dass du dabei bist! Klicke einfach auf den folgenden Link, um deine Anmeldung für das Mässpäggli 2026 zu starten:",
+          "title": "Jetzt für Weihnachtswünsche anmelden",
+          "highlight": "Dein Anmeldelink für das Weihnachtswünsche ist bereit.",
+          "body": "Schön, dass du dabei bist! Klicke einfach auf den folgenden Link, um deine Anmeldung für das Weihnachtswünsche 2026 zu starten:",
           "nextTitle": "Wichtig",
           "nextText": "Der Link ist 10 Minuten gültig und kann nur einmal verwendet werden.",
-          "button": "Mässpäggli auswählen",
-          "subject": "Dein Link zur Mässpäggli-Bestellung"
+          "button": "Weihnachtswünsche auswählen",
+          "subject": "Dein Link zur Weihnachtswünsche-Bestellung"
+        },
+        "fulfillerReservation": {
+          "title": "Deine Wunschreservierung bestätigen",
+          "intro": "Bitte bestätige, dass du den folgenden Wunsch erfüllen möchtest:",
+          "button": "Wunschreservierung bestätigen",
+          "subject": "Bitte bestätige deine Wunschreservierung"
+        },
+        "fulfillerReservationConfirmation": {
+          "title": "Wunschreservierung bestätigt",
+          "subject": "Deine Wunschreservierung ist bestätigt",
+          "body": "Danke, dass du diesen Weihnachtswunsch erfüllst. Deine Reservierung wurde erfolgreich bestätigt.",
+          "wishNumber": "Wunschnummer",
+          "wish": "Wunsch",
+          "handoverTitle": "Übergabe",
+          "date": "Datum",
+          "time": "Zeitfenster",
+          "location": "Ort",
+          "keepMessage": "Bitte bewahre diese E-Mail auf und bringe den Wunsch zum angegebenen Zeitpunkt an den angegebenen Ort."
         },
         "common": {
           "ignore": "Falls du diese Anfrage nicht ausgelöst hast, kannst du diese E-Mail ignorieren."
         },
         "clientOrderStatus": {
-          "title": "Information zu deiner Mässpäggli-Bestellung",
-          "subject": "Information zu deiner Mässpäggli-Bestellung",
+          "title": "Information zu deiner Weihnachtswünsche-Bestellung",
+          "subject": "Information zu deiner Weihnachtswünsche-Bestellung",
           "toDeliver": "Deine Anmeldung wird bereits vorbereitet.",
           "qrcode": "Wir haben dir schon einen QR-Code für die Abholung gesandt.",
-          "delivered": "Die Mässpäggli wurden bereits ausgeliefert."
+          "delivered": "Die Weihnachtswünsche wurden bereits ausgeliefert."
         }
       }
     }

@@ -9,7 +9,7 @@ const isPreservedOnRoute = (url: string, preserveOnRoutes: string[]): boolean =>
 
   return preserveOnRoutes.some((route) => {
     const preservedPath = normalizePath(route);
-    return currentPath === preservedPath || currentPath.startsWith(`${preservedPath}/`);
+    return currentPath === preservedPath;
   });
 };
 

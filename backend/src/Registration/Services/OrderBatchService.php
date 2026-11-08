@@ -8,12 +8,10 @@ use App\Configuration\Data\FrontendConfigRepository;
 use App\Fairgate\Services\FairgateContactProvider;
 use App\Fairgate\Services\FairgateBatchContactProvider;
 use App\Fairgate\Services\FairgateOrderDataEvaluator;
-use App\Registration\Data\OrderEmailQueueRepository;
-use App\Registration\Data\OrderCategories;
 use App\Registration\Data\OrderRepository;
 use App\Registration\Data\RegistrationTokenRepository;
-use App\Registration\Services\QrCodeGenerator;
 use App\Shared\Mail\EmailSenderInterface;
+use App\Shared\Mail\EmailQueueRepository;
 use App\Shared\Database\Database;
 use App\Shared\Logging\ExternalErrorLogRepository;
 use DateTimeImmutable;
@@ -23,16 +21,16 @@ use Throwable;
 final class OrderBatchService
 {
     private const INTERVAL_CONFIG = 'fairgate_email_interval_days';
+    private const REMINDER_END_DATE_CONFIG = 'fairgate_reminder_end_date';
     private const TOKEN_RETENTION_CONFIG = 'registration_token_retention_days';
 
     public function __construct(
         private readonly OrderRepository $orders,
-        private readonly OrderEmailQueueRepository $queue,
+        private readonly EmailQueueRepository $queue,
         private readonly FrontendConfigRepository $config,
         private readonly FairgateContactProvider $fairgate,
         private readonly EmailSenderInterface $emails,
         private readonly RegistrationTokenRepository $tokens,
-        private readonly ?QrCodeGenerator $qrCodes = null,
         private readonly ?ExternalErrorLogRepository $externalErrors = null,
         private readonly ?FairgateOrderDataEvaluator $evaluator = null,
     ) {
@@ -49,6 +47,7 @@ final class OrderBatchService
         }
         $retentionDays = $this->tokenRetentionDays();
         $now = new DateTimeImmutable('now', new DateTimeZone('UTC'));
+        $reminderEndDate = $this->reminderEndDate();
         $result = [
             'loaded' => 0,
             'sent' => 0,
@@ -59,35 +58,43 @@ final class OrderBatchService
         $fairgateContacts = $this->fairgateContacts();
 
         foreach ($this->queue->pending() as $email) {
+            if (($email['email_type'] ?? null) === 'fairgate_reminder'
+                && !$this->reminderAllowed($reminderEndDate, $now)) {
+                $this->queue->remove((string) $email['id']);
+                continue;
+            }
             try {
                 $this->emails->sendStoredEmail($email['recipient'], $email['subject'], $email['html_body'], $email['text_body']);
                 $this->queue->remove($email['id']);
                 if ($email['email_type'] === 'order_confirmation') {
-                    $this->orders->markBatchEmailSent($email['order_id']);
-                } elseif ($email['email_type'] === 'delivery_qrcode') {
-                    $this->orders->markQrCodeSent($email['order_id']);
-                } else {
-                    $this->orders->markFairgateReminderSent($email['order_id']);
+                    $this->orders->markReleased($email['reference_id']);
+                } elseif ($email['email_type'] === 'family_size_correction') {
+                    $this->orders->markFamilySizeExceeded($email['reference_id']);
+                } elseif ($email['email_type'] === 'fairgate_reminder') {
+                    $this->orders->markFairgateReminderSent($email['reference_id']);
+                }
+                if (in_array($email['email_type'], ['order_confirmation', 'family_size_correction'], true)) {
+                    $this->orders->markConfirmationEmailSent($email['reference_id']);
                 }
                 $result['sent']++;
             } catch (Throwable $exception) {
                 $this->queue->recordFailure($email['id'], $exception->getMessage());
-                $this->log('Queued email failed', $email['order_id'], $exception);
+                $this->log('Queued email failed', $email['reference_id'], $exception);
                 $result['failed']++;
             }
         }
 
-        foreach ($this->orders->findProvisionalWithUsers() as $entry) {
+        foreach ($this->orders->findWaitingForFairgateWithUsers() as $entry) {
             $result['loaded']++;
             $order = $entry['order'];
-            if ($this->queue->hasPendingForOrder($order['id'])) {
+            if ($this->queue->hasPendingForReference('order', $order['id'])) {
                 continue;
             }
 
             try {
                 $data = $this->contactData($entry['email'], $fairgateContacts);
                 if (!is_array($data)) {
-                    $this->processMissingFairgate($order, $entry['email'], $result, 'not_found');
+                    $this->processMissingFairgate($order, $entry['email'], $result, 'not_found', $reminderEndDate, $now);
                     continue;
                 }
 
@@ -98,64 +105,43 @@ final class OrderBatchService
                     $this->config->findCampaignYear(),
                 );
                 if (!$evaluation['valid']) {
-                    $this->processMissingFairgate($order, $entry['email'], $result, $evaluation['status']);
+                    $this->processMissingFairgate($order, $entry['email'], $result, $evaluation['status'], $reminderEndDate, $now);
                     continue;
                 }
 
                 $adults = $evaluation['adultsCount'];
                 $children = $evaluation['childrenCount'];
-                $corrected = $adults !== $order['adultsCount'] || $children !== $order['childrenCount'];
-                if ($corrected) {
-                    $items = $this->correctItems($order['items'], $adults, $children);
-                    $this->orders->updateFromBatch($order['id'], $adults, $children, $items);
-                    $order = $this->orders->findForYear($order['userId'], $order['year']) ?? $order;
-                    $order['correctionNotice'] = true;
-                    $order['startUrl'] = rtrim(getenv('FRONTEND_BASE_URL') ?: 'http://localhost:4200', '/') . '/start';
+                $this->orders->recordFairgateCounts($order['id'], $adults, $children);
+                $order['fairgateAdultsCount'] = $adults;
+                $order['fairgateChildrenCount'] = $children;
+                $order['fairgateUrl'] = $this->fairgateUrl();
+                $order['startUrl'] = rtrim(getenv('FRONTEND_BASE_URL') ?: 'http://localhost:4200', '/') . '/start';
+
+                if ($adults !== $order['adultsCount'] || $children !== $order['childrenCount']) {
+                    $this->sendStatusEmail($order, $entry['email'], $result, 'family_size_exceeded');
+                    continue;
                 }
-                $this->sendConfirmation($order, $entry['email'], $result);
+
+                $this->sendStatusEmail($order, $entry['email'], $result, 'released');
             } catch (Throwable $exception) {
                 $this->log('Order batch failed', $order['id'], $exception);
                 $result['failed']++;
             }
         }
 
-        foreach ($this->orders->findToDeliverWithUsers() as $entry) {
+        foreach ($this->orders->findOrdersWithPendingStatusEmails() as $entry) {
             $result['loaded']++;
             $order = $entry['order'];
-            if ($this->queue->hasPendingForOrder($order['id'])) {
+            if ($this->queue->hasPendingForReference('order', $order['id'])) {
                 continue;
             }
 
-            try {
-                $token = is_string($order['deliveryToken']) && $order['deliveryToken'] !== ''
-                    ? $order['deliveryToken']
-                    : $this->createDeliveryToken($order['id']);
-                $deliveryUrl = rtrim(getenv('FRONTEND_BASE_URL') ?: 'http://localhost:4200', '/') . '/delivery?token=' . rawurlencode($token);
-                $qrDataUri = ($this->qrCodes ?? new QrCodeGenerator())->generateDataUri($deliveryUrl);
-                $message = $this->emails->renderDeliveryNotification($order, $deliveryUrl, $qrDataUri);
-                try {
-                    $this->emails->sendStoredEmail($entry['email'], $message['subject'], $message['html'], $message['text']);
-                    $this->orders->markQrCodeSent($order['id']);
-                    $result['sent']++;
-                } catch (Throwable $exception) {
-                    $this->queue->enqueue($order['id'], 'delivery_qrcode', $entry['email'], $message, $exception->getMessage());
-                    $this->log('Delivery notification failed and queued', $order['id'], $exception);
-                    $result['queued']++;
-                }
-            } catch (Throwable $exception) {
-                $this->log('Delivery batch failed', $order['id'], $exception);
-                $result['failed']++;
-            }
+            $order['fairgateUrl'] = $this->fairgateUrl();
+            $order['startUrl'] = rtrim(getenv('FRONTEND_BASE_URL') ?: 'http://localhost:4200', '/') . '/start';
+            $this->sendStatusEmail($order, $entry['email'], $result, (string) $order['status']);
         }
 
         return $result;
-    }
-
-    private function createDeliveryToken(string $orderId): string
-    {
-        $token = rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '=');
-        $this->orders->setDeliveryToken($orderId, $token);
-        return $token;
     }
 
     /** @return array<string, string>|null */
@@ -166,7 +152,7 @@ final class OrderBatchService
         }
 
         $contacts = [];
-        foreach ($this->fairgate->findAllContacts() as $contact) {
+        foreach ($this->fairgate->findAllContacts(ClientRegistrationLoginService::MEMBERSHIP) as $contact) {
             $contacts[strtolower(trim($contact['email']))] = $contact['contactId'];
         }
 
@@ -177,7 +163,7 @@ final class OrderBatchService
     private function contactData(string $email, ?array $contacts): ?array
     {
         if ($contacts === null) {
-            $data = $this->fairgate->findContactDataByEmail($email)['data'] ?? null;
+            $data = $this->fairgate->findContactDataByEmail($email, ClientRegistrationLoginService::MEMBERSHIP)['data'] ?? null;
             return is_array($data) ? $data : null;
         }
 
@@ -191,18 +177,22 @@ final class OrderBatchService
     }
 
     /** @param array<string, mixed> $order */
-    private function sendConfirmation(array $order, string $email, array &$result): void
+    private function sendStatusEmail(array $order, string $email, array &$result, string $status): void
     {
         if (($order['fairgateStatus'] ?? null) === 'expired') {
             $order['fairgateDocumentEmail'] = $this->documentEmail();
         }
-        $message = $this->emails->renderOrderConfirmation($order, 'definitive');
+        $message = $this->emails->renderOrderConfirmation($order, $status);
+        $emailType = $status === 'family_size_exceeded'
+            ? 'family_size_correction'
+            : 'order_confirmation';
         try {
             $this->emails->sendStoredEmail($email, $message['subject'], $message['html'], $message['text']);
         } catch (Throwable $exception) {
             $this->queue->enqueue(
+                'order',
                 $order['id'],
-                'order_confirmation',
+                $emailType,
                 $email,
                 $message,
                 $exception->getMessage(),
@@ -212,13 +202,27 @@ final class OrderBatchService
             return;
         }
 
-        $this->orders->markBatchEmailSent($order['id']);
+        if ($status === 'family_size_exceeded') {
+            $this->orders->markFamilySizeExceeded($order['id']);
+        } else {
+            $this->orders->markReleased($order['id']);
+        }
+        $this->orders->markConfirmationEmailSent($order['id']);
         $result['sent']++;
     }
 
     /** @param array<string, mixed> $order */
-    private function processMissingFairgate(array $order, string $email, array &$result, string $status): void
-    {
+    private function processMissingFairgate(
+        array $order,
+        string $email,
+        array &$result,
+        string $status,
+        ?DateTimeImmutable $reminderEndDate,
+        DateTimeImmutable $now,
+    ): void {
+        if (!$this->reminderAllowed($reminderEndDate, $now)) {
+            return;
+        }
         $last = $order['fairgateReminderEmailSentAt'] ?? null;
         $reference = is_string($last) && trim($last) !== ''
             ? $last
@@ -238,54 +242,19 @@ final class OrderBatchService
             $this->orders->markFairgateReminderSent($order['id']);
             $result['sent']++;
         } catch (Throwable $exception) {
-            $this->queue->enqueue($order['id'], 'fairgate_reminder', $email, $message, $exception->getMessage());
+            $this->queue->enqueue(
+                'order',
+                $order['id'],
+                'fairgate_reminder',
+                $email,
+                $message,
+                $exception->getMessage(),
+            );
             $this->log('Fairgate reminder failed and queued', $order['id'], $exception);
             $result['queued']++;
         }
     }
 
-    /** @param list<array{personType: string, category: string, quantity: int}> $items */
-    private function correctItems(array $items, int $adults, int $children): array
-    {
-        $groups = ['adult' => [], 'child' => []];
-        foreach ($items as $item) {
-            $groups[$item['personType']][$item['category']] = $item['quantity'];
-        }
-        $targets = [
-            'adult' => $children > 0 ? 0 : $adults,
-            'child' => $children,
-        ];
-        $fallbacks = [
-            'adult' => OrderCategories::ADULT_FALLBACK,
-            'child' => OrderCategories::CHILD_FALLBACK,
-        ];
-        foreach ($targets as $type => $target) {
-            $current = array_sum($groups[$type]);
-            while ($current < $target) {
-                $fallback = $fallbacks[$type];
-                $groups[$type][$fallback] = ($groups[$type][$fallback] ?? 0) + 1;
-                $current++;
-            }
-            while ($current > $target) {
-                foreach (array_reverse(OrderCategories::ALL) as $category) {
-                    if (($groups[$type][$category] ?? 0) > 0) {
-                        $groups[$type][$category]--;
-                        $current--;
-                        break;
-                    }
-                }
-            }
-        }
-        $result = [];
-        foreach ($groups as $type => $categories) {
-            foreach ($categories as $category => $quantity) {
-                if ($quantity > 0) {
-                    $result[] = ['personType' => $type, 'category' => $category, 'quantity' => $quantity];
-                }
-            }
-        }
-        return $result;
-    }
 
     private function log(string $message, string $orderId, Throwable $exception): void
     {
@@ -299,6 +268,29 @@ final class OrderBatchService
             throw new \RuntimeException('Invalid Fairgate email interval configuration.');
         }
         return (int) $value;
+    }
+
+    private function reminderEndDate(): ?DateTimeImmutable
+    {
+        $value = $this->config->findValueByVariableName(self::REMINDER_END_DATE_CONFIG);
+        if ($value === null || trim((string) $value) === '') {
+            return null;
+        }
+        $value = trim((string) $value);
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $value) !== 1) {
+            throw new \RuntimeException('Invalid Fairgate reminder end date configuration.');
+        }
+        $date = DateTimeImmutable::createFromFormat('!Y-m-d', $value, new DateTimeZone('UTC'));
+        $errors = DateTimeImmutable::getLastErrors();
+        if ($date === false || ($errors !== false && ($errors['warning_count'] > 0 || $errors['error_count'] > 0))) {
+            throw new \RuntimeException('Invalid Fairgate reminder end date configuration.');
+        }
+        return $date;
+    }
+
+    private function reminderAllowed(?DateTimeImmutable $endDate, DateTimeImmutable $now): bool
+    {
+        return $endDate === null || $now->format('Y-m-d') <= $endDate->format('Y-m-d');
     }
 
     private function fairgateUrl(): string

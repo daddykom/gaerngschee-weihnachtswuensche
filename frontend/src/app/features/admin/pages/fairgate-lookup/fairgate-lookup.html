@@ -2,16 +2,12 @@
   <p class="gl-text--multiline">{{ 'app.admin.fairgateLookup.description' | translate }}</p>
 
   @if (email === '') {
-    <p role="alert">{{ 'app.admin.fairgateLookup.missingEmail' | translate }}</p>
+  <p role="alert">{{ 'app.admin.fairgateLookup.missingEmail' | translate }}</p>
   } @else {
-    <p>{{ email }}</p>
-  }
-
-  @if (loading()) {
-    <p>{{ 'app.admin.fairgateLookup.loading' | translate }}</p>
-  }
-
-  @if (result(); as response) {
-    <pre class="fairgate-lookup-result">{{ response | json }}</pre>
+  <p>{{ email }}</p>
+  } @if (loading()) {
+  <p>{{ 'app.admin.fairgateLookup.loading' | translate }}</p>
+  } @if (result(); as response) {
+  <pre class="fairgate-lookup-result">{{ response | json }}</pre>
   }
 </section>

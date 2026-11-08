@@ -1,8 +1,8 @@
-# Bedienungsanleitung Gärngschee-Mässpäggli
+# Bedienungsanleitung Gärngschee-Weihnachtswünsche
 
 ## Zweck der Anwendung
 
-Die Anwendung unterstützt Gärngschee bei der Verwaltung von Mässpäggli-
+Die Anwendung unterstützt Gärngschee bei der Verwaltung von Weihnachtswünsche-
 Bestellungen und deren Auslieferung. Je nach Benutzergruppe stehen
 unterschiedliche Funktionen zur Verfügung.
 
@@ -14,7 +14,7 @@ Bedienung erfolgt über die angezeigten Schaltflächen, Links und Formulare.
 | Benutzergruppe | Aufgabe |
 |---|---|
 | Besucher | Öffentliche Informationen ansehen und eine Bestellung anfragen |
-| Spender | Über den externen Spendenlink Mässpäggli finanzieren |
+| Erfüller | Einzelne Weihnachtswünsche auswählen und erfüllen |
 | Klient | Eine eigene Bestellung erfassen und bestätigen |
 | Mitarbeitende | Bestellungen suchen und ausliefern |
 | Administratoren | Anwendung, Benutzer und Konfiguration verwalten |
@@ -29,10 +29,10 @@ die Benutzergruppe `admin`.
 Auf der Startseite werden das Aktionsjahr und der aktuelle Stand der Kampagne
 angezeigt.
 
-Unter **Mässpäggli spenden** führt die Schaltfläche **Jetzt spenden** auf die
-externe Spendenseite.
+Unter **Weihnachtswünsche erfüllen** können verfügbare Wünsche ausgewählt und
+einzeln erfüllt werden.
 
-Unter **Mässpäggli erhalten** kann während einer offenen Kampagne eine Anfrage
+Unter **Weihnachtswünsche erhalten** kann während einer offenen Kampagne eine Anfrage
 gestartet werden. Vor dem Kampagnenstart wird das Startdatum angezeigt. Nach
 dem Kampagnenende wird angezeigt, dass die Aktion beendet ist.
 
@@ -62,26 +62,24 @@ Mit **Abmelden** wird die Sitzung beendet.
 Wenn die Sitzung bereits abgelaufen ist, muss die Anmeldung erneut durchgeführt
 werden.
 
-## Besucher und Spender
+## Besucher und Erfüller
 
 ### Öffentliche Informationen ansehen
 
 Die Startseite ist ohne Anmeldung erreichbar. Dort werden das Aktionsjahr, die
-Informationen für Spender und die Möglichkeit für eine Bestellung angezeigt.
+Informationen für Erfüller und die Möglichkeit für eine Bestellung angezeigt.
 
-### Spenden
+### Weihnachtswünsche erfüllen
 
-1. Auf der Startseite **Jetzt spenden** auswählen.
-2. Die externe Spendenseite öffnet sich in einem neuen Browserfenster oder
-   Tab.
-3. Die Zahlung und die Auswahl der Spende werden vollständig auf dieser
-   externen Seite durchgeführt.
+1. Auf der Startseite die Übersicht der verfügbaren Weihnachtswünsche öffnen.
+2. Einen einzelnen Weihnachtswunsch auswählen.
+3. Die Erfüllung des Wunsches bestätigen.
 
-Die Anwendung selbst verarbeitet keine Zahlungsdaten.
+Der ausgewählte Wunsch wird danach als erfüllt gekennzeichnet und steht anderen Erfüllern nicht mehr zur Auswahl.
 
 ### Eine Bestellung anfragen
 
-1. Auf der Startseite **Mässpäggli anfragen** auswählen.
+1. Auf der Startseite **Weihnachtswünsche anfragen** auswählen.
 2. Die E-Mail-Adresse eingeben.
 3. **Weiter** auswählen.
 4. Den persönlichen Link aus der E-Mail öffnen.
@@ -117,8 +115,8 @@ Bestellseite und auf der Bestellübersicht steht ein Fairgate-Link zur Verfügun
 
 ### Bestellung erfassen
 
-Wenn keine Kinder angemeldet sind, können Mässpäggli für Erwachsene ausgewählt
-werden. Sobald Kinder angemeldet sind, können nur noch Mässpäggli für Kinder
+Wenn keine Kinder angemeldet sind, können Weihnachtswünsche für Erwachsene ausgewählt
+werden. Sobald Kinder angemeldet sind, können nur noch Weihnachtswünsche für Kinder
 ausgewählt werden.
 
 1. Die angezeigten Personenanzahlen prüfen.
@@ -291,7 +289,7 @@ Mögliche Konfigurationswerte betreffen unter anderem:
 
 - Aktionsjahr
 - Start- und Enddatum der Kampagne
-- Spendenlink
+- Übersicht der verfügbaren Weihnachtswünsche
 - Fairgate-Link
 - Anzahl Tage für die Anzeige neuer provisorischer Bestellungen
 - Fairgate-Testkontakt und Erinnerungsintervalle

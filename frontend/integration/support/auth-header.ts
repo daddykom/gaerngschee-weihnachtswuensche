@@ -1,6 +1,6 @@
+import { Page } from '@playwright/test';
 import { execFileSync } from 'node:child_process';
 import { resolve } from 'node:path';
-import { Page } from '@playwright/test';
 
 export function resetIntegrationRateLimits(): void {
   execFileSync(

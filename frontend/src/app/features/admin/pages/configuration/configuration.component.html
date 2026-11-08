@@ -1,5 +1,8 @@
 <section class="gl-stack gl-stack--section">
-  <form class="configuration-form gl-stack gl-stack--section" (submit)="$event.preventDefault(); onSubmit()">
+  <form
+    class="configuration-form gl-stack gl-stack--section"
+    (submit)="$event.preventDefault(); onSubmit()"
+  >
     @if (loading()) {
       <p>{{ 'app.admin.configuration.loading' | translate }}</p>
     } @else {
@@ -18,16 +21,22 @@
               @for (value of values(config); track $index) {
                 <mat-form-field appearance="outline">
                   <mat-label>{{ config.variableName }} {{ $index + 1 }}</mat-label>
-                    @if (config.canUpdate) {
-                       <input matInput type="text" [placeholder]="config.placeholder || ''" [formField]="arrayField(config, $index)" (blur)="arrayField(config, $index)().markAsTouched()" />
-                    } @else {
-                      <input matInput type="text" [value]="value" disabled />
-                    }
-                    <app-control-error
-                      matError
-                      [control]="arrayField(config, $index)()"
-                      translationPrefix="app.admin.configuration.errors"
+                  @if (config.canUpdate) {
+                    <input
+                      matInput
+                      type="text"
+                      [placeholder]="config.placeholder || ''"
+                      [formField]="arrayField(config, $index)"
+                      (blur)="arrayField(config, $index)().markAsTouched()"
                     />
+                  } @else {
+                    <input matInput type="text" [value]="value" disabled />
+                  }
+                  <app-control-error
+                    matError
+                    [control]="arrayField(config, $index)()"
+                    translationPrefix="app.admin.configuration.errors"
+                  />
                 </mat-form-field>
                 @if (config.canUpdate) {
                   <button mat-button type="button" (click)="removeValue(config, $index)">
@@ -44,16 +53,22 @@
           } @else {
             <mat-form-field appearance="outline">
               <mat-label>{{ config.variableName }}</mat-label>
-               @if (config.canUpdate) {
-                <input matInput type="text" [placeholder]="config.placeholder || ''" [formField]="field(config)" (blur)="field(config)().markAsTouched()" />
-               } @else {
-                 <input matInput type="text" [value]="model()[config.id]" disabled />
-               }
-               <app-control-error
-                 matError
-                 [control]="field(config)()"
-                 translationPrefix="app.admin.configuration.errors"
-               />
+              @if (config.canUpdate) {
+                <input
+                  matInput
+                  type="text"
+                  [placeholder]="config.placeholder || ''"
+                  [formField]="field(config)"
+                  (blur)="field(config)().markAsTouched()"
+                />
+              } @else {
+                <input matInput type="text" [value]="model()[config.id]" disabled />
+              }
+              <app-control-error
+                matError
+                [control]="field(config)()"
+                translationPrefix="app.admin.configuration.errors"
+              />
             </mat-form-field>
           }
         </fieldset>
@@ -62,7 +77,13 @@
       }
 
       <div class="gl-cluster">
-        <button mat-flat-button color="primary" type="submit" [disabled]="saving() || loading()" (click)="$event.preventDefault(); onSubmit()">
+        <button
+          mat-flat-button
+          color="primary"
+          type="submit"
+          [disabled]="saving() || loading()"
+          (click)="$event.preventDefault(); onSubmit()"
+        >
           {{ 'app.admin.configuration.save' | translate }}
         </button>
       </div>

@@ -12,6 +12,7 @@
 /frontend/.nx
 /frontend/coverage
 /frontend/dist
+/frontend/public/version.json
 /frontend/node_modules
 /backend/.php-cs-fixer.cache
 /.codanna/index/serve.lock

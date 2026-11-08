@@ -1,0 +1,9 @@
+<app-fulfillment-list
+  [orders]="orders()"
+  [search]="search()"
+  [category]="category()"
+  [loadStatus]="loadStatus()"
+  (searchChanged)="searchChanged($event)"
+  (categoryChanged)="categoryChanged($event)"
+  (reserve)="reserve($event)"
+></app-fulfillment-list>

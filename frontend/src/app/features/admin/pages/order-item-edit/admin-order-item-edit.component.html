@@ -1,0 +1,60 @@
+@if (order(); as currentOrder) {
+  @if (item(); as currentItem) {
+    <div class="gl-stack gl-stack--section">
+      <section class="gl-stack gl-stack--group" aria-labelledby="item-edit-heading">
+        <div class="gl-cluster">
+          <h2 id="item-edit-heading">{{ 'app.admin.overview.itemEditTitle' | translate }}</h2>
+          <button mat-button type="button" (click)="cancel()">
+            {{ 'app.admin.overview.cancel' | translate }}
+          </button>
+        </div>
+        <p>{{ currentOrder.requesterEmail }}</p>
+        <p>
+          <strong>{{ 'app.admin.overview.originalDescription' | translate }}</strong>
+        </p>
+        <p class="original-text">{{ currentItem.originalDescription }}</p>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>{{ 'app.order.items.description' | translate }}</mat-label>
+          <textarea matInput rows="4" [formField]="itemForm.currentDescription"></textarea>
+          <app-control-error
+            matError
+            [control]="itemForm.currentDescription()"
+            translationPrefix="app.order.errors.items.description"
+          />
+        </mat-form-field>
+        <p>
+          <strong>{{ 'app.admin.overview.originalReason' | translate }}</strong>
+        </p>
+        <p class="original-text">{{ currentItem.originalReason }}</p>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>{{ 'app.order.items.reason' | translate }}</mat-label>
+          <textarea matInput rows="3" [formField]="itemForm.currentReason"></textarea>
+          <app-control-error
+            matError
+            [control]="itemForm.currentReason()"
+            translationPrefix="app.order.errors.items.reason"
+          />
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>{{ 'app.admin.overview.rejectionReason' | translate }}</mat-label>
+          <textarea matInput rows="3" [formField]="itemForm.adminNotes"></textarea>
+          <app-control-error
+            matError
+            [control]="itemForm.adminNotes()"
+            translationPrefix="app.admin.overview.errors.rejectionReason"
+          />
+        </mat-form-field>
+      </section>
+      <div class="gl-cluster">
+        <button mat-button type="button" (click)="accept()">
+          {{ 'app.admin.overview.accept' | translate }}
+        </button>
+        <button mat-stroked-button type="button" (click)="reject()">
+          {{ 'app.admin.overview.reject' | translate }}
+        </button>
+      </div>
+    </div>
+  }
+} @else {
+  <p>{{ 'app.admin.overview.orderNotFound' | translate }}</p>
+}

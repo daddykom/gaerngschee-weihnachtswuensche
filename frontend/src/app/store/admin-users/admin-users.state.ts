@@ -1,23 +1,29 @@
-import { AdminUser, ClientDeletionLookup } from '../../shared/services/admin-users.service';
+import { AdminUser } from '../../shared/services/admin-users.service';
 
-export type ClientDeletionLookupState =
-  | { status: 'initial'; email: string }
-  | { status: 'loading'; email: string }
-  | { status: 'loaded'; email: string; result: ClientDeletionLookup }
-  | { status: 'error'; email: string; errorCode: string };
+export interface AdminUserForm {
+  email: string;
+  group: 'admin' | 'user';
+  requiredPasswordReset: boolean;
+}
 
 export interface AdminUsersState {
+  form: AdminUserForm;
   users: AdminUser[];
-  loading: boolean;
-  saving: boolean;
-  deletingClientOrder: boolean;
-  clientDeletion: ClientDeletionLookupState;
+  selectedUser: AdminUser | null;
+  detailStatus: 'initial' | 'loading' | 'loaded' | 'error';
+  loadStatus: 'initial' | 'loading' | 'loaded' | 'error';
+  saveStatus: 'initial' | 'loading' | 'success' | 'error';
+  errorCode: string | null;
+  detailErrorCode: string | null;
 }
 
 export const initialState: AdminUsersState = {
+  form: { email: '', group: 'user', requiredPasswordReset: false },
   users: [],
-  loading: false,
-  saving: false,
-  deletingClientOrder: false,
-  clientDeletion: { status: 'initial', email: '' },
+  selectedUser: null,
+  detailStatus: 'initial',
+  loadStatus: 'initial',
+  saveStatus: 'initial',
+  errorCode: null,
+  detailErrorCode: null,
 };

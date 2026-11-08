@@ -116,16 +116,41 @@ final class FrontendConfigRepository
 
     public function campaignStatus(?DateTimeImmutable $now = null): string
     {
+        return $this->dateRangeStatus('campaign_start_date', 'campaign_end_date', 'campaign', $now);
+    }
+
+    public function fulfillerStatus(?DateTimeImmutable $now = null): string
+    {
+        return $this->dateRangeStatus('fulfiller_start_date', 'fulfiller_end_date', 'fulfiller', $now);
+    }
+
+    private function findById(string $id, string $group): ?array
+    {
+        foreach ($this->findVisibleForGroup($group) as $config) {
+            if ($config['id'] === $id) {
+                return $config;
+            }
+        }
+
+        return null;
+    }
+
+    private function dateRangeStatus(
+        string $startVariableName,
+        string $endVariableName,
+        string $configurationName,
+        ?DateTimeImmutable $now,
+    ): string {
         $timezone = new DateTimeZone('Europe/Zurich');
-        $startValue = $this->findValueByVariableName('campaign_start_date');
-        $endValue = $this->findValueByVariableName('campaign_end_date');
+        $startValue = $this->findValueByVariableName($startVariableName);
+        $endValue = $this->findValueByVariableName($endVariableName);
         $startDate = is_string($startValue) ? DateTimeImmutable::createFromFormat('!Y-m-d', $startValue, $timezone) : false;
         $endDate = is_string($endValue) ? DateTimeImmutable::createFromFormat('!Y-m-d', $endValue, $timezone) : false;
         if ($startDate === false || $startDate->format('Y-m-d') !== $startValue) {
-            throw new \RuntimeException('Invalid campaign start date configuration.');
+            throw new \RuntimeException('Invalid ' . $configurationName . ' start date configuration.');
         }
         if ($endDate === false || $endDate->format('Y-m-d') !== $endValue) {
-            throw new \RuntimeException('Invalid campaign end date configuration.');
+            throw new \RuntimeException('Invalid ' . $configurationName . ' end date configuration.');
         }
 
         $currentDate = ($now ?? new DateTimeImmutable('now', $timezone))->setTimezone($timezone);
@@ -138,17 +163,6 @@ final class FrontendConfigRepository
         }
 
         return 'open';
-    }
-
-    private function findById(string $id, string $group): ?array
-    {
-        foreach ($this->findVisibleForGroup($group) as $config) {
-            if ($config['id'] === $id) {
-                return $config;
-            }
-        }
-
-        return null;
     }
 
     private function mapConfig(array $row, bool $canUpdate): array

@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { type Mock } from 'vitest';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { provideTranslateService } from '@ngx-translate/core';
+import { type Mock } from 'vitest';
 import { ConfirmDialogComponent, ConfirmDialogData } from './confirm-dialog';
 
 describe('ConfirmDialogComponent', () => {
@@ -31,7 +31,9 @@ describe('ConfirmDialogComponent', () => {
 
   it('renders all supplied dialog text and actions', () => {
     expect(fixture.nativeElement.querySelector('h2').textContent).toContain(data.title);
-    expect(fixture.nativeElement.querySelector('mat-dialog-content').textContent).toContain(data.message);
+    expect(fixture.nativeElement.querySelector('mat-dialog-content').textContent).toContain(
+      data.message,
+    );
     expect(fixture.nativeElement.querySelectorAll('button')).toHaveLength(2);
   });
 

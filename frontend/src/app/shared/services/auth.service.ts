@@ -2,8 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { UserGroup } from '../models/frontend-config.model';
 import { FairgateStatus } from '../models/fairgate.model';
+import { UserGroup } from '../models/frontend-config.model';
 
 export interface AuthUser {
   id: string;
@@ -15,6 +15,7 @@ export interface LoginResponse {
   user: AuthUser;
   group: UserGroup;
   requiredPasswordReset: boolean;
+  firstAccess: boolean;
 }
 
 export interface RegistrationLoginResponse extends LoginResponse {
@@ -23,6 +24,13 @@ export interface RegistrationLoginResponse extends LoginResponse {
   childrenCount: number;
   adultsCount: number;
   salutation: string;
+}
+
+export type EmailCheckMode = 'password' | 'email_sent' | 'info';
+
+export interface EmailCheckResponse {
+  mode: EmailCheckMode;
+  processingYear: number;
 }
 
 export interface SessionStatusResponse {
@@ -47,6 +55,14 @@ export class AuthService {
     return this.http.post<LoginResponse>(
       `${environment.apiUrl}/auth/login`,
       { email, password },
+      { withCredentials: true },
+    );
+  }
+
+  checkEmail(email: string): Observable<EmailCheckResponse> {
+    return this.http.post<EmailCheckResponse>(
+      `${environment.apiUrl}/auth/email-check`,
+      { email },
       { withCredentials: true },
     );
   }

@@ -1,21 +1,40 @@
-import { expect, test } from './support/test';
 import { expectTranslatedText } from './support/assertions';
+import { expect, test } from './support/test';
 
 test.describe('Login route', () => {
   test.beforeEach(async ({ page }) => {
-    await page.route('http://localhost:8080/auth/session-status', async (route) => {
-      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ expiresAt: '2099-01-01T00:00:00Z', secondsRemaining: 3600 }) });
+    await page.route('http://localhost:8083/auth/session-status', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ expiresAt: '2099-01-01T00:00:00Z', secondsRemaining: 3600 }),
+      });
     });
-    await page.route('http://localhost:8080/admin/overview', async (route) => {
-      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ year: 2026, recentDays: 14, orders: {}, categories: [] }) });
+    await page.route('http://localhost:8083/admin/overview', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ year: 2026, recentDays: 14, orders: {}, categories: [] }),
+      });
     });
-    await page.route('http://localhost:8080/public/configuration', async (route) => {
-      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
+    await page.route('http://localhost:8083/admin/orders**', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ orders: [], statuses: ['released', 'in_review'], categories: [] }),
+      });
+    });
+    await page.route('http://localhost:8083/public/configuration', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([]),
+      });
     });
   });
 
   test('logs in and navigates to the admin overview', async ({ page }) => {
-    await page.route('http://localhost:8080/auth/login', async (route) => {
+    await page.route('http://localhost:8083/auth/login', async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -26,13 +45,14 @@ test.describe('Login route', () => {
         }),
       });
     });
-    await page.route('http://localhost:8080/auth/logout', async (route) => {
+    await page.route('http://localhost:8083/auth/logout', async (route) => {
       await route.fulfill({ status: 204 });
     });
 
     await page.goto('/login');
     await expectTranslatedText(page.locator('h1'), 'app.login.pageTitle');
     await page.locator('input[type="email"]').fill('admin@example.com');
+    await page.getByRole('button', { name: 'Weiter' }).click();
     await page.locator('input[type="password"]').fill('secret');
     await page.locator('button[type="submit"]').click();
 
@@ -64,7 +84,7 @@ test.describe('Login route', () => {
   });
 
   test('shows a translated error for invalid credentials', async ({ page }) => {
-    await page.route('http://localhost:8080/auth/login', async (route) => {
+    await page.route('http://localhost:8083/auth/login', async (route) => {
       await route.fulfill({
         status: 401,
         contentType: 'application/json',
@@ -77,6 +97,7 @@ test.describe('Login route', () => {
     await page.goto('/login');
     await expectTranslatedText(page.locator('h1'), 'app.login.pageTitle');
     await page.locator('input[type="email"]').fill('admin@example.com');
+    await page.getByRole('button', { name: 'Weiter' }).click();
     await page.locator('input[type="password"]').fill('wrong-password');
     await page.locator('button[type="submit"]').click();
 
@@ -85,7 +106,7 @@ test.describe('Login route', () => {
   });
 
   test('warns before the session expires', async ({ page }) => {
-    await page.route('http://localhost:8080/auth/login', async (route) => {
+    await page.route('http://localhost:8083/auth/login', async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -96,7 +117,7 @@ test.describe('Login route', () => {
         }),
       });
     });
-    await page.route('http://localhost:8080/auth/session-status', async (route) => {
+    await page.route('http://localhost:8083/auth/session-status', async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -109,6 +130,7 @@ test.describe('Login route', () => {
 
     await page.goto('/login');
     await page.locator('input[type="email"]').fill('admin@example.com');
+    await page.getByRole('button', { name: 'Weiter' }).click();
     await page.locator('input[type="password"]').fill('secret');
     await page.getByRole('button', { name: 'Anmelden' }).click();
 
@@ -120,7 +142,7 @@ test.describe('Login route', () => {
   });
 
   test('redirects users with a required password reset', async ({ page }) => {
-    await page.route('http://localhost:8080/auth/login', async (route) => {
+    await page.route('http://localhost:8083/auth/login', async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -134,10 +156,29 @@ test.describe('Login route', () => {
 
     await page.goto('/login');
     await page.locator('input[type="email"]').fill('user@example.com');
+    await page.getByRole('button', { name: 'Weiter' }).click();
     await page.locator('input[type="password"]').fill('temporary-secret');
     await page.getByRole('button', { name: 'Anmelden' }).click();
 
     await page.waitForURL('**/password-change');
     await expectTranslatedText(page.locator('h1'), 'app.passwordChange.pageTitle');
+  });
+
+  test('redirects clients to the success page with a success message', async ({ page }) => {
+    await page.route('http://localhost:8083/auth/email-check', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ mode: 'email_sent', processingYear: 2026 }),
+      });
+    });
+
+    await page.goto('/login');
+    await page.locator('input[type="email"]').fill('client@example.com');
+    await page.getByRole('button', { name: 'Weiter' }).click();
+
+    await page.waitForURL('**/start/success');
+    await expectTranslatedText(page.locator('.info-box'), 'app.anmeldung.emailSentTitle');
+    await expectTranslatedText(page.locator('.info-box'), 'app.login.orderInfo');
   });
 });

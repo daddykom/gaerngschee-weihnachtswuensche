@@ -1,13 +1,13 @@
+import { JsonPipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { JsonPipe } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
+import { FairgateTestActions } from '../../../../store/fairgate-test/fairgate-test.actions';
 import {
   selectFairgateTestLoading,
   selectFairgateTestResult,
 } from '../../../../store/fairgate-test/fairgate-test.feature';
-import { FairgateTestActions } from '../../../../store/fairgate-test/fairgate-test.actions';
 
 @Component({
   selector: 'app-admin-fairgate-test',

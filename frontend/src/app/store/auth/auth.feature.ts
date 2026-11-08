@@ -1,14 +1,19 @@
 import { createFeature, createReducer, on } from '@ngrx/store';
 import { AuthActions } from './auth.actions';
-import { SessionActions } from './session.actions';
 import { AuthState, initialState, loggedOutState } from './auth.state';
+import { SessionActions } from './session.actions';
 
 export const authFeature = createFeature({
   name: 'auth',
   reducer: createReducer<AuthState>(
     initialState,
-    on(AuthActions.login, (state) => ({
+    on(AuthActions.loginFormChanged, (state, { changes }) => ({
       ...state,
+      loginForm: { ...state.loginForm, ...changes },
+    })),
+    on(AuthActions.login, (state, { email, password }) => ({
+      ...state,
+      loginForm: { email, password },
       loading: true,
       errorCode: null,
       email: null,
@@ -17,6 +22,29 @@ export const authFeature = createFeature({
       childrenCount: null,
       adultsCount: null,
       salutation: null,
+      firstAccess: false,
+    })),
+    on(AuthActions.checkEmail, (state) => ({
+      ...state,
+      emailCheckLoading: true,
+      emailCheckMode: null,
+      emailCheckEmail: null,
+      emailCheckYear: null,
+      emailCheckErrorCode: null,
+    })),
+    on(AuthActions.checkEmailSuccess, (state, { email, mode, processingYear }) => ({
+      ...state,
+      emailCheckLoading: false,
+      emailCheckMode: mode,
+      emailCheckEmail: email,
+      emailCheckYear: processingYear,
+      emailCheckErrorCode: null,
+    })),
+    on(AuthActions.checkEmailFailure, (state, { errorCode }) => ({
+      ...state,
+      emailCheckLoading: false,
+      emailCheckMode: null,
+      emailCheckErrorCode: errorCode,
     })),
     on(AuthActions.loginSuccess, (state, { userId, group, requiredPasswordReset, email }) => ({
       ...state,
@@ -26,6 +54,7 @@ export const authFeature = createFeature({
       loading: false,
       errorCode: null,
       email: email ?? state.email,
+      firstAccess: false,
     })),
     on(AuthActions.loginFailure, (state, { errorCode }) => ({
       ...state,
@@ -58,6 +87,7 @@ export const authFeature = createFeature({
       childrenCount: result.childrenCount,
       adultsCount: result.adultsCount,
       salutation: result.salutation,
+      firstAccess: result.firstAccess,
     })),
     on(AuthActions.registrationLoginFailure, (state, { errorCode }) => ({
       ...state,
@@ -70,12 +100,18 @@ export const authFeature = createFeature({
       childrenCount: null,
       adultsCount: null,
       salutation: null,
+      firstAccess: false,
     })),
     on(AuthActions.passwordChangeSuccess, (state) => ({
       ...state,
       requiredPasswordReset: false,
       passwordChangeLoading: false,
       passwordChangeErrorCode: null,
+      firstAccess: false,
+    })),
+    on(AuthActions.passwordChangeFormChanged, (state, { changes }) => ({
+      ...state,
+      passwordChangeForm: { ...state.passwordChangeForm, ...changes },
     })),
     on(AuthActions.passwordChange, (state) => ({
       ...state,
@@ -88,6 +124,7 @@ export const authFeature = createFeature({
       passwordChangeErrorCode: errorCode,
     })),
     on(AuthActions.logoutRequested, () => loggedOutState),
+    on(AuthActions.logoutRequestedWithRedirect, () => loggedOutState),
     on(SessionActions.statusLoaded, (state, { expiresAt, secondsRemaining }) => ({
       ...state,
       sessionExpiresAt: expiresAt,
@@ -104,7 +141,10 @@ export const authFeature = createFeature({
     })),
     on(SessionActions.refreshFailed, (state) => ({ ...state, sessionRefreshLoading: false })),
     on(SessionActions.countdownStarted, (state) => ({ ...state, sessionWarningVisible: true })),
-    on(SessionActions.countdownTick, (state, { secondsRemaining }) => ({ ...state, sessionSecondsRemaining: secondsRemaining })),
+    on(SessionActions.countdownTick, (state, { secondsRemaining }) => ({
+      ...state,
+      sessionSecondsRemaining: secondsRemaining,
+    })),
     on(SessionActions.countdownStopped, (state) => ({ ...state, sessionWarningVisible: false })),
   ),
 });
@@ -122,6 +162,7 @@ export const {
   selectErrorCode: selectAuthErrorCode,
   selectRegistrationLoginLoading: selectAuthRegistrationLoginLoading,
   selectRegistrationLoginErrorCode: selectAuthRegistrationLoginErrorCode,
+  selectFirstAccess: selectAuthFirstAccess,
   selectFairgateUserExists: selectAuthFairgateUserExists,
   selectFairgateStatus: selectAuthFairgateStatus,
   selectChildrenCount: selectAuthChildrenCount,
@@ -132,4 +173,11 @@ export const {
   selectSessionWarningVisible: selectAuthSessionWarningVisible,
   selectSessionRefreshLoading: selectAuthSessionRefreshLoading,
   selectEmail: selectAuthEmail,
+  selectLoginForm: selectAuthLoginForm,
+  selectPasswordChangeForm: selectAuthPasswordChangeForm,
 } = authFeature;
+
+export const selectAuthEmailCheckLoading = authFeature.selectEmailCheckLoading;
+export const selectAuthEmailCheckMode = authFeature.selectEmailCheckMode;
+export const selectAuthEmailCheckEmail = authFeature.selectEmailCheckEmail;
+export const selectAuthEmailCheckYear = authFeature.selectEmailCheckYear;

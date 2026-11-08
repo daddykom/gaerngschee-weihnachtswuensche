@@ -70,9 +70,9 @@ Farbrollen und ihre praktische Verwendung.
 
 Die beiden Home-Karten verwenden Rosa und Mintgrün als Kategorienfarben:
 
--   Die Spendenkarte verwendet den primären Container und damit die
+-   Die Karte zum Erfüllen eines Weihnachtswunsches verwendet den primären Container und damit die
     Markenfarbe Rosa.
--   Die Karte zum Erhalten von Mässpäggli verwendet den sekundären Container
+-   Die Karte zum Erhalten von Weihnachtswünsche verwendet den sekundären Container
     und damit Mintgrün.
 
 Diese Farben beschreiben unterschiedliche Einstiege, aber keinen Status. Sie

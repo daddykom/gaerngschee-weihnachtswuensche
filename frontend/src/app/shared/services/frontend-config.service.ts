@@ -18,6 +18,10 @@ export class FrontendConfigService {
   }
 
   update(id: string, value: string | string[]): Observable<FrontendConfig> {
-    return this.http.patch<FrontendConfig>(`${this.baseUrl}/${id}`, { value }, { withCredentials: true });
+    return this.http.patch<FrontendConfig>(
+      `${this.baseUrl}/${id}`,
+      { value },
+      { withCredentials: true },
+    );
   }
 }

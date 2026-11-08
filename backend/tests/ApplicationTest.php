@@ -98,7 +98,7 @@ final class ApplicationTest extends TestCase
         $database = TestDatabase::create();
         $app = Application::create(new RateLimitService($database));
 
-        for ($attempt = 0; $attempt < 3; $attempt++) {
+        for ($attempt = 0; $attempt < 10; $attempt++) {
             $response = $app->handle($this->jsonRequest('/public/start', [
                 'email' => 'not-an-email',
             ]));

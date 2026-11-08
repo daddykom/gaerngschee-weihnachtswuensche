@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideTranslateService } from '@ngx-translate/core';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
+import { provideTranslateService } from '@ngx-translate/core';
 import { FairgateTestActions } from '../../../../store/fairgate-test/fairgate-test.actions';
 import { FairgateTestComponent } from './fairgate-test.component';
 
@@ -18,7 +18,7 @@ describe('FairgateTestComponent', () => {
           initialState: {
             fairgateTest: {
               result: null,
-              loading: false,
+              status: 'initial',
               errorCode: null,
             },
           },
@@ -52,18 +52,22 @@ describe('FairgateTestComponent', () => {
           email: 'isabelle.joss@gaerngschee.ch',
           fairgate: { success: true, data: { contacts: [] } },
         },
-        loading: false,
+        status: 'loaded',
         errorCode: null,
       },
     });
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('.fairgate-test-result').textContent).toContain('success');
-    expect(fixture.nativeElement.querySelector('.fairgate-test-result').textContent).toContain('contacts');
+    expect(fixture.nativeElement.querySelector('.fairgate-test-result').textContent).toContain(
+      'success',
+    );
+    expect(fixture.nativeElement.querySelector('.fairgate-test-result').textContent).toContain(
+      'contacts',
+    );
   });
 
   it('renders the loading state and disables the test button', () => {
-    store.setState({ fairgateTest: { result: null, loading: true, errorCode: null } });
+    store.setState({ fairgateTest: { result: null, status: 'loading', errorCode: null } });
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('button').disabled).toBe(true);
@@ -74,12 +78,14 @@ describe('FairgateTestComponent', () => {
     store.setState({
       fairgateTest: {
         result: { email: '', fairgate: { success: false, data: null } },
-        loading: false,
+        status: 'loaded',
         errorCode: null,
       },
     });
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('.fairgate-test-result').textContent).toContain('false');
+    expect(fixture.nativeElement.querySelector('.fairgate-test-result').textContent).toContain(
+      'false',
+    );
   });
 });

@@ -1,8 +1,8 @@
-import { NavigationEnd, NavigationStart, Router } from '@angular/router';
 import { TestBed } from '@angular/core/testing';
+import { NavigationEnd, NavigationStart, Router } from '@angular/router';
 import { firstValueFrom, Subject } from 'rxjs';
-import { notificationRouteEffect } from './notification.effects';
 import { NotificationActions } from './notification.actions';
+import { notificationRouteEffect } from './notification.effects';
 
 describe('notificationRouteEffect', () => {
   let routerEvents$: Subject<unknown>;

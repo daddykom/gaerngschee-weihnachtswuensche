@@ -3,7 +3,7 @@
 ## Project Root
 
 ```
-gaerngschee-maesspaeggli/
+gaerngschee-weihnachtswuensche/
 ├── frontend/                  # Angular SPA
 ├── backend/                   # PHP Slim API
 ├── db/                        # Database migrations & seeds
@@ -96,8 +96,8 @@ documents/
 openspec/
 ├── SPEC.md                   # OpenSpec index
 └── specs/                    # Capability specifications
-    ├── maesspaeggli.md       # Fachkonzept
-    ├── maesspaeggli/         # Main capability spec
+    ├── weihnachtswuensche.md       # Fachkonzept
+    ├── weihnachtswuensche/         # Main capability spec
     ├── donations/
     ├── registrations/
     ├── eligibility/

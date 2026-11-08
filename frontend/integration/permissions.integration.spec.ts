@@ -28,9 +28,9 @@ test.describe('Integration permissions', () => {
         },
       },
     );
-    expect(response.status()).toBe(422);
+    expect(response.status()).toBe(404);
     await expect(response.json()).resolves.toEqual({
-      error: { code: 'INVALID_USER_DATA', details: [] },
+      error: { code: 'NOT_FOUND', details: [] },
     });
   });
 

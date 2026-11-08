@@ -106,6 +106,6 @@ final class GroupMiddlewareTest extends TestCase
 
     public static function userGroups(): array
     {
-        return [['client'], ['user'], ['admin']];
+        return [['wunschbesteller'], ['user'], ['admin']];
     }
 }

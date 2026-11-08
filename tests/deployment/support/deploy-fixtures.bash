@@ -4,7 +4,7 @@ setup_deploy_fixture() {
   project_directory="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
   test_directory="${BATS_TEST_TMPDIR}/deployment"
   fake_bin="$test_directory/bin"
-  target_base="$test_directory/maesspaeggli"
+  target_base="$test_directory/weihnachtswuensche"
   log_file="$test_directory/commands.log"
   temporary_parent="$test_directory/tmp"
 
@@ -97,7 +97,7 @@ run_deploy() {
     "COMPOSER_BIN=$fake_bin/composer"
     "DEPLOY_EXPECTED_ENV_FILE=$target_base/$environment/backend/.env"
     'REPO_URL=https://example.test/repository.git'
-    "$project_directory/scripts/deploy.sh"
+    "$project_directory/scripts/deploy-weihnachtswuensche.sh"
     "$environment"
   )
 

@@ -7,6 +7,8 @@ namespace Tests\Middleware;
 use App\Middleware\AuthMiddleware;
 use App\Auth\Services\JwtService;
 use App\Auth\Services\SessionService;
+use App\Users\Data\UserRepository;
+use Tests\Support\TestDatabase;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Server\RequestHandlerInterface;
 use Slim\Psr7\Factory\ServerRequestFactory;
@@ -14,9 +16,12 @@ use Slim\Psr7\Response;
 
 final class AuthMiddlewareTest extends TestCase
 {
+    private \PDO $pdo;
     protected function setUp(): void
     {
         putenv('JWT_SECRET=01234567890123456789012345678901');
+        $this->pdo = TestDatabase::create();
+        $this->pdo->exec("INSERT INTO users (id, email, password, \"group\") VALUES ('user-123', 'user@example.com', 'hash', 'user')");
         (new SessionService())->clear();
     }
 
@@ -46,7 +51,7 @@ final class AuthMiddlewareTest extends TestCase
 
     public function testBearerTokenAddsUserIdToRequest(): void
     {
-        $token = (new JwtService())->createToken('user-123');
+        $token = (new JwtService())->createToken('user-123', 0);
         $handler = $this->createMock(RequestHandlerInterface::class);
         $handler->expects(self::once())
             ->method('handle')
@@ -57,7 +62,7 @@ final class AuthMiddlewareTest extends TestCase
             ->createServerRequest('GET', '/admin/users')
             ->withHeader('Authorization', 'Bearer ' . $token);
 
-        self::assertSame(200, (new AuthMiddleware())->__invoke($request, $handler)->getStatusCode());
+        self::assertSame(200, (new AuthMiddleware(new UserRepository($this->pdo)))->__invoke($request, $handler)->getStatusCode());
     }
 
     public function testSessionAddsUserIdToRequest(): void

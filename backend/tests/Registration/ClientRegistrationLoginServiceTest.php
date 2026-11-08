@@ -28,7 +28,7 @@ final class ClientRegistrationLoginServiceTest extends TestCase
         $result = $service->login($issued['token']);
 
         self::assertNotNull($result);
-        self::assertSame('client', $result['user']['group']);
+        self::assertSame('wunschbesteller', $result['user']['group']);
         self::assertTrue($result['fairgateUserExists']);
         self::assertSame(2, $result['childrenCount']);
         self::assertSame(2, $result['adultsCount']);
@@ -78,12 +78,12 @@ final class ClientRegistrationLoginServiceTest extends TestCase
 
 final class StubFairgateDataProvider implements FairgateContactProvider
 {
-    public function hasContactByEmail(string $email): bool
+    public function hasContactByEmail(string $email, string $membership): bool
     {
         return true;
     }
 
-    public function findContactDataByEmail(string $email): array
+    public function findContactDataByEmail(string $email, string $membership): array
     {
         return [
             'success' => true,

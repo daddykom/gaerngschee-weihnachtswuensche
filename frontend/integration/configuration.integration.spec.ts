@@ -13,7 +13,9 @@ test.describe('Integration configuration', () => {
     await expect(page.getByText('Die Konfiguration wurde gespeichert.')).toBeVisible();
 
     await page.reload();
-    await expect(page.getByLabel('fairgate_test_email')).toHaveValue('integration.changed@example.com');
+    await expect(page.getByLabel('fairgate_test_email')).toHaveValue(
+      'integration.changed@example.com',
+    );
 
     await page.getByLabel('fairgate_test_email').fill('isabelle.joss@gaerngschee.ch');
     await page.getByRole('button', { name: 'Konfiguration speichern' }).click();

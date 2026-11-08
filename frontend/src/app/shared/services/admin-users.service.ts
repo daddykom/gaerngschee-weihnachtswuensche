@@ -3,7 +3,6 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { UserGroup } from '../models/frontend-config.model';
-import { ClientOrder } from '../models/order.model';
 
 export interface AdminUser {
   id: string;
@@ -19,13 +18,6 @@ export interface UserMutationResponse {
   emailSentTo?: string;
 }
 
-export interface ClientDeletionLookup {
-  client: Pick<AdminUser, 'id' | 'email'>;
-  year: number;
-  order: ClientOrder;
-  canDelete: boolean;
-}
-
 @Injectable({ providedIn: 'root' })
 export class AdminUsersService {
   private readonly http = inject(HttpClient);
@@ -35,39 +27,52 @@ export class AdminUsersService {
     return this.http.get<AdminUser[]>(this.baseUrl, { withCredentials: true });
   }
 
-  findClientOrder(email: string): Observable<ClientDeletionLookup> {
-    return this.http.get<ClientDeletionLookup>(`${environment.apiUrl}/admin/client-deletion`, {
-      params: { email },
-      withCredentials: true,
-    });
-  }
-
-  deleteClientOrder(userId: string): Observable<{ deleted: boolean; userId: string }> {
-    return this.http.delete<{ deleted: boolean; userId: string }>(`${environment.apiUrl}/admin/client-deletion/${userId}`, {
-      withCredentials: true,
-    });
-  }
-
   get(userId: string): Observable<{ user: AdminUser }> {
-    return this.http.get<{ user: AdminUser }>(`${this.baseUrl}/${userId}`, { withCredentials: true });
+    return this.http.get<{ user: AdminUser }>(`${this.baseUrl}/${userId}`, {
+      withCredentials: true,
+    });
+  }
+
+  getProfile(): Observable<{ user: AdminUser }> {
+    return this.http.get<{ user: AdminUser }>(`${environment.apiUrl}/user/profile`, {
+      withCredentials: true,
+    });
   }
 
   create(email: string, group: UserGroup): Observable<UserMutationResponse> {
-    return this.http.post<UserMutationResponse>(this.baseUrl, { email, group }, { withCredentials: true });
+    return this.http.post<UserMutationResponse>(
+      this.baseUrl,
+      { email, group },
+      { withCredentials: true },
+    );
   }
 
   update(
     userId: string,
     changes: Partial<Pick<AdminUser, 'email' | 'group' | 'required_password_reset'>>,
   ): Observable<UserMutationResponse> {
-    return this.http.patch<UserMutationResponse>(`${this.baseUrl}/${userId}`, changes, { withCredentials: true });
+    return this.http.patch<UserMutationResponse>(`${this.baseUrl}/${userId}`, changes, {
+      withCredentials: true,
+    });
+  }
+
+  updateProfile(changes: Pick<AdminUser, 'email'>): Observable<UserMutationResponse> {
+    return this.http.patch<UserMutationResponse>(`${environment.apiUrl}/user/profile`, changes, {
+      withCredentials: true,
+    });
   }
 
   delete(userId: string): Observable<{ deleted: boolean; userId: string }> {
-    return this.http.delete<{ deleted: boolean; userId: string }>(`${this.baseUrl}/${userId}`, { withCredentials: true });
+    return this.http.delete<{ deleted: boolean; userId: string }>(`${this.baseUrl}/${userId}`, {
+      withCredentials: true,
+    });
   }
 
   sendPasswordReset(userId: string): Observable<{ emailSentTo: string }> {
-    return this.http.post<{ emailSentTo: string }>(`${this.baseUrl}/${userId}/password-reset`, {}, { withCredentials: true });
+    return this.http.post<{ emailSentTo: string }>(
+      `${this.baseUrl}/${userId}/password-reset`,
+      {},
+      { withCredentials: true },
+    );
   }
 }

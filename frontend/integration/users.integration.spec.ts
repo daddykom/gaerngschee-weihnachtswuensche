@@ -28,9 +28,8 @@ test.describe('Integration user administration', () => {
     await page.getByRole('button', { name: 'Speichern' }).click();
 
     await page.waitForURL('**/admin/users');
-    await expect(page.getByText(email)).toBeVisible();
-
     const createdUser = page.getByRole('listitem').filter({ hasText: email });
+    await expect(createdUser).toBeVisible();
     await createdUser.getByRole('link', { name: 'Bearbeiten' }).click();
     await page.waitForURL('**/admin/users/*');
     await page.getByRole('combobox').click();
