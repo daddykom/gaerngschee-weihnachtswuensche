@@ -20,8 +20,9 @@ import {
 import { NavigationActions } from '../../../../store/navigation/navigation.actions';
 
 interface ItemFormValue {
+  currentTitle: string;
   currentDescription: string;
-  currentReason: string;
+  personalMessage: string;
   adminNotes: string;
 }
 
@@ -48,14 +49,14 @@ export class AdminOrderItemEditComponent {
   readonly item = signal<AdminOrderItem | null>(null);
   readonly decision = signal<'accept' | 'reject' | null>(null);
   readonly formModel = signal<ItemFormValue>({
+    currentTitle: '',
     currentDescription: '',
-    currentReason: '',
+    personalMessage: '',
     adminNotes: '',
   });
   private previousItem: ItemFormValue | null = null;
   readonly itemForm = form(this.formModel, (schema) => {
     required(schema.currentDescription);
-    required(schema.currentReason);
     validate(schema.adminNotes, ({ valueOf }) =>
       this.decision() === 'reject' && valueOf(schema.adminNotes).trim() === ''
         ? { kind: 'required' }
@@ -77,8 +78,9 @@ export class AdminOrderItemEditComponent {
         this.order.set(currentOrder);
         this.item.set(currentItem);
         const formValue: ItemFormValue = {
+          currentTitle: currentItem.currentTitle ?? currentItem.currentDescription,
           currentDescription: currentItem.currentDescription,
-          currentReason: currentItem.currentReason ?? '',
+          personalMessage: currentItem.personalMessage ?? currentItem.currentReason ?? '',
           adminNotes: currentItem.adminNotes ?? '',
         };
         this.formModel.set(formValue);
@@ -90,6 +92,7 @@ export class AdminOrderItemEditComponent {
           childrenCount: currentOrder.childrenCount,
           items: currentOrder.items.map((item) => ({
             ...item,
+            currentTitle: item.currentTitle ?? item.currentDescription,
             currentReason: item.currentReason ?? '',
             adminNotes: item.adminNotes ?? '',
           })),
@@ -173,8 +176,11 @@ export class AdminOrderItemEditComponent {
     if (previous.currentDescription !== current.currentDescription) {
       changes.currentDescription = current.currentDescription;
     }
-    if (previous.currentReason !== current.currentReason) {
-      changes.currentReason = current.currentReason;
+    if (previous.currentTitle !== current.currentTitle) {
+      changes.currentTitle = current.currentTitle;
+    }
+    if (previous.personalMessage !== current.personalMessage) {
+      changes.personalMessage = current.personalMessage;
     }
     if (previous.adminNotes !== current.adminNotes) {
       changes.adminNotes = current.adminNotes;

@@ -206,13 +206,22 @@
         "manualMessage": "Wir konnten keinen gültigen Fairgate-Zugang finden. Bitte gib die Anzahl der Erwachsenen und Kinder selbst ein."
       },
       "publicText": {
-        "label": "Erzähl uns etwas kleines warum du dir das wünschst (‼️ Bitte beachte, diese Informationen werden ÖFFENTLICH PUBLIZIERT ‼️)",
+        "label": "Erzähl doch kurz etwas über Dich und/oder Deine Familie",
         "hint": "Bitte teile keine privaten oder vertraulichen Informationen."
       },
       "items": {
         "title": "Deine Wünsche",
         "caption": "Deine Wünsche",
+        "wishTitle": "Wunschtitel",
         "description": "Wunschbeschreibung",
+        "giftLink": "Link zum gewünschten Geschenk (freiwillig)",
+        "giftLinkHint": "Als Orientierung kannst du hier einen Beispiel-Link einfügen.",
+        "personalMessage": "Persönliche Nachricht zum Wunsch",
+        "personalMessageHint": "Wenn du möchtest, erzähle uns kurz, weshalb du dir das wünschst.",
+        "person": "Für wen ist der Wunsch?",
+        "adult": "Erwachsener",
+        "child": "Kind",
+        "unassigned": "Noch nicht zugeordnet",
         "reason": "Begründung",
         "category": "Kategorie",
         "new": "Wunsch hinzufügen",
@@ -249,6 +258,13 @@
       "actions": {
         "newItem": "Neuen Wunsch aufnehmen",
         "save": "Speichern"
+      },
+      "confirmSave": {
+        "title": "Wunschzettel speichern",
+        "message": "Willst Du wirklich speichern? Du kannst es nachher nicht mehr ändern.",
+        "incompleteMessage": "Willst Du wirklich speichern? Du kannst es nachher nicht mehr ändern. Du hast {{itemCount}} von {{maximumItemCount}} möglichen Wünschen erfasst.",
+        "confirm": "Speichern",
+        "cancel": "Abbrechen"
       },
       "confirmation": {
         "pageTitle": "Bestellung gespeichert",
@@ -293,12 +309,12 @@
         "ORDER_SAVE_FAILED": "Bitte versuche es später erneut.",
         "password": {
           "required": "Bitte gib ein Passwort ein.",
-          "minLength": "Das Passwort muss mindestens 12 Zeichen lang sein.",
+          "minLength": "Das Passwort muss mindestens 8 Zeichen lang sein.",
           "maxLength": "Das Passwort darf höchstens 128 Zeichen lang sein."
         },
         "passwordConfirmation": {
           "required": "Bitte wiederhole das Passwort.",
-          "minLength": "Das Passwort muss mindestens 12 Zeichen lang sein.",
+          "minLength": "Das Passwort muss mindestens 8 Zeichen lang sein.",
           "maxLength": "Das Passwort darf höchstens 128 Zeichen lang sein.",
           "passwordsDoNotMatch": "Die Passwörter stimmen nicht überein."
         },
@@ -319,9 +335,18 @@
           "category": {
             "required": "Bitte wähle eine Kategorie aus."
           },
-          "description": {
-            "required": "Bitte beschreibe deinen Wunsch.",
-            "maxLength": "Die Wunschbeschreibung darf höchstens 2000 Zeichen lang sein."
+          "person": {
+            "required": "Bitte wähle eine Person aus."
+          },
+          "title": {
+            "required": "Bitte gib einen Wunschtitel ein.",
+            "maxLength": "Der Wunschtitel darf höchstens 255 Zeichen lang sein."
+          },
+          "giftLink": {
+            "maxLength": "Der Link darf höchstens 2048 Zeichen lang sein."
+          },
+          "personalMessage": {
+            "maxLength": "Die persönliche Nachricht darf höchstens 2000 Zeichen lang sein."
           },
           "reason": {
             "required": "Bitte begründe deinen Wunsch.",
@@ -363,7 +388,7 @@
       "filters": {
         "title": "Wünsche suchen",
         "search": "Suche",
-        "searchHint": "Suche nach Familieninformationen, Wunschtext oder Begründung.",
+        "searchHint": "Suche nach Familieninformationen, Wunschtitel, Wunschtext oder persönlicher Nachricht.",
         "minimumSearchLength": "Die Suche startet ab drei Zeichen.",
         "category": "Kategorie",
         "allCategories": "Alle Kategorien"
@@ -392,7 +417,7 @@
         "wishDetailsTitle": "Wunschdetails",
         "wishNumberLabel": "Wunschnummer",
         "wishLabel": "Wunsch",
-        "reasonLabel": "Begründung",
+        "reasonLabel": "Persönliche Nachricht zum Wunsch",
         "commitmentTitle": "Verbindliche Zusage",
         "emailLabel": "Deine E-Mail-Adresse",
         "commitment": "Mit der Reservierung verpflichtest du dich, den Wunsch zu beschaffen, zu verpacken und zur angegebenen Zeit am angegebenen Ort abzugeben.",
@@ -466,7 +491,7 @@
     "passwordChange": {
       "pageTitle": "Passwort ändern",
       "heading": "Passwort ändern",
-      "passwordRules": "Dein Passwort muss mindestens 12 Zeichen lang sein und darf höchstens 128 Zeichen enthalten. Leerzeichen und Sonderzeichen sind erlaubt.",
+      "passwordRules": "Dein Passwort muss mindestens 8 Zeichen lang sein und darf höchstens 128 Zeichen enthalten. Leerzeichen und Sonderzeichen sind erlaubt.",
       "emailLabel": "E-Mail-Adresse",
       "newPasswordLabel": "Neues Passwort",
       "confirmationLabel": "Neues Passwort bestätigen",
@@ -474,12 +499,12 @@
       "errors": {
         "newPassword": {
           "required": "Bitte gib ein neues Passwort ein.",
-          "minLength": "Das Passwort muss mindestens 12 Zeichen lang sein.",
+          "minLength": "Das Passwort muss mindestens 8 Zeichen lang sein.",
           "maxLength": "Das Passwort darf höchstens 128 Zeichen lang sein."
         },
         "passwordConfirmation": {
           "required": "Bitte bestätige dein neues Passwort.",
-          "minLength": "Das Passwort muss mindestens 12 Zeichen lang sein.",
+          "minLength": "Das Passwort muss mindestens 8 Zeichen lang sein.",
           "maxLength": "Das Passwort darf höchstens 128 Zeichen lang sein.",
           "passwordsDoNotMatch": "Die Passwörter stimmen nicht überein."
         },
@@ -505,7 +530,7 @@
     "passwordReset": {
       "pageTitle": "Neues Passwort setzen",
       "heading": "Neues Passwort setzen",
-      "passwordRules": "Dein Passwort muss mindestens 12 Zeichen lang sein und darf höchstens 128 Zeichen enthalten. Leerzeichen und Sonderzeichen sind erlaubt.",
+      "passwordRules": "Dein Passwort muss mindestens 8 Zeichen lang sein und darf höchstens 128 Zeichen enthalten. Leerzeichen und Sonderzeichen sind erlaubt.",
       "emailLabel": "E-Mail-Adresse",
       "newPasswordLabel": "Neues Passwort",
       "confirmationLabel": "Neues Passwort bestätigen",
@@ -517,12 +542,12 @@
         },
         "newPassword": {
           "required": "Bitte gib ein neues Passwort ein.",
-          "minLength": "Das Passwort muss mindestens 12 Zeichen lang sein.",
+          "minLength": "Das Passwort muss mindestens 8 Zeichen lang sein.",
           "maxLength": "Das Passwort darf höchstens 128 Zeichen lang sein."
         },
         "passwordConfirmation": {
           "required": "Bitte bestätige dein neues Passwort.",
-          "minLength": "Das Passwort muss mindestens 12 Zeichen lang sein.",
+          "minLength": "Das Passwort muss mindestens 8 Zeichen lang sein.",
           "maxLength": "Das Passwort darf höchstens 128 Zeichen lang sein.",
           "passwordsDoNotMatch": "Die Passwörter stimmen nicht überein."
         },
@@ -837,6 +862,20 @@
             "year": "Jahr:",
             "adults": "Erwachsene:",
             "children": "Kinder:"
+          },
+          "saved": {
+            "subject": "Dein Wunschzettel wurde gespeichert",
+            "title": "Dein Wunschzettel wurde gespeichert",
+            "body": "Dein Wunschzettel für {{year}} wurde erfolgreich gespeichert.",
+            "nextText": "Wir prüfen deine Angaben und informieren dich per E-Mail über den nächsten Schritt.",
+            "button": "Zur Anmeldung"
+          },
+          "changes_requested": {
+            "subject": "Bitte passe deinen Wunschzettel an",
+            "title": "Dein Wunschzettel wurde zurückgewiesen",
+            "body": "Dein Wunschzettel für {{year}} wurde zurückgewiesen.",
+            "nextText": "Bitte melde dich an und passe deine Wünsche an. Danach kannst du den Wunschzettel erneut speichern.",
+            "button": "Wunschzettel anpassen"
           },
           "released": {
             "subject": "Deine Weihnachtswünsche-Anmeldung wurde freigegeben",

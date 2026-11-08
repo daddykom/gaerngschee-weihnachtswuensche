@@ -15,6 +15,7 @@ use Slim\Factory\AppFactory;
 use Slim\Psr7\Factory\ServerRequestFactory;
 use Slim\Psr7\Stream;
 use Tests\Support\TestDatabase;
+use Tests\Support\RecordingEmailSender;
 
 final class AdminOrderRoutesTest extends TestCase
 {
@@ -110,7 +111,7 @@ final class AdminOrderRoutesTest extends TestCase
     {
         $app = AppFactory::create();
         $app->addRoutingMiddleware();
-        AdminRoutes::register($app, $this->users, null, null, new OrderRepository($this->pdo));
+        AdminRoutes::register($app, $this->users, new RecordingEmailSender(), null, new OrderRepository($this->pdo));
         return $app;
     }
 

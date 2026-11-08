@@ -27,16 +27,25 @@
       @for (item of formModel().items; track item.id) {
         <article class="item-editor">
           <div class="item-editor__category">
+            @if (item.personType && item.personIndex) {
+              <span
+                >{{
+                  (item.personType === 'adult' ? 'app.order.items.adult' : 'app.order.items.child')
+                    | translate
+                }}
+                {{ item.personIndex }}</span
+              >
+            }
             <strong>{{ 'app.order.items.categories.' + item.category | translate }}</strong>
             <span>{{ 'app.order.items.statuses.' + item.publicationStatus | translate }}</span>
           </div>
           <div class="item-editor__text">
-            <strong>{{ 'app.order.items.description' | translate }}</strong>
-            <span>{{ item.currentDescription }}</span>
+            <strong>{{ 'app.order.items.wishTitle' | translate }}</strong>
+            <span>{{ item.currentTitle || item.currentDescription }}</span>
           </div>
           <div class="item-editor__text">
-            <strong>{{ 'app.order.items.reason' | translate }}</strong>
-            <span>{{ item.currentReason }}</span>
+            <strong>{{ 'app.order.items.personalMessage' | translate }}</strong>
+            <span>{{ item.personalMessage || item.currentReason }}</span>
           </div>
           <a mat-button [routerLink]="['item', item.id]">{{
             'app.admin.overview.change' | translate

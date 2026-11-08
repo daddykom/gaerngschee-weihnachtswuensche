@@ -1,4 +1,4 @@
-import { OrderItemCategory, OrderStatus } from './order.model';
+import { OrderItemCategory, OrderItemPersonType, OrderStatus } from './order.model';
 
 export type AdminPublicationStatus = 'draft' | 'submitted' | 'rejected' | 'approved';
 
@@ -7,10 +7,16 @@ export interface AdminOrderItem {
   orderId: string;
   itemNumber?: number | null;
   category: OrderItemCategory;
+  personType?: OrderItemPersonType | null;
+  personIndex?: number | null;
+  originalTitle?: string;
+  currentTitle?: string;
   originalDescription: string;
   currentDescription: string;
+  giftLink?: string | null;
   originalReason: string | null;
   currentReason: string | null;
+  personalMessage?: string | null;
   publicationStatus: AdminPublicationStatus;
   fulfillmentStatus: string;
   adminNotes: string | null;
@@ -41,6 +47,7 @@ export interface AdminOrderFormValue {
   items: Array<
     AdminOrderItem & {
       currentReason: string;
+      currentTitle: string;
       adminNotes: string;
     }
   >;

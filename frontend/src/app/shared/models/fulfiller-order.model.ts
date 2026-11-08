@@ -1,3 +1,5 @@
+import { OrderItemPersonType } from './order.model';
+
 export type FulfillerCategory = 'gift' | 'voucher';
 export type FulfillerWishStatus = 'available' | 'pending_confirmation' | 'reserved';
 
@@ -6,7 +8,11 @@ export interface FulfillerWish {
   itemNumber: number;
   wishNumber: string;
   category: FulfillerCategory;
+  personType?: OrderItemPersonType | null;
+  personIndex?: number | null;
+  title?: string;
   currentDescription: string;
+  giftLink?: string | null;
   currentReason: string | null;
   fulfillmentStatus: FulfillerWishStatus;
   reservedAt: string | null;

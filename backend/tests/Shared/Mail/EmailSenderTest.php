@@ -174,6 +174,41 @@ final class EmailSenderTest extends TestCase
         self::assertStringContainsString('http://localhost:4200/start', $message['text']);
     }
 
+    public function testRendersSavedOrderMailWithLoginLink(): void
+    {
+        $sender = new EmailSender(
+            $this->createMock(MailerInterface::class),
+            'noreply@example.com',
+            'Gärngschee-Weihnachtswünsche',
+        );
+
+        $message = $sender->renderOrderConfirmation([
+            'year' => 2026,
+            'loginUrl' => 'http://localhost:4200/login',
+        ], 'saved');
+
+        self::assertSame('Dein Wunschzettel wurde gespeichert', $message['subject']);
+        self::assertStringContainsString('http://localhost:4200/login', $message['html']);
+    }
+
+    public function testRendersChangesRequestedMailWithoutAdminReason(): void
+    {
+        $sender = new EmailSender(
+            $this->createMock(MailerInterface::class),
+            'noreply@example.com',
+            'Gärngschee-Weihnachtswünsche',
+        );
+
+        $message = $sender->renderOrderConfirmation([
+            'year' => 2026,
+            'loginUrl' => 'http://localhost:4200/login',
+        ], 'changes_requested');
+
+        self::assertSame('Bitte passe deinen Wunschzettel an', $message['subject']);
+        self::assertStringContainsString('Wunschzettel wurde zurückgewiesen', $message['html']);
+        self::assertStringContainsString('http://localhost:4200/login', $message['text']);
+    }
+
     public function testRenderExpiredFairgateReminderRequestsTheDocument(): void
     {
         $sender = new EmailSender(
