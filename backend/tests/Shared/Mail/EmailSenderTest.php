@@ -16,7 +16,7 @@ final class EmailSenderTest extends TestCase
     {
         $variant = AnmeldungMailVariant::ClientOrder;
         $subject = 'Dein Link zur Weihnachtswünsche-Bestellung';
-        $content = 'Jetzt für Weihnachtswünsche anmelden';
+        $content = 'Jetzt für die Wunschzettel-Aktion anmelden';
         $link = 'http://localhost:4200/login';
         $mailer = $this->createMock(MailerInterface::class);
         $mailer->expects(self::once())
@@ -25,6 +25,7 @@ final class EmailSenderTest extends TestCase
                 self::assertSame('person@example.com', $email->getTo()[0]->getAddress());
                 self::assertSame($subject, $email->getSubject());
                 self::assertStringContainsString($content, $email->getHtmlBody());
+                self::assertStringContainsString('Wunschzettel-Aktion 2027', $email->getHtmlBody());
                 self::assertStringContainsString($link, $email->getHtmlBody());
                 self::assertStringContainsString('cid:gaerngschee-logo', $email->getHtmlBody());
                 self::assertStringContainsString('gaerngschee-logo', $email->getBody()->toString());
@@ -37,7 +38,7 @@ final class EmailSenderTest extends TestCase
 
         $sender = new EmailSender($mailer, 'noreply@example.com', 'Gärngschee-Weihnachtswünsche');
 
-        $sender->sendAnmeldung('person@example.com', $variant);
+        $sender->sendAnmeldung('person@example.com', $variant, 'de', null, null, 2027);
     }
 
     public function testSendUserCreatedSendsTemporaryPasswordToNewUser(): void
@@ -66,7 +67,7 @@ final class EmailSenderTest extends TestCase
             ->method('send')
             ->with(self::callback(static function (Email $email): bool {
                 self::assertSame('Dein Link zur Weihnachtswünsche-Bestellung', $email->getSubject());
-                self::assertStringContainsString('Weihnachtswünsche auswählen', $email->getHtmlBody());
+                self::assertStringContainsString('Weihnachtswünsche eintragen', $email->getHtmlBody());
                 self::assertStringContainsString('http://localhost:4200/client-login?token=test-token', $email->getHtmlBody());
                 self::assertStringContainsString('10 Minuten gültig', $email->getHtmlBody());
                 self::assertStringContainsString('http://localhost:4200/client-login?token=test-token', $email->getTextBody());

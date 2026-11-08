@@ -54,7 +54,7 @@ final class EmailCheckAction
                 $frontendBaseUrl = rtrim(getenv('FRONTEND_BASE_URL') ?: 'http://localhost:4200', '/');
                 $loginUrl = $frontendBaseUrl . '/client-login?token=' . rawurlencode($token);
                 ($this->anmeldung ?? new AnmeldungService(new \App\Shared\Mail\EmailSender()))
-                    ->sendRegistrationLink($email, $loginUrl);
+                    ->sendRegistrationLink($email, $loginUrl, 'de', $year);
             } catch (Throwable $exception) {
                 return JsonResponse::error($response, 'REQUEST_FAILED', 503);
             }

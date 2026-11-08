@@ -152,7 +152,7 @@ final class PublicStartRoutesTest extends TestCase
         return new AnmeldungService(
             $failToSend
                 ? new class () implements EmailSenderInterface {
-                    public function sendAnmeldung(string $recipient, \App\Registration\Services\AnmeldungMailVariant $variant, string $locale = 'de', ?string $loginUrl = null, ?array $wish = null): void
+                    public function sendAnmeldung(string $recipient, \App\Registration\Services\AnmeldungMailVariant $variant, string $locale = 'de', ?string $loginUrl = null, ?array $wish = null, ?int $campaignYear = null): void
                     {
                         throw new \RuntimeException('SMTP failed');
                     }
@@ -200,7 +200,7 @@ final class PublicStartRoutesTest extends TestCase
                     }
                 }
             : new class () implements EmailSenderInterface {
-                public function sendAnmeldung(string $recipient, \App\Registration\Services\AnmeldungMailVariant $variant, string $locale = 'de', ?string $loginUrl = null, ?array $wish = null): void
+                public function sendAnmeldung(string $recipient, \App\Registration\Services\AnmeldungMailVariant $variant, string $locale = 'de', ?string $loginUrl = null, ?array $wish = null, ?int $campaignYear = null): void
                 {
                 }
 

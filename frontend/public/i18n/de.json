@@ -977,7 +977,7 @@
         "clientOrder": {
           "title": "Jetzt für die Wunschzettel-Aktion anmelden",
           "highlight": "Dein Anmeldelink für das Weihnachtswünsche ist bereit.",
-          "body": "Schön, dass du dabei bist! Klicke einfach auf den folgenden Link, um deine Anmeldung für die Wunschzettel-Aktion 2026 zu starten:",
+          "body": "Schön, dass du dabei bist! Klicke einfach auf den folgenden Link, um deine Anmeldung für die Wunschzettel-Aktion %year% zu starten:",
           "nextTitle": "Wichtig",
           "nextText": "Der Link ist 10 Minuten gültig und kann nur einmal verwendet werden.",
           "button": "Weihnachtswünsche eintragen",
