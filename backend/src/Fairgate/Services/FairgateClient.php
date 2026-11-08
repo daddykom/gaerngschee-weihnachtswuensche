@@ -16,7 +16,7 @@ use Lcobucci\JWT\Validation\Constraint\SignedWith;
 use Lcobucci\JWT\Validation\Validator;
 use Psr\Http\Client\ClientInterface;
 
-final class FairgateClient implements FairgateContactProvider, FairgateBatchContactProvider
+final class FairgateClient implements FairgateContactProvider
 {
     private const CONTACTS_PATH = '/fsa/v1.1/contact/%s/contacts';
     private const FILTERED_CONTACTS_PATH = '/fsa/v1.1/contact/%s/contacts/list';
@@ -66,37 +66,6 @@ final class FairgateClient implements FairgateContactProvider, FairgateBatchCont
         }
 
         return $this->requestContacts($email, 1, 1, $membership);
-    }
-
-    /** @return list<array{email: string, contactId: string}> */
-    public function findAllContacts(string $membership): array
-    {
-        $contacts = [];
-        $page = 1;
-        $pageLimit = 100;
-
-        do {
-            $data = $this->requestContacts(null, $page, $pageLimit, $membership);
-            $pageContacts = $data['data']['contacts'] ?? [];
-            if (!is_array($pageContacts)) {
-                break;
-            }
-
-            foreach ($pageContacts as $contact) {
-                if (!is_array($contact)) {
-                    continue;
-                }
-                $email = strtolower(trim((string) ($contact['primary_email'] ?? $contact['communication']['primary_email'] ?? '')));
-                $contactId = $contact['contact_id'] ?? $contact['basefields']['contact_id'] ?? null;
-                if ($email !== '' && $contactId !== null) {
-                    $contacts[] = ['email' => $email, 'contactId' => (string) $contactId];
-                }
-            }
-
-            $page++;
-        } while (count($pageContacts) === $pageLimit);
-
-        return $contacts;
     }
 
     /** @return array<string, mixed> */
