@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  effect,
+  ElementRef,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { form, FormField, maxLength, minLength, required, validate } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
@@ -27,6 +35,10 @@ export class PasswordChange {
   readonly storeForm = this.store.selectSignal(selectAuthPasswordChangeForm);
 
   readonly passwordChangeModel = signal({ newPassword: '', passwordConfirmation: '' });
+  private readonly newPasswordInput = viewChild<ElementRef<HTMLInputElement>>('newPasswordInput');
+  private readonly passwordConfirmationInput = viewChild<ElementRef<HTMLInputElement>>(
+    'passwordConfirmationInput',
+  );
   readonly passwordChangeForm = form(this.passwordChangeModel, (schema) => {
     required(schema.newPassword);
     minLength(schema.newPassword, inputLimits.minimumPasswordLength);
@@ -76,6 +88,7 @@ export class PasswordChange {
       this.passwordChangeForm().markAsTouched();
       this.passwordChangeForm.newPassword().markAsTouched();
       this.passwordChangeForm.passwordConfirmation().markAsTouched();
+      this.focusFirstInvalidField();
       return;
     }
 
@@ -84,5 +97,18 @@ export class PasswordChange {
         password: this.storeForm()?.newPassword ?? this.passwordChangeModel().newPassword,
       }),
     );
+  }
+
+  private focusFirstInvalidField(): void {
+    const input = !this.passwordChangeForm.newPassword().valid()
+      ? this.newPasswordInput()
+      : this.passwordConfirmationInput();
+    const element = input?.nativeElement;
+    if (!element) {
+      return;
+    }
+
+    element.focus({ preventScroll: true });
+    element.scrollIntoView?.({ behavior: 'smooth', block: 'center' });
   }
 }

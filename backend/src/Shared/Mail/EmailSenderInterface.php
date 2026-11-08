@@ -14,6 +14,7 @@ interface EmailSenderInterface
         string $locale = 'de',
         ?string $loginUrl = null,
         ?array $wish = null,
+        ?int $campaignYear = null,
     ): void;
 
     /** @param array<string, mixed> $wish @param array<string, mixed> $handover */

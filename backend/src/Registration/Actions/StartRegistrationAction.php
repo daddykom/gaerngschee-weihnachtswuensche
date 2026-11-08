@@ -75,7 +75,12 @@ final class StartRegistrationAction
             $token = ($this->tokens ?? new RegistrationTokenService())->issue($normalizedEmail)['token'];
             $frontendBaseUrl = rtrim(getenv('FRONTEND_BASE_URL') ?: 'http://localhost:4200', '/');
             $loginUrl = $frontendBaseUrl . '/client-login?token=' . rawurlencode($token);
-            ($this->anmeldung ?? self::createService())->sendRegistrationLink($email, $loginUrl, $locale);
+            ($this->anmeldung ?? self::createService())->sendRegistrationLink(
+                $email,
+                $loginUrl,
+                $locale,
+                ($this->configs ?? new FrontendConfigRepository(Database::getConnection()))->findCampaignYear(),
+            );
         } catch (Throwable $exception) {
             ExceptionLogger::log('Start registration email delivery failed', $exception);
             return JsonResponse::error($response, 'REQUEST_FAILED', 503);

@@ -136,15 +136,15 @@
       }
     },
     "bestellung": {
-      "pageTitle": "Bestellung",
+      "pageTitle": "Wunschzettel",
       "title": "Weihnachtswünsche",
-      "message": "Die Bestellfunktion wird derzeit vorbereitet."
+      "message": "Die Wunschzettel-Funktion wird derzeit vorbereitet."
     },
     "order": {
-      "pageTitle": "Weihnachtswünsche bestellen",
-      "heading": "Weihnachtswünsche bestellen",
-      "description": "Dies ist die vorbereitete Bestellseite.",
-      "intro": "Für deine Bestellung sind {{adults}} Erwachsene und {{children}} Kinder erfasst.",
+      "pageTitle": "Wunschzettel",
+      "heading": "Dein Wunschzettel",
+      "description": "Hier kannst du deinen Wunschzettel erfassen.",
+      "intro": "Für deinen Wunschzettel sind {{adults}} Erwachsene und {{children}} Kinder erfasst.",
       "introInstruction": "Wähle für jede Person das passende Weihnachtswünsche aus.",
       "adults": "Erwachsene",
       "children": "Kinder",
@@ -152,8 +152,8 @@
       "yes": "Ja",
       "no": "Nein",
       "noFairgate": {
-        "title": "Lieber Besteller",
-        "messageBeforeLink": "Wir können Dich leider nicht bei Fairgate finden. Bitte melde Dich dort an, damit Du berechtigt bist, ein oder mehrere Weihnachtswünsche zu bestellen. Verwende dabei die E-Mail, die Du hier verwendet hast. Du kannst deine Bestellung trotzdem speichern, musst uns aber die richtige Anzahl Erwachsene und Kinder angeben. Sobald wir deine Anmeldung bei Fairgate erhalten haben, wird deine Bestellung automatisch zur Prüfung freigegeben. Anmelden kannst Du Dich",
+        "title": "Liebe Teilnehmerin, lieber Teilnehmer",
+        "messageBeforeLink": "Wir können Dich leider nicht bei Fairgate finden. Bitte melde Dich dort an, damit Du berechtigt bist, ein oder mehrere Weihnachtswünsche zu erhalten. Verwende dabei die E-Mail, die Du hier verwendet hast. Du kannst deinen Wunschzettel trotzdem speichern, musst uns aber die richtige Anzahl Erwachsene und Kinder angeben. Sobald wir deine Anmeldung bei Fairgate erhalten haben, wird dein Wunschzettel automatisch zur Prüfung freigegeben. Anmelden kannst Du Dich",
         "link": "hier",
         "messageAfterLink": "."
       },
@@ -201,7 +201,7 @@
         "label": "Passwort wiederholen"
       },
       "details": {
-        "title": "Deine Bestellung"
+        "title": "Dein Wunschzettel"
       },
       "fairgate": {
         "validTitle": "Fairgate-Zugang gefunden",
@@ -210,8 +210,8 @@
         "manualMessage": "Wir konnten keinen gültigen Fairgate-Zugang finden. Bitte gib die Anzahl der Erwachsenen und Kinder selbst ein."
       },
       "publicText": {
-        "label": "Erzähl doch kurz etwas über Dich und/oder Deine Familie",
-        "hint": "Bitte teile keine privaten oder vertraulichen Informationen."
+        "label": "Erzähl uns kurz von deiner aktuellen Lebenssituation",
+        "hint": "Was ist gerade schwierig für dich? Wie ist es dazu gekommen?\n\nWichtig: Dein Text wird öffentlich auf der Website angezeigt. Schreibe deshalb keine Namen oder persönlichen Daten hinein."
       },
       "items": {
         "title": "Deine Wünsche",
@@ -271,9 +271,9 @@
         "cancel": "Abbrechen"
       },
       "confirmation": {
-        "pageTitle": "Bestellung gespeichert",
-        "title": "Deine Bestellung wurde gespeichert",
-        "releasedTitle": "Bestellung freigegeben",
+        "pageTitle": "Wunschzettel gespeichert",
+        "title": "Dein Wunschzettel wurde gespeichert",
+        "releasedTitle": "Wunschzettel freigegeben",
         "releasedMessage": "Deine Daten werden den Administratoren zur Prüfung vorgelegt.",
         "waitingForFairgateTitle": "Fairgate-Zugang noch nicht gefunden",
         "waitingForFairgateMessage": "Sobald Du bei Fairgate angemeldet bist, senden wir dir eine E-Mail darüber, wie es weitergeht.",
@@ -309,7 +309,7 @@
         "INVALID_ORDER": "Bitte prüfe deine Angaben.",
         "WEAK_PASSWORD": "Das Passwort erfüllt die Anforderungen nicht.",
         "FAIRGATE_LOOKUP_FAILED": "Die Fairgate-Daten konnten nicht geprüft werden.",
-        "ORDER_NOT_EDITABLE": "Diese Bestellung kann in ihrem aktuellen Status nicht mehr geändert werden.",
+        "ORDER_NOT_EDITABLE": "Dieser Wunschzettel kann in seinem aktuellen Status nicht mehr geändert werden.",
         "ORDER_SAVE_FAILED": "Bitte versuche es später erneut.",
         "password": {
           "required": "Bitte gib ein Passwort ein.",
@@ -331,7 +331,7 @@
           "min": "Die Anzahl darf nicht negativ sein."
         },
         "text": {
-          "required": "Bitte erzähl uns kurz, warum du dir das wünschst.",
+          "required": "Bitte erzähl uns kurz von deiner aktuellen Lebenssituation.",
           "maxLength": "Der Text darf höchstens 2000 Zeichen lang sein."
         },
         "items": {
@@ -359,27 +359,27 @@
         }
       },
       "summary": {
-        "pageTitle": "Bestellübersicht",
-        "title": "Bestellübersicht",
-        "description": "Deine Bestellung für das Jahr {{year}}.",
+        "pageTitle": "Wunschzettel-Übersicht",
+        "title": "Wunschzettel-Übersicht",
+        "description": "Dein Wunschzettel für das Jahr {{year}}.",
         "status": "Status",
         "statuses": {
           "waiting_for_fairgate": "Wartet auf Fairgate",
           "definitive": "Definitiv"
         },
         "back": "Zurück",
-        "order": "Bestellen",
-        "noOrder": "Es ist keine Bestellung zur Bestätigung vorhanden."
+        "order": "Wunschzettel absenden",
+        "noOrder": "Es ist kein Wunschzettel zur Bestätigung vorhanden."
       },
       "notifications": {
-        "successTitle": "Bestellung gespeichert",
-        "success": "Deine Bestellung wurde erfolgreich gespeichert.",
-        "loadErrorTitle": "Bestellung konnte nicht geladen werden",
-        "loadError": "Die Daten für deine Bestellung konnten nicht geladen werden.",
-        "saveErrorTitle": "Bestellung konnte nicht gespeichert werden",
-        "errorTitle": "Bestellung konnte nicht gespeichert werden",
+        "successTitle": "Wunschzettel gespeichert",
+        "success": "Dein Wunschzettel wurde erfolgreich gespeichert.",
+        "loadErrorTitle": "Wunschzettel konnte nicht geladen werden",
+        "loadError": "Die Daten für deinen Wunschzettel konnten nicht geladen werden.",
+        "saveErrorTitle": "Wunschzettel konnte nicht gespeichert werden",
+        "errorTitle": "Wunschzettel konnte nicht gespeichert werden",
         "errors": {
-          "REQUEST_FAILED": "Die Bestellung konnte nicht gespeichert werden.",
+          "REQUEST_FAILED": "Der Wunschzettel konnte nicht gespeichert werden.",
           "INVALID_ORDER": "Bitte prüfe deine Angaben.",
           "WEAK_PASSWORD": "Das Passwort erfüllt die Anforderungen nicht.",
           "FAIRGATE_LOOKUP_FAILED": "Die Fairgate-Daten konnten nicht geprüft werden.",
@@ -975,12 +975,12 @@
       },
       "registration": {
         "clientOrder": {
-          "title": "Jetzt für Weihnachtswünsche anmelden",
+          "title": "Jetzt für die Wunschzettel-Aktion anmelden",
           "highlight": "Dein Anmeldelink für das Weihnachtswünsche ist bereit.",
-          "body": "Schön, dass du dabei bist! Klicke einfach auf den folgenden Link, um deine Anmeldung für das Weihnachtswünsche 2026 zu starten:",
+          "body": "Schön, dass du dabei bist! Klicke einfach auf den folgenden Link, um deine Anmeldung für die Wunschzettel-Aktion %year% zu starten:",
           "nextTitle": "Wichtig",
           "nextText": "Der Link ist 10 Minuten gültig und kann nur einmal verwendet werden.",
-          "button": "Weihnachtswünsche auswählen",
+          "button": "Weihnachtswünsche eintragen",
           "subject": "Dein Link zur Weihnachtswünsche-Bestellung"
         },
         "fairgateRegistrationRequired": {
