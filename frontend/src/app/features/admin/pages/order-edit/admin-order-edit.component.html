@@ -63,20 +63,10 @@
           </mat-form-field>
         </div>
       }
-      <dl>
-        <dt>{{ 'app.admin.overview.releasedAt' | translate }}</dt>
-        <dd>{{ currentOrder.releasedAt ?? '—' }}</dd>
-        <dt>{{ 'app.admin.overview.definitiveAt' | translate }}</dt>
-        <dd>{{ currentOrder.definitiveAt ?? '—' }}</dd>
-        <dt>{{ 'app.admin.overview.confirmationEmailSentAt' | translate }}</dt>
-        <dd>{{ currentOrder.confirmationEmailSentAt ?? '—' }}</dd>
-        <dt>{{ 'app.admin.overview.fairgateReminderEmailSentAt' | translate }}</dt>
-        <dd>{{ currentOrder.fairgateReminderEmailSentAt ?? '—' }}</dd>
-      </dl>
-      <p>
+      <div class="original-text-section">
         <strong>{{ 'app.admin.overview.originalText' | translate }}</strong>
-      </p>
-      <p class="original-text">{{ currentOrder.originalText }}</p>
+        <p class="original-text">{{ currentOrder.originalText }}</p>
+      </div>
       <mat-form-field appearance="outline" subscriptSizing="dynamic">
         <mat-label>{{ 'app.admin.overview.currentText' | translate }}</mat-label>
         <textarea matInput rows="5" [formField]="orderForm.currentText"></textarea>
