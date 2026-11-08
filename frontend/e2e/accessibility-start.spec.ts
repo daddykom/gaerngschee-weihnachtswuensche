@@ -13,8 +13,11 @@ test.describe('Start route accessibility', () => {
     ).toBeVisible();
 
     const email = page.getByRole('textbox', { name: 'E-Mail-Adresse' });
+    const privacyCheckbox = page.locator('mat-checkbox input[type="checkbox"]');
+    const privacyLink = page.locator('.privacy-consent a');
     const continueButton = page.getByRole('button', { name: 'Weiter' });
     await expect(email).toBeVisible();
+    await expect(privacyCheckbox).toBeVisible();
     await expect(continueButton).toBeVisible();
 
     const ids = await page
@@ -25,6 +28,10 @@ test.describe('Start route accessibility', () => {
     await email.focus();
     await expect(email).toBeFocused();
     await page.keyboard.press('Tab');
+    await expect(privacyCheckbox).toBeFocused();
+    await page.keyboard.press('Tab');
+    await expect(privacyLink).toBeFocused();
+    await page.keyboard.press('Tab');
     await expect(continueButton).toBeFocused();
   });
 
@@ -33,7 +40,7 @@ test.describe('Start route accessibility', () => {
     await page.getByRole('textbox', { name: 'E-Mail-Adresse' }).fill('invalid');
     await page.getByRole('button', { name: 'Weiter' }).click();
 
-    const alert = page.getByRole('alert');
+    const alert = page.locator('.email-field .control-error');
     await expect(alert).toBeVisible();
     await expectTranslatedText(alert, 'app.anmeldung.errors.email.email');
   });

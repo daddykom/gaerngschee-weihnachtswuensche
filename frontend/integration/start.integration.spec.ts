@@ -5,6 +5,7 @@ test.describe('Integration start', () => {
     const email = `registration-${Date.now()}@example.com`;
     await page.goto('/start');
     await page.locator('input[type="email"]').fill(email);
+    await page.getByRole('checkbox').check();
     await page.getByRole('button', { name: 'Weiter' }).click();
 
     await expect(page.locator('input[type="email"]')).toHaveValue(email);

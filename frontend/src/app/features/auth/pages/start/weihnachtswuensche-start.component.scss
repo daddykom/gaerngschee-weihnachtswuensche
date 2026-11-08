@@ -19,17 +19,6 @@ p {
   align-items: center;
 }
 
-.privacy-box {
-  display: flex;
-  gap: var(--gl-space-md);
-  align-items: flex-start;
-  border-radius: 16px;
-}
-
-.privacy-box p {
-  margin: 0;
-}
-
 .intro__visual {
   display: none;
   justify-content: center;
@@ -54,8 +43,7 @@ p {
 }
 
 .email-section h2,
-.steps h2,
-.privacy-box h2 {
+.steps h2 {
   margin: 0;
 }
 
@@ -91,6 +79,12 @@ p {
   width: 18px;
   height: 18px;
   font-size: 18px;
+}
+
+.privacy-consent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gl-space-sm);
 }
 
 .steps__grid {
@@ -163,20 +157,6 @@ p {
   color: var(--gl-warning);
 }
 
-.privacy-box {
-  padding: var(--gl-space-lg);
-  background: var(--gl-info-container);
-}
-
-.privacy-box > mat-icon {
-  flex: 0 0 auto;
-  color: var(--gl-info);
-}
-
-.privacy-box h2 {
-  color: var(--gl-info);
-}
-
 @media (min-width: layout.$gl-section-breakpoint) {
   .intro__visual {
     display: flex;
@@ -196,5 +176,20 @@ p {
 @media (min-width: layout.$gl-section-breakpoint) {
   .email-form {
     grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .email-field-group {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .privacy-consent {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .continue-button {
+    grid-column: 2;
+    grid-row: 1;
   }
 }

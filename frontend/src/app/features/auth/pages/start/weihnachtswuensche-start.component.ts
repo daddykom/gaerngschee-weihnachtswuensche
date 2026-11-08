@@ -1,6 +1,7 @@
 import { Component, effect, inject, signal, untracked } from '@angular/core';
 import { email, form, FormField, maxLength, required } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -18,6 +19,7 @@ import { selectStartForm } from '../../../../store/start/start.feature';
   imports: [
     FormField,
     MatButtonModule,
+    MatCheckboxModule,
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
@@ -35,21 +37,26 @@ export class WeihnachtswuenscheStartComponent {
 
   readonly model = signal({
     email: '',
+    privacyAccepted: false,
   });
   readonly form = form(this.model, (schema) => {
     required(schema.email);
     email(schema.email);
     maxLength(schema.email, inputLimits.email);
+    required(schema.privacyAccepted);
   });
 
   constructor() {
     let initialized = false;
-    let previousEmail = '';
+    let previous = this.model();
     effect(() => {
       const storeForm = this.storeForm();
       if (!initialized && storeForm !== undefined) {
-        this.model.set({ email: storeForm.email });
-        previousEmail = storeForm.email;
+        this.model.set({
+          email: storeForm.email,
+          privacyAccepted: storeForm.privacyAccepted,
+        });
+        previous = this.model();
         initialized = true;
       }
     });
@@ -57,19 +64,21 @@ export class WeihnachtswuenscheStartComponent {
       if (!initialized) {
         return;
       }
-      const emailValue = this.model().email;
-      if (emailValue !== previousEmail) {
-        this.store.dispatch(StartActions.formChanged({ changes: { email: emailValue } }));
-        previousEmail = emailValue;
+      const current = this.model();
+      if (
+        current.email !== previous.email ||
+        current.privacyAccepted !== previous.privacyAccepted
+      ) {
+        this.store.dispatch(StartActions.formChanged({ changes: current }));
+        previous = current;
       }
     });
   }
 
   submit(): void {
-    if (!this.form().valid()) {
-      this.form.email().markAsTouched();
-      return;
-    }
+    this.form.email().markAsTouched();
+    this.form.privacyAccepted().markAsTouched();
+    if (!this.form().valid()) return;
 
     const email = this.storeForm()?.email ?? untracked(this.model).email;
     this.store.dispatch(
