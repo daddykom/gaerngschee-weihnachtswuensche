@@ -51,6 +51,10 @@
   margin: 0;
 }
 
+.home-faq__section + .home-faq__section {
+  margin-block-start: var(--gl-space-xl);
+}
+
 .home-faq__answer {
   line-height: 1.55;
 }
