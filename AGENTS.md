@@ -74,6 +74,9 @@ See: [documents/frontend-conventions.md](./documents/frontend-conventions.md#vie
   Initial unberührte Controls zeigen keine Fehlermeldung. Ungültiges Absenden
   markiert die betroffenen Controls als `touched`, damit ihre Fehler angezeigt
   werden.
+- Bei ungültigem Absenden wird das erste ungültige Feld fokussiert und in den
+  sichtbaren Bereich gescrollt. Dadurch bleiben feldbezogene Fehlermeldungen
+  auch bei längeren Formularen direkt am betroffenen Feld sichtbar.
 
 ### Initiales Laden und Resolver
 

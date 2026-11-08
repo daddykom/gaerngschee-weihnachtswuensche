@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { expectTranslatedText } from '../e2e/support/assertions';
 import { issueRegistrationToken } from './support/registration-token';
 
 test.describe('Integration client login', () => {
@@ -8,7 +9,7 @@ test.describe('Integration client login', () => {
 
     await page.goto(`/client-login?token=${encodeURIComponent(token)}`);
     await page.waitForURL('**/bestellung');
-    await expect(page.getByRole('heading', { name: 'Deine Bestellung' })).toBeVisible();
+    await expectTranslatedText(page.locator('#order-details-heading'), 'app.order.details.title');
   });
 
   test('rejects an already consumed registration token', async ({ page }) => {

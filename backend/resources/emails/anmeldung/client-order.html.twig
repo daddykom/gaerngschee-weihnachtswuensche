@@ -30,7 +30,7 @@
                 <strong style="color:{{ EMAIL_THEME.success }};">{{ 'app.mail.registration.clientOrder.highlight'|trans }}</strong>
               </p>
               <p style="margin:0; font-size:17px; line-height:1.55; color:{{ EMAIL_THEME.mutedText }};">
-                {{ 'app.mail.registration.clientOrder.body'|trans }}
+                {{ 'app.mail.registration.clientOrder.body'|trans({'%year%': CAMPAIGN_YEAR}) }}
               </p>
             </td>
           </tr>
