@@ -505,16 +505,6 @@ final class OrderRepository
         $this->recordStatusChanges($statement->rowCount());
     }
 
-    public function markFamilySizeExceeded(string $orderId): void
-    {
-        $statement = $this->pdo->prepare(
-            "UPDATE orders SET status = 'family_size_exceeded', updated_at = CURRENT_TIMESTAMP
-             WHERE id = :id AND status = 'waiting_for_fairgate'",
-        );
-        $statement->execute(['id' => $orderId]);
-        $this->recordStatusChanges($statement->rowCount());
-    }
-
     public function recordFairgateCounts(string $orderId, int $adultsCount, int $childrenCount): void
     {
         $statement = $this->pdo->prepare(

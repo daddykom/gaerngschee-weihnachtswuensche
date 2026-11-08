@@ -54,9 +54,6 @@ final class OrderBatchService
                 if ($email['email_type'] === 'order_confirmation') {
                     $this->orders->markReleased($email['reference_id']);
                     $this->orders->markConfirmationEmailSent($email['reference_id']);
-                } elseif ($email['email_type'] === 'family_size_correction') {
-                    $this->orders->markFamilySizeExceeded($email['reference_id']);
-                    $this->orders->markConfirmationEmailSent($email['reference_id']);
                 }
                 $result['sent']++;
             } catch (Throwable $exception) {
