@@ -96,6 +96,8 @@ final class TestDatabase
                 id TEXT PRIMARY KEY,
                  order_id TEXT NOT NULL,
                  category TEXT NOT NULL DEFAULT \'gift\',
+                 person_type TEXT NULL,
+                 person_index INTEGER NULL,
                  original_title TEXT NOT NULL DEFAULT \'\',
                  current_title TEXT NOT NULL DEFAULT \'\',
                  original_description TEXT NOT NULL,

@@ -62,7 +62,7 @@ final class OrderRepository
     public function findItems(string $orderId): array
     {
         $statement = $this->pdo->prepare(
-            'SELECT id, order_id, item_number, category, original_title, current_title, original_description, current_description,
+            'SELECT id, order_id, item_number, category, person_type, person_index, original_title, current_title, original_description, current_description,
                     gift_link, original_reason, current_reason, personal_message, status, publication_status, fulfillment_status, admin_notes, fulfiller_email,
                     reserved_at, due_at, received_at, created_at, updated_at
              FROM order_items WHERE order_id = :order_id ORDER BY created_at, id',
@@ -74,6 +74,8 @@ final class OrderRepository
             'orderId' => (string) $item['order_id'],
             'itemNumber' => $item['item_number'] === null ? null : (int) $item['item_number'],
             'category' => (string) $item['category'],
+            'personType' => $item['person_type'] === null ? null : (string) $item['person_type'],
+            'personIndex' => $item['person_index'] === null ? null : (int) $item['person_index'],
             'originalTitle' => (string) ($item['original_title'] ?? $item['original_description']),
             'currentTitle' => (string) ($item['current_title'] ?? $item['current_description']),
             'originalDescription' => (string) $item['original_description'],
@@ -203,7 +205,7 @@ final class OrderRepository
             $parameters['category'] = $category;
         }
         $statement = $this->pdo->prepare(
-            'SELECT id, item_number, category, current_title, current_description, gift_link, current_reason, personal_message, fulfillment_status, reserved_at
+            'SELECT id, item_number, category, person_type, person_index, current_title, current_description, gift_link, current_reason, personal_message, fulfillment_status, reserved_at
              FROM order_items WHERE ' . implode(' AND ', $conditions) . ' ORDER BY item_number ASC, id ASC',
         );
         $statement->execute($parameters);
@@ -213,6 +215,8 @@ final class OrderRepository
             'itemNumber' => (int) $item['item_number'],
             'wishNumber' => null,
             'category' => (string) $item['category'],
+            'personType' => $item['person_type'] === null ? null : (string) $item['person_type'],
+            'personIndex' => $item['person_index'] === null ? null : (int) $item['person_index'],
             'title' => (string) ($item['current_title'] ?? $item['current_description']),
             'currentDescription' => (string) $item['current_description'],
             'giftLink' => $item['gift_link'] ?? null,
@@ -585,7 +589,7 @@ final class OrderRepository
         return $this->findForYear($userId, $year) ?? throw new \RuntimeException('Order was not saved.');
     }
 
-    /** @param list<array{id?: string, category: string, title: string, description: string, giftLink: ?string, personalMessage: string}> $items */
+    /** @param list<array{id?: string, category: string, personType: ?string, personIndex: ?int, title: string, description: string, giftLink: ?string, personalMessage: string}> $items */
     private function saveItems(string $orderId, array $items): void
     {
         $existing = $this->pdo->prepare('SELECT id FROM order_items WHERE order_id = :order_id');
@@ -600,7 +604,7 @@ final class OrderRepository
             $submittedIds[] = $itemId;
             if (in_array($itemId, $existingIds, true)) {
                 $statement = $this->pdo->prepare(
-                    'UPDATE order_items SET category = :category, current_title = :title, current_description = :description,
+                    'UPDATE order_items SET category = :category, person_type = :person_type, person_index = :person_index, current_title = :title, current_description = :description,
                      gift_link = :gift_link, personal_message = :personal_message, current_reason = :personal_message,
                      status = \'submitted\', updated_at = CURRENT_TIMESTAMP
                      WHERE id = :id AND order_id = :order_id',
@@ -609,6 +613,8 @@ final class OrderRepository
                     'id' => $itemId,
                     'order_id' => $orderId,
                     'category' => $item['category'],
+                    'person_type' => $item['personType'] ?? null,
+                    'person_index' => $item['personIndex'] ?? null,
                     'title' => $title,
                     'description' => $item['description'],
                     'gift_link' => $item['giftLink'] ?? null,
@@ -619,15 +625,17 @@ final class OrderRepository
 
             $statement = $this->pdo->prepare(
                 'INSERT INTO order_items
-                 (id, order_id, category, original_title, current_title, original_description, current_description,
+                 (id, order_id, category, person_type, person_index, original_title, current_title, original_description, current_description,
                   gift_link, original_reason, current_reason, personal_message, status)
-                 VALUES (:id, :order_id, :category, :original_title, :current_title, :original_description,
-                         :current_description, :gift_link, :original_reason, :current_reason, :personal_message, \'submitted\')',
+                  VALUES (:id, :order_id, :category, :person_type, :person_index, :original_title, :current_title, :original_description,
+                          :current_description, :gift_link, :original_reason, :current_reason, :personal_message, \'submitted\')',
             );
             $statement->execute([
                 'id' => $itemId,
                 'order_id' => $orderId,
                 'category' => $item['category'],
+                'person_type' => $item['personType'] ?? null,
+                'person_index' => $item['personIndex'] ?? null,
                 'original_title' => $title,
                 'current_title' => $title,
                 'original_description' => $item['description'],

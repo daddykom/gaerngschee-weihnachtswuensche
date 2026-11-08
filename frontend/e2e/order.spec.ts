@@ -52,6 +52,8 @@ test.describe('Bestellung route', () => {
         items: [
           {
             category: 'gift',
+            personType: 'adult',
+            personIndex: 1,
             title: 'Winterjacke',
             giftLink: 'https://example.com/winterjacke',
             personalMessage: 'Das würde mir Freude machen.',
@@ -81,6 +83,8 @@ test.describe('Bestellung route', () => {
     await page.waitForURL('**/bestellung/wunsch/neu');
     await page.getByRole('combobox', { name: 'Kategorie' }).click();
     await page.getByRole('option', { name: 'Geschenk' }).click();
+    await page.getByRole('combobox', { name: 'Für wen ist der Wunsch?' }).click();
+    await page.getByRole('option', { name: 'Erwachsener 1' }).click();
     await page.getByRole('textbox', { name: 'Wunschtitel' }).fill('Winterjacke');
     await page
       .getByRole('textbox', { name: /Link zum gewünschten Geschenk/ })
@@ -207,11 +211,11 @@ test.describe('Bestellung route', () => {
 
     await expect(page).toHaveURL(/\/bestellung\/wunsch\/neu$/);
     await expectTranslatedText(
-      page.locator('mat-form-field').nth(0).locator('.control-error'),
+      page.locator('mat-form-field').nth(1).locator('.control-error'),
       'app.order.errors.items.category.required',
     );
     await expectTranslatedText(
-      page.locator('mat-form-field').nth(1).locator('.control-error'),
+      page.locator('mat-form-field').nth(2).locator('.control-error'),
       'app.order.errors.items.title.required',
     );
   });

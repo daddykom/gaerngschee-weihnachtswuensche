@@ -1,4 +1,4 @@
-import { OrderItemCategory, OrderStatus } from './order.model';
+import { OrderItemCategory, OrderItemPersonType, OrderStatus } from './order.model';
 
 export type AdminPublicationStatus = 'draft' | 'submitted' | 'rejected' | 'approved';
 
@@ -7,6 +7,8 @@ export interface AdminOrderItem {
   orderId: string;
   itemNumber?: number | null;
   category: OrderItemCategory;
+  personType?: OrderItemPersonType | null;
+  personIndex?: number | null;
   originalTitle?: string;
   currentTitle?: string;
   originalDescription: string;

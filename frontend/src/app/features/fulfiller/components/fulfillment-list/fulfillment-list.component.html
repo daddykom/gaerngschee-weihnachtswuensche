@@ -63,6 +63,17 @@
                   <li class="wish-entry gl-stack">
                     <div class="wish-entry__content gl-stack">
                       <h3>{{ wish.title || wish.wishNumber }}</h3>
+                      @if (wish.personType && wish.personIndex) {
+                        <p>
+                          {{
+                            (wish.personType === 'adult'
+                              ? 'app.order.items.adult'
+                              : 'app.order.items.child'
+                            ) | translate
+                          }}
+                          {{ wish.personIndex }}
+                        </p>
+                      }
                       <p>
                         <strong>{{
                           'app.order.items.categories.' + wish.category | translate

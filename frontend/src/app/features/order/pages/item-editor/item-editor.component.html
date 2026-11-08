@@ -6,6 +6,27 @@
     <p>{{ 'app.order.itemEditor.description' | translate }}</p>
 
     <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>{{ 'app.order.items.person' | translate }}</mat-label>
+      <mat-select
+        [value]="
+          itemForm.personType() && itemForm.personIndex()
+            ? itemForm.personType() + ':' + itemForm.personIndex()
+            : null
+        "
+        (selectionChange)="formModel.update((item) => ({ ...item, personType: $event.value.split(':')[0], personIndex: +$event.value.split(':')[1] }))"
+      >
+        @for (option of personOptions(); track option.value) {
+          <mat-option [value]="option.value">{{ option.label }}</mat-option>
+        }
+      </mat-select>
+      <app-control-error
+        matError
+        [control]="itemForm.personType()"
+        translationPrefix="app.order.errors.items.person"
+      />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
       <mat-label>{{ 'app.order.items.wishTitle' | translate }}</mat-label>
       <input matInput [formField]="itemForm.title" />
       <app-control-error

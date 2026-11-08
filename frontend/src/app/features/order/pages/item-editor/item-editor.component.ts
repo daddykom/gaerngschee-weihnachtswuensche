@@ -1,5 +1,12 @@
-import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
-import { form, FormField, maxLength, required } from '@angular/forms/signals';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
+import { form, FormField, maxLength, required, validate } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -8,7 +15,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ControlErrorComponent } from '../../../../shared/components/control-error/control-error';
-import { OrderItemFormValue } from '../../../../shared/models/order.model';
+import { OrderItemFormValue, OrderItemPersonType } from '../../../../shared/models/order.model';
 import { OrderActions } from '../../../../store/order/order.actions';
 import { selectOrderForm } from '../../../../store/order/order.feature';
 
@@ -33,16 +40,50 @@ export class ItemEditorComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly orderFormState = this.store.selectSignal(selectOrderForm);
   private readonly itemId = this.route.snapshot.paramMap.get('itemId') ?? crypto.randomUUID();
+  readonly personOptions = computed(() => {
+    const currentForm = this.orderFormState();
+    const current = currentForm.items.find((item) => item.id === this.itemId);
+    const assigned = new Set(
+      currentForm.items
+        .filter(
+          (item) =>
+            item.id !== this.itemId && item.personType !== null && item.personIndex !== null,
+        )
+        .map((item) => `${item.personType}:${item.personIndex}`),
+    );
+    return [
+      ...this.persons('adult', currentForm.adultsCount ?? 0),
+      ...this.persons('child', currentForm.childrenCount ?? 0),
+    ].filter(
+      (option) =>
+        !assigned.has(option.value) ||
+        option.value === `${current?.personType}:${current?.personIndex}`,
+    );
+  });
   readonly isNew = this.route.snapshot.routeConfig?.path === 'wunsch/neu';
   readonly formModel = signal<OrderItemFormValue>({
     id: this.itemId,
     category: null,
+    personType: null,
+    personIndex: null,
     title: '',
     giftLink: '',
     personalMessage: '',
   });
   readonly itemForm = form(this.formModel, (schema) => {
     required(schema.category);
+    validate(schema.personType, ({ valueOf }) =>
+      this.requiresPersonAssignment() &&
+      (valueOf(schema.personIndex) === null || valueOf(schema.personType) === null)
+        ? { kind: 'required' }
+        : undefined,
+    );
+    validate(schema.personIndex, ({ valueOf }) =>
+      this.requiresPersonAssignment() &&
+      (valueOf(schema.personType) === null || valueOf(schema.personIndex) === null)
+        ? { kind: 'required' }
+        : undefined,
+    );
     required(schema.title);
     maxLength(schema.title, 255);
     maxLength(schema.giftLink, 2048);
@@ -128,6 +169,12 @@ export class ItemEditorComponent {
     if (previous.category !== current.category) {
       changes.category = current.category;
     }
+    if (previous.personType !== current.personType) {
+      changes.personType = current.personType;
+    }
+    if (previous.personIndex !== current.personIndex) {
+      changes.personIndex = current.personIndex;
+    }
     if (previous.title !== current.title) {
       changes.title = current.title;
     }
@@ -138,5 +185,27 @@ export class ItemEditorComponent {
       changes.personalMessage = current.personalMessage;
     }
     return changes;
+  }
+
+  personLabel(type: OrderItemPersonType, index: number): string {
+    return `${type === 'adult' ? 'Erwachsener' : 'Kind'} ${index}`;
+  }
+
+  private persons(
+    type: OrderItemPersonType,
+    count: number,
+  ): Array<{ value: string; type: OrderItemPersonType; index: number; label: string }> {
+    return Array.from({ length: count }, (_, offset) => {
+      const index = offset + 1;
+      return { value: `${type}:${index}`, type, index, label: this.personLabel(type, index) };
+    });
+  }
+
+  private requiresPersonAssignment(): boolean {
+    if (this.isNew) {
+      return true;
+    }
+    const item = this.orderFormState().items.find((candidate) => candidate.id === this.itemId);
+    return item?.personType !== null && item?.personType !== undefined;
   }
 }

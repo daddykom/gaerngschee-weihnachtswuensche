@@ -8,10 +8,13 @@ export type OrderItemStatus =
   | 'completed';
 
 export type OrderItemCategory = 'voucher' | 'gift';
+export type OrderItemPersonType = 'adult' | 'child';
 
 export interface OrderItemFormValue {
   id: string;
   category: OrderItemCategory | null;
+  personType: OrderItemPersonType | null;
+  personIndex: number | null;
   title: string;
   giftLink: string;
   personalMessage: string;
@@ -22,6 +25,8 @@ export interface OrderItem {
   orderId: string;
   itemNumber?: number | null;
   category: OrderItemCategory;
+  personType?: OrderItemPersonType | null;
+  personIndex?: number | null;
   originalTitle: string;
   currentTitle: string;
   originalDescription: string;

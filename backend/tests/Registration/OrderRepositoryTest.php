@@ -25,6 +25,8 @@ final class OrderRepositoryTest extends TestCase
             1,
             [[
                 'category' => 'gift',
+                'personType' => 'child',
+                'personIndex' => 1,
                 'description' => 'Ein Geschenk',
                 'reason' => 'Das wäre schön.',
             ]],
@@ -32,6 +34,8 @@ final class OrderRepositoryTest extends TestCase
 
         self::assertCount(1, $order['items']);
         self::assertSame('gift', $order['items'][0]['category']);
+        self::assertSame('child', $order['items'][0]['personType']);
+        self::assertSame(1, $order['items'][0]['personIndex']);
         self::assertSame('Ein Geschenk', $order['items'][0]['originalDescription']);
         self::assertSame('Ein Geschenk', $order['items'][0]['currentDescription']);
         self::assertSame('Das wäre schön.', $order['items'][0]['originalReason']);

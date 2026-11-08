@@ -218,6 +218,10 @@
         "giftLinkHint": "Als Orientierung kannst du hier einen Beispiel-Link einfügen.",
         "personalMessage": "Persönliche Nachricht zum Wunsch",
         "personalMessageHint": "Wenn du möchtest, erzähle uns kurz, weshalb du dir das wünschst.",
+        "person": "Für wen ist der Wunsch?",
+        "adult": "Erwachsener",
+        "child": "Kind",
+        "unassigned": "Noch nicht zugeordnet",
         "reason": "Begründung",
         "category": "Kategorie",
         "new": "Wunsch hinzufügen",
@@ -330,6 +334,9 @@
           "itemCount": "Bitte erfasse mindestens einen Wunsch und höchstens einen Wunsch pro Familienmitglied.",
           "category": {
             "required": "Bitte wähle eine Kategorie aus."
+          },
+          "person": {
+            "required": "Bitte wähle eine Person aus."
           },
           "title": {
             "required": "Bitte gib einen Wunschtitel ein.",

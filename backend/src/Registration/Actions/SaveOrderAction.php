@@ -105,6 +105,16 @@ final class SaveOrderAction
         if (count($items) < 1 || count($items) > $adultsCount + $childrenCount) {
             return JsonResponse::error($response, 'INVALID_ORDER_ITEMS', 422);
         }
+        $legacyUnassignedIds = array_values(array_map(
+            static fn (array $item): string => (string) $item['id'],
+            array_filter(
+                $existingOrder['items'] ?? [],
+                static fn (array $item): bool => ($item['personType'] ?? null) === null,
+            ),
+        ));
+        if (!$this->validPersonAssignments($items, $adultsCount, $childrenCount, $legacyUnassignedIds)) {
+            return JsonResponse::error($response, 'INVALID_ORDER_ITEMS', 422);
+        }
         if ($password !== null) {
             ($this->users ?? new UserRepository())->updatePassword($user['id'], $password);
         }
@@ -151,7 +161,7 @@ final class SaveOrderAction
     }
 
     /** @param mixed $value
-     *  @return list<array{id?: string, category: string, title: string, description: string, giftLink: ?string, personalMessage: string}>|null
+     *  @return list<array{id?: string, category: string, personType: ?string, personIndex: ?int, title: string, description: string, giftLink: ?string, personalMessage: string}>|null
      */
     private function items(mixed $value): ?array
     {
@@ -167,8 +177,13 @@ final class SaveOrderAction
             $title = $item['title'] ?? ($item['description'] ?? '');
             $description = $item['description'] ?? '';
             $personalMessage = $item['personalMessage'] ?? ($item['reason'] ?? '');
+            $personType = $item['personType'] ?? null;
+            $personIndex = $this->integer($item['personIndex'] ?? null);
             if ((isset($item['id']) && !is_string($item['id']))
                 || !in_array($item['category'] ?? null, ['voucher', 'gift'], true)
+                || ($personType !== null && !in_array($personType, ['adult', 'child'], true))
+                || ($personType === null && $personIndex !== null)
+                || ($personType !== null && $personIndex === null)
                 || !is_string($title)
                 || trim($title) === ''
                 || strlen($title) > 255
@@ -185,6 +200,8 @@ final class SaveOrderAction
             $items[] = [
                 ...(isset($item['id']) && $item['id'] !== '' ? ['id' => $item['id']] : []),
                 'category' => $item['category'],
+                'personType' => $personType,
+                'personIndex' => $personIndex,
                 'title' => trim($title),
                 'description' => trim($description),
                 'giftLink' => isset($item['giftLink']) && $item['giftLink'] !== '' ? trim((string) $item['giftLink']) : null,
@@ -193,6 +210,34 @@ final class SaveOrderAction
         }
 
         return $items;
+    }
+
+    /** @param list<array{id?: string, personType: ?string, personIndex: ?int}> $items */
+    private function validPersonAssignments(
+        array $items,
+        int $adultsCount,
+        int $childrenCount,
+        array $legacyUnassignedIds = [],
+    ): bool {
+        $assigned = [];
+        foreach ($items as $item) {
+            if ($item['personType'] === null || $item['personIndex'] === null) {
+                if (!in_array($item['id'] ?? null, $legacyUnassignedIds, true)) {
+                    return false;
+                }
+                continue;
+            }
+            $maximum = $item['personType'] === 'adult' ? $adultsCount : $childrenCount;
+            if ($item['personIndex'] < 1 || $item['personIndex'] > $maximum) {
+                return false;
+            }
+            $key = $item['personType'] . ':' . $item['personIndex'];
+            if (isset($assigned[$key])) {
+                return false;
+            }
+            $assigned[$key] = true;
+        }
+        return true;
     }
 
     /** @param array<string, mixed> $data */

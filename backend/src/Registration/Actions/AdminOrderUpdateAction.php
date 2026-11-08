@@ -77,6 +77,13 @@ final class AdminOrderUpdateAction
         if ($currentItemIds !== $submittedItemIds) {
             return JsonResponse::error($response, 'INVALID_ORDER_DATA', 422);
         }
+        if (!$this->validPersonAssignments(
+            $current['items'],
+            $this->integer($order['adultsCount'] ?? null) ?? 0,
+            $this->integer($order['childrenCount'] ?? null) ?? 0,
+        )) {
+            return JsonResponse::error($response, 'INVALID_ORDER_DATA', 422);
+        }
 
         $requestedStatus = is_string($order['status'] ?? null) ? $order['status'] : $current['status'];
         if ($requestedStatus === 'definitive' && $action !== 'release') {
@@ -146,5 +153,36 @@ final class AdminOrderUpdateAction
         }
 
         return JsonResponse::success($response, ['order' => $saved]);
+    }
+
+    /** @param list<array<string, mixed>> $items */
+    private function validPersonAssignments(array $items, int $adultsCount, int $childrenCount): bool
+    {
+        $assigned = [];
+        foreach ($items as $item) {
+            $type = $item['personType'] ?? null;
+            $index = $item['personIndex'] ?? null;
+            if ($type === null || $index === null) {
+                continue;
+            }
+            if (!in_array($type, ['adult', 'child'], true) || !is_int($index)) {
+                return false;
+            }
+            $maximum = $type === 'adult' ? $adultsCount : $childrenCount;
+            if ($index < 1 || $index > $maximum) {
+                return false;
+            }
+            $key = $type . ':' . $index;
+            if (isset($assigned[$key])) {
+                return false;
+            }
+            $assigned[$key] = true;
+        }
+        return true;
+    }
+
+    private function integer(mixed $value): ?int
+    {
+        return is_int($value) ? $value : (is_string($value) && filter_var($value, FILTER_VALIDATE_INT) !== false ? (int) $value : null);
     }
 }
