@@ -1,5 +1,6 @@
 export interface StartForm {
   email: string;
+  privacyAccepted: boolean;
   language: string;
 }
 
@@ -12,5 +13,5 @@ export interface StartState {
 export const initialState: StartState = {
   status: 'initial',
   sent: null,
-  form: { email: '', language: 'de' },
+  form: { email: '', privacyAccepted: false, language: 'de' },
 };

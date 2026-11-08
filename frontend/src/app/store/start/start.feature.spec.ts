@@ -12,25 +12,41 @@ describe('startReducer', () => {
     expect(state).toEqual({
       status: 'loading',
       sent: null,
-      form: { email: 'person@example.com', language: 'de' },
+      form: { email: 'person@example.com', privacyAccepted: false, language: 'de' },
     });
   });
 
   it('stores a successful response', () => {
     const state = startReducer(
-      { status: 'loading', sent: null, form: { email: '', language: 'de' } },
+      {
+        status: 'loading',
+        sent: null,
+        form: { email: '', privacyAccepted: false, language: 'de' },
+      },
       StartActions.submitSuccess({ sent: true }),
     );
 
-    expect(state).toEqual({ status: 'success', sent: true, form: { email: '', language: 'de' } });
+    expect(state).toEqual({
+      status: 'success',
+      sent: true,
+      form: { email: '', privacyAccepted: false, language: 'de' },
+    });
   });
 
   it('stores a failed response', () => {
     const state = startReducer(
-      { status: 'loading', sent: null, form: { email: '', language: 'de' } },
+      {
+        status: 'loading',
+        sent: null,
+        form: { email: '', privacyAccepted: false, language: 'de' },
+      },
       StartActions.submitFailure(),
     );
 
-    expect(state).toEqual({ status: 'error', sent: false, form: { email: '', language: 'de' } });
+    expect(state).toEqual({
+      status: 'error',
+      sent: false,
+      form: { email: '', privacyAccepted: false, language: 'de' },
+    });
   });
 });
