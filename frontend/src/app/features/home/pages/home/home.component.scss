@@ -1,3 +1,5 @@
+@use '../../../../../layout-variables' as layout;
+
 :host {
   display: block;
 }
@@ -10,6 +12,10 @@
 
 .home__choices {
   align-items: stretch;
+}
+
+.home__choices > div.gl-stack {
+  display: contents;
 }
 
 .home-choice {
@@ -51,6 +57,10 @@
   margin: 0;
 }
 
+.home-faq__section + .home-faq__section {
+  margin-block-start: var(--gl-space-xl);
+}
+
 .home-faq__answer {
   line-height: 1.55;
 }
@@ -70,4 +80,21 @@
 .home__login {
   margin: 0;
   text-align: center;
+}
+
+@media (min-width: layout.$gl-section-breakpoint) {
+  .home-choice--submit {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .home-choice--fulfill {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .home__login {
+    grid-column: 1;
+    grid-row: 2;
+  }
 }

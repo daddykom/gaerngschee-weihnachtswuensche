@@ -22,20 +22,24 @@ test.describe('Root route', () => {
     await expect(page.locator('app-root')).toBeVisible();
     await expectTranslatedText(page.locator('h1'), 'app.home.title');
     await expectTranslatedText(page.locator('.home__lead'), 'app.home.lead');
-    await expect(page.getByRole('link', { name: 'Wunsch einreichen' })).toHaveAttribute(
-      'href',
-      '/start',
-    );
-    await expect(page.getByRole('link', { name: 'Wünsche anzeigen' })).toHaveAttribute(
-      'href',
-      '/erfuellen',
-    );
+    const submitLink = page.locator('a[href="/start"]');
+    const fulfillLink = page.locator('a[href="/erfuellen"]');
+    await expectTranslatedText(submitLink, 'app.home.submit.action');
+    await expectTranslatedText(fulfillLink, 'app.home.fulfill.action');
     const faqPanels = page.locator('mat-expansion-panel');
     await expect(page.locator('.home-faq__section')).toHaveCount(2);
     await expect(faqPanels).toHaveCount(7);
     await faqPanels.nth(0).locator('mat-expansion-panel-header').click();
     await expect(faqPanels.nth(0).locator('.home-faq__answer')).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Anmelden' })).toHaveAttribute('href', '/login');
+    const loginLink = page.locator('a[href="/login"]');
+    await expectTranslatedText(loginLink, 'app.home.login');
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    const homeActions = page.locator('.home__choices a');
+    await expect(homeActions).toHaveCount(3);
+    await expect(homeActions.nth(0)).toHaveAttribute('href', '/start');
+    await expectTranslatedText(homeActions.nth(1), 'app.home.login');
+    await expect(homeActions.nth(2)).toHaveAttribute('href', '/erfuellen');
   });
 
   test('shows the campaign start date instead of the receive link before launch', async ({
@@ -58,7 +62,7 @@ test.describe('Root route', () => {
 
     await page.goto('/');
     await expectTranslatedText(page.locator('main'), 'app.home.submit.notStarted');
-    await expect(page.getByRole('link', { name: 'Wunsch einreichen' })).toHaveCount(0);
+    await expect(page.locator('a[href="/start"]')).toHaveCount(0);
   });
 
   test('shows logout for an authenticated user and returns home after logout', async ({ page }) => {
@@ -104,6 +108,6 @@ test.describe('Root route', () => {
     await expect(page.getByRole('button', { name: 'Abmelden' })).toBeVisible();
     await page.getByRole('button', { name: 'Abmelden' }).click();
     await page.waitForURL('**/');
-    await expect(page.getByRole('link', { name: 'Anmelden' })).toBeVisible();
+    await expectTranslatedText(page.locator('a[href="/login"]'), 'app.home.login');
   });
 });
