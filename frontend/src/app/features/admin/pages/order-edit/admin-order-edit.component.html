@@ -3,11 +3,12 @@
     <section class="gl-stack gl-stack--group" aria-labelledby="edit-order-heading">
       <div class="gl-cluster">
         <h2 id="edit-order-heading">{{ 'app.admin.overview.editTitle' | translate }}</h2>
-        <button mat-button type="button" (click)="cancel()">
-          {{ 'app.admin.overview.cancel' | translate }}
-        </button>
       </div>
       <p>{{ currentOrder.requesterEmail }}</p>
+      <p>
+        <strong>{{ 'app.admin.overview.currentStatus' | translate }}:</strong>
+        {{ 'app.admin.overview.statuses.' + currentOrder.status | translate }}
+      </p>
       <p>
         <strong>{{ 'app.admin.overview.originalText' | translate }}</strong>
       </p>
@@ -54,6 +55,17 @@
       }
     </section>
 
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>{{ 'app.admin.overview.newStatus' | translate }}</mat-label>
+      <mat-select [formField]="orderForm.status">
+        @for (status of statusOptions; track status) {
+          <mat-option [value]="status">
+            {{ 'app.admin.overview.statuses.' + status | translate }}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
     <div class="gl-cluster">
       <button mat-button type="button" (click)="cancel()">
         {{ 'app.admin.overview.cancel' | translate }}
@@ -66,23 +78,6 @@
         (click)="save()"
       >
         {{ 'app.admin.overview.save' | translate }}
-      </button>
-      <button
-        mat-stroked-button
-        type="button"
-        [disabled]="saveStatus() === 'loading' || !canRejectOrder()"
-        (click)="rejectOrder()"
-      >
-        {{ 'app.admin.overview.rejectOrder' | translate }}
-      </button>
-      <button
-        mat-flat-button
-        color="primary"
-        type="button"
-        [disabled]="saveStatus() === 'loading' || !allItemsApproved()"
-        (click)="releaseOrder()"
-      >
-        {{ 'app.admin.overview.release' | translate }}
       </button>
     </div>
   </div>

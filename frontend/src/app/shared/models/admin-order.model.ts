@@ -40,6 +40,7 @@ export interface AdminOrder {
 }
 
 export interface AdminOrderFormValue {
+  status: OrderStatus;
   currentText: string;
   adminNotes: string;
   adultsCount: number;

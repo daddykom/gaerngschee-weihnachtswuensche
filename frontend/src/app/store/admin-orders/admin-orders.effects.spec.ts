@@ -74,10 +74,12 @@ describe('admin orders effects', () => {
 
   it('updates the complete order with the selected action and maps failures', async () => {
     const order = { id: 'order-1' } as never;
-    service.update.mockReturnValueOnce(of({ order }));
+    service.update.mockReturnValueOnce(of({ order, mailSent: false }));
     const success = firstValueFrom(TestBed.runInInjectionContext(() => saveAdminOrderEffect()));
     actions$.next(AdminOrdersActions.save({ order, action: 'release' }));
-    await expect(success).resolves.toEqual(AdminOrdersActions.saveSuccess({ order }));
+    await expect(success).resolves.toEqual(
+      AdminOrdersActions.saveSuccess({ order, mailSent: false }),
+    );
     expect(service.update).toHaveBeenCalledWith(order, 'release');
 
     service.update.mockReturnValueOnce(
@@ -96,7 +98,9 @@ describe('admin orders effects', () => {
     const result = firstValueFrom(
       TestBed.runInInjectionContext(() => navigateBackAfterAdminOrderSaveEffect()),
     );
-    actions$.next(AdminOrdersActions.saveSuccess({ order: { id: 'order-1' } as never }));
+    actions$.next(
+      AdminOrdersActions.saveSuccess({ order: { id: 'order-1' } as never, mailSent: false }),
+    );
     await expect(result).resolves.toEqual(NavigationActions.navigate({ target: 'back' }));
   });
 });

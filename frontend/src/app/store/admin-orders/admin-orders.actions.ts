@@ -13,7 +13,7 @@ export const AdminOrdersActions = createActionGroup({
     'Draft Changed': props<{ order: AdminOrder }>(),
     'Form Loaded': props<{ orderId: string; form: AdminOrderFormValue }>(),
     'Form Changed': props<{ orderId: string; changes: Partial<AdminOrderFormValue> }>(),
-    'Save Success': props<{ order: AdminOrder }>(),
+    'Save Success': props<{ order: AdminOrder; mailSent: boolean }>(),
     'Save Failure': props<{ errorCode: string }>(),
   },
 });

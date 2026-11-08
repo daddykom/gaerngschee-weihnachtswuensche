@@ -86,6 +86,7 @@ export class AdminOrderItemEditComponent {
         this.formModel.set(formValue);
         this.previousItem = { ...formValue };
         const orderForm: AdminOrderFormValue = {
+          status: currentOrder.status,
           currentText: currentOrder.currentText ?? '',
           adminNotes: currentOrder.adminNotes ?? '',
           adultsCount: currentOrder.adultsCount,

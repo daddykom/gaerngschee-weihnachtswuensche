@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Registration\Actions;
 
 use App\Registration\Data\OrderRepository;
+use App\Registration\Services\OrderStatus;
 use App\Shared\Database\Database;
 use App\Shared\Http\JsonRequest;
 use App\Shared\Http\JsonResponse;
@@ -41,7 +42,7 @@ final class AdminOrderUpdateAction
         }
 
         if (!in_array($action, ['save', 'release', 'rejectOrder', 'acceptItem', 'rejectItem'], true)
-            || !in_array($order['status'] ?? null, ['released', 'in_review', 'changes_requested', 'definitive'], true)) {
+            || !in_array($order['status'] ?? null, OrderStatus::all(), true)) {
             return JsonResponse::error($response, 'INVALID_ORDER_DATA', 422);
         }
 
@@ -86,17 +87,11 @@ final class AdminOrderUpdateAction
         }
 
         $requestedStatus = is_string($order['status'] ?? null) ? $order['status'] : $current['status'];
-        if ($requestedStatus === 'definitive' && $action !== 'release') {
-            return JsonResponse::error($response, 'INVALID_ORDER_DATA', 422);
-        }
         if ($action === 'release' && !$allApproved) {
             return JsonResponse::error($response, 'ITEMS_NOT_ACCEPTED', 422);
         }
         if ($action === 'release') {
             $requestedStatus = 'definitive';
-        }
-        if (in_array('rejected', array_column($normalizedItems, 'publicationStatus'), true)) {
-            $requestedStatus = 'changes_requested';
         }
         if ($action === 'rejectOrder' && !in_array('rejected', array_column($normalizedItems, 'publicationStatus'), true)
             && (!is_string($order['adminNotes'] ?? null) || trim($order['adminNotes']) === '')) {
@@ -121,12 +116,10 @@ final class AdminOrderUpdateAction
 
         $mailStatus = null;
         $emailType = null;
+        $mailSent = false;
         if ($requestedStatus === 'changes_requested' && $current['status'] !== 'changes_requested') {
             $mailStatus = 'changes_requested';
             $emailType = 'order_changes_requested';
-        } elseif ($requestedStatus === 'definitive' && $current['status'] !== 'definitive') {
-            $mailStatus = 'definitive';
-            $emailType = 'order_definitive';
         }
         if ($mailStatus !== null && $emailType !== null && is_string($saved['requesterEmail'] ?? null)) {
             $emailOrder = $saved;
@@ -140,6 +133,7 @@ final class AdminOrderUpdateAction
             $message = $emails->renderOrderConfirmation($emailOrder, $mailStatus);
             try {
                 $emails->sendStoredEmail($saved['requesterEmail'], $message['subject'], $message['html'], $message['text']);
+                $mailSent = true;
             } catch (\Throwable $exception) {
                 ($this->emailQueue ?? new EmailQueueRepository(Database::getConnection()))->enqueue(
                     'order',
@@ -152,7 +146,7 @@ final class AdminOrderUpdateAction
             }
         }
 
-        return JsonResponse::success($response, ['order' => $saved]);
+        return JsonResponse::success($response, ['order' => $saved, 'mailSent' => $mailSent]);
     }
 
     /** @param list<array<string, mixed>> $items */

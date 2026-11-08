@@ -59,7 +59,10 @@ describe('adminOrdersFeature', () => {
     expect(
       adminOrdersFeature.reducer(
         state,
-        AdminOrdersActions.saveSuccess({ order: { ...order, status: 'definitive' } as never }),
+        AdminOrdersActions.saveSuccess({
+          order: { ...order, status: 'definitive' } as never,
+          mailSent: false,
+        }),
       ).saveStatus,
     ).toBe('success');
     expect(

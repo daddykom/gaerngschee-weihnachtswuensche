@@ -108,7 +108,7 @@ final class AdminOrderUpdateActionTest extends TestCase
         self::assertStringNotContainsString('Interne Begründung', $emails->orderConfirmations[0]['order']['html']);
     }
 
-    public function testSendsAcceptanceEmailWhenOrderBecomesDefinitive(): void
+    public function testDoesNotSendEmailWhenOrderBecomesDefinitive(): void
     {
         [$pdo, $order] = $this->orderWithItems('released');
         $emails = new RecordingEmailSender();
@@ -120,8 +120,42 @@ final class AdminOrderUpdateActionTest extends TestCase
             'action' => 'release',
         ]), new Response(), ['orderId' => $order['id']]);
 
-        self::assertCount(1, $emails->orderConfirmations);
-        self::assertStringContainsString('definitive', $emails->orderConfirmations[0]['order']['html']);
+        self::assertCount(0, $emails->orderConfirmations);
+    }
+
+    public function testAllowsEveryOrderStatusFromTheAdminEditor(): void
+    {
+        foreach (['draft', 'waiting_for_fairgate', 'released', 'family_size_exceeded', 'in_review', 'changes_requested', 'definitive', 'ready_for_pickup', 'completed'] as $status) {
+            [$pdo, $order] = $this->orderWithItems('released');
+            $action = new AdminOrderUpdateAction(new OrderRepository($pdo), new RecordingEmailSender());
+
+            $response = ($action)($this->request($order['id'], [
+                'order' => $this->orderPayload($order, $status),
+                'items' => [$this->itemPayload($order['items'][0], 'submitted')],
+                'action' => 'save',
+            ]), new Response(), ['orderId' => $order['id']]);
+
+            self::assertSame(200, $response->getStatusCode());
+            self::assertSame($status, json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR)['order']['status']);
+        }
+    }
+
+    public function testDoesNotSendEmailWhenTheStatusStaysTheSame(): void
+    {
+        [$pdo, $order] = $this->orderWithItems('released');
+        $emails = new RecordingEmailSender();
+        $action = new AdminOrderUpdateAction(new OrderRepository($pdo), $emails);
+
+        $response = ($action)($this->request($order['id'], [
+            'order' => $this->orderPayload($order, 'released'),
+            'items' => [$this->itemPayload($order['items'][0], 'submitted')],
+            'action' => 'save',
+        ]), new Response(), ['orderId' => $order['id']]);
+
+        $data = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
+        self::assertSame(200, $response->getStatusCode());
+        self::assertFalse($data['mailSent']);
+        self::assertCount(0, $emails->orderConfirmations);
     }
 
     public function testRejectsUnknownOrderAndMismatchedPayload(): void
