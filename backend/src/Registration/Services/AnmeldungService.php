@@ -24,6 +24,36 @@ final class AnmeldungService
         $this->emailSender->sendAnmeldung($email, AnmeldungMailVariant::ClientOrder, $locale, $loginUrl);
     }
 
+    public function sendFairgateRegistrationRequired(string $email, string $fairgateUrl, string $locale = 'de'): void
+    {
+        $email = strtolower(trim($email));
+        if (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
+            throw new InvalidArgumentException('Invalid email address.');
+        }
+
+        $this->emailSender->sendAnmeldung(
+            $email,
+            AnmeldungMailVariant::FairgateRegistrationRequired,
+            $locale,
+            $fairgateUrl,
+        );
+    }
+
+    public function sendFairgateRegistrationAvailable(string $email, string $startUrl, string $locale = 'de'): void
+    {
+        $email = strtolower(trim($email));
+        if (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
+            throw new InvalidArgumentException('Invalid email address.');
+        }
+
+        $this->emailSender->sendAnmeldung(
+            $email,
+            AnmeldungMailVariant::FairgateRegistrationAvailable,
+            $locale,
+            $startUrl,
+        );
+    }
+
     /** @param array<string, mixed> $wish */
     public function sendFulfillerReservationLink(
         string $email,
