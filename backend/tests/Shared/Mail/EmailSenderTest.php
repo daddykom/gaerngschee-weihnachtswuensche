@@ -15,7 +15,7 @@ final class EmailSenderTest extends TestCase
     public function testSendAnmeldungRendersClientOrderVariant(): void
     {
         $variant = AnmeldungMailVariant::ClientOrder;
-        $subject = 'Dein Link zur Weihnachtswünsche-Bestellung';
+        $subject = 'Dein Link zum Weihnachtswünsche-Wunschzettel';
         $content = 'Jetzt für die Wunschzettel-Aktion anmelden';
         $link = 'http://localhost:4200/login';
         $mailer = $this->createMock(MailerInterface::class);
@@ -107,7 +107,7 @@ final class EmailSenderTest extends TestCase
         $mailer->expects(self::once())
             ->method('send')
             ->with(self::callback(static function (Email $email): bool {
-                self::assertSame('Dein Link zur Weihnachtswünsche-Bestellung', $email->getSubject());
+                self::assertSame('Dein Link zum Weihnachtswünsche-Wunschzettel', $email->getSubject());
                 self::assertStringContainsString('Weihnachtswünsche eintragen', $email->getHtmlBody());
                 self::assertStringContainsString('http://localhost:4200/client-login?token=test-token', $email->getHtmlBody());
                 self::assertStringContainsString('10 Minuten gültig', $email->getHtmlBody());

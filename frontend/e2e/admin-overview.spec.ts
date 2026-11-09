@@ -1,4 +1,5 @@
 import { loginAsAdmin, mockOrders, orderFixture } from './support/admin-orders';
+import { expectTranslatedText } from './support/assertions';
 import { expect, test } from './support/test';
 
 test.describe('Admin order overview route', () => {
@@ -7,7 +8,9 @@ test.describe('Admin order overview route', () => {
     await mockOrders(page, orderFixture());
     await page.goto('/admin/overview');
 
-    await page.getByRole('link', { name: 'Bestellung verarbeiten' }).click();
+    const processLink = page.locator('a[href="/admin/orders/order-1/edit"]');
+    await expectTranslatedText(processLink, 'app.admin.overview.process');
+    await processLink.click();
     await expect(page).toHaveURL(/\/admin\/orders\/order-1\/edit$/);
   });
 
@@ -39,7 +42,7 @@ test.describe('Admin order overview route', () => {
     await page.keyboard.press('Escape');
     await expect(page.locator('mat-chip-row')).toHaveCount(2);
 
-    await page.getByRole('link', { name: 'Bestellung verarbeiten' }).click();
+    await page.locator('a[href="/admin/orders/order-1/edit"]').click();
     await page.getByRole('button', { name: 'Abbrechen' }).first().click();
     await expect(page).toHaveURL(/\/admin\/overview$/);
     await expect(page.locator('mat-chip-row')).toHaveCount(2);
