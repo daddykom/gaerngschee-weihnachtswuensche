@@ -40,6 +40,18 @@ describe('AdminOverviewComponent', () => {
     expect(component.selectedCategories()).toEqual(['gift']);
   });
 
+  it('offers all order statuses as selectable filters', () => {
+    expect(component.statusOptions).toEqual([
+      'draft',
+      'released',
+      'in_review',
+      'changes_requested',
+      'definitive',
+      'ready_for_pickup',
+      'completed',
+    ]);
+  });
+
   it('keeps the other filter when one filter changes', () => {
     const dispatch = vi.spyOn(store, 'dispatch');
 

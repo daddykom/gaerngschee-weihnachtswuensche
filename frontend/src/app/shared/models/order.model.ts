@@ -47,14 +47,22 @@ export interface OrderItem {
 
 export type OrderStatus =
   | 'draft'
-  | 'waiting_for_fairgate'
   | 'released'
-  | 'family_size_exceeded'
   | 'in_review'
   | 'changes_requested'
   | 'definitive'
   | 'ready_for_pickup'
   | 'completed';
+
+export const ORDER_STATUS_WORKFLOW: OrderStatus[] = [
+  'draft',
+  'released',
+  'in_review',
+  'changes_requested',
+  'definitive',
+  'ready_for_pickup',
+  'completed',
+];
 
 export interface Order {
   id: string;

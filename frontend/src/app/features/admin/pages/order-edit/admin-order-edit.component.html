@@ -149,9 +149,9 @@
     <mat-form-field appearance="outline" subscriptSizing="dynamic">
       <mat-label>{{ 'app.admin.overview.newStatus' | translate }}</mat-label>
       <mat-select [formField]="orderForm.status">
-        @for (status of statusOptions; track status) {
+        @for (status of statusOptions; track status; let index = $index) {
           <mat-option [value]="status">
-            {{ 'app.admin.overview.statuses.' + status | translate }}
+            {{ index + 1 }}. {{ 'app.admin.overview.statuses.' + status | translate }}
           </mat-option>
         }
       </mat-select>

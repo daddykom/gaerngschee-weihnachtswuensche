@@ -122,6 +122,22 @@ describe('AdminOrderEditComponent', () => {
     );
   });
 
+  it('uses the current order status as the initial selection', () => {
+    expect(component.formModel().status).toBe('released');
+  });
+
+  it('offers all order statuses in workflow order', () => {
+    expect(component.statusOptions).toEqual([
+      'draft',
+      'released',
+      'in_review',
+      'changes_requested',
+      'definitive',
+      'ready_for_pickup',
+      'completed',
+    ]);
+  });
+
   it('shows an error instead of silently aborting when a wish description is missing', () => {
     const dispatch = vi.spyOn(store, 'dispatch');
 

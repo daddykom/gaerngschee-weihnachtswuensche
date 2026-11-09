@@ -73,9 +73,7 @@ export class OrderComponent {
     const currentOrder = this.order();
     return (
       currentOrder === null ||
-      ['draft', 'family_size_exceeded', 'changes_requested'].includes(
-        currentOrder.status as OrderStatus,
-      )
+      ['draft', 'changes_requested'].includes(currentOrder.status as OrderStatus)
     );
   });
   readonly maxItems = computed(() => {

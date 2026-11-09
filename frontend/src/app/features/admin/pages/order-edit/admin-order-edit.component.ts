@@ -9,7 +9,7 @@ import { Store } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ControlErrorComponent } from '../../../../shared/components/control-error/control-error';
 import { AdminOrder, AdminOrderFormValue } from '../../../../shared/models/admin-order.model';
-import { OrderStatus } from '../../../../shared/models/order.model';
+import { ORDER_STATUS_WORKFLOW } from '../../../../shared/models/order.model';
 import { AdminOrdersActions } from '../../../../store/admin-orders/admin-orders.actions';
 import {
   selectAdminOrders,
@@ -57,17 +57,7 @@ export class AdminOrderEditComponent {
     required(schema.childrenCount);
     min(schema.childrenCount, 0);
   });
-  readonly statusOptions: OrderStatus[] = [
-    'draft',
-    'waiting_for_fairgate',
-    'released',
-    'family_size_exceeded',
-    'in_review',
-    'changes_requested',
-    'definitive',
-    'ready_for_pickup',
-    'completed',
-  ];
+  readonly statusOptions = ORDER_STATUS_WORKFLOW;
 
   cancel(): void {
     this.store.dispatch(NavigationActions.navigate({ target: 'back' }));
