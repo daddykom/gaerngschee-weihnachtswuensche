@@ -1,36 +1,19 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
-import { Route, Router } from '@angular/router';
+import { Route, Router, UrlTree } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { firstValueFrom, of, throwError } from 'rxjs';
-import { AuthService, RegistrationLoginResponse } from '../../../shared/services/auth.service';
-import { NavigationProgressService } from '../../../shared/services/navigation-progress.service';
 import { AuthActions } from '../../../store/auth/auth.actions';
 import { clientLoginGuard } from './client-login.guard';
 
 describe('clientLoginGuard', () => {
   const redirect = { url: '/start' };
-  const orderRedirect = { url: '/bestellung' };
   const router = {
     getCurrentNavigation: vi.fn(() => ({
       initialUrl: { queryParams: { token: 'registration-token' } },
     })),
     url: '/client-login',
-    parseUrl: vi.fn((url: string) => (url === '/bestellung' ? orderRedirect : redirect)),
+    parseUrl: vi.fn(() => redirect),
   };
   const store = { dispatch: vi.fn() };
-  const progress = { start: vi.fn(), stop: vi.fn() };
-  const response: RegistrationLoginResponse = {
-    user: { id: 'client-1', email: 'client@example.com', group: 'wunschbesteller' },
-    group: 'wunschbesteller',
-    requiredPasswordReset: false,
-    firstAccess: true,
-    fairgateStatus: 'valid',
-    fairgateUserExists: true,
-    childrenCount: 1,
-    adultsCount: 2,
-    salutation: 'Hallo',
-  };
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -38,83 +21,27 @@ describe('clientLoginGuard', () => {
       providers: [
         { provide: Router, useValue: router },
         { provide: Store, useValue: store },
-        { provide: NavigationProgressService, useValue: progress },
       ],
     });
   });
 
-  it('redirects to the order page and stores a successful registration login', async () => {
-    TestBed.configureTestingModule({
-      providers: [
-        { provide: AuthService, useValue: { registrationLogin: vi.fn(() => of(response)) } },
-      ],
-    });
-
+  it('allows the client-login page to render when a token is present', () => {
     const result = TestBed.runInInjectionContext(() =>
       clientLoginGuard({} as Route, [], {} as never),
     );
 
-    await expect(firstValueFrom(result as ReturnType<typeof of>)).resolves.toEqual(orderRedirect);
-    expect(store.dispatch).toHaveBeenCalledWith(
-      AuthActions.registrationLoginSuccess({
-        userId: 'client-1',
-        email: 'client@example.com',
-        group: 'wunschbesteller',
-        firstAccess: true,
-        fairgateStatus: 'valid',
-        fairgateUserExists: true,
-        childrenCount: 1,
-        adultsCount: 2,
-        salutation: 'Hallo',
-      }),
-    );
-    expect(progress.start).toHaveBeenCalledOnce();
-    expect(progress.stop).toHaveBeenCalledOnce();
+    expect(result).toBe(true);
+    expect(store.dispatch).not.toHaveBeenCalled();
   });
 
-  it('redirects to start and stores the backend error for an invalid token', async () => {
-    TestBed.configureTestingModule({
-      providers: [
-        {
-          provide: AuthService,
-          useValue: {
-            registrationLogin: vi.fn(() =>
-              throwError(
-                () =>
-                  new HttpErrorResponse({
-                    status: 401,
-                    error: { error: { code: 'INVALID_REGISTRATION_TOKEN' } },
-                  }),
-              ),
-            ),
-          },
-        },
-      ],
-    });
-
-    const result = TestBed.runInInjectionContext(() =>
-      clientLoginGuard({} as Route, [], {} as never),
-    );
-
-    await expect(firstValueFrom(result as ReturnType<typeof of>)).resolves.toEqual(redirect);
-    expect(store.dispatch).toHaveBeenCalledWith(
-      AuthActions.registrationLoginFailure({ errorCode: 'INVALID_REGISTRATION_TOKEN' }),
-    );
-    expect(progress.start).toHaveBeenCalledOnce();
-    expect(progress.stop).toHaveBeenCalledOnce();
-  });
-
-  it('redirects to start without calling the backend when the token is missing', () => {
+  it('redirects to start and stores an error when the token is missing', () => {
     router.getCurrentNavigation.mockReturnValue({ initialUrl: { queryParams: {} } } as never);
-    const auth = { registrationLogin: vi.fn() };
-    TestBed.configureTestingModule({ providers: [{ provide: AuthService, useValue: auth }] });
 
     const result = TestBed.runInInjectionContext(() =>
       clientLoginGuard({} as Route, [], {} as never),
     );
 
-    expect(result).toEqual(redirect);
-    expect(auth.registrationLogin).not.toHaveBeenCalled();
+    expect(result).toBe(redirect as unknown as UrlTree);
     expect(store.dispatch).toHaveBeenCalledWith(
       AuthActions.registrationLoginFailure({ errorCode: 'INVALID_REGISTRATION_TOKEN' }),
     );

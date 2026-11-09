@@ -44,17 +44,6 @@
   white-space: nowrap;
 }
 
-.app-navigation-progress {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--gl-space-sm);
-  min-height: 12rem;
-  padding: var(--gl-space-xl) var(--gl-space-md);
-  background: var(--mat-sys-surface-container);
-  text-align: center;
-}
-
 @media (max-width: 47.99rem) {
   .app-header__content {
     display: grid;
