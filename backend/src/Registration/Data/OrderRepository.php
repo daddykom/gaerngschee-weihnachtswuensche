@@ -355,7 +355,7 @@ final class OrderRepository
                 $itemStatement = $this->pdo->prepare(
                     'UPDATE order_items SET category = :category, person_type = :person_type, person_index = :person_index,
                       current_title = :title, current_description = :description, gift_link = :gift_link,
-                      personal_message = :personal_message, current_reason = :personal_message,
+                       personal_message = :personal_message, current_reason = :current_reason,
                      publication_status = :publication_status, status = :status, admin_notes = :admin_notes,
                      updated_at = CURRENT_TIMESTAMP WHERE id = :id AND order_id = :order_id',
                 );
@@ -369,6 +369,7 @@ final class OrderRepository
                     'person_index' => $item['personIndex'] ?? null,
                     'gift_link' => $item['giftLink'] ?? null,
                     'personal_message' => $item['personalMessage'] ?? ($item['currentReason'] ?? null),
+                    'current_reason' => $item['personalMessage'] ?? ($item['currentReason'] ?? null),
                     'publication_status' => $item['publicationStatus'],
                     'status' => $item['publicationStatus'],
                     'admin_notes' => $item['adminNotes'] ?? null,

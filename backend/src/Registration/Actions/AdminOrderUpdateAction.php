@@ -140,6 +140,44 @@ final class AdminOrderUpdateAction
             ], $normalizedItems);
         } catch (\Throwable $exception) {
             ExceptionLogger::log('admin order update failed for ' . $orderId, $exception);
+            $diagnostic = sprintf(
+                'admin order update payload for %s: %s',
+                $orderId,
+                json_encode([
+                    'action' => $action,
+                    'orderStatus' => $order['status'] ?? null,
+                    'adultsCount' => $order['adultsCount'] ?? null,
+                    'childrenCount' => $order['childrenCount'] ?? null,
+                    'itemCount' => count($normalizedItems),
+                    'items' => array_map(static fn (array $item): array => [
+                        'id' => $item['id'] ?? null,
+                        'publicationStatus' => $item['publicationStatus'] ?? null,
+                        'category' => $item['category'] ?? null,
+                        'personType' => $item['personType'] ?? null,
+                        'personIndex' => $item['personIndex'] ?? null,
+                        'currentTitleLength' => is_string($item['currentTitle'] ?? null)
+                            ? strlen($item['currentTitle'])
+                            : null,
+                        'currentDescriptionLength' => is_string($item['currentDescription'] ?? null)
+                            ? strlen($item['currentDescription'])
+                            : null,
+                        'giftLinkType' => get_debug_type($item['giftLink'] ?? null),
+                        'adminNotesType' => get_debug_type($item['adminNotes'] ?? null),
+                    ], $normalizedItems),
+                ], JSON_THROW_ON_ERROR),
+            );
+            error_log($diagnostic);
+            file_put_contents(
+                '/tmp/admin-order-update.log',
+                sprintf(
+                    "%s\nexception: %s: %s\n%s\n",
+                    date(DATE_ATOM),
+                    $exception::class,
+                    $exception->getMessage(),
+                    $diagnostic,
+                ),
+                FILE_APPEND | LOCK_EX,
+            );
             return JsonResponse::error($response, 'ORDER_UPDATE_FAILED', 500);
         }
 
