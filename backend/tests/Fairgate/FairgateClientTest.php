@@ -28,7 +28,7 @@ final class FairgateClientTest extends TestCase
         self::assertTrue($client->hasContactByEmail(' Person@Example.com ', 'Klient*innen'));
         self::assertCount(2, $history);
         self::assertSame('/fsa/v1.1/auth/create/org-123/token', $history[0]['request']->getUri()->getPath());
-        self::assertSame('/fsa/v1.1/contact/org-123/contacts/list', $history[1]['request']->getUri()->getPath());
+        self::assertSame('/fsa/v1.1/contact/org-123/contacts', $history[1]['request']->getUri()->getPath());
     }
 
     public function testFindContactDataByEmailLoadsTheExtendedContactData(): void
@@ -58,7 +58,38 @@ final class FairgateClientTest extends TestCase
 
         $client->findContactDataByEmail('person@example.com', 'Aktivmitglied');
 
-        self::assertSame('pageNo=1&pageLimit=1&primary_email=person%40example.com&membership%5B%5D=Aktivmitglied', $history[1]['request']->getUri()->getQuery());
+        self::assertSame('pageNo=1&pageLimit=100&membership%5B%5D=Aktivmitglied', $history[1]['request']->getUri()->getQuery());
+    }
+
+    public function testFindContactDataByEmailSearchesAllMembershipPages(): void
+    {
+        $history = [];
+        $handler = HandlerStack::create(new MockHandler([
+            new Response(200, [], '{"success":true,"data":{"token":"test-token"}}'),
+            new Response(200, [], '{"success":true,"data":{"contacts":[{"contact_id":7,"primary_email":"other@example.com"}],"totalPages":2}}'),
+            new Response(200, [], '{"success":true,"data":{"contacts":[{"contact_id":42,"primary_email":"person@example.com"}],"totalPages":2}}'),
+            new Response(200, [], '{"success":true,"code":200,"data":{"contactId":42}}'),
+        ]));
+        $handler->push(Middleware::history($history));
+        $client = new FairgateClient(new Client(['handler' => $handler, 'base_uri' => 'https://fsa-test.fairgate.ch']), 'https://fsa-test.fairgate.ch', 'org-123', 'access-key', null, static fn (string $token): bool => $token === 'test-token');
+
+        self::assertSame(['contactId' => 42], $client->findContactDataByEmail('person@example.com', 'Klient*innen')['data']);
+        self::assertSame('pageNo=2&pageLimit=100&membership%5B%5D=Klient%2Ainnen', $history[2]['request']->getUri()->getQuery());
+    }
+
+    public function testFindContactDataByEmailStopsAfterTheFirstMembershipMatch(): void
+    {
+        $history = [];
+        $handler = HandlerStack::create(new MockHandler([
+            new Response(200, [], '{"success":true,"data":{"token":"test-token"}}'),
+            new Response(200, [], '{"success":true,"data":{"contacts":[{"contact_id":42,"primary_email":"person@example.com"}],"totalPages":5}}'),
+            new Response(200, [], '{"success":true,"code":200,"data":{"contactId":42}}'),
+        ]));
+        $handler->push(Middleware::history($history));
+        $client = new FairgateClient(new Client(['handler' => $handler, 'base_uri' => 'https://fsa-test.fairgate.ch']), 'https://fsa-test.fairgate.ch', 'org-123', 'access-key', null, static fn (string $token): bool => $token === 'test-token');
+
+        self::assertSame(['contactId' => 42], $client->findContactDataByEmail('person@example.com', 'Klient*innen')['data']);
+        self::assertCount(3, $history);
     }
 
     public function testFindContactDataByEmailCanOmitMembershipFilter(): void
