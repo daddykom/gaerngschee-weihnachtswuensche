@@ -82,6 +82,11 @@
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>{{ 'app.admin.overview.currentDescription' | translate }}</mat-label>
           <textarea matInput rows="4" [formField]="itemForm.currentDescription"></textarea>
+          <app-control-error
+            matError
+            [control]="itemForm.currentDescription()"
+            translationPrefix="app.admin.overview.errors.currentDescription"
+          />
         </mat-form-field>
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>{{ 'app.order.items.giftLink' | translate }}</mat-label>

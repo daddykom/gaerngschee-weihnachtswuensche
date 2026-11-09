@@ -5,6 +5,7 @@ import { provideTranslateService } from '@ngx-translate/core';
 import { AdminOrder } from '../../../../shared/models/admin-order.model';
 import { AdminOrdersActions } from '../../../../store/admin-orders/admin-orders.actions';
 import { NavigationActions } from '../../../../store/navigation/navigation.actions';
+import { NotificationActions } from '../../../../store/notification/notification.actions';
 import { AdminOrderEditComponent } from './admin-order-edit.component';
 
 describe('AdminOrderEditComponent', () => {
@@ -118,6 +119,28 @@ describe('AdminOrderEditComponent', () => {
         action: 'save',
         order: expect.objectContaining({ status: 'completed' }),
       }),
+    );
+  });
+
+  it('shows an error instead of silently aborting when a wish description is missing', () => {
+    const dispatch = vi.spyOn(store, 'dispatch');
+
+    component.formModel.update((model) => ({
+      ...model,
+      items: model.items.map((item) => ({ ...item, currentDescription: '' })),
+    }));
+    component.save();
+
+    expect(dispatch).toHaveBeenCalledWith(
+      NotificationActions.show({
+        variant: 'error',
+        titleKey: 'app.admin.overview.saveErrorTitle',
+        messageKey: 'app.admin.overview.errors.ITEM_DESCRIPTION_REQUIRED',
+        preserveOnRoutes: ['/admin/overview', '/admin/orders'],
+      }),
+    );
+    expect(dispatch).not.toHaveBeenCalledWith(
+      expect.objectContaining({ type: AdminOrdersActions.save.type }),
     );
   });
 });

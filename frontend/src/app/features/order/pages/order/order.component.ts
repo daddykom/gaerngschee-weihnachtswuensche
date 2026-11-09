@@ -179,6 +179,18 @@ export class OrderComponent {
       return;
     }
 
+    if (this.storeForm().items.some((item) => item.title.trim() === '')) {
+      this.store.dispatch(
+        NotificationActions.show({
+          variant: 'error',
+          titleKey: 'app.order.notifications.errorTitle',
+          messageKey: 'app.order.errors.items.title.required',
+          preserveOnRoutes: ['/bestellung'],
+        }),
+      );
+      return;
+    }
+
     if (this.canEdit() && this.saving() !== 'loading') {
       const itemCount = this.storeForm().items.length;
       const maximumItemCount = this.maxItems();

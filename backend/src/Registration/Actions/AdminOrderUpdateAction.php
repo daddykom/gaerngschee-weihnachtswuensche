@@ -9,6 +9,7 @@ use App\Registration\Services\OrderStatus;
 use App\Shared\Database\Database;
 use App\Shared\Http\JsonRequest;
 use App\Shared\Http\JsonResponse;
+use App\Shared\Logging\ExceptionLogger;
 use App\Shared\Mail\EmailQueueRepository;
 use App\Shared\Mail\EmailSender;
 use App\Shared\Mail\EmailSenderInterface;
@@ -133,7 +134,8 @@ final class AdminOrderUpdateAction
                 'adultsCount' => $order['adultsCount'] ?? 0,
                 'childrenCount' => $order['childrenCount'] ?? 0,
             ], $normalizedItems);
-        } catch (\Throwable) {
+        } catch (\Throwable $exception) {
+            ExceptionLogger::log('admin order update failed for ' . $orderId, $exception);
             return JsonResponse::error($response, 'ORDER_UPDATE_FAILED', 500);
         }
 

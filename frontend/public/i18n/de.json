@@ -757,9 +757,13 @@
           "REJECTION_REASON_REQUIRED": "Für eine Zurückweisung ist eine Begründung erforderlich.",
           "ITEMS_NOT_ACCEPTED": "Alle Wünsche müssen zuerst akzeptiert werden.",
           "ITEM_REJECTION_REQUIRED": "Mindestens ein Wunsch muss zurückgewiesen werden.",
+          "ITEM_DESCRIPTION_REQUIRED": "Jeder Wunsch benötigt eine aktuelle Beschreibung.",
           "ORDER_REJECTION_REASON_REQUIRED": "Für die Zurückweisung der Order ist eine Begründung erforderlich.",
           "rejectionReason": {
             "required": "Bitte gib eine Begründung für die Zurückweisung ein."
+          },
+          "currentDescription": {
+            "required": "Bitte gib eine aktuelle Wunschbeschreibung ein."
           },
           "ORDER_UPDATE_FAILED": "Die Bestellung konnte nicht gespeichert werden.",
           "INVALID_OVERVIEW_CONFIGURATION": "Die Konfiguration für die Übersicht ist ungültig.",

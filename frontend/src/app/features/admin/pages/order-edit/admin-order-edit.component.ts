@@ -17,6 +17,7 @@ import {
   selectAdminOrdersSaveStatus,
 } from '../../../../store/admin-orders/admin-orders.feature';
 import { NavigationActions } from '../../../../store/navigation/navigation.actions';
+import { NotificationActions } from '../../../../store/notification/notification.actions';
 
 @Component({
   selector: 'app-admin-order-edit',
@@ -129,17 +130,35 @@ export class AdminOrderEditComponent {
 
   save(): void {
     const order = this.order();
-    this.syncForm();
     const model = this.storeForm() ?? this.formModel();
+    if (order === null || !this.orderForm().valid()) {
+      this.orderForm().markAsTouched();
+      return;
+    }
+    if (model.items.some((item) => item.currentDescription.trim() === '')) {
+      this.store.dispatch(
+        NotificationActions.show({
+          variant: 'error',
+          titleKey: 'app.admin.overview.saveErrorTitle',
+          messageKey: 'app.admin.overview.errors.ITEM_DESCRIPTION_REQUIRED',
+          preserveOnRoutes: ['/admin/overview', '/admin/orders'],
+        }),
+      );
+      return;
+    }
     if (
-      order === null ||
-      !this.orderForm().valid() ||
-      model.items.some((item) => item.currentDescription.trim() === '') ||
       model.items.some(
         (item) => item.publicationStatus === 'rejected' && item.adminNotes.trim() === '',
       )
     ) {
-      this.orderForm().markAsTouched();
+      this.store.dispatch(
+        NotificationActions.show({
+          variant: 'error',
+          titleKey: 'app.admin.overview.saveErrorTitle',
+          messageKey: 'app.admin.overview.errors.REJECTION_REASON_REQUIRED',
+          preserveOnRoutes: ['/admin/overview', '/admin/orders'],
+        }),
+      );
       return;
     }
     this.store.dispatch(
@@ -152,15 +171,6 @@ export class AdminOrderEditComponent {
         action: 'save',
       }),
     );
-  }
-
-  private syncForm(): void {
-    const orderId = this.order()?.id;
-    const currentForm = this.formModel();
-    const changes = this.formChanges(this.storeForm(), currentForm);
-    if (orderId !== undefined && Object.keys(changes).length > 0) {
-      this.store.dispatch(AdminOrdersActions.formChanged({ orderId, changes }));
-    }
   }
 
   private cloneForm(value: AdminOrderFormValue): AdminOrderFormValue {

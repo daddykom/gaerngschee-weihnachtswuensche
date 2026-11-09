@@ -84,7 +84,9 @@ export class ItemEditorComponent {
         ? { kind: 'required' }
         : undefined,
     );
-    required(schema.title);
+    validate(schema.title, ({ valueOf }) =>
+      valueOf(schema.title).trim() === '' ? { kind: 'required' } : undefined,
+    );
     maxLength(schema.title, 255);
     maxLength(schema.giftLink, 2048);
     maxLength(schema.personalMessage, 2000);
