@@ -41,6 +41,47 @@ final class EmailSenderTest extends TestCase
         $sender->sendAnmeldung('person@example.com', $variant, 'de', null, null, 2027);
     }
 
+    public function testSendTestEmailRendersFairgateRegistrationTranslation(): void
+    {
+        $mailer = $this->createMock(MailerInterface::class);
+        $mailer->expects(self::once())
+            ->method('send')
+            ->with(self::callback(static function (Email $email): bool {
+                self::assertSame('Bitte zuerst bei Fairgate anmelden', $email->getSubject());
+                self::assertStringContainsString('Zuerst bei Fairgate anmelden', $email->getHtmlBody());
+                self::assertStringNotContainsString('app.mail.registration.fairgateRegistrationRequired', $email->getHtmlBody());
+
+                return true;
+            }));
+
+        $sender = new EmailSender($mailer, 'noreply@example.com', 'Gärngschee-Weihnachtswünsche');
+
+        $sender->sendTestEmail('person@example.com', 'fairgate-registration-required', [
+            'fairgateUrl' => 'https://fairgate.ch',
+        ]);
+    }
+
+    public function testSendTestEmailRendersFairgateRegistrationAvailableTranslation(): void
+    {
+        $mailer = $this->createMock(MailerInterface::class);
+        $mailer->expects(self::once())
+            ->method('send')
+            ->with(self::callback(static function (Email $email): bool {
+                self::assertSame('Du kannst jetzt Weihnachtswünsche anmelden', $email->getSubject());
+                self::assertStringContainsString('Du kannst dich jetzt anmelden', $email->getHtmlBody());
+                self::assertStringContainsString('Deine Fairgate-Anmeldung wurde gefunden.', $email->getHtmlBody());
+                self::assertStringNotContainsString('app.mail.registration.fairgateRegistrationAvailable', $email->getHtmlBody());
+
+                return true;
+            }));
+
+        $sender = new EmailSender($mailer, 'noreply@example.com', 'Gärngschee-Weihnachtswünsche');
+
+        $sender->sendTestEmail('person@example.com', 'fairgate-registration-available', [
+            'startUrl' => 'https://example.com/start',
+        ]);
+    }
+
     public function testSendUserCreatedSendsTemporaryPasswordToNewUser(): void
     {
         $mailer = $this->createMock(MailerInterface::class);
@@ -257,6 +298,7 @@ final class EmailSenderTest extends TestCase
 
         self::assertSame('Bitte passe deinen Wunschzettel an', $message['subject']);
         self::assertStringContainsString('Wunschzettel wurde zurückgewiesen', $message['html']);
+        self::assertStringContainsString('border:1px solid #8c7b85; border-radius:20px;', $message['html']);
         self::assertStringContainsString('http://localhost:4200/login', $message['text']);
     }
 
