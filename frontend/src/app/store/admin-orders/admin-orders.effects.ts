@@ -38,7 +38,9 @@ export const saveAdminOrderEffect = createEffect(
       ofType(AdminOrdersActions.save),
       switchMap(({ order, action }) =>
         service.update(order, action).pipe(
-          map(({ order: savedOrder }) => AdminOrdersActions.saveSuccess({ order: savedOrder })),
+          map(({ order: savedOrder, mailSent }) =>
+            AdminOrdersActions.saveSuccess({ order: savedOrder, mailSent }),
+          ),
           catchError((error: HttpErrorResponse) =>
             of(AdminOrdersActions.saveFailure({ errorCode: errorCode(error) })),
           ),
@@ -69,9 +71,13 @@ export const adminOrdersNotificationEffect = createEffect(
         action.type === AdminOrdersActions.saveSuccess.type
           ? NotificationActions.show({
               variant: 'success',
-              titleKey: 'app.admin.overview.successTitle',
-              messageKey: 'app.admin.overview.saved',
-              preserveOnRoutes: ['/admin/overview'],
+              titleKey: action.mailSent
+                ? 'app.admin.overview.emailSentTitle'
+                : 'app.admin.overview.successTitle',
+              messageKey: action.mailSent
+                ? 'app.admin.overview.emailSent'
+                : 'app.admin.overview.saved',
+              preserveOnRoutes: ['/admin/overview', '/admin/orders'],
             })
           : NotificationActions.show({
               variant: 'error',

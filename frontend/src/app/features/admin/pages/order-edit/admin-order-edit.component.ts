@@ -1,19 +1,15 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  effect,
-  inject,
-  signal,
-} from '@angular/core';
-import { form, FormField, required } from '@angular/forms/signals';
+import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
+import { form, FormField, min, required } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
+import { ControlErrorComponent } from '../../../../shared/components/control-error/control-error';
 import { AdminOrder, AdminOrderFormValue } from '../../../../shared/models/admin-order.model';
+import { OrderStatus } from '../../../../shared/models/order.model';
 import { AdminOrdersActions } from '../../../../store/admin-orders/admin-orders.actions';
 import {
   selectAdminOrders,
@@ -26,11 +22,13 @@ import { NavigationActions } from '../../../../store/navigation/navigation.actio
   selector: 'app-admin-order-edit',
   imports: [
     TranslatePipe,
+    ControlErrorComponent,
     RouterLink,
     FormField,
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
+    MatSelectModule,
   ],
   templateUrl: './admin-order-edit.component.html',
   styleUrl: './admin-order-edit.component.scss',
@@ -44,24 +42,31 @@ export class AdminOrderEditComponent {
   readonly storeForm = this.store.selectSignal(selectAdminOrdersForm);
   readonly order = signal<AdminOrder | null>(null);
   readonly formModel = signal<AdminOrderFormValue>({
+    status: 'draft',
     currentText: '',
     adminNotes: '',
     adultsCount: 0,
     childrenCount: 0,
     items: [],
   });
-  readonly orderForm = form(this.formModel, (schema) => required(schema.currentText));
-  readonly allItemsApproved = computed(
-    () =>
-      this.formModel().items.length > 0 &&
-      this.formModel().items.every((item) => item.publicationStatus === 'approved'),
-  );
-  readonly hasRejectedItem = computed(() =>
-    this.formModel().items.some((item) => item.publicationStatus === 'rejected'),
-  );
-  readonly canRejectOrder = computed(
-    () => this.hasRejectedItem() || this.formModel().adminNotes.trim() !== '',
-  );
+  readonly orderForm = form(this.formModel, (schema) => {
+    required(schema.currentText);
+    required(schema.adultsCount);
+    min(schema.adultsCount, 0);
+    required(schema.childrenCount);
+    min(schema.childrenCount, 0);
+  });
+  readonly statusOptions: OrderStatus[] = [
+    'draft',
+    'waiting_for_fairgate',
+    'released',
+    'family_size_exceeded',
+    'in_review',
+    'changes_requested',
+    'definitive',
+    'ready_for_pickup',
+    'completed',
+  ];
 
   cancel(): void {
     this.store.dispatch(NavigationActions.navigate({ target: 'back' }));
@@ -77,6 +82,7 @@ export class AdminOrderEditComponent {
         const rejectItem = this.route.snapshot.queryParamMap.get('rejectItem');
         this.order.set(currentOrder);
         const formValue: AdminOrderFormValue = {
+          status: currentOrder.status,
           currentText: currentOrder.currentText ?? '',
           adminNotes: currentOrder.adminNotes ?? '',
           adultsCount: currentOrder.adultsCount,
@@ -136,55 +142,14 @@ export class AdminOrderEditComponent {
       this.orderForm().markAsTouched();
       return;
     }
-    const hasRejectedItem = model.items.some((item) => item.publicationStatus === 'rejected');
     this.store.dispatch(
       AdminOrdersActions.save({
         order: {
           ...order,
           ...model,
-          status: hasRejectedItem ? 'changes_requested' : order.status,
           items: model.items.map((item) => ({ ...item })),
         },
         action: 'save',
-      }),
-    );
-  }
-
-  rejectOrder(): void {
-    const order = this.order();
-    this.syncForm();
-    const model = this.storeForm() ?? this.formModel();
-    if (order === null || !this.canRejectOrder()) {
-      this.orderForm().markAsTouched();
-      return;
-    }
-    this.store.dispatch(
-      AdminOrdersActions.save({
-        order: {
-          ...order,
-          ...model,
-          status: 'changes_requested',
-          items: model.items.map((item) => ({ ...item })),
-        },
-        action: 'rejectOrder',
-      }),
-    );
-  }
-
-  releaseOrder(): void {
-    const order = this.order();
-    this.syncForm();
-    const model = this.storeForm() ?? this.formModel();
-    if (order === null || !this.allItemsApproved()) return;
-    this.store.dispatch(
-      AdminOrdersActions.save({
-        order: {
-          ...order,
-          ...model,
-          status: 'definitive',
-          items: model.items.map((item) => ({ ...item })),
-        },
-        action: 'release',
       }),
     );
   }
@@ -213,6 +178,7 @@ export class AdminOrderEditComponent {
       return {};
     }
     const changes: Partial<AdminOrderFormValue> = {};
+    if (previous.status !== current.status) changes.status = current.status;
     if (previous.currentText !== current.currentText) changes.currentText = current.currentText;
     if (previous.adminNotes !== current.adminNotes) changes.adminNotes = current.adminNotes;
     if (previous.adultsCount !== current.adultsCount) changes.adultsCount = current.adultsCount;

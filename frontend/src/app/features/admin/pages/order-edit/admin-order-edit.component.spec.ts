@@ -24,6 +24,14 @@ describe('AdminOrderEditComponent', () => {
     originalText: 'Original',
     currentText: 'Aktuell',
     adminNotes: null,
+    fairgateStatus: null,
+    fairgateAdultsCount: null,
+    fairgateChildrenCount: null,
+    processingYear: 2026,
+    releasedAt: null,
+    definitiveAt: null,
+    confirmationEmailSentAt: null,
+    fairgateReminderEmailSentAt: null,
     items: [
       {
         id: 'item-1',
@@ -98,31 +106,18 @@ describe('AdminOrderEditComponent', () => {
     );
   });
 
-  it('requires an order reason when rejecting without a rejected wish', () => {
+  it('saves the selected status with the order', () => {
     const dispatch = vi.spyOn(store, 'dispatch');
 
-    component.rejectOrder();
-
-    expect(dispatch).not.toHaveBeenCalledWith(
-      expect.objectContaining({ type: AdminOrdersActions.save.type }),
-    );
-  });
-
-  it('releases only when every wish is approved', () => {
-    const dispatch = vi.spyOn(store, 'dispatch');
-    component.releaseOrder();
-    expect(dispatch).not.toHaveBeenCalledWith(
-      expect.objectContaining({ type: AdminOrdersActions.save.type }),
-    );
-
-    component.formModel.update((model) => ({
-      ...model,
-      items: model.items.map((item) => ({ ...item, publicationStatus: 'approved' })),
-    }));
-    component.releaseOrder();
+    component.formModel.update((model) => ({ ...model, status: 'completed' }));
+    component.save();
 
     expect(dispatch).toHaveBeenCalledWith(
-      expect.objectContaining({ type: AdminOrdersActions.save.type, action: 'release' }),
+      expect.objectContaining({
+        type: AdminOrdersActions.save.type,
+        action: 'save',
+        order: expect.objectContaining({ status: 'completed' }),
+      }),
     );
   });
 });

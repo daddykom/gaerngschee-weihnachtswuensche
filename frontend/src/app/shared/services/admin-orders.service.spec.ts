@@ -42,8 +42,14 @@ describe('AdminOrdersService', () => {
       items: [
         {
           id: 'item-1',
+          category: 'gift',
+          personType: 'adult',
+          personIndex: 1,
+          currentTitle: 'Titel',
           currentDescription: 'Beschreibung',
           currentReason: 'Begründung',
+          personalMessage: 'Persönliche Nachricht',
+          giftLink: 'https://example.com/gift',
           publicationStatus: 'approved',
           adminNotes: null,
         },
@@ -67,8 +73,14 @@ describe('AdminOrdersService', () => {
       items: [
         {
           id: 'item-1',
+          category: 'gift',
+          personType: 'adult',
+          personIndex: 1,
+          currentTitle: 'Titel',
           currentDescription: 'Beschreibung',
           currentReason: 'Begründung',
+          personalMessage: 'Persönliche Nachricht',
+          giftLink: 'https://example.com/gift',
           publicationStatus: 'approved',
           adminNotes: null,
         },

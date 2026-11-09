@@ -37,8 +37,14 @@
 }
 
 .original-text {
+  margin: 0;
   padding: var(--gl-space-md);
   border-left: 0.25rem solid #8c7b85;
   background: #fff8fc;
   white-space: pre-wrap;
+}
+
+.original-text-section {
+  display: grid;
+  gap: var(--gl-space-sm);
 }

@@ -64,7 +64,7 @@ final class OrderRepository
         $statement = $this->pdo->prepare(
             'SELECT id, order_id, item_number, category, person_type, person_index, original_title, current_title, original_description, current_description,
                     gift_link, original_reason, current_reason, personal_message, status, publication_status, fulfillment_status, admin_notes, fulfiller_email,
-                    reserved_at, due_at, received_at, created_at, updated_at
+                    reserved_at, reservation_expires_at, due_at, received_at, created_at, updated_at
              FROM order_items WHERE order_id = :order_id ORDER BY created_at, id',
         );
         $statement->execute(['order_id' => $orderId]);
@@ -90,6 +90,7 @@ final class OrderRepository
             'adminNotes' => $item['admin_notes'] ?? null,
             'fulfillerEmail' => $item['fulfiller_email'],
             'reservedAt' => $item['reserved_at'],
+            'reservationExpiresAt' => $item['reservation_expires_at'],
             'dueAt' => $item['due_at'],
             'receivedAt' => $item['received_at'],
             'createdAt' => $item['created_at'],
@@ -292,7 +293,10 @@ final class OrderRepository
         $statement = $this->pdo->prepare(
             'SELECT orders.id, orders.user_id, users.email, orders.year, orders.order_number, orders.status,
                     orders.adults_count, orders.children_count, orders.original_text, orders.current_text,
-                    orders.admin_notes, orders.created_at, orders.updated_at
+                    orders.admin_notes, orders.fairgate_status, orders.fairgate_adults_count, orders.fairgate_children_count,
+                    orders.processing_year, orders.released_at, orders.definitive_at,
+                    orders.confirmation_email_sent_at, orders.fairgate_reminder_email_sent_at,
+                    orders.created_at, orders.updated_at
              FROM orders INNER JOIN users ON users.id = orders.user_id
              ' . $where . ' ORDER BY orders.created_at, orders.id',
         );
@@ -311,6 +315,14 @@ final class OrderRepository
                 'originalText' => $row['original_text'],
                 'currentText' => $row['current_text'],
                 'adminNotes' => $row['admin_notes'],
+                'fairgateStatus' => $row['fairgate_status'],
+                'fairgateAdultsCount' => $row['fairgate_adults_count'] === null ? null : (int) $row['fairgate_adults_count'],
+                'fairgateChildrenCount' => $row['fairgate_children_count'] === null ? null : (int) $row['fairgate_children_count'],
+                'processingYear' => $row['processing_year'] === null ? null : (int) $row['processing_year'],
+                'releasedAt' => $row['released_at'],
+                'definitiveAt' => $row['definitive_at'],
+                'confirmationEmailSentAt' => $row['confirmation_email_sent_at'],
+                'fairgateReminderEmailSentAt' => $row['fairgate_reminder_email_sent_at'],
                 'items' => $this->findItems((string) $row['id']),
                 'createdAt' => $row['created_at'],
                 'updatedAt' => $row['updated_at'],
@@ -341,8 +353,9 @@ final class OrderRepository
             ]);
             foreach ($items as $item) {
                 $itemStatement = $this->pdo->prepare(
-                    'UPDATE order_items SET current_title = :title, current_description = :description,
-                     personal_message = :personal_message, current_reason = :personal_message,
+                    'UPDATE order_items SET category = :category, person_type = :person_type, person_index = :person_index,
+                      current_title = :title, current_description = :description, gift_link = :gift_link,
+                      personal_message = :personal_message, current_reason = :personal_message,
                      publication_status = :publication_status, status = :status, admin_notes = :admin_notes,
                      updated_at = CURRENT_TIMESTAMP WHERE id = :id AND order_id = :order_id',
                 );
@@ -351,6 +364,10 @@ final class OrderRepository
                     'order_id' => $order['id'],
                     'description' => $item['currentDescription'],
                     'title' => $item['currentTitle'] ?? $item['currentDescription'],
+                    'category' => $item['category'] ?? 'gift',
+                    'person_type' => $item['personType'] ?? null,
+                    'person_index' => $item['personIndex'] ?? null,
+                    'gift_link' => $item['giftLink'] ?? null,
                     'personal_message' => $item['personalMessage'] ?? ($item['currentReason'] ?? null),
                     'publication_status' => $item['publicationStatus'],
                     'status' => $item['publicationStatus'],

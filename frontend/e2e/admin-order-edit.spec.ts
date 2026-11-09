@@ -1,4 +1,5 @@
 import { loginAsAdmin, mockOrders, orderFixture } from './support/admin-orders';
+import { expectTranslatedText } from './support/assertions';
 import { expect, test } from './support/test';
 
 test.describe('Admin order edit route', () => {
@@ -38,52 +39,66 @@ test.describe('Admin order edit route', () => {
     expect(patchCount).toBe(1);
   });
 
-  test('releases only after all wishes are accepted', async ({ page }) => {
+  test('changes the order status through the status select', async ({ page }) => {
     await loginAsAdmin(page);
     await mockOrders(page, orderFixture());
     let action: unknown;
+    let status: unknown;
     await page.route('http://localhost:8083/admin/orders/order-1', async (route) => {
-      action = route.request().postDataJSON().action;
+      const payload = route.request().postDataJSON();
+      action = payload.action;
+      status = payload.order.status;
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ order: { ...orderFixture(), status: 'definitive' } }),
+        body: JSON.stringify({
+          order: { ...orderFixture(), status: 'definitive' },
+          mailSent: false,
+        }),
       });
     });
 
     await page.goto('/admin/overview');
     await page.getByRole('link', { name: 'Bestellung verarbeiten' }).click();
-    const release = page.getByRole('button', { name: 'Freigeben' });
-    await expect(release).toBeDisabled();
-    await page.getByRole('link', { name: 'Ändern' }).first().click();
-    await page.getByRole('button', { name: 'Wunsch akzeptieren' }).click();
-    await page.waitForURL('**/admin/orders/order-1/edit');
-    await expect(release).toBeEnabled();
-    await release.click();
+    await page.getByRole('combobox', { name: 'Neuer Status' }).click();
+    await page.getByRole('option', { name: 'Definitiv' }).click();
+    await page.getByRole('button', { name: 'Speichern' }).click();
 
     await expect(page).toHaveURL(/\/admin\/overview$/);
-    expect(action).toBe('release');
+    await expectTranslatedText(page.getByRole('alert'), 'app.admin.overview.emailSentTitle');
+    await expectTranslatedText(page.getByRole('alert'), 'app.admin.overview.emailSent');
+    expect(action).toBe('save');
+    expect(status).toBe('definitive');
   });
 
-  test('rejects the whole order with an order-level reason', async ({ page }) => {
+  test('changes the order to changes requested with the status select', async ({ page }) => {
     await loginAsAdmin(page);
     await mockOrders(page, orderFixture());
     let action: unknown;
+    let status: unknown;
     await page.route('http://localhost:8083/admin/orders/order-1', async (route) => {
-      action = route.request().postDataJSON().action;
+      const payload = route.request().postDataJSON();
+      action = payload.action;
+      status = payload.order.status;
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ order: { ...orderFixture(), status: 'changes_requested' } }),
+        body: JSON.stringify({
+          order: { ...orderFixture(), status: 'changes_requested' },
+          mailSent: true,
+        }),
       });
     });
 
     await page.goto('/admin/overview');
     await page.getByRole('link', { name: 'Bestellung verarbeiten' }).click();
+    await page.getByRole('combobox', { name: 'Neuer Status' }).click();
+    await page.getByRole('option', { name: 'Änderungen verlangt' }).click();
     await page.getByRole('textbox', { name: /Interne Bemerkung/ }).fill('Bitte nochmals prüfen');
-    await page.getByRole('button', { name: 'Zurückweisen' }).click();
+    await page.getByRole('button', { name: 'Speichern' }).click();
 
     await expect(page).toHaveURL(/\/admin\/overview$/);
-    expect(action).toBe('rejectOrder');
+    expect(action).toBe('save');
+    expect(status).toBe('changes_requested');
   });
 });

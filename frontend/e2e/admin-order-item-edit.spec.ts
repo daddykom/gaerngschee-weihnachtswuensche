@@ -12,7 +12,10 @@ test.describe('Admin order item edit route', () => {
     await page.getByRole('button', { name: 'Wunsch zurückweisen' }).click();
 
     await expectTranslatedText(
-      page.locator('mat-form-field').nth(2).locator('.control-error'),
+      page
+        .getByRole('textbox', { name: 'Begründung der Zurückweisung' })
+        .locator('xpath=ancestor::mat-form-field')
+        .locator('.control-error'),
       'app.admin.overview.errors.rejectionReason.required',
     );
     await expect(page).toHaveURL(/\/admin\/orders\/order-1\/edit\/item\/item-1$/);
