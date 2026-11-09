@@ -1,5 +1,8 @@
 {
   "app": {
+    "navigation": {
+      "loading": "Die Anmeldung wird bei Fairgate geprüft ..."
+    },
     "title": "Weihnachtswünsche",
     "footer": {
       "product": "Weihnachtswünsche",

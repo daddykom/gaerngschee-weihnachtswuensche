@@ -2,13 +2,15 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { CanMatchFn, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { catchError, map, of } from 'rxjs';
+import { catchError, finalize, map, of } from 'rxjs';
 import { AuthService } from '../../../shared/services/auth.service';
+import { NavigationProgressService } from '../../../shared/services/navigation-progress.service';
 import { AuthActions } from '../../../store/auth/auth.actions';
 
 export const clientLoginGuard: CanMatchFn = () => {
   const router = inject(Router);
   const store = inject(Store);
+  const progress = inject(NavigationProgressService);
   const url = router.getCurrentNavigation()?.initialUrl ?? router.parseUrl(router.url);
   const token = url.queryParams['token'];
 
@@ -18,6 +20,8 @@ export const clientLoginGuard: CanMatchFn = () => {
     );
     return router.parseUrl('/start');
   }
+
+  progress.start();
 
   return inject(AuthService)
     .registrationLogin(token)
@@ -49,5 +53,6 @@ export const clientLoginGuard: CanMatchFn = () => {
         );
         return of(router.parseUrl('/start'));
       }),
+      finalize(() => progress.stop()),
     );
 };
