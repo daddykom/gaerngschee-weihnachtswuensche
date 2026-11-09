@@ -3,6 +3,9 @@
     "navigation": {
       "loading": "Die Anmeldung wird bei Fairgate geprüft ..."
     },
+    "application": {
+      "loading": "Die Anwendung wird geladen ..."
+    },
     "title": "Weihnachtswünsche",
     "footer": {
       "product": "Weihnachtswünsche",
