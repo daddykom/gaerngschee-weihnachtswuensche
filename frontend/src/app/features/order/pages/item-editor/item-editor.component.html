@@ -27,22 +27,22 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline" subscriptSizing="dynamic">
-      <mat-label>{{ 'app.order.items.description' | translate }}</mat-label>
-      <textarea matInput rows="4" [formField]="itemForm.description"></textarea>
-      <app-control-error
-        matError
-        [control]="itemForm.description()"
-        translationPrefix="app.order.errors.items.description"
-      />
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" subscriptSizing="dynamic">
       <mat-label>{{ 'app.order.items.wishTitle' | translate }}</mat-label>
       <input matInput [formField]="itemForm.title" />
       <app-control-error
         matError
         [control]="itemForm.title()"
         translationPrefix="app.order.errors.items.title"
+      />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>{{ 'app.order.items.description' | translate }}</mat-label>
+      <textarea matInput rows="4" [formField]="itemForm.description"></textarea>
+      <app-control-error
+        matError
+        [control]="itemForm.description()"
+        translationPrefix="app.order.errors.items.description"
       />
     </mat-form-field>
 

@@ -51,6 +51,13 @@
   display: none;
 }
 
+.order-list__label {
+  display: block;
+  margin-bottom: var(--gl-space-xs);
+  color: #6f6069;
+  font-size: 0.875rem;
+}
+
 .order-list__cell--email {
   overflow-wrap: anywhere;
 }
@@ -67,16 +74,17 @@
   display: none;
 }
 
-@media (min-width: 64rem) {
-  .order-list__row,
+@media (min-width: 65rem) {
+  .order-list__row:not(.order-list__row--header),
   .order-list__row--header {
-    grid-template-columns: 8rem minmax(0, 1.8fr) 9rem 8rem minmax(11rem, max-content);
+    grid-template-columns: 8rem 16rem 9rem 8rem max-content;
     grid-template-areas: 'number email status count actions';
     align-items: center;
+    justify-content: start;
   }
 
-  .order-list__cell::before {
-    content: none;
+  .order-list__label {
+    display: none;
   }
 
   .order-list__row--header {

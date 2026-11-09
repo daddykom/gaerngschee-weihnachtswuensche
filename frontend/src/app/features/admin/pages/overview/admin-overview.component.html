@@ -99,28 +99,40 @@
               role="cell"
               [attr.data-label]="'app.admin.overview.orderNumber' | translate"
               [attr.aria-label]="'app.admin.overview.orderNumber' | translate"
-              >{{ order.orderNumber ?? '—' }}</span
+              ><span class="order-list__label" aria-hidden="true">
+                {{ 'app.admin.overview.orderNumber' | translate }}
+              </span>
+              {{ order.orderNumber ?? '—' }}</span
             >
             <span
               class="order-list__cell order-list__cell--email"
               role="cell"
               [attr.data-label]="'app.admin.overview.email' | translate"
               [attr.aria-label]="'app.admin.overview.email' | translate"
-              >{{ order.requesterEmail }}</span
+              ><span class="order-list__label" aria-hidden="true">
+                {{ 'app.admin.overview.email' | translate }}
+              </span>
+              {{ order.requesterEmail }}</span
             >
             <span
               class="order-list__cell order-list__cell--status"
               role="cell"
               [attr.data-label]="'app.admin.overview.status' | translate"
               [attr.aria-label]="'app.admin.overview.status' | translate"
-              >{{ 'app.admin.overview.statuses.' + order.status | translate }}</span
+              ><span class="order-list__label" aria-hidden="true">
+                {{ 'app.admin.overview.status' | translate }}
+              </span>
+              {{ 'app.admin.overview.statuses.' + order.status | translate }}</span
             >
             <span
               class="order-list__cell order-list__cell--count"
               role="cell"
               [attr.data-label]="'app.admin.overview.itemCountHeader' | translate"
               [attr.aria-label]="'app.admin.overview.itemCountHeader' | translate"
-              >{{
+              ><span class="order-list__label" aria-hidden="true">
+                {{ 'app.admin.overview.itemCountHeader' | translate }}
+              </span>
+              {{
                 (order.items.length === 1
                   ? 'app.admin.overview.itemCountSingular'
                   : 'app.admin.overview.itemCount'
@@ -132,7 +144,10 @@
               role="cell"
               [attr.data-label]="'app.admin.overview.actions' | translate"
               [attr.aria-label]="'app.admin.overview.actions' | translate"
-              ><a
+              ><span class="order-list__label" aria-hidden="true">
+                {{ 'app.admin.overview.actions' | translate }}
+              </span>
+              <a
                 class="gl-button--secondary"
                 mat-button
                 [routerLink]="['/admin/orders', order.id, 'edit']"
