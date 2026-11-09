@@ -64,6 +64,23 @@ test.describe('Fulfillment route', () => {
     });
 
     await page.goto('/erfuellen');
+    const searchControl = page
+      .locator('mat-form-field')
+      .filter({ has: page.locator('input[type="search"]') })
+      .locator('.mat-mdc-text-field-wrapper');
+    const categoryControl = page
+      .locator('mat-form-field')
+      .filter({ has: page.getByRole('combobox') })
+      .locator('.mat-mdc-text-field-wrapper');
+    await expect(searchControl).toBeVisible();
+    await expect(categoryControl).toBeVisible();
+    await expect
+      .poll(async () => {
+        const searchBounds = await searchControl.boundingBox();
+        const categoryBounds = await categoryControl.boundingBox();
+        return Math.abs((searchBounds?.height ?? 0) - (categoryBounds?.height ?? 0));
+      })
+      .toBeLessThan(2);
     await expectTranslatedText(page.locator('h1'), 'app.fulfiller.pageTitle');
     await expect(page.getByRole('heading', { name: '12-1' })).toBeVisible();
     await expect(

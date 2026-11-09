@@ -122,6 +122,10 @@ a {
   display: grid;
   gap: var(--gl-space-lg);
 
+  &--align-start {
+    align-items: start;
+  }
+
   &--2 {
     grid-template-columns: minmax(0, 1fr);
 
