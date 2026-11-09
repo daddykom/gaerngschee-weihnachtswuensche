@@ -6,6 +6,7 @@ namespace App\Fairgate\Actions;
 
 use App\Fairgate\Services\FairgateContactProviderFactory;
 use App\Fairgate\Services\FairgateException;
+use App\Registration\Services\ClientRegistrationLoginService;
 use App\Shared\Http\JsonResponse;
 use App\Shared\Logging\ExceptionLogger;
 use Closure;
@@ -29,20 +30,12 @@ final class FairgateLookupAction
         if (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
             return JsonResponse::error($response, 'INVALID_EMAIL', 400);
         }
-        $membership = trim((string) ($request->getQueryParams()['membership'] ?? ''));
-        if ($membership === '') {
-            return JsonResponse::error($response, 'INVALID_MEMBERSHIP', 400);
-        }
-        if (mb_strlen($membership) > 160) {
-            return JsonResponse::error($response, 'INVALID_MEMBERSHIP', 400);
-        }
-
         try {
-            $lookup = $this->lookup ?? FairgateContactProviderFactory::create()->findContactDataByEmail(...);
+            $lookup = $this->lookup ?? FairgateContactProviderFactory::createReal()->findContactDataByEmail(...);
 
             return JsonResponse::success($response, [
                 'email' => $email,
-                'fairgate' => $lookup($email, $membership),
+                'fairgate' => $lookup($email, ClientRegistrationLoginService::MEMBERSHIP),
             ]);
         } catch (FairgateException $exception) {
             ExceptionLogger::log('Fairgate lookup failed', $exception);

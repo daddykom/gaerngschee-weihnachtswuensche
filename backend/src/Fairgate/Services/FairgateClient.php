@@ -58,7 +58,7 @@ final class FairgateClient implements FairgateContactProvider
     }
 
     /** @return array<string, mixed> */
-    public function findContactsByEmail(string $email, string $membership): array
+    public function findContactsByEmail(string $email, ?string $membership = null): array
     {
         $email = strtolower(trim($email));
         if ($email === '') {
@@ -69,7 +69,7 @@ final class FairgateClient implements FairgateContactProvider
     }
 
     /** @return array<string, mixed> */
-    public function findContactDataByEmail(string $email, string $membership): array
+    public function findContactDataByEmail(string $email, ?string $membership = null): array
     {
         $email = strtolower(trim($email));
         $contactsResponse = $this->findContactsByEmail($email, $membership);
@@ -112,18 +112,15 @@ final class FairgateClient implements FairgateContactProvider
     }
 
     /** @return array<string, mixed> */
-    private function requestContacts(?string $email, int $page, int $pageLimit, string $membership): array
+    private function requestContacts(?string $email, int $page, int $pageLimit, ?string $membership = null): array
     {
-        $membership = trim($membership);
-        if ($membership === '') {
-            throw new FairgateException('Fairgate membership is required.');
-        }
-
         $query = ['pageNo' => $page, 'pageLimit' => $pageLimit];
         if ($email !== null) {
             $query['primary_email'] = $email;
         }
-        $query['membership[]'] = $membership;
+        if ($membership !== null && trim($membership) !== '') {
+            $query['membership[]'] = trim($membership);
+        }
 
         try {
             $path = $email === null ? self::CONTACTS_PATH : self::FILTERED_CONTACTS_PATH;

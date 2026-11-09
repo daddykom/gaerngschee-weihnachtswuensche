@@ -83,7 +83,7 @@ final class StubFairgateDataProvider implements FairgateContactProvider
         return true;
     }
 
-    public function findContactDataByEmail(string $email, string $membership): array
+    public function findContactDataByEmail(string $email, ?string $membership = null): array
     {
         return [
             'success' => true,

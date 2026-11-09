@@ -145,7 +145,7 @@ final class AdminRoutesTest extends TestCase
         $response = $app->handle(
             (new ServerRequestFactory())->createServerRequest(
                 'GET',
-                '/admin/fairgate-lookup?email=%20Person%40Example.com%20&membership=Aktivmitglied',
+                '/admin/fairgate-lookup?email=%20Person%40Example.com%20',
             ),
         );
 
@@ -154,7 +154,7 @@ final class AdminRoutesTest extends TestCase
             'email' => 'person@example.com',
             'fairgate' => [
                 'success' => true,
-                'data' => ['email' => 'person@example.com', 'membership' => 'Aktivmitglied'],
+                'data' => ['email' => 'person@example.com', 'membership' => 'Klient*innen'],
             ],
         ], json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR));
     }

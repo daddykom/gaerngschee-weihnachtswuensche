@@ -12,9 +12,11 @@ final class FakeFairgateClient implements FairgateContactProvider
         return $this->profileForEmail($email) !== null;
     }
 
-    public function findContactDataByEmail(string $email, string $membership): array
+    public function findContactDataByEmail(string $email, ?string $membership = null): array
     {
-        $this->validateMembership($membership);
+        if ($membership !== null) {
+            $this->validateMembership($membership);
+        }
         $profile = $this->profileForEmail($email);
         if ($profile === null) {
             return ['success' => true, 'data' => null];

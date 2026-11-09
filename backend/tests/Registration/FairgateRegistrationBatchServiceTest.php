@@ -105,7 +105,7 @@ final class FairgateRegistrationFixedProvider implements FairgateContactProvider
         return $this->found;
     }
 
-    public function findContactDataByEmail(string $email, string $membership): array
+    public function findContactDataByEmail(string $email, ?string $membership = null): array
     {
         return ['success' => true, 'data' => null];
     }
@@ -122,7 +122,7 @@ final class FairgateRegistrationFailingProvider implements FairgateContactProvid
         return true;
     }
 
-    public function findContactDataByEmail(string $email, string $membership): array
+    public function findContactDataByEmail(string $email, ?string $membership = null): array
     {
         return ['success' => true, 'data' => null];
     }
