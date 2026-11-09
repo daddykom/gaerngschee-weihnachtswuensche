@@ -73,6 +73,27 @@ test.describe('Admin order edit route', () => {
     expect(status).toBe('definitive');
   });
 
+  test('keeps the current order status when no status change is selected', async ({ page }) => {
+    await loginAsAdmin(page);
+    await mockOrders(page, orderFixture());
+    let status: unknown;
+    await page.route('http://localhost:8083/admin/orders/order-1', async (route) => {
+      status = route.request().postDataJSON().order.status;
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ order: orderFixture(), mailSent: false }),
+      });
+    });
+
+    await page.goto('/admin/overview');
+    await page.getByRole('link', { name: 'Bestellung verarbeiten' }).click();
+    await page.getByRole('button', { name: 'Speichern' }).click();
+    await expect(page).toHaveURL(/\/admin\/overview$/);
+
+    expect(status).toBe('released');
+  });
+
   test('changes the order to changes requested with the status select', async ({ page }) => {
     await loginAsAdmin(page);
     await mockOrders(page, orderFixture());

@@ -34,8 +34,8 @@
             <mat-label>{{ 'app.order.items.person' | translate }}</mat-label>
             <mat-select
               [value]="
-                itemForm.personType() && itemForm.personIndex()
-                  ? itemForm.personType() + ':' + itemForm.personIndex()
+                itemForm.personType().value() && itemForm.personIndex().value()
+                  ? itemForm.personType().value() + ':' + itemForm.personIndex().value()
                   : null
               "
               (selectionChange)="

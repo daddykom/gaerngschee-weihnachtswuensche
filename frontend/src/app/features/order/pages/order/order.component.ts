@@ -30,7 +30,6 @@ import {
   OrderItemStatus,
   OrderStatus,
 } from '../../../../shared/models/order.model';
-import { selectAuthFirstAccess } from '../../../../store/auth/auth.feature';
 import { NotificationActions } from '../../../../store/notification/notification.actions';
 import { OrderActions } from '../../../../store/order/order.actions';
 import {
@@ -67,8 +66,8 @@ export class OrderComponent {
   readonly fairgateUserExists = this.store.selectSignal(selectOrderFairgateUserExists);
   readonly fairgateAdultsCount = this.store.selectSignal(selectOrderAdultsCount);
   readonly fairgateChildrenCount = this.store.selectSignal(selectOrderChildrenCount);
-  readonly firstAccess = this.store.selectSignal(selectAuthFirstAccess);
   readonly storeForm = this.store.selectSignal(selectOrderForm);
+  readonly firstAccess = computed(() => this.order() === null);
   readonly canEdit = computed(() => {
     const currentOrder = this.order();
     return (
