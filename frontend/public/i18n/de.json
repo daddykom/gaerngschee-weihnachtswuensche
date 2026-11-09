@@ -354,6 +354,10 @@
             "required": "Bitte gib einen Wunschtitel ein.",
             "maxLength": "Der Wunschtitel darf höchstens 255 Zeichen lang sein."
           },
+          "description": {
+            "required": "Bitte gib eine Wunschbeschreibung ein.",
+            "maxLength": "Die Wunschbeschreibung darf höchstens 2000 Zeichen lang sein."
+          },
           "giftLink": {
             "maxLength": "Der Link darf höchstens 2048 Zeichen lang sein."
           },

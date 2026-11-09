@@ -55,6 +55,7 @@ test.describe('Bestellung route', () => {
             personType: 'adult',
             personIndex: 1,
             title: 'Winterjacke',
+            description: 'Eine warme Winterjacke für draussen.',
             giftLink: 'https://example.com/winterjacke',
             personalMessage: 'Das würde mir Freude machen.',
           },
@@ -86,6 +87,9 @@ test.describe('Bestellung route', () => {
     await page.getByRole('combobox', { name: 'Für wen ist der Wunsch?' }).click();
     await page.getByRole('option', { name: 'Erwachsener 1' }).click();
     await page.getByRole('textbox', { name: 'Wunschtitel' }).fill('Winterjacke');
+    await page
+      .getByRole('textbox', { name: 'Wunschbeschreibung' })
+      .fill('Eine warme Winterjacke für draussen.');
     await page
       .getByRole('textbox', { name: /Link zum gewünschten Geschenk/ })
       .fill('https://example.com/winterjacke');

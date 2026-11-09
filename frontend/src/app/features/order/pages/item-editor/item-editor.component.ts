@@ -67,6 +67,7 @@ export class ItemEditorComponent {
     personType: null,
     personIndex: null,
     title: '',
+    description: '',
     giftLink: '',
     personalMessage: '',
   });
@@ -88,6 +89,10 @@ export class ItemEditorComponent {
       valueOf(schema.title).trim() === '' ? { kind: 'required' } : undefined,
     );
     maxLength(schema.title, 255);
+    validate(schema.description, ({ valueOf }) =>
+      valueOf(schema.description).trim() === '' ? { kind: 'required' } : undefined,
+    );
+    maxLength(schema.description, 2000);
     maxLength(schema.giftLink, 2048);
     maxLength(schema.personalMessage, 2000);
   });
@@ -179,6 +184,9 @@ export class ItemEditorComponent {
     }
     if (previous.title !== current.title) {
       changes.title = current.title;
+    }
+    if (previous.description !== current.description) {
+      changes.description = current.description;
     }
     if (previous.giftLink !== current.giftLink) {
       changes.giftLink = current.giftLink;

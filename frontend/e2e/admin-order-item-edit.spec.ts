@@ -9,7 +9,9 @@ test.describe('Admin order item edit route', () => {
     await page.goto('/admin/overview');
     await page.getByRole('link', { name: 'Bestellung verarbeiten' }).click();
     await page.getByRole('link', { name: 'Ändern' }).first().click();
-    await page.getByRole('button', { name: 'Wunsch zurückweisen' }).click();
+    await page.getByRole('combobox', { name: 'Neuer Status' }).click();
+    await page.getByRole('option', { name: 'Änderung erforderlich' }).click();
+    await page.getByRole('button', { name: 'Speichern' }).click();
 
     await expectTranslatedText(
       page
@@ -39,7 +41,9 @@ test.describe('Admin order item edit route', () => {
     await page
       .getByRole('textbox', { name: 'Begründung der Zurückweisung' })
       .fill('Nicht erfüllbar');
-    await page.getByRole('button', { name: 'Wunsch zurückweisen' }).click();
+    await page.getByRole('combobox', { name: 'Neuer Status' }).click();
+    await page.getByRole('option', { name: 'Änderung erforderlich' }).click();
+    await page.getByRole('button', { name: 'Speichern' }).click();
 
     await page.waitForURL('**/admin/orders/order-1/edit');
     expect(patchCount).toBe(0);

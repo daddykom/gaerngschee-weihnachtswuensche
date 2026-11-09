@@ -16,6 +16,7 @@ export interface OrderItemFormValue {
   personType: OrderItemPersonType | null;
   personIndex: number | null;
   title: string;
+  description: string;
   giftLink: string;
   personalMessage: string;
 }

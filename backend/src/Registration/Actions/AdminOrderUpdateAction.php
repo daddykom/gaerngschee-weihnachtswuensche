@@ -54,12 +54,18 @@ final class AdminOrderUpdateAction
             $currentItems[(string) $currentItem['id']] = $currentItem;
         }
         foreach ($items as $item) {
-            if (!is_array($item) || !is_string($item['id'] ?? null) || !in_array($item['publicationStatus'] ?? null, ['approved', 'rejected', 'submitted'], true)) {
+            if (!is_array($item) || !is_string($item['id'] ?? null) || !in_array($item['publicationStatus'] ?? null, ['draft', 'approved', 'rejected', 'submitted'], true)) {
                 return JsonResponse::error($response, 'INVALID_ORDER_DATA', 422);
             }
             $currentItem = $currentItems[(string) $item['id']] ?? [];
             $publicationStatus = (string) $item['publicationStatus'];
             $adminNotes = $item['adminNotes'] ?? null;
+            $currentDescription = is_string($item['currentDescription'] ?? null)
+                ? $item['currentDescription']
+                : ($currentItem['currentDescription'] ?? '');
+            if (trim($currentDescription) === '') {
+                return JsonResponse::error($response, 'ITEM_DESCRIPTION_REQUIRED', 422);
+            }
             if ($publicationStatus === 'rejected' && (!is_string($adminNotes) || trim($adminNotes) === '')) {
                 return JsonResponse::error($response, 'REJECTION_REASON_REQUIRED', 422);
             }
@@ -80,9 +86,7 @@ final class AdminOrderUpdateAction
                     : (is_string($item['currentDescription'] ?? null)
                         ? $item['currentDescription']
                         : ($currentItem['currentTitle'] ?? $currentItem['currentDescription'] ?? '')),
-                'currentDescription' => is_string($item['currentDescription'] ?? null)
-                    ? $item['currentDescription']
-                    : ($currentItem['currentDescription'] ?? ''),
+                'currentDescription' => $currentDescription,
                 'giftLink' => array_key_exists('giftLink', $item)
                     ? (is_string($item['giftLink']) ? $item['giftLink'] : null)
                     : ($currentItem['giftLink'] ?? null),

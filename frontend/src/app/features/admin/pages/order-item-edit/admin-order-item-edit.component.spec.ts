@@ -77,10 +77,11 @@ describe('AdminOrderItemEditComponent', () => {
     await fixture.whenStable();
   });
 
-  it('changes only the draft and navigates back when accepting a wish', () => {
+  it('changes only the draft and navigates back when saving a wish status', () => {
     const dispatch = vi.spyOn(store, 'dispatch');
 
-    component.accept();
+    component.formModel.update((model) => ({ ...model, publicationStatus: 'approved' }));
+    component.save();
 
     expect(dispatch).toHaveBeenNthCalledWith(
       1,
@@ -89,19 +90,24 @@ describe('AdminOrderItemEditComponent', () => {
     expect(dispatch).toHaveBeenNthCalledWith(2, NavigationActions.navigate({ target: 'back' }));
   });
 
-  it('does not navigate or update the draft when rejection reason is empty', () => {
+  it('does not navigate or update the draft when a rejection reason is empty', () => {
     const dispatch = vi.spyOn(store, 'dispatch');
 
-    component.reject();
+    component.formModel.update((model) => ({ ...model, publicationStatus: 'rejected' }));
+    component.save();
 
     expect(dispatch).not.toHaveBeenCalled();
   });
 
   it('changes only the draft and navigates back when rejecting with a reason', () => {
     const dispatch = vi.spyOn(store, 'dispatch');
-    component.formModel.update((model) => ({ ...model, adminNotes: 'Nicht erfüllbar' }));
+    component.formModel.update((model) => ({
+      ...model,
+      publicationStatus: 'rejected',
+      adminNotes: 'Nicht erfüllbar',
+    }));
 
-    component.reject();
+    component.save();
 
     expect(dispatch).toHaveBeenNthCalledWith(
       1,

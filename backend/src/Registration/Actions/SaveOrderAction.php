@@ -188,6 +188,7 @@ final class SaveOrderAction
                 || trim($title) === ''
                 || strlen($title) > 255
                 || !is_string($description)
+                || trim($description) === ''
                 || strlen($description) > 2000
                 || (isset($item['giftLink']) && $item['giftLink'] !== ''
                     && (!is_string($item['giftLink'])

@@ -64,6 +64,23 @@ final class AdminOrderUpdateActionTest extends TestCase
         self::assertSame('REJECTION_REASON_REQUIRED', $this->errorCode($response));
     }
 
+    public function testRejectsItemWithoutDescription(): void
+    {
+        [$pdo, $order] = $this->orderWithItems('released');
+        $action = new AdminOrderUpdateAction(new OrderRepository($pdo));
+
+        $item = $this->itemPayload($order['items'][0], 'submitted');
+        $item['currentDescription'] = '  ';
+        $response = ($action)($this->request($order['id'], [
+            'order' => $this->orderPayload($order, 'released'),
+            'items' => [$item],
+            'action' => 'save',
+        ]), new Response(), ['orderId' => $order['id']]);
+
+        self::assertSame(422, $response->getStatusCode());
+        self::assertSame('ITEM_DESCRIPTION_REQUIRED', $this->errorCode($response));
+    }
+
     public function testSavesWholeOrderAndPreservesOriginalValues(): void
     {
         [$pdo, $order] = $this->orderWithItems('released');

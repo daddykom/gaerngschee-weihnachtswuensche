@@ -19,6 +19,7 @@ import {
   AdminOrder,
   AdminOrderFormValue,
   AdminOrderItem,
+  AdminPublicationStatus,
 } from '../../../../shared/models/admin-order.model';
 import { OrderItemCategory, OrderItemPersonType } from '../../../../shared/models/order.model';
 import { AdminOrdersActions } from '../../../../store/admin-orders/admin-orders.actions';
@@ -37,6 +38,7 @@ interface ItemFormValue {
   giftLink: string;
   personalMessage: string;
   adminNotes: string;
+  publicationStatus: AdminPublicationStatus;
 }
 
 @Component({
@@ -61,7 +63,11 @@ export class AdminOrderItemEditComponent {
   readonly storeForm = this.store.selectSignal(selectAdminOrdersForm);
   readonly order = signal<AdminOrder | null>(null);
   readonly item = signal<AdminOrderItem | null>(null);
-  readonly decision = signal<'accept' | 'reject' | null>(null);
+  readonly publicationStatusOptions: AdminPublicationStatus[] = [
+    'submitted',
+    'approved',
+    'rejected',
+  ];
   readonly formModel = signal<ItemFormValue>({
     category: 'gift',
     personType: null,
@@ -71,13 +77,14 @@ export class AdminOrderItemEditComponent {
     giftLink: '',
     personalMessage: '',
     adminNotes: '',
+    publicationStatus: 'submitted',
   });
   private previousItem: ItemFormValue | null = null;
   readonly itemForm = form(this.formModel, (schema) => {
     required(schema.category);
     required(schema.currentDescription);
     validate(schema.adminNotes, ({ valueOf }) =>
-      this.decision() === 'reject' && valueOf(schema.adminNotes).trim() === ''
+      valueOf(schema.publicationStatus) === 'rejected' && valueOf(schema.adminNotes).trim() === ''
         ? { kind: 'required' }
         : undefined,
     );
@@ -109,6 +116,7 @@ export class AdminOrderItemEditComponent {
           giftLink: currentItem.giftLink ?? '',
           personalMessage: currentItem.personalMessage ?? currentItem.currentReason ?? '',
           adminNotes: currentItem.adminNotes ?? '',
+          publicationStatus: currentItem.publicationStatus,
         };
         this.formModel.set(formValue);
         this.previousItem = { ...formValue };
@@ -155,21 +163,7 @@ export class AdminOrderItemEditComponent {
     });
   }
 
-  accept(): void {
-    this.decision.set('accept');
-    this.save('approved');
-  }
-
-  reject(): void {
-    this.decision.set('reject');
-    if (!this.itemForm().valid()) {
-      this.itemForm().markAsTouched();
-      return;
-    }
-    this.save('rejected');
-  }
-
-  private save(status: 'approved' | 'rejected'): void {
+  save(): void {
     const order = this.order();
     const item = this.item();
     const model = this.formModel();
@@ -181,11 +175,9 @@ export class AdminOrderItemEditComponent {
       AdminOrdersActions.draftChanged({
         order: {
           ...order,
-          status: status === 'rejected' ? 'changes_requested' : order.status,
+          status: order.status,
           items: order.items.map((current) =>
-            current.id === item.id
-              ? { ...current, ...model, publicationStatus: status }
-              : { ...current },
+            current.id === item.id ? { ...current, ...model } : { ...current },
           ),
         },
       }),
@@ -224,6 +216,9 @@ export class AdminOrderItemEditComponent {
     }
     if (previous.adminNotes !== current.adminNotes) {
       changes.adminNotes = current.adminNotes;
+    }
+    if (previous.publicationStatus !== current.publicationStatus) {
+      changes.publicationStatus = current.publicationStatus;
     }
     return changes;
   }
