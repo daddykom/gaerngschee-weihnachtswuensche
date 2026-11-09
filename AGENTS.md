@@ -166,6 +166,31 @@ src/
 - Datenbankzugriff liegt im zuständigen `Data/`-Verzeichnis; gemeinsame Datenbank-Infrastruktur liegt unter `Shared/Database/`.
 - Wiederverwendbare HTTP- und Mail-Helfer liegen unter `Shared/`.
 - Namespace und Verzeichnis müssen der PSR-4-Struktur entsprechen.
+- Jede neue oder geänderte E-Mail-Vorlage MUSS zusätzlich in der folgenden
+  E-Mail-Übersicht dieses Dokuments ergänzt beziehungsweise aktualisiert
+  werden. Die Übersicht enthält mindestens Template-Pfad, Zweck und alle
+  benötigten Parameter. Bei einer testbaren E-Mail ist ausserdem der
+  Parameterkatalog unter `backend/src/Shared/Mail/EmailTestAction.php`
+  anzupassen.
+
+### E-Mail-Vorlagen
+
+| Template | Zweck | Parameter |
+|---|---|---|
+| `anmeldung/client-order.html.twig` | Registrierungs-Link für Wunschbesteller | `LOGIN_URL`, `CAMPAIGN_YEAR` |
+| `anmeldung/fulfiller-reservation.html.twig` | Reservations-Link für Erfüller | `LOGIN_URL`, `WISH.wishNumber`, `WISH.currentDescription` |
+| `anmeldung/fairgate-registration-required.html.twig` | Hinweis auf erforderliche Fairgate-Registrierung | `LOGIN_URL` |
+| `anmeldung/fairgate-registration-available.html.twig` | Hinweis auf verfügbare Fairgate-Registrierung | `LOGIN_URL` |
+| `user-created.html.twig` | Zugangsdaten für neu erstellten Benutzer | `LOGIN_URL`, `TEMPORARY_PASSWORD` |
+| `user-email-changed.html.twig` | Bestätigung einer geänderten E-Mail-Adresse | `LOGIN_URL` |
+| `password-reset.html.twig` | Passwort-Reset | `RESET_URL` |
+| `order-confirmation-saved.html.twig` | Bestätigung einer gespeicherten Bestellung | `ORDER.year`, `ORDER.loginUrl` |
+| `order-confirmation-changes_requested.html.twig` | Aufforderung zur Anpassung einer Bestellung | `ORDER.year`, `ORDER.loginUrl` |
+
+Neue E-Mail-Vorlagen dürfen nicht nur im Template-Verzeichnis angelegt werden:
+Die Versandlogik, Übersetzungen, die Admin-E-Mail-Testauswahl und die
+zugehörigen Tests müssen im selben Änderungsumfang geprüft und aktualisiert
+werden.
 - Die Admin-Fairgate-Testroute `/admin/fairgate/test` wird in `Routes/AdminRoutes.php` registriert und verwendet `Fairgate/Actions/FairgateTestAction`.
 - Die früheren Sammelpfade `App\Services` und `App\Data` werden nicht mehr verwendet.
 - Fairgate-, Mail-, Datenbank- und JWT-Konfiguration werden aus der jeweiligen Environment-Datei geladen. `backend/.env` ist ausschließlich für die lokale Developer-Datenbank bestimmt. `backend/.env.integration` wird ausschließlich von der Integrationsumgebung verwendet. Pre-Production- und Production-`.env`-Dateien werden auf den jeweiligen Servern bereitgestellt und existieren nicht im Repository.

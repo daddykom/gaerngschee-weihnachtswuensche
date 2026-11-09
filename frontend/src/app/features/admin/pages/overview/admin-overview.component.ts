@@ -6,6 +6,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { RouterLink } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
+import { ORDER_STATUS_WORKFLOW } from '../../../../shared/models/order.model';
 import { AdminOrdersActions } from '../../../../store/admin-orders/admin-orders.actions';
 import {
   selectAdminOrderCategories,
@@ -34,14 +35,7 @@ export class AdminOverviewComponent {
   readonly loadStatus = this.store.selectSignal(selectAdminOrdersLoadStatus);
   readonly selectedStatuses = this.store.selectSignal(selectAdminOrderStatuses);
   readonly selectedCategories = this.store.selectSignal(selectAdminOrderCategories);
-  readonly statusOptions = [
-    'released',
-    'in_review',
-    'changes_requested',
-    'definitive',
-    'ready_for_pickup',
-    'completed',
-  ];
+  readonly statusOptions = ORDER_STATUS_WORKFLOW;
   readonly categoryOptions = ['gift', 'voucher'];
 
   statusChanged(statuses: string[]): void {

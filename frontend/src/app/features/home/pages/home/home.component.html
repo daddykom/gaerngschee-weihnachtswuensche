@@ -32,7 +32,7 @@
 
         <p class="home__login">
           @if (authGroup()) {
-            <button mat-button type="button" (click)="logout()">
+            <button class="gl-button--secondary" mat-button type="button" (click)="logout()">
               {{ 'app.home.logout' | translate }}
             </button>
           } @else {

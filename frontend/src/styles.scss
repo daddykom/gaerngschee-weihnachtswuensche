@@ -142,6 +142,15 @@ a {
   gap: var(--gl-space-md);
 }
 
+.gl-button--secondary {
+  border: 1px solid var(--mat-sys-primary-container) !important;
+}
+
+.gl-button--secondary[color='warn'],
+.gl-button--secondary.mat-warn {
+  border-color: var(--mat-sys-error-container) !important;
+}
+
 .gl-text--multiline {
   white-space: pre-line;
 }

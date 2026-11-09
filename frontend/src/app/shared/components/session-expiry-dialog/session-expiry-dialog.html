@@ -3,7 +3,7 @@
   {{ 'app.auth.sessionExpiredWarningMessage' | translate: { seconds: secondsRemaining() ?? 0 } }}
 </mat-dialog-content>
 <mat-dialog-actions align="end">
-  <button mat-button type="button" (click)="logout()">
+  <button class="gl-button--secondary" mat-button type="button" (click)="logout()">
     {{ 'app.navigation.logout' | translate }}
   </button>
   <button

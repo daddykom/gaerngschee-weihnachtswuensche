@@ -22,8 +22,8 @@ final class SharedJsonFileLoaderTest extends TestCase
             $catalogue->get('app.home.lead'),
         );
         self::assertSame(
-            'Deine Weihnachtswünsche-Anmeldung ist definitiv bestätigt',
-            $catalogue->get('app.mail.order.confirmation.definitive.subject'),
+            'Dein Wunschzettel wurde gespeichert',
+            $catalogue->get('app.mail.order.confirmation.saved.subject'),
         );
     }
 }

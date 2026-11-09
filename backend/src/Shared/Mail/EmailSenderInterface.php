@@ -36,8 +36,5 @@ interface EmailSenderInterface
     /** @param array<string, mixed> $order */
     public function renderOrderConfirmation(array $order, string $mailStatus): array;
 
-    /** @return array{subject: string, html: string, text: string} */
-    public function renderFairgateReminder(string $fairgateUrl, string $status = 'not_found', ?string $documentEmail = null): array;
-
     public function sendStoredEmail(string $recipient, string $subject, string $html, string $text): void;
 }

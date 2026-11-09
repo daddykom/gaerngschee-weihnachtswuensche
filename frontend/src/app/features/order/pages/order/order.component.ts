@@ -73,9 +73,7 @@ export class OrderComponent {
     const currentOrder = this.order();
     return (
       currentOrder === null ||
-      ['draft', 'family_size_exceeded', 'changes_requested'].includes(
-        currentOrder.status as OrderStatus,
-      )
+      ['draft', 'changes_requested'].includes(currentOrder.status as OrderStatus)
     );
   });
   readonly maxItems = computed(() => {
@@ -176,6 +174,22 @@ export class OrderComponent {
     }
 
     if (itemCount < 1 || itemCount > this.maxItems()) {
+      return;
+    }
+
+    if (
+      this.storeForm().items.some(
+        (item) => item.title.trim() === '' || item.description.trim() === '',
+      )
+    ) {
+      this.store.dispatch(
+        NotificationActions.show({
+          variant: 'error',
+          titleKey: 'app.order.notifications.errorTitle',
+          messageKey: 'app.order.errors.items.description.required',
+          preserveOnRoutes: ['/bestellung'],
+        }),
+      );
       return;
     }
 
@@ -289,6 +303,7 @@ export class OrderComponent {
           item.id === currentItem.id &&
           item.category === currentItem.category &&
           item.title === currentItem.title &&
+          item.description === currentItem.description &&
           item.giftLink === currentItem.giftLink &&
           item.personalMessage === currentItem.personalMessage
         );

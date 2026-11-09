@@ -125,10 +125,6 @@ final class StartRegistrationActionTest extends TestCase
                 {
                     return [];
                 }
-                public function renderFairgateReminder(string $fairgateUrl, string $status = 'not_found', ?string $documentEmail = null): array
-                {
-                    return [];
-                }
                 public function sendStoredEmail(string $recipient, string $subject, string $html, string $text): void
                 {
                 }

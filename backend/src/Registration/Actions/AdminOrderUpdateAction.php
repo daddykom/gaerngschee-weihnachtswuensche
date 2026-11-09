@@ -9,6 +9,7 @@ use App\Registration\Services\OrderStatus;
 use App\Shared\Database\Database;
 use App\Shared\Http\JsonRequest;
 use App\Shared\Http\JsonResponse;
+use App\Shared\Logging\ExceptionLogger;
 use App\Shared\Mail\EmailQueueRepository;
 use App\Shared\Mail\EmailSender;
 use App\Shared\Mail\EmailSenderInterface;
@@ -53,12 +54,18 @@ final class AdminOrderUpdateAction
             $currentItems[(string) $currentItem['id']] = $currentItem;
         }
         foreach ($items as $item) {
-            if (!is_array($item) || !is_string($item['id'] ?? null) || !in_array($item['publicationStatus'] ?? null, ['approved', 'rejected', 'submitted'], true)) {
+            if (!is_array($item) || !is_string($item['id'] ?? null) || !in_array($item['publicationStatus'] ?? null, ['draft', 'approved', 'rejected', 'submitted'], true)) {
                 return JsonResponse::error($response, 'INVALID_ORDER_DATA', 422);
             }
             $currentItem = $currentItems[(string) $item['id']] ?? [];
             $publicationStatus = (string) $item['publicationStatus'];
             $adminNotes = $item['adminNotes'] ?? null;
+            $currentDescription = is_string($item['currentDescription'] ?? null)
+                ? $item['currentDescription']
+                : ($currentItem['currentDescription'] ?? '');
+            if (trim($currentDescription) === '') {
+                return JsonResponse::error($response, 'ITEM_DESCRIPTION_REQUIRED', 422);
+            }
             if ($publicationStatus === 'rejected' && (!is_string($adminNotes) || trim($adminNotes) === '')) {
                 return JsonResponse::error($response, 'REJECTION_REASON_REQUIRED', 422);
             }
@@ -79,9 +86,7 @@ final class AdminOrderUpdateAction
                     : (is_string($item['currentDescription'] ?? null)
                         ? $item['currentDescription']
                         : ($currentItem['currentTitle'] ?? $currentItem['currentDescription'] ?? '')),
-                'currentDescription' => is_string($item['currentDescription'] ?? null)
-                    ? $item['currentDescription']
-                    : ($currentItem['currentDescription'] ?? ''),
+                'currentDescription' => $currentDescription,
                 'giftLink' => array_key_exists('giftLink', $item)
                     ? (is_string($item['giftLink']) ? $item['giftLink'] : null)
                     : ($currentItem['giftLink'] ?? null),
@@ -133,7 +138,46 @@ final class AdminOrderUpdateAction
                 'adultsCount' => $order['adultsCount'] ?? 0,
                 'childrenCount' => $order['childrenCount'] ?? 0,
             ], $normalizedItems);
-        } catch (\Throwable) {
+        } catch (\Throwable $exception) {
+            ExceptionLogger::log('admin order update failed for ' . $orderId, $exception);
+            $diagnostic = sprintf(
+                'admin order update payload for %s: %s',
+                $orderId,
+                json_encode([
+                    'action' => $action,
+                    'orderStatus' => $order['status'] ?? null,
+                    'adultsCount' => $order['adultsCount'] ?? null,
+                    'childrenCount' => $order['childrenCount'] ?? null,
+                    'itemCount' => count($normalizedItems),
+                    'items' => array_map(static fn (array $item): array => [
+                        'id' => $item['id'] ?? null,
+                        'publicationStatus' => $item['publicationStatus'] ?? null,
+                        'category' => $item['category'] ?? null,
+                        'personType' => $item['personType'] ?? null,
+                        'personIndex' => $item['personIndex'] ?? null,
+                        'currentTitleLength' => is_string($item['currentTitle'] ?? null)
+                            ? strlen($item['currentTitle'])
+                            : null,
+                        'currentDescriptionLength' => is_string($item['currentDescription'] ?? null)
+                            ? strlen($item['currentDescription'])
+                            : null,
+                        'giftLinkType' => get_debug_type($item['giftLink'] ?? null),
+                        'adminNotesType' => get_debug_type($item['adminNotes'] ?? null),
+                    ], $normalizedItems),
+                ], JSON_THROW_ON_ERROR),
+            );
+            error_log($diagnostic);
+            file_put_contents(
+                '/tmp/admin-order-update.log',
+                sprintf(
+                    "%s\nexception: %s: %s\n%s\n",
+                    date(DATE_ATOM),
+                    $exception::class,
+                    $exception->getMessage(),
+                    $diagnostic,
+                ),
+                FILE_APPEND | LOCK_EX,
+            );
             return JsonResponse::error($response, 'ORDER_UPDATE_FAILED', 500);
         }
 

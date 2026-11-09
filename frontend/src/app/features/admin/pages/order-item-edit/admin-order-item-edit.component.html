@@ -82,6 +82,11 @@
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>{{ 'app.admin.overview.currentDescription' | translate }}</mat-label>
           <textarea matInput rows="4" [formField]="itemForm.currentDescription"></textarea>
+          <app-control-error
+            matError
+            [control]="itemForm.currentDescription()"
+            translationPrefix="app.admin.overview.errors.currentDescription"
+          />
         </mat-form-field>
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>{{ 'app.order.items.giftLink' | translate }}</mat-label>
@@ -106,15 +111,23 @@
           />
         </mat-form-field>
       </section>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>{{ 'app.admin.overview.newStatus' | translate }}</mat-label>
+        <mat-select [formField]="itemForm.publicationStatus">
+          @for (status of publicationStatusOptions; track status) {
+            <mat-option [value]="status">
+              {{ 'app.order.items.statuses.' + status | translate }}
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
       <div class="gl-cluster">
-        <button mat-button type="button" (click)="cancel()">
+        <button class="gl-button--secondary" mat-button type="button" (click)="cancel()">
           {{ 'app.admin.overview.cancel' | translate }}
         </button>
-        <button mat-button type="button" (click)="accept()">
-          {{ 'app.admin.overview.accept' | translate }}
-        </button>
-        <button mat-stroked-button type="button" (click)="reject()">
-          {{ 'app.admin.overview.reject' | translate }}
+        <button mat-flat-button color="primary" type="button" (click)="save()">
+          {{ 'app.admin.overview.save' | translate }}
         </button>
       </div>
     </div>

@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { provideEffects } from '@ngrx/effects';
 import { provideState } from '@ngrx/store';
 import { configurationResolver } from './features/admin/pages/configuration/configuration.resolver';
+import { emailTestResolver } from './features/admin/pages/email-test/email-test.resolver';
 import { adminOrdersResolver } from './features/admin/pages/order-edit/admin-orders.resolver';
 import { adminOverviewResolver } from './features/admin/pages/overview/admin-overview.resolver';
 import { userEditResolver } from './features/admin/pages/users/user-edit.resolver';
@@ -15,6 +16,8 @@ import { adminOrdersEffects } from './store/admin-orders/admin-orders.effects';
 import { adminOrdersFeature } from './store/admin-orders/admin-orders.feature';
 import { adminUsersEffects } from './store/admin-users/admin-users.effects';
 import { adminUsersFeature } from './store/admin-users/admin-users.feature';
+import { emailTestEffects } from './store/email-test/email-test.effects';
+import { emailTestFeature } from './store/email-test/email-test.feature';
 import { fairgateLookupEffects } from './store/fairgate-lookup/fairgate-lookup.effects';
 import { fairgateLookupFeature } from './store/fairgate-lookup/fairgate-lookup.feature';
 import { fairgateTestEffects } from './store/fairgate-test/fairgate-test.effects';
@@ -199,11 +202,13 @@ export const appRoutes: Routes = [
           provideState(adminOrdersFeature),
           provideState(fairgateTestFeature),
           provideState(fairgateLookupFeature),
+          provideState(emailTestFeature),
           provideEffects(
             adminUsersEffects,
             adminOrdersEffects,
             fairgateTestEffects,
             fairgateLookupEffects,
+            emailTestEffects,
           ),
         ],
         children: [
@@ -266,6 +271,15 @@ export const appRoutes: Routes = [
             loadComponent: () =>
               import('./features/admin/pages/configuration/configuration.component').then(
                 (m) => m.ConfigurationComponent,
+              ),
+          },
+          {
+            path: 'email-test',
+            resolve: { templates: emailTestResolver },
+            data: { pageTitle: 'app.admin.emailTest.title' },
+            loadComponent: () =>
+              import('./features/admin/pages/email-test/email-test.component').then(
+                (m) => m.EmailTestComponent,
               ),
           },
           {

@@ -131,10 +131,11 @@ die ursprünglichen und die aktuell gültigen Texte getrennt gespeichert.
   der Liste `Klient*innen` gesucht.
 - Wird der Wunschbesteller gefunden, werden die Anzahl der Erwachsenen und
   Kinder aus Fairgate übernommen. Dadurch kann die zulässige Anzahl der
-  OrderItems bereits beim Erfassen begrenzt werden.
-- Wird der Wunschbesteller nicht gefunden, muss er die Anzahl der Erwachsenen
-  und Kinder selbst angeben. Die Order wird weiterhin regelmäßig gegen
-  Fairgate geprüft.
+  OrderItems bereits beim Erfassen begrenzt werden. Erst danach kann eine
+  Order erstellt werden.
+- Wird der Wunschbesteller nicht gefunden, erhält er ausschließlich den Link
+  zur Anmeldung bei Fairgate. Es wird keine Order erstellt und es gibt keinen
+  Zugang zur Anwendung. Ohne Fairgate-Eintrag kann er sich nicht anmelden.
 - Beim ersten erfolgreichen Zugang muss der Wunschbesteller ein Passwort
   erfassen.
 - Danach kann er sich mit E-Mail-Adresse und Passwort anmelden.
@@ -149,37 +150,27 @@ ist. Dazu gehören insbesondere:
 - die vorhandenen Fairgate-basierten Grenzen einhalten;
 - eine zurückgewiesene Order oder zurückgewiesene Wünsche korrigieren.
 
-Nach jeder Änderung muss die Order erneut zur Erfüllung freigegeben werden.
+Nach jeder Änderung muss die Order erneut zur administrativen Prüfung
+eingereicht werden.
 
 ## 5. Freigabe und administrative Prüfung
 
-### 5.1 Freigabe durch den Wunschbesteller
+### 5.1 Einreichung durch den Wunschbesteller
 
-Wenn der Wunschbesteller seine Wünsche erfasst hat, kann er die gesamte Order
-zur Erfüllung freigeben. Eine freigegebene Order wird nicht automatisch
-öffentlich, sondern zunächst geprüft.
+Der Wunschbesteller meldet sich an und erfasst seine Wünsche. Sobald er seine
+Bestellung einreicht, wird sie dem Administrator zur Prüfung vorgelegt. Die
+Bestellung ist dadurch noch nicht öffentlich.
 
-### 5.2 Fairgate-Prüfung
+### 5.2 Fairgate als Voraussetzung
 
-Eine Order wird in einem Batch so lange regelmäßig gegen Fairgate geprüft,
-bis der Wunschbesteller dort gefunden wurde:
+Eine Order kann nur für einen Wunschbesteller erstellt werden, der in Fairgate
+gefunden wurde. Die Anzahl der Erwachsenen und Kinder wird aus Fairgate
+übernommen und begrenzt die Anzahl der möglichen Wünsche. Wird die maximale
+Anzahl überschritten, muss der Wunschbesteller einen Wunsch entfernen oder
+korrigieren. Dafür gibt es keinen eigenen Order-Status.
 
-- Es wird mit der E-Mail-Adresse und der Gruppe bzw. Liste `Klient*innen`
-  gesucht.
-- Wird der Wunschbesteller gefunden, gilt die Order als Fairgate-gültig.
-- Aus Fairgate werden mindestens die Anzahl der Erwachsenen und Kinder
-  übernommen.
-- Ohne gültigen Fairgate-Eintrag wird die Order administrativ nicht weiter
-  verarbeitet.
-- Der Wunschbesteller erhält Erinnerungs-E-Mails, solange die Anmeldung bei
-  Fairgate fehlt.
-
-Nach erfolgreicher Fairgate-Prüfung erfolgen für diesen Zweck keine weiteren
-regelmäßigen Fairgate-Suchen. Wird bei der Prüfung festgestellt, dass bereits
-mehr Wünsche erfasst sind als Familienmitglieder vorhanden sind, wird die
-Order auf `family_size_exceeded` gesetzt. Der Wunschbesteller wird per E-Mail
-informiert und muss mindestens einen Wunsch entfernen. Danach kann er die
-Order erneut speichern und freigeben.
+Die Fairgate-Suche findet vor der Erstellung der Order statt. Deshalb kann
+eine Order nicht auf einen Zustand "wartet auf Fairgate" gesetzt werden.
 
 ### 5.3 Prüfung durch Administratoren
 
@@ -194,62 +185,69 @@ Administratoren können:
 Die bisherigen Texte bleiben erhalten. Korrekturen werden als aktuelle Texte
 angezeigt und dürfen nicht die ursprüngliche Eingabe zerstören.
 
-Bei einer Ablehnung:
+Bei der Prüfung entscheidet der Administrator für jeden einzelnen Wunsch, ob
+er ihn akzeptiert oder zurückweist. Bei einer Ablehnung:
 
 - wird der Wunschbesteller per E-Mail informiert;
 - werden die Ablehnungsgründe bzw. Bemerkungen angezeigt;
 - muss der Wunschbesteller die betroffenen Angaben überarbeiten;
-- muss die Order anschließend erneut freigegeben werden.
+- geht die Bestellung an den Wunschbesteller zurück;
+- muss der Wunschbesteller den zurückgewiesenen Wunsch korrigieren;
+- muss die Bestellung anschließend erneut eingereicht und geprüft werden.
 
-Sind alle OrderItems akzeptiert und die Order fachlich vollständig, kann der
-Administrator die gesamte Order auf `definitive` stellen. Danach ist sie für
-den Wunschbesteller gesperrt.
+Sind alle Wünsche akzeptiert und ist die Bestellung fachlich plausibel, kann
+der Administrator die Bestellung veröffentlichen. Dazu stellt er sie auf
+`definitive`. Erst ab diesem Zeitpunkt sind die Wünsche für Wunscherfüller
+sichtbar und auswählbar. Danach ist die Bestellung für den Wunschbesteller
+gesperrt.
 
 ## 6. Statusmodell
 
 ### 6.1 Order-Status
 
-Die Order benötigt mindestens folgende fachliche Zustände:
+Die Order verwendet folgende Zustände. Die deutsche Bezeichnung entspricht
+der Übersetzung in `frontend/public/i18n/de.json`:
 
-- `draft` – in Bearbeitung durch den Wunschbesteller;
-- `waiting_for_fairgate` – gespeichert, aber der Wunschbesteller ist noch
-  nicht bei Fairgate gefunden; dieser Zustand liegt vor der Freigabe;
-- `released` – gespeichert und zur administrativen Prüfung freigegeben;
-- `family_size_exceeded` – Fairgate liefert eine kleinere Familiengrösse als
-  die Anzahl der erfassten Wünsche;
-- `in_review` – Fairgate-gültig und in administrativer Prüfung;
-- `changes_requested` – Änderungen durch den Wunschbesteller erforderlich;
-- `definitive` – vollständig akzeptiert und gesperrt;
-- `ready_for_pickup` – alle Geschenke sind eingetroffen;
-- `completed` – Abholung abgeschlossen.
+| Technischer Wert | Deutsche Übersetzung | Situation |
+| --- | --- | --- |
+| `draft` | Entwurf | Der Wunschbesteller erstellt oder korrigiert seine Bestellung. |
+| `released` | Freigegeben | Die Bestellung ist zur administrativen Prüfung eingereicht. |
+| `in_review` | In Prüfung | Der Administrator prüft die Bestellung und die einzelnen Wünsche. |
+| `changes_requested` | Änderungen verlangt | Mindestens ein Wunsch wurde zurückgewiesen; der Wunschbesteller muss korrigieren. |
+| `definitive` | Definitiv | Alle Wünsche sind akzeptiert und die Bestellung ist veröffentlicht. Wunscherfüller können Wünsche auswählen. |
+| `ready_for_pickup` | Bereit zur Abholung | Alle ausgewählten Wünsche sind eingetroffen; der Wunschbesteller erhält einen QR-Code. |
+| `completed` | Abgeschlossen | Die Wünsche wurden mit dem QR-Code abgeholt. |
 
-Beim Speichern der Order gilt:
+Der reguläre Ablauf ist:
 
-- Ist der Wunschbesteller bei Fairgate gefunden, wird die Order auf
-  `released` gesetzt.
-- Ist er nicht gefunden, wird die Order auf `waiting_for_fairgate` gesetzt.
-- Der Batch prüft eine Order nur so lange regelmäßig bei Fairgate, bis der
-  Wunschbesteller dort gefunden wurde.
+```text
+draft
+  → released
+  → in_review
+  → definitive
+  → ready_for_pickup
+  → completed
+```
 
-### 6.2 OrderItem-Status
+Bei einer Korrektur läuft die Bestellung über:
 
-Für einzelne Wünsche werden mindestens folgende Zustände benötigt:
+```text
+in_review
+  → changes_requested
+  → draft
+  → released
+  → in_review
+```
 
-- `draft`;
-- `submitted`;
-- `rejected`;
-- `approved`;
-- `reserved`;
-- `received`;
-- `completed`.
-
-Die Veröffentlichung eines OrderItems und seine Erfüllung sind getrennte
-Sachverhalte.
+Die Freigabe einzelner Wünsche und die Veröffentlichung der gesamten
+Bestellung sind getrennte Entscheidungen. Die Bestellung darf erst auf
+`definitive` gesetzt werden, wenn alle Wünsche akzeptiert und die fachlichen
+Plausibilitätsregeln erfüllt sind.
 
 ## 7. Erfüllung durch Wunscherfüller
 
-- Wunscherfüller sehen ausschließlich anonymisierte, definitive und
-  verfügbare Wünsche.
+- Wunscherfüller sehen ausschließlich anonymisierte Wünsche aus definitiven
+  Bestellungen, die noch nicht ausgewählt wurden.
 - Sie können einzelne OrderItems auswählen.
 - Die Auswahl muss transaktionssicher erfolgen, damit ein Wunsch nicht
   gleichzeitig mehrfach übernommen wird.
@@ -257,6 +255,8 @@ Sachverhalte.
   Bestätigungs-E-Mail.
 - Die E-Mail enthält den Abgabe-Endtermin und die notwendigen Angaben zur
   Geschenkabgabe.
+- Der Wunscherfüller bringt den ausgewählten Wunsch zur vorgesehenen
+  Abgabestelle beziehungsweise zum vereinbarten Termin vorbei.
 - Solange das Geschenk nicht eingetroffen ist, werden regelmäßig
   Erinnerungs-E-Mails verschickt.
 - Eine Zuordnung kann nur durch einen Administrator storniert und das
@@ -287,7 +287,7 @@ Die Anwendung versendet mindestens:
 
 - Link für den Erstzugang;
 - Bestätigung der Erfassung und Freigabe;
-- Information über fehlende Fairgate-Anmeldung;
+- Link zur Fairgate-Anmeldung, wenn kein Fairgate-Eintrag vorhanden ist;
 - Information über administrative Korrekturen oder Ablehnungen;
 - Bestätigung der definitiven Order;
 - Bestätigung an Wunscherfüller mit Abgabe-Endtermin;

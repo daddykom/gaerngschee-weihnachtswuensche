@@ -74,8 +74,7 @@ export const orderFairgateNotificationEffect = createEffect(
       map(({ overview }) => {
         const status = overview.order?.status;
         const canEdit =
-          status === undefined ||
-          ['draft', 'family_size_exceeded', 'changes_requested'].includes(status as OrderStatus);
+          status === undefined || ['draft', 'changes_requested'].includes(status as OrderStatus);
         if (status !== undefined && !canEdit) {
           return NotificationActions.show({
             variant: 'info',

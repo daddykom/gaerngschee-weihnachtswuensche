@@ -41,6 +41,7 @@ final class OrderRepositoryTest extends TestCase
         self::assertSame('Das wäre schön.', $order['items'][0]['originalReason']);
         self::assertSame('Das wäre schön.', $order['items'][0]['currentReason']);
         self::assertSame('submitted', $order['items'][0]['status']);
+        self::assertSame('submitted', $order['items'][0]['publicationStatus']);
     }
 
     public function testAdministrationFiltersByStatusAndCategoryAndSavesApproval(): void

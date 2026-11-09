@@ -1,7 +1,12 @@
 <h2 mat-dialog-title>{{ data.title | translate }}</h2>
 <mat-dialog-content>{{ data.message | translate: data.messageParams }}</mat-dialog-content>
 <mat-dialog-actions class="confirm-dialog__actions">
-  <button class="confirm-dialog__cancel" mat-button type="button" (click)="cancel()">
+  <button
+    class="confirm-dialog__cancel gl-button--secondary"
+    mat-button
+    type="button"
+    (click)="cancel()"
+  >
     {{ data.cancelLabel | translate }}
   </button>
   <button

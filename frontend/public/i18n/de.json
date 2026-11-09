@@ -3,6 +3,9 @@
     "navigation": {
       "loading": "Die Anmeldung wird bei Fairgate geprüft ..."
     },
+    "application": {
+      "loading": "Die Anwendung wird geladen ..."
+    },
     "title": "Weihnachtswünsche",
     "footer": {
       "product": "Weihnachtswünsche",
@@ -351,6 +354,10 @@
             "required": "Bitte gib einen Wunschtitel ein.",
             "maxLength": "Der Wunschtitel darf höchstens 255 Zeichen lang sein."
           },
+          "description": {
+            "required": "Bitte gib eine Wunschbeschreibung ein.",
+            "maxLength": "Die Wunschbeschreibung darf höchstens 2000 Zeichen lang sein."
+          },
           "giftLink": {
             "maxLength": "Der Link darf höchstens 2048 Zeichen lang sein."
           },
@@ -636,6 +643,46 @@
           "REQUEST_FAILED": "Die Anfrage konnte nicht durchgeführt werden."
         }
       },
+      "emailTest": {
+        "title": "Email Test",
+        "recipient": "Empfänger-Adresse",
+        "template": "E-Mail",
+        "submit": "Senden",
+        "successTitle": "E-Mail gesendet",
+        "sent": "Die E-Mail wurde an {{ email }} gesendet.",
+        "errorTitle": "E-Mail konnte nicht gesendet werden",
+        "errors": {
+          "required": "Dieses Feld ist erforderlich.",
+          "email": "Bitte gib eine gültige E-Mail-Adresse ein.",
+          "maxLength": "Der Wert ist zu lang.",
+          "INVALID_EMAIL_TEST_DATA": "Bitte prüfe die Eingaben.",
+          "EMAIL_DELIVERY_FAILED": "Die E-Mail konnte nicht zugestellt werden.",
+          "EMAIL_TEST_FAILED": "Der E-Mail-Test ist fehlgeschlagen.",
+          "REQUEST_FAILED": "Die Anfrage konnte nicht durchgeführt werden."
+        },
+        "templates": {
+          "client-order": "Registrierungs-Link",
+          "fulfiller-reservation": "Reservation für Erfüller",
+          "fairgate-registration-required": "Fairgate-Registrierung erforderlich",
+          "fairgate-registration-available": "Fairgate-Registrierung verfügbar",
+          "user-created": "Benutzer erstellt",
+          "user-email-changed": "E-Mail-Adresse geändert",
+          "password-reset": "Passwort zurücksetzen",
+          "order-confirmation-saved": "Bestellbestätigung: Gespeichert",
+          "order-confirmation-changes_requested": "Bestellbestätigung: Änderungen verlangt"
+        },
+        "parameters": {
+          "loginUrl": "Login-URL",
+          "campaignYear": "Kampagnenjahr",
+          "wishNumber": "Wunschnummer",
+          "wishDescription": "Wunschbeschreibung",
+          "fairgateUrl": "Fairgate-URL",
+          "startUrl": "Start-URL",
+          "temporaryPassword": "Temporäres Passwort",
+          "resetUrl": "Passwort-Reset-URL",
+          "year": "Jahr"
+        }
+      },
       "overview": {
         "title": "Admin-Übersicht",
         "filters": {
@@ -680,11 +727,12 @@
         "reservationExpiresAt": "Reservierung läuft ab am",
         "dueAt": "Fällig am",
         "receivedAt": "Eingegangen am",
-        "orderNumber": "Ordernummer",
+        "orderNumber": "Zettelnummer",
         "wishNumber": "Wunschnummer",
         "status": "Status",
         "itemCountHeader": "Anzahl Wünsche",
         "actions": "Aktionen",
+        "itemCountSingular": "{{ count }} Wunsch",
         "itemCount": "{{ count }} Wünsche",
         "process": "Bestellung verarbeiten",
         "editTitle": "Bestellung bearbeiten",
@@ -754,9 +802,13 @@
           "REJECTION_REASON_REQUIRED": "Für eine Zurückweisung ist eine Begründung erforderlich.",
           "ITEMS_NOT_ACCEPTED": "Alle Wünsche müssen zuerst akzeptiert werden.",
           "ITEM_REJECTION_REQUIRED": "Mindestens ein Wunsch muss zurückgewiesen werden.",
+          "ITEM_DESCRIPTION_REQUIRED": "Jeder Wunsch benötigt eine aktuelle Beschreibung.",
           "ORDER_REJECTION_REASON_REQUIRED": "Für die Zurückweisung der Order ist eine Begründung erforderlich.",
           "rejectionReason": {
             "required": "Bitte gib eine Begründung für die Zurückweisung ein."
+          },
+          "currentDescription": {
+            "required": "Bitte gib eine aktuelle Wunschbeschreibung ein."
           },
           "ORDER_UPDATE_FAILED": "Die Bestellung konnte nicht gespeichert werden.",
           "INVALID_OVERVIEW_CONFIGURATION": "Die Konfiguration für die Übersicht ist ungültig.",
@@ -872,6 +924,7 @@
       "delivery": "Auslieferung",
       "configuration": "Konfiguration",
       "fairgateTest": "Fairgate-Test",
+      "emailTest": "Email Test",
       "fulfillment": "Wünsche erfüllen",
       "userManagement": "Benutzerverwaltung",
       "clientDeletion": "Client-Bestellung löschen",
@@ -881,20 +934,6 @@
     "mail": {
       "order": {
         "confirmation": {
-          "definitive": {
-            "subject": "Deine Weihnachtswünsche-Anmeldung ist definitiv bestätigt",
-            "title": "Deine Weihnachtswünsche-Anmeldung ist definitiv bestätigt",
-            "highlight": "Danke für deine Geduld.",
-            "body": "Vielen Dank für deine Geduld! Deine Anmeldung für das Weihnachtswünsche {{year}} wurde erfolgreich geprüft und ist nun definitiv bestätigt.",
-            "nextTitle": "Wie geht es weiter?",
-            "nextText": "Sobald die Weihnachtswünsche abholbereit sind, senden wir dir eine E-Mail mit deinem persönlichen QR-Code. Diesen QR-Code zeigst du einfach bei der Ausgabe vor, um dein Weihnachtswünsche in Empfang zu nehmen.",
-            "correction": "Wir haben die Anzahl der Erwachsenen und Kinder anhand der Angaben in Fairgate angepasst. Bitte prüfe deine Bestellübersicht.",
-            "correctionLink": "Anmeldung prüfen oder anpassen",
-            "overviewTitle": "Bestellübersicht",
-            "year": "Jahr:",
-            "adults": "Erwachsene:",
-            "children": "Kinder:"
-          },
           "saved": {
             "subject": "Dein Wunschzettel wurde gespeichert",
             "title": "Dein Wunschzettel wurde gespeichert",
@@ -908,42 +947,6 @@
             "body": "Dein Wunschzettel für {{year}} wurde zurückgewiesen.",
             "nextText": "Bitte melde dich an und passe deine Wünsche an. Danach kannst du den Wunschzettel erneut speichern.",
             "button": "Wunschzettel anpassen"
-          },
-          "released": {
-            "subject": "Deine Weihnachtswünsche-Anmeldung wurde freigegeben",
-            "title": "Deine Weihnachtswünsche-Anmeldung wurde freigegeben",
-            "highlight": "Danke für deine Geduld.",
-            "body": "Vielen Dank für deine Geduld! Deine Anmeldung für das Weihnachtswünsche {{year}} wurde erfolgreich geprüft und zur administrativen Prüfung freigegeben.",
-            "nextTitle": "Wie geht es weiter?",
-            "nextText": "Wir informieren dich per E-Mail, sobald deine Anmeldung definitiv bestätigt wurde.",
-            "overviewTitle": "Bestellübersicht",
-            "year": "Jahr:",
-            "adults": "Erwachsene:",
-            "children": "Kinder:"
-          },
-          "waiting_for_fairgate": {
-            "subject": "Fast geschafft!",
-            "title": "Fast geschafft!",
-            "highlight": "Danke für deine Anmeldung zum Weihnachtswünsche {{year}}.",
-            "body": "",
-            "fairgateTitle": "Fairgate-Prüfung steht noch aus",
-            "fairgateText": "Bitte melde dich bei Fairgate mit der gleichen E-Mail-Adresse wie bei deiner Anmeldung an. Danach prüfen wir deine Angaben automatisch.",
-            "fairgateLink": "Bei Fairgate anmelden",
-            "expiredTitle": "Dein Bedürftigkeitsausweis ist abgelaufen",
-            "expiredText": "Bitte sende uns einen aktuellen Bedürftigkeitsausweis an folgende Adresse:",
-            "overviewTitle": "Bestellübersicht",
-            "year": "Jahr:",
-            "adults": "Erwachsene:",
-            "children": "Kinder:"
-          },
-          "family_size_exceeded": {
-            "subject": "Bitte passe deine Weihnachtswünsche-Anmeldung an",
-            "title": "Bitte passe deine Anmeldung an",
-            "noticeTitle": "Die Personenzahlen stimmen nicht überein",
-            "noticeText": "Die Angaben in deiner Weihnachtswünsche-Anmeldung stimmen nicht mit den Angaben bei Fairgate überein.",
-            "counts": "In deiner Bestellung sind %orderAdults% Erwachsene und %orderChildren% Kinder angegeben. Bei Fairgate wurden %fairgateAdults% Erwachsene und %fairgateChildren% Kinder gefunden.",
-            "button": "Anmeldung anpassen",
-            "footer": "Bitte passe deine Bestellung an. Danach wird sie erneut geprüft."
           }
         }
       },
@@ -992,14 +995,6 @@
         "closingMessage": "Wir wünschen dir und deinen Liebsten ganz viel Freude und tolle Erlebnisse an der Basler Herbstmesse!",
         "closing": "Herzliche Grüsse",
         "team": "Dein Gärngschee-Team"
-      },
-      "fairgateReminder": {
-        "subject": "Bitte schliesse deine Weihnachtswünsche-Anmeldung ab",
-        "notFound": "Wir haben dich bei Fairgate noch nicht gefunden.",
-        "body": "Bitte registriere dich bei Fairgate.\nWichtig: Verwende die gleiche E-Mail-Adresse wie für deine Weihnachtswünsche-Anmeldung.\n\nDanach prüfen wir deine Anmeldung automatisch.",
-        "button": "Bei Fairgate anmelden",
-        "expired": "Dein Bedürftigkeitsausweis bei Fairgate ist abgelaufen.",
-        "expiredBody": "Bitte sende uns einen aktuellen Bedürftigkeitsausweis an folgende Adresse:"
       },
       "registration": {
         "clientOrder": {
