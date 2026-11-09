@@ -4,6 +4,7 @@ import { Route, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { firstValueFrom, of, throwError } from 'rxjs';
 import { AuthService, RegistrationLoginResponse } from '../../../shared/services/auth.service';
+import { NavigationProgressService } from '../../../shared/services/navigation-progress.service';
 import { AuthActions } from '../../../store/auth/auth.actions';
 import { clientLoginGuard } from './client-login.guard';
 
@@ -18,6 +19,7 @@ describe('clientLoginGuard', () => {
     parseUrl: vi.fn((url: string) => (url === '/bestellung' ? orderRedirect : redirect)),
   };
   const store = { dispatch: vi.fn() };
+  const progress = { start: vi.fn(), stop: vi.fn() };
   const response: RegistrationLoginResponse = {
     user: { id: 'client-1', email: 'client@example.com', group: 'wunschbesteller' },
     group: 'wunschbesteller',
@@ -36,6 +38,7 @@ describe('clientLoginGuard', () => {
       providers: [
         { provide: Router, useValue: router },
         { provide: Store, useValue: store },
+        { provide: NavigationProgressService, useValue: progress },
       ],
     });
   });
@@ -65,6 +68,8 @@ describe('clientLoginGuard', () => {
         salutation: 'Hallo',
       }),
     );
+    expect(progress.start).toHaveBeenCalledOnce();
+    expect(progress.stop).toHaveBeenCalledOnce();
   });
 
   it('redirects to start and stores the backend error for an invalid token', async () => {
@@ -95,6 +100,8 @@ describe('clientLoginGuard', () => {
     expect(store.dispatch).toHaveBeenCalledWith(
       AuthActions.registrationLoginFailure({ errorCode: 'INVALID_REGISTRATION_TOKEN' }),
     );
+    expect(progress.start).toHaveBeenCalledOnce();
+    expect(progress.stop).toHaveBeenCalledOnce();
   });
 
   it('redirects to start without calling the backend when the token is missing', () => {

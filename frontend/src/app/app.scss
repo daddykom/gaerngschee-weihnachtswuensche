@@ -44,6 +44,22 @@
   white-space: nowrap;
 }
 
+.app-navigation-progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gl-space-sm);
+  padding-block: var(--gl-space-sm);
+  background: var(--mat-sys-surface-container);
+  text-align: center;
+}
+
+.app-navigation-progress mat-progress-bar {
+  position: fixed;
+  inset-block-start: 0;
+  inset-inline: 0;
+  z-index: 1000;
+}
+
 @media (max-width: 47.99rem) {
   .app-header__content {
     display: grid;

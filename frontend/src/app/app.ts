@@ -12,12 +12,14 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { ActivatedRoute, NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
 import { filter, startWith } from 'rxjs';
 import { AdminNavigationComponent } from './shared/components/admin-navigation/admin-navigation';
 import { InfoBoxComponent } from './shared/components/info-box/info-box';
+import { NavigationProgressService } from './shared/services/navigation-progress.service';
 import { AuthActions } from './store/auth/auth.actions';
 import { selectAuthEmail, selectAuthGroup } from './store/auth/auth.feature';
 import { SessionActions } from './store/auth/session.actions';
@@ -34,6 +36,7 @@ import { selectNotification } from './store/notification/notification.feature';
     MatButtonModule,
     MatIconModule,
     MatMenuModule,
+    MatProgressBarModule,
   ],
   selector: 'app-root',
   templateUrl: './app.html',
@@ -45,6 +48,7 @@ export class App {
   private readonly store = inject(Store);
   private readonly router = inject(Router);
   private readonly activatedRoute = inject(ActivatedRoute);
+  readonly navigationProgress = inject(NavigationProgressService);
 
   private readonly navigation = toSignal(
     this.router.events.pipe(
