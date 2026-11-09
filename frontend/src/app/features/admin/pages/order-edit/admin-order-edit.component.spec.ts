@@ -122,19 +122,33 @@ describe('AdminOrderEditComponent', () => {
     );
   });
 
+  it('keeps the current status when no status change is selected', () => {
+    const dispatch = vi.spyOn(store, 'dispatch');
+
+    component.formModel.update((model) => ({ ...model, status: 'unchanged' }));
+    component.save();
+
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: AdminOrdersActions.save.type,
+        action: 'save',
+        order: expect.objectContaining({ status: 'released' }),
+      }),
+    );
+  });
+
   it('uses the current order status as the initial selection', () => {
     expect(component.formModel().status).toBe('released');
   });
 
-  it('offers all order statuses in workflow order', () => {
+  it('offers an unchanged option and the first five order statuses', () => {
     expect(component.statusOptions).toEqual([
+      'unchanged',
       'draft',
       'released',
       'in_review',
       'changes_requested',
       'definitive',
-      'ready_for_pickup',
-      'completed',
     ]);
   });
 

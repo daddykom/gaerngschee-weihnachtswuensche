@@ -151,7 +151,11 @@
       <mat-select [formField]="orderForm.status">
         @for (status of statusOptions; track status; let index = $index) {
           <mat-option [value]="status">
-            {{ index + 1 }}. {{ 'app.admin.overview.statuses.' + status | translate }}
+            @if (status === 'unchanged') {
+              {{ 'app.admin.overview.statuses.unchanged' | translate }}
+            } @else {
+              {{ index }}. {{ 'app.admin.overview.statuses.' + status | translate }}
+            }
           </mat-option>
         }
       </mat-select>

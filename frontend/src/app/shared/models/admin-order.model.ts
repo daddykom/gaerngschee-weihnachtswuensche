@@ -1,6 +1,7 @@
 import { OrderItemCategory, OrderItemPersonType, OrderStatus } from './order.model';
 
 export type AdminPublicationStatus = 'draft' | 'submitted' | 'rejected' | 'approved';
+export type AdminOrderFormStatus = OrderStatus | 'unchanged';
 
 export interface AdminOrderItem {
   id: string;
@@ -55,7 +56,7 @@ export interface AdminOrder {
 }
 
 export interface AdminOrderFormValue {
-  status: OrderStatus;
+  status: AdminOrderFormStatus;
   currentText: string;
   adminNotes: string;
   adultsCount: number;

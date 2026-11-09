@@ -702,7 +702,8 @@
           "changes_requested": "Änderungen verlangt",
           "definitive": "Definitiv",
           "ready_for_pickup": "Bereit zur Abholung",
-          "completed": "Abgeschlossen"
+          "completed": "Abgeschlossen",
+          "unchanged": "Nicht verändern"
         },
         "ordersTitle": "Bestellungen",
         "orderNotFound": "Die Bestellung wurde nicht gefunden.",

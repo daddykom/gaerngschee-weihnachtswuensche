@@ -8,7 +8,11 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ControlErrorComponent } from '../../../../shared/components/control-error/control-error';
-import { AdminOrder, AdminOrderFormValue } from '../../../../shared/models/admin-order.model';
+import {
+  AdminOrder,
+  AdminOrderFormStatus,
+  AdminOrderFormValue,
+} from '../../../../shared/models/admin-order.model';
 import { ORDER_STATUS_WORKFLOW } from '../../../../shared/models/order.model';
 import { AdminOrdersActions } from '../../../../store/admin-orders/admin-orders.actions';
 import {
@@ -57,7 +61,10 @@ export class AdminOrderEditComponent {
     required(schema.childrenCount);
     min(schema.childrenCount, 0);
   });
-  readonly statusOptions = ORDER_STATUS_WORKFLOW;
+  readonly statusOptions: AdminOrderFormStatus[] = [
+    'unchanged',
+    ...ORDER_STATUS_WORKFLOW.slice(0, 5),
+  ];
 
   cancel(): void {
     this.store.dispatch(NavigationActions.navigate({ target: 'back' }));
@@ -156,6 +163,7 @@ export class AdminOrderEditComponent {
         order: {
           ...order,
           ...model,
+          status: model.status === 'unchanged' ? order.status : model.status,
           items: model.items.map((item) => ({ ...item })),
         },
         action: 'save',
