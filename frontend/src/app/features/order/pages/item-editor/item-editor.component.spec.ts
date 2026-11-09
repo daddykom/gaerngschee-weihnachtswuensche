@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MatSelect } from '@angular/material/select';
+import { By } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { provideTranslateService } from '@ngx-translate/core';
@@ -88,5 +90,12 @@ describe('ItemEditorComponent', () => {
         changes: { description: 'Ausführliche Beschreibung' },
       }),
     );
+  });
+
+  it('shows the stored person assignment in the select', () => {
+    const personSelect = fixture.debugElement.query(By.directive(MatSelect))
+      .componentInstance as MatSelect;
+
+    expect(personSelect.value).toBe('adult:1');
   });
 });
