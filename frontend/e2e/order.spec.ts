@@ -77,6 +77,9 @@ test.describe('Bestellung route', () => {
     await expect(page.locator('.app-notification')).toContainText(
       'Die Anzahl der Erwachsenen und Kinder wurde aus Fairgate übernommen.',
     );
+    await page.reload();
+    await expect(page).toHaveURL(/\/bestellung$/);
+    await expect(page.locator('input[type="password"]')).toHaveCount(2);
     await page.locator('input[type="password"]').first().fill('long-enough-password');
     await page.locator('input[type="password"]').nth(1).fill('long-enough-password');
     await page.locator('textarea').fill('Ich wünsche mir etwas Schönes.');

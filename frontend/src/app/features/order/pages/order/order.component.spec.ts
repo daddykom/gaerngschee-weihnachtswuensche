@@ -53,7 +53,6 @@ describe('OrderComponent', () => {
               saveStatus: 'initial',
               saveErrorCode: null,
             },
-            auth: { firstAccess: false },
           },
         }),
         { provide: MatDialog, useValue: { open: vi.fn(() => ({ afterClosed: () => of(true) })) } },
@@ -80,5 +79,35 @@ describe('OrderComponent', () => {
         preserveOnRoutes: ['/bestellung'],
       }),
     );
+  });
+
+  it('requires the password when no order exists after loading', () => {
+    store.setState({
+      order: {
+        status: 'loaded',
+        order: null,
+        year: 2026,
+        fairgateStatus: null,
+        fairgateUserExists: false,
+        childrenCount: 0,
+        adultsCount: 1,
+        form: {
+          password: '',
+          passwordConfirmation: '',
+          adultsCount: 1,
+          childrenCount: 0,
+          text: 'Meine Situation',
+          items: [],
+        },
+        errorCode: null,
+        saveStatus: 'initial',
+        saveErrorCode: null,
+      },
+    });
+    fixture.detectChanges();
+
+    expect(component.firstAccess()).toBe(true);
+    expect(fixture.nativeElement.querySelectorAll('input[type="password"]')).toHaveLength(2);
+    expect(component.orderForm().valid()).toBe(false);
   });
 });
