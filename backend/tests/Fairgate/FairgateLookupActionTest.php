@@ -17,7 +17,7 @@ final class FairgateLookupActionTest extends TestCase
         putenv('FSA_MODE');
     }
 
-    public function testLookupPassesAnOptionalMembershipToTheProvider(): void
+    public function testLookupAlwaysUsesClientMembership(): void
     {
         $receivedMembership = 'not-called';
         $action = new FairgateLookupAction(static function (string $email, ?string $membership) use (&$receivedMembership): array {
@@ -39,6 +39,6 @@ final class FairgateLookupActionTest extends TestCase
         $body = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
         self::assertSame(true, $body['fairgate']['success']);
         self::assertSame(42, $body['fairgate']['data']['contactId']);
-        self::assertNull($receivedMembership);
+        self::assertSame('Klient*innen', $receivedMembership);
     }
 }

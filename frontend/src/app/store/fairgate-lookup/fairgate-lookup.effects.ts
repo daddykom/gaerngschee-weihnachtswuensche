@@ -14,8 +14,8 @@ export const fairgateLookupEffect = createEffect(
   (actions$ = inject(Actions), service = inject(FairgateLookupService)) =>
     actions$.pipe(
       ofType(FairgateLookupActions.lookup),
-      exhaustMap(({ email, membership }) =>
-        service.lookup(email, membership).pipe(
+      exhaustMap(({ email }) =>
+        service.lookup(email).pipe(
           map((result) => FairgateLookupActions.lookupSuccess({ result })),
           catchError((error: HttpErrorResponse) =>
             of(FairgateLookupActions.lookupFailure({ errorCode: errorCode(error) })),

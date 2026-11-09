@@ -22,7 +22,7 @@ test.describe('Fairgate lookup route', () => {
       });
     });
     await page.route('http://localhost:8083/admin/fairgate-lookup**', async (route) => {
-      expect(new URL(route.request().url()).searchParams.get('membership')).toBe('Aktivmitglied');
+      expect(new URL(route.request().url()).searchParams.get('membership')).toBeNull();
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -41,7 +41,7 @@ test.describe('Fairgate lookup route', () => {
     await page.waitForURL('**/admin/overview');
     await expectTranslatedText(page.locator('h1'), 'app.admin.overview.title');
 
-    await page.goto('/admin/fairgate-lookup?email=person%40example.com&membership=Aktivmitglied');
+    await page.goto('/admin/fairgate-lookup?email=person%40example.com');
     await page.waitForURL('**/admin/fairgate-lookup**');
 
     await expectTranslatedText(page.locator('p').first(), 'app.admin.fairgateLookup.description');
