@@ -687,7 +687,7 @@
         "reservationExpiresAt": "Reservierung läuft ab am",
         "dueAt": "Fällig am",
         "receivedAt": "Eingegangen am",
-        "orderNumber": "Ordernummer",
+        "orderNumber": "Zettelnummer",
         "wishNumber": "Wunschnummer",
         "status": "Status",
         "itemCountHeader": "Anzahl Wünsche",
