@@ -7,7 +7,7 @@ test.describe('Admin order item edit route', () => {
     await loginAsAdmin(page);
     await mockOrders(page, orderFixture());
     await page.goto('/admin/overview');
-    await page.getByRole('link', { name: 'Bestellung verarbeiten' }).click();
+    await page.locator('a[href="/admin/orders/order-1/edit"]').click();
     await page.getByRole('link', { name: 'Ändern' }).first().click();
     await page.getByRole('combobox', { name: 'Neuer Status' }).click();
     await page.getByRole('option', { name: 'Änderung erforderlich' }).click();
@@ -36,7 +36,7 @@ test.describe('Admin order item edit route', () => {
       });
     });
     await page.goto('/admin/overview');
-    await page.getByRole('link', { name: 'Bestellung verarbeiten' }).click();
+    await page.locator('a[href="/admin/orders/order-1/edit"]').click();
     await page.getByRole('link', { name: 'Ändern' }).first().click();
     await page
       .getByRole('textbox', { name: 'Begründung der Zurückweisung' })

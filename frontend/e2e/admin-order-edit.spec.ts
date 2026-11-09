@@ -7,7 +7,7 @@ test.describe('Admin order edit route', () => {
     await loginAsAdmin(page);
     await mockOrders(page, orderFixture());
     await page.goto('/admin/overview');
-    await page.getByRole('link', { name: 'Bestellung verarbeiten' }).click();
+    await page.locator('a[href="/admin/orders/order-1/edit"]').click();
     await page.getByRole('button', { name: 'Abbrechen' }).first().click();
 
     await expect(page).toHaveURL(/\/admin\/overview$/);
@@ -28,7 +28,7 @@ test.describe('Admin order edit route', () => {
     });
 
     await page.goto('/admin/overview');
-    await page.getByRole('link', { name: 'Bestellung verarbeiten' }).click();
+    await page.locator('a[href="/admin/orders/order-1/edit"]').click();
     await page.getByRole('link', { name: 'Ändern' }).first().click();
     await page.getByRole('combobox', { name: 'Neuer Status' }).click();
     await page.getByRole('option', { name: 'Freigegeben' }).click();
@@ -61,7 +61,7 @@ test.describe('Admin order edit route', () => {
     });
 
     await page.goto('/admin/overview');
-    await page.getByRole('link', { name: 'Bestellung verarbeiten' }).click();
+    await page.locator('a[href="/admin/orders/order-1/edit"]').click();
     await page.getByRole('combobox', { name: 'Neuer Status' }).click();
     await page.getByRole('option', { name: 'Definitiv' }).click();
     await page.getByRole('button', { name: 'Speichern' }).click();
@@ -87,7 +87,7 @@ test.describe('Admin order edit route', () => {
     });
 
     await page.goto('/admin/overview');
-    await page.getByRole('link', { name: 'Bestellung verarbeiten' }).click();
+    await page.locator('a[href="/admin/orders/order-1/edit"]').click();
     await page.getByRole('button', { name: 'Speichern' }).click();
     await expect(page).toHaveURL(/\/admin\/overview$/);
 
@@ -114,7 +114,7 @@ test.describe('Admin order edit route', () => {
     });
 
     await page.goto('/admin/overview');
-    await page.getByRole('link', { name: 'Bestellung verarbeiten' }).click();
+    await page.locator('a[href="/admin/orders/order-1/edit"]').click();
     await page.getByRole('combobox', { name: 'Neuer Status' }).click();
     await page.getByRole('option', { name: 'Änderungen verlangt' }).click();
     await page.getByRole('textbox', { name: /Interne Bemerkung/ }).fill('Bitte nochmals prüfen');
