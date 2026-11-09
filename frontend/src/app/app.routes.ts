@@ -80,7 +80,11 @@ export const appRoutes: Routes = [
       {
         path: 'client-login',
         canMatch: [clientLoginGuard],
-        children: [{ path: '', redirectTo: 'start', pathMatch: 'full' }],
+        data: { pageTitle: 'app.anmeldung.title' },
+        loadComponent: () =>
+          import('./features/auth/pages/client-login/client-login').then(
+            (m) => m.ClientLoginComponent,
+          ),
       },
       {
         path: 'bestellung',
