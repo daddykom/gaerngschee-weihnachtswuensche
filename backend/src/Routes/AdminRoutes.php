@@ -15,6 +15,8 @@ use App\Middleware\AuthMiddleware;
 use App\Middleware\GroupMiddleware;
 use App\Middleware\SuperuserMiddleware;
 use App\Shared\Mail\EmailSenderInterface;
+use App\Shared\Mail\EmailSender;
+use App\Shared\Mail\EmailTestAction;
 use App\Users\Actions\CreateUserAction;
 use App\Users\Actions\DeleteUserAction;
 use App\Users\Actions\GetUserAction;
@@ -39,8 +41,9 @@ final class AdminRoutes
         ?FairgateLookupAction $fairgateLookupAction = null,
         ?AdminOrderListAction $adminOrderListAction = null,
         ?AdminOrderUpdateAction $adminOrderUpdateAction = null,
+        ?EmailTestAction $emailTestAction = null,
     ): void {
-        $app->group('/admin', function (RouteCollectorProxy $group) use ($userRepository, $emailSender, $fairgateTestAction, $orderRepository, $configRepository, $rateLimitService, $fairgateLookupAction, $adminOrderListAction, $adminOrderUpdateAction): void {
+        $app->group('/admin', function (RouteCollectorProxy $group) use ($userRepository, $emailSender, $fairgateTestAction, $orderRepository, $configRepository, $rateLimitService, $fairgateLookupAction, $adminOrderListAction, $adminOrderUpdateAction, $emailTestAction): void {
 
             $orders = $group->get('/orders', $adminOrderListAction ?? new AdminOrderListAction($orderRepository));
             $orders->add(new GroupMiddleware(['admin'], $userRepository))->add(new AuthMiddleware());
@@ -74,6 +77,9 @@ final class AdminRoutes
 
             $fairgateLookup = $group->get('/fairgate-lookup', $fairgateLookupAction ?? new FairgateLookupAction());
             $fairgateLookup->add(new SuperuserMiddleware($userRepository))->add(new AuthMiddleware());
+
+            $emailTest = $group->map(['GET', 'POST'], '/email-test', $emailTestAction ?? new EmailTestAction($emailSender instanceof EmailSender ? $emailSender : null));
+            $emailTest->add(new GroupMiddleware(['admin'], $userRepository))->add(new AuthMiddleware());
         });
     }
 }

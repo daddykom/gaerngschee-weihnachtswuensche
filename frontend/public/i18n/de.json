@@ -643,6 +643,60 @@
           "REQUEST_FAILED": "Die Anfrage konnte nicht durchgeführt werden."
         }
       },
+      "emailTest": {
+        "title": "Email Test",
+        "recipient": "Empfänger-Adresse",
+        "template": "E-Mail",
+        "submit": "Senden",
+        "successTitle": "E-Mail gesendet",
+        "sent": "Die E-Mail wurde an {{ email }} gesendet.",
+        "errorTitle": "E-Mail konnte nicht gesendet werden",
+        "errors": {
+          "required": "Dieses Feld ist erforderlich.",
+          "email": "Bitte gib eine gültige E-Mail-Adresse ein.",
+          "maxLength": "Der Wert ist zu lang.",
+          "INVALID_EMAIL_TEST_DATA": "Bitte prüfe die Eingaben.",
+          "EMAIL_DELIVERY_FAILED": "Die E-Mail konnte nicht zugestellt werden.",
+          "EMAIL_TEST_FAILED": "Der E-Mail-Test ist fehlgeschlagen.",
+          "REQUEST_FAILED": "Die Anfrage konnte nicht durchgeführt werden."
+        },
+        "templates": {
+          "client-order": "Registrierungs-Link",
+          "fulfiller-reservation": "Reservation für Erfüller",
+          "fairgate-registration-required": "Fairgate-Registrierung erforderlich",
+          "fairgate-registration-available": "Fairgate-Registrierung verfügbar",
+          "user-created": "Benutzer erstellt",
+          "user-email-changed": "E-Mail-Adresse geändert",
+          "password-reset": "Passwort zurücksetzen",
+          "fairgate-reminder": "Fairgate-Erinnerung",
+          "order-confirmation-saved": "Bestellbestätigung: Gespeichert",
+          "order-confirmation-released": "Bestellbestätigung: Freigegeben",
+          "order-confirmation-changes_requested": "Bestellbestätigung: Änderungen verlangt",
+          "order-confirmation-definitive": "Bestellbestätigung: Definitiv",
+          "order-confirmation-waiting_for_fairgate": "Bestellbestätigung: Wartet auf Fairgate",
+          "order-confirmation-family_size_exceeded": "Bestellbestätigung: Familiengrösse überschritten"
+        },
+        "parameters": {
+          "loginUrl": "Login-URL",
+          "campaignYear": "Kampagnenjahr",
+          "wishNumber": "Wunschnummer",
+          "wishDescription": "Wunschbeschreibung",
+          "fairgateUrl": "Fairgate-URL",
+          "startUrl": "Start-URL",
+          "temporaryPassword": "Temporäres Passwort",
+          "resetUrl": "Passwort-Reset-URL",
+          "status": "Status",
+          "documentEmail": "Dokument-E-Mail",
+          "year": "Jahr",
+          "adultsCount": "Anzahl Erwachsene",
+          "childrenCount": "Anzahl Kinder",
+          "correctionNotice": "Korrekturhinweis",
+          "fairgateStatus": "Fairgate-Status",
+          "fairgateDocumentEmail": "Fairgate-Dokument-E-Mail",
+          "fairgateAdultsCount": "Fairgate Erwachsene",
+          "fairgateChildrenCount": "Fairgate Kinder"
+        }
+      },
       "overview": {
         "title": "Admin-Übersicht",
         "filters": {
@@ -884,6 +938,7 @@
       "delivery": "Auslieferung",
       "configuration": "Konfiguration",
       "fairgateTest": "Fairgate-Test",
+      "emailTest": "Email Test",
       "fulfillment": "Wünsche erfüllen",
       "userManagement": "Benutzerverwaltung",
       "clientDeletion": "Client-Bestellung löschen",

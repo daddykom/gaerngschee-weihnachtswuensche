@@ -1,0 +1,48 @@
+<section class="gl-stack gl-stack--group">
+  <form class="gl-stack gl-stack--group" (submit)="$event.preventDefault(); submit()">
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'app.admin.emailTest.recipient' | translate }}</mat-label>
+      <input matInput type="email" [formField]="form.recipient" />
+      <app-control-error
+        matError
+        [control]="form.recipient()"
+        translationPrefix="app.admin.emailTest.errors"
+      />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'app.admin.emailTest.template' | translate }}</mat-label>
+      <mat-select [value]="model().template" (selectionChange)="selectTemplate($event.value)">
+        @for (template of templates(); track template.id) {
+          <mat-option [value]="template.id">{{ templateLabel(template) | translate }}</mat-option>
+        }
+      </mat-select>
+      <app-control-error
+        matError
+        [control]="form.template()"
+        translationPrefix="app.admin.emailTest.errors"
+      />
+    </mat-form-field>
+
+    @if (selectedTemplate(); as template) {
+      <div class="gl-stack gl-stack--group">
+        @for (field of template.fields; track field.key) {
+          <mat-form-field appearance="outline">
+            <mat-label>{{ fieldLabel(field) | translate }}</mat-label>
+            @if (field.type === 'textarea') {
+              <textarea matInput rows="4" [formField]="parameterField(field.key)"></textarea>
+            } @else {
+              <input matInput [type]="field.type" [formField]="parameterField(field.key)" />
+            }
+          </mat-form-field>
+        }
+      </div>
+    }
+
+    <div class="gl-cluster">
+      <button mat-flat-button color="primary" type="submit" [disabled]="status() === 'sending'">
+        {{ 'app.admin.emailTest.submit' | translate }}
+      </button>
+    </div>
+  </form>
+</section>
