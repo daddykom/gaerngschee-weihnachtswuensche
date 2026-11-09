@@ -47,17 +47,12 @@
 .app-navigation-progress {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: var(--gl-space-sm);
-  padding-block: var(--gl-space-sm);
+  min-height: 12rem;
+  padding: var(--gl-space-xl) var(--gl-space-md);
   background: var(--mat-sys-surface-container);
   text-align: center;
-}
-
-.app-navigation-progress mat-progress-bar {
-  position: fixed;
-  inset-block-start: 0;
-  inset-inline: 0;
-  z-index: 1000;
 }
 
 @media (max-width: 47.99rem) {

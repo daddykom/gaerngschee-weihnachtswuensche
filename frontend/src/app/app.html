@@ -39,7 +39,7 @@
 
 @if (navigationProgress.active()) {
 <div class="app-navigation-progress" role="status" aria-live="polite">
-  <mat-progress-bar mode="indeterminate" aria-hidden="true" />
+  <mat-progress-spinner mode="indeterminate" diameter="48" aria-hidden="true" />
   <span>{{ 'app.navigation.loading' | translate }}</span>
 </div>
 }

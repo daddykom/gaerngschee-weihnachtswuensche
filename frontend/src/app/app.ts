@@ -12,7 +12,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ActivatedRoute, NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -36,7 +36,7 @@ import { selectNotification } from './store/notification/notification.feature';
     MatButtonModule,
     MatIconModule,
     MatMenuModule,
-    MatProgressBarModule,
+    MatProgressSpinnerModule,
   ],
   selector: 'app-root',
   templateUrl: './app.html',
