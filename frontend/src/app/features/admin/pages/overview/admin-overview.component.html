@@ -132,9 +132,12 @@
               role="cell"
               [attr.data-label]="'app.admin.overview.actions' | translate"
               [attr.aria-label]="'app.admin.overview.actions' | translate"
-              ><a mat-button [routerLink]="['/admin/orders', order.id, 'edit']">{{
-                'app.admin.overview.process' | translate
-              }}</a></span
+              ><a
+                class="gl-button--secondary"
+                mat-button
+                [routerLink]="['/admin/orders', order.id, 'edit']"
+                >{{ 'app.admin.overview.process' | translate }}</a
+              ></span
             >
           </div>
         } @empty {

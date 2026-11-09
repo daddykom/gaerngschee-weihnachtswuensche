@@ -39,14 +39,24 @@
                   />
                 </mat-form-field>
                 @if (config.canUpdate) {
-                  <button mat-button type="button" (click)="removeValue(config, $index)">
+                  <button
+                    class="gl-button--secondary"
+                    mat-button
+                    type="button"
+                    (click)="removeValue(config, $index)"
+                  >
                     {{ 'app.admin.configuration.removeValue' | translate }}
                   </button>
                 }
               }
             </div>
             @if (config.canUpdate) {
-              <button mat-button type="button" (click)="addValue(config)">
+              <button
+                class="gl-button--secondary"
+                mat-button
+                type="button"
+                (click)="addValue(config)"
+              >
                 {{ 'app.admin.configuration.addValue' | translate }}
               </button>
             }

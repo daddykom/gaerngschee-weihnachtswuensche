@@ -157,10 +157,16 @@
                 <td>
                   @if (canEdit()) {
                     <div class="gl-cluster table-actions">
-                      <button mat-button type="button" (click)="editItem(item.id)">
+                      <button
+                        class="gl-button--secondary"
+                        mat-button
+                        type="button"
+                        (click)="editItem(item.id)"
+                      >
                         {{ 'app.order.items.edit' | translate }}
                       </button>
                       <button
+                        class="gl-button--secondary"
                         mat-button
                         type="button"
                         [attr.aria-disabled]="storeForm().items.length > 1 ? null : 'true'"

@@ -139,7 +139,7 @@
               >
             </div>
           }
-          <a mat-button [routerLink]="['item', item.id]">{{
+          <a class="gl-button--secondary" mat-button [routerLink]="['item', item.id]">{{
             'app.admin.overview.change' | translate
           }}</a>
         </article>
@@ -158,7 +158,7 @@
     </mat-form-field>
 
     <div class="gl-cluster">
-      <button mat-button type="button" (click)="cancel()">
+      <button class="gl-button--secondary" mat-button type="button" (click)="cancel()">
         {{ 'app.admin.overview.cancel' | translate }}
       </button>
       <button
