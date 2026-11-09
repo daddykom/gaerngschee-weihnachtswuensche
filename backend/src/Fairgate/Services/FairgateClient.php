@@ -22,6 +22,7 @@ final class FairgateClient implements FairgateContactProvider
     private const FILTERED_CONTACTS_PATH = '/fsa/v1.1/contact/%s/contacts/list';
     private const CONTACT_DATA_PATH = '/fsa/v2.0/contact/%s/data/%s';
     private const TOKEN_PATH = '/fsa/v1.1/auth/create/%s/token';
+    private const CONTACT_PAGE_LIMIT = 100;
 
     private ?string $bearerToken = null;
 
@@ -48,7 +49,7 @@ final class FairgateClient implements FairgateContactProvider
         $contacts = $data['data']['contacts'] ?? [];
 
         foreach ($contacts as $contact) {
-            $contactEmail = strtolower(trim((string) ($contact['communication']['primary_email'] ?? '')));
+            $contactEmail = $this->contactEmail($contact);
             if ($contactEmail === strtolower(trim($email))) {
                 return true;
             }
@@ -63,6 +64,10 @@ final class FairgateClient implements FairgateContactProvider
         $email = strtolower(trim($email));
         if ($email === '') {
             return ['success' => true, 'data' => ['contacts' => []]];
+        }
+
+        if ($membership !== null && trim($membership) !== '') {
+            return $this->findMembershipContactByEmail($email, trim($membership));
         }
 
         return $this->requestContacts($email, 1, 1, $membership);
@@ -90,6 +95,50 @@ final class FairgateClient implements FairgateContactProvider
             'code' => 200,
             'data' => null,
         ];
+    }
+
+    /** @return array<string, mixed> */
+    private function findMembershipContactByEmail(string $email, string $membership): array
+    {
+        $page = 1;
+        $totalPages = 1;
+        $matches = [];
+        $lastResponse = ['success' => true, 'code' => 200, 'data' => []];
+
+        do {
+            $lastResponse = $this->requestContacts(null, $page, self::CONTACT_PAGE_LIMIT, $membership);
+            $data = $lastResponse['data'] ?? [];
+            $contacts = is_array($data['contacts'] ?? null) ? $data['contacts'] : [];
+
+            foreach ($contacts as $contact) {
+                if ($this->contactEmail($contact) === $email) {
+                    $matches[] = $contact;
+                    break;
+                }
+            }
+
+            $totalPages = max(1, (int) ($data['totalPages'] ?? $page));
+            $page++;
+        } while ($page <= $totalPages && $matches === []);
+
+        $data = is_array($lastResponse['data'] ?? null) ? $lastResponse['data'] : [];
+        $data['contacts'] = $matches;
+        $data['totalRecords'] = count($matches);
+        $data['totalPages'] = 1;
+        $data['pageNo'] = 1;
+        $data['pageLimit'] = count($matches);
+
+        return [...$lastResponse, 'data' => $data];
+    }
+
+    /** @param array<string, mixed> $contact */
+    private function contactEmail(array $contact): string
+    {
+        return strtolower(trim((string) (
+            $contact['primary_email']
+            ?? $contact['communication']['primary_email']
+            ?? ''
+        )));
     }
 
     /** @return array<string, mixed> */
