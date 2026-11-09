@@ -17,15 +17,20 @@ final class FairgateLookupActionTest extends TestCase
         putenv('FSA_MODE');
     }
 
-    public function testDefaultLookupUsesFakeProviderWhenFakeModeIsConfigured(): void
+    public function testLookupPassesAnOptionalMembershipToTheProvider(): void
     {
-        putenv('APP_ENV=test');
-        putenv('FSA_MODE=fake');
+        $receivedMembership = 'not-called';
+        $action = new FairgateLookupAction(static function (string $email, ?string $membership) use (&$receivedMembership): array {
+            self::assertSame('person@example.com', $email);
+            $receivedMembership = $membership;
 
-        $response = (new FairgateLookupAction())(
+            return ['success' => true, 'data' => ['contactId' => 42]];
+        });
+
+        $response = $action(
             (new ServerRequestFactory())->createServerRequest(
                 'GET',
-                '/admin/fairgate-lookup?email=person%2Bfair1%40example.com&membership=Klient%2Ainnen',
+                '/admin/fairgate-lookup?email=person%40example.com',
             ),
             new Response(),
         );
@@ -33,13 +38,7 @@ final class FairgateLookupActionTest extends TestCase
         self::assertSame(200, $response->getStatusCode());
         $body = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
         self::assertSame(true, $body['fairgate']['success']);
-        self::assertSame(3, count(array_filter(
-            $body['fairgate']['data'],
-            static fn (mixed $value, int|string $key): bool => is_string($key)
-                && str_starts_with($key, 'name_und_vorname_kind')
-                && is_string($value)
-                && trim($value) !== '',
-            ARRAY_FILTER_USE_BOTH,
-        )));
+        self::assertSame(42, $body['fairgate']['data']['contactId']);
+        self::assertNull($receivedMembership);
     }
 }

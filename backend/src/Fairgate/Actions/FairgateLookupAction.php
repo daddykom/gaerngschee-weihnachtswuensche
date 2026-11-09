@@ -30,15 +30,13 @@ final class FairgateLookupAction
             return JsonResponse::error($response, 'INVALID_EMAIL', 400);
         }
         $membership = trim((string) ($request->getQueryParams()['membership'] ?? ''));
-        if ($membership === '') {
-            return JsonResponse::error($response, 'INVALID_MEMBERSHIP', 400);
-        }
-        if (mb_strlen($membership) > 160) {
+        $membership = $membership === '' ? null : $membership;
+        if ($membership !== null && mb_strlen($membership) > 160) {
             return JsonResponse::error($response, 'INVALID_MEMBERSHIP', 400);
         }
 
         try {
-            $lookup = $this->lookup ?? FairgateContactProviderFactory::create()->findContactDataByEmail(...);
+            $lookup = $this->lookup ?? FairgateContactProviderFactory::createReal()->findContactDataByEmail(...);
 
             return JsonResponse::success($response, [
                 'email' => $email,
