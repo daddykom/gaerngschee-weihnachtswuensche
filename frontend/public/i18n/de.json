@@ -692,6 +692,7 @@
         "status": "Status",
         "itemCountHeader": "Anzahl Wünsche",
         "actions": "Aktionen",
+        "itemCountSingular": "{{ count }} Wunsch",
         "itemCount": "{{ count }} Wünsche",
         "process": "Bestellung verarbeiten",
         "editTitle": "Bestellung bearbeiten",

@@ -15,31 +15,67 @@
   background: #fff8fc;
 }
 
-.order-list__row > span {
-  display: grid;
-  gap: var(--gl-space-sm);
+.order-list__row:not(.order-list__row--header) {
+  grid-template-columns: minmax(0, 1fr) auto max-content;
+  grid-template-areas:
+    'number . status'
+    'email count actions';
 }
 
-.order-list__row > span::before {
-  content: attr(data-label);
-  color: #6f6069;
-  font-size: 0.875rem;
+.order-list__cell--number {
+  grid-area: number;
+}
+
+.order-list__cell--email {
+  grid-area: email;
+}
+
+.order-list__cell--status {
+  grid-area: status;
+}
+
+.order-list__cell--count {
+  grid-area: count;
+}
+
+.order-list__cell--actions {
+  grid-area: actions;
+}
+
+.order-list__cell {
+  display: block;
+  min-width: 0;
+}
+
+.order-list__cell::before {
+  display: none;
+}
+
+.order-list__cell--email {
+  overflow-wrap: anywhere;
+}
+
+.order-list__cell--actions {
+  justify-self: end;
+}
+
+.order-list__cell--actions a {
+  white-space: nowrap;
 }
 
 .order-list__row--header {
   display: none;
 }
 
-@media (min-width: 48rem) {
+@media (min-width: 64rem) {
   .order-list__row,
   .order-list__row--header {
-    grid-template-columns:
-      minmax(5rem, 0.7fr) minmax(12rem, 1.5fr) minmax(10rem, 1fr) minmax(8rem, 1fr)
-      minmax(10rem, auto);
+    grid-template-columns: 8rem minmax(0, 1.8fr) 9rem 8rem minmax(11rem, max-content);
+    grid-template-areas: 'number email status count actions';
     align-items: center;
   }
 
-  .order-list__row > span::before {
+  .order-list__cell::before {
     content: none;
   }
 
@@ -50,5 +86,24 @@
     background: transparent;
     color: #6f6069;
     font-weight: 700;
+    overflow-wrap: anywhere;
+  }
+
+  .order-list__cell--actions {
+    justify-self: stretch;
+  }
+}
+
+@media (max-width: 36rem) {
+  .order-list__row:not(.order-list__row--header) {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'number status'
+      'email count'
+      'actions actions';
+  }
+
+  .order-list__cell--actions {
+    justify-self: start;
   }
 }
