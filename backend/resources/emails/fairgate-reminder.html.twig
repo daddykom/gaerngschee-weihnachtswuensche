@@ -1,9 +1,0 @@
-{% if FAIRGATE_STATUS == 'expired' %}
-<p>{{ 'app.mail.fairgateReminder.expired'|trans }}</p>
-<p>{{ 'app.mail.fairgateReminder.expiredBody'|trans }}</p>
-{% if DOCUMENT_EMAIL %}<p><a href="mailto:{{ DOCUMENT_EMAIL }}">{{ DOCUMENT_EMAIL }}</a></p>{% endif %}
-{% else %}
-<p>{{ 'app.mail.fairgateReminder.notFound'|trans }}</p>
-<p>{{ 'app.mail.fairgateReminder.body'|trans }}</p>
-<p><a href="{{ FAIRGATE_URL }}">{{ 'app.mail.fairgateReminder.button'|trans }}</a></p>
-{% endif %}

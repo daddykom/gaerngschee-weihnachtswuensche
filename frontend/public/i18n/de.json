@@ -668,13 +668,8 @@
           "user-created": "Benutzer erstellt",
           "user-email-changed": "E-Mail-Adresse geändert",
           "password-reset": "Passwort zurücksetzen",
-          "fairgate-reminder": "Fairgate-Erinnerung",
           "order-confirmation-saved": "Bestellbestätigung: Gespeichert",
-          "order-confirmation-released": "Bestellbestätigung: Freigegeben",
-          "order-confirmation-changes_requested": "Bestellbestätigung: Änderungen verlangt",
-          "order-confirmation-definitive": "Bestellbestätigung: Definitiv",
-          "order-confirmation-waiting_for_fairgate": "Bestellbestätigung: Wartet auf Fairgate",
-          "order-confirmation-family_size_exceeded": "Bestellbestätigung: Familiengrösse überschritten"
+          "order-confirmation-changes_requested": "Bestellbestätigung: Änderungen verlangt"
         },
         "parameters": {
           "loginUrl": "Login-URL",
@@ -685,16 +680,7 @@
           "startUrl": "Start-URL",
           "temporaryPassword": "Temporäres Passwort",
           "resetUrl": "Passwort-Reset-URL",
-          "status": "Status",
-          "documentEmail": "Dokument-E-Mail",
-          "year": "Jahr",
-          "adultsCount": "Anzahl Erwachsene",
-          "childrenCount": "Anzahl Kinder",
-          "correctionNotice": "Korrekturhinweis",
-          "fairgateStatus": "Fairgate-Status",
-          "fairgateDocumentEmail": "Fairgate-Dokument-E-Mail",
-          "fairgateAdultsCount": "Fairgate Erwachsene",
-          "fairgateChildrenCount": "Fairgate Kinder"
+          "year": "Jahr"
         }
       },
       "overview": {
@@ -948,20 +934,6 @@
     "mail": {
       "order": {
         "confirmation": {
-          "definitive": {
-            "subject": "Deine Weihnachtswünsche-Anmeldung ist definitiv bestätigt",
-            "title": "Deine Weihnachtswünsche-Anmeldung ist definitiv bestätigt",
-            "highlight": "Danke für deine Geduld.",
-            "body": "Vielen Dank für deine Geduld! Deine Anmeldung für das Weihnachtswünsche {{year}} wurde erfolgreich geprüft und ist nun definitiv bestätigt.",
-            "nextTitle": "Wie geht es weiter?",
-            "nextText": "Sobald die Weihnachtswünsche abholbereit sind, senden wir dir eine E-Mail mit deinem persönlichen QR-Code. Diesen QR-Code zeigst du einfach bei der Ausgabe vor, um dein Weihnachtswünsche in Empfang zu nehmen.",
-            "correction": "Wir haben die Anzahl der Erwachsenen und Kinder anhand der Angaben in Fairgate angepasst. Bitte prüfe deine Bestellübersicht.",
-            "correctionLink": "Anmeldung prüfen oder anpassen",
-            "overviewTitle": "Bestellübersicht",
-            "year": "Jahr:",
-            "adults": "Erwachsene:",
-            "children": "Kinder:"
-          },
           "saved": {
             "subject": "Dein Wunschzettel wurde gespeichert",
             "title": "Dein Wunschzettel wurde gespeichert",
@@ -975,42 +947,6 @@
             "body": "Dein Wunschzettel für {{year}} wurde zurückgewiesen.",
             "nextText": "Bitte melde dich an und passe deine Wünsche an. Danach kannst du den Wunschzettel erneut speichern.",
             "button": "Wunschzettel anpassen"
-          },
-          "released": {
-            "subject": "Deine Weihnachtswünsche-Anmeldung wurde freigegeben",
-            "title": "Deine Weihnachtswünsche-Anmeldung wurde freigegeben",
-            "highlight": "Danke für deine Geduld.",
-            "body": "Vielen Dank für deine Geduld! Deine Anmeldung für das Weihnachtswünsche {{year}} wurde erfolgreich geprüft und zur administrativen Prüfung freigegeben.",
-            "nextTitle": "Wie geht es weiter?",
-            "nextText": "Wir informieren dich per E-Mail, sobald deine Anmeldung definitiv bestätigt wurde.",
-            "overviewTitle": "Bestellübersicht",
-            "year": "Jahr:",
-            "adults": "Erwachsene:",
-            "children": "Kinder:"
-          },
-          "waiting_for_fairgate": {
-            "subject": "Fast geschafft!",
-            "title": "Fast geschafft!",
-            "highlight": "Danke für deine Anmeldung zum Weihnachtswünsche {{year}}.",
-            "body": "",
-            "fairgateTitle": "Fairgate-Prüfung steht noch aus",
-            "fairgateText": "Bitte melde dich bei Fairgate mit der gleichen E-Mail-Adresse wie bei deiner Anmeldung an. Danach prüfen wir deine Angaben automatisch.",
-            "fairgateLink": "Bei Fairgate anmelden",
-            "expiredTitle": "Dein Bedürftigkeitsausweis ist abgelaufen",
-            "expiredText": "Bitte sende uns einen aktuellen Bedürftigkeitsausweis an folgende Adresse:",
-            "overviewTitle": "Bestellübersicht",
-            "year": "Jahr:",
-            "adults": "Erwachsene:",
-            "children": "Kinder:"
-          },
-          "family_size_exceeded": {
-            "subject": "Bitte passe deine Weihnachtswünsche-Anmeldung an",
-            "title": "Bitte passe deine Anmeldung an",
-            "noticeTitle": "Die Personenzahlen stimmen nicht überein",
-            "noticeText": "Die Angaben in deiner Weihnachtswünsche-Anmeldung stimmen nicht mit den Angaben bei Fairgate überein.",
-            "counts": "In deiner Bestellung sind %orderAdults% Erwachsene und %orderChildren% Kinder angegeben. Bei Fairgate wurden %fairgateAdults% Erwachsene und %fairgateChildren% Kinder gefunden.",
-            "button": "Anmeldung anpassen",
-            "footer": "Bitte passe deine Bestellung an. Danach wird sie erneut geprüft."
           }
         }
       },
@@ -1059,14 +995,6 @@
         "closingMessage": "Wir wünschen dir und deinen Liebsten ganz viel Freude und tolle Erlebnisse an der Basler Herbstmesse!",
         "closing": "Herzliche Grüsse",
         "team": "Dein Gärngschee-Team"
-      },
-      "fairgateReminder": {
-        "subject": "Bitte schliesse deine Weihnachtswünsche-Anmeldung ab",
-        "notFound": "Wir haben dich bei Fairgate noch nicht gefunden.",
-        "body": "Bitte registriere dich bei Fairgate.\nWichtig: Verwende die gleiche E-Mail-Adresse wie für deine Weihnachtswünsche-Anmeldung.\n\nDanach prüfen wir deine Anmeldung automatisch.",
-        "button": "Bei Fairgate anmelden",
-        "expired": "Dein Bedürftigkeitsausweis bei Fairgate ist abgelaufen.",
-        "expiredBody": "Bitte sende uns einen aktuellen Bedürftigkeitsausweis an folgende Adresse:"
       },
       "registration": {
         "clientOrder": {

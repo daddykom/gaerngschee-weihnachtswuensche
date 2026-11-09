@@ -184,13 +184,8 @@ src/
 | `user-created.html.twig` | Zugangsdaten für neu erstellten Benutzer | `LOGIN_URL`, `TEMPORARY_PASSWORD` |
 | `user-email-changed.html.twig` | Bestätigung einer geänderten E-Mail-Adresse | `LOGIN_URL` |
 | `password-reset.html.twig` | Passwort-Reset | `RESET_URL` |
-| `fairgate-reminder.html.twig` | Erinnerung an die Fairgate-Abklärung | `FAIRGATE_URL`, `FAIRGATE_STATUS`, optional `DOCUMENT_EMAIL` |
 | `order-confirmation-saved.html.twig` | Bestätigung einer gespeicherten Bestellung | `ORDER.year`, `ORDER.loginUrl` |
-| `order-confirmation-released.html.twig` | Bestätigung einer freigegebenen Bestellung | `ORDER.year`, `ORDER.adultsCount`, `ORDER.childrenCount` |
 | `order-confirmation-changes_requested.html.twig` | Aufforderung zur Anpassung einer Bestellung | `ORDER.year`, `ORDER.loginUrl` |
-| `order-confirmation-definitive.html.twig` | Bestätigung einer definitiven Bestellung | `ORDER.year`, `ORDER.adultsCount`, `ORDER.childrenCount`, optional `ORDER.correctionNotice`, `ORDER.startUrl` |
-| `order-confirmation-waiting_for_fairgate.html.twig` | Bestätigung mit ausstehender Fairgate-Abklärung | `ORDER.year`, `ORDER.adultsCount`, `ORDER.childrenCount`, `ORDER.fairgateStatus`, optional `ORDER.fairgateUrl`, `ORDER.fairgateDocumentEmail` |
-| `order-confirmation-family_size_exceeded.html.twig` | Hinweis auf überschrittene Familiengrösse | `ORDER.adultsCount`, `ORDER.childrenCount`, `ORDER.fairgateAdultsCount`, `ORDER.fairgateChildrenCount`, `ORDER.startUrl` |
 
 Neue E-Mail-Vorlagen dürfen nicht nur im Template-Verzeichnis angelegt werden:
 Die Versandlogik, Übersetzungen, die Admin-E-Mail-Testauswahl und die

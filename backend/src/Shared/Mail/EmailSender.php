@@ -199,7 +199,7 @@ final class EmailSender implements EmailSenderInterface
     /** @return array{subject: string, html: string, text: string} */
     public function renderOrderConfirmation(array $order, string $mailStatus): array
     {
-        if (!in_array($mailStatus, ['saved', 'released', 'waiting_for_fairgate', 'family_size_exceeded', 'changes_requested', 'definitive'], true)) {
+        if (!in_array($mailStatus, ['saved', 'changes_requested'], true)) {
             throw new \InvalidArgumentException('Invalid order confirmation mail status.');
         }
         $html = $this->twig->render('order-confirmation-' . $mailStatus . '.html.twig', [
@@ -209,22 +209,6 @@ final class EmailSender implements EmailSenderInterface
         $subject = $this->translator->trans('app.mail.order.confirmation.' . $mailStatus . '.subject', [], null, 'de');
 
         return ['subject' => $subject, 'html' => $html, 'text' => $this->plainText($html)];
-    }
-
-    /** @return array{subject: string, html: string, text: string} */
-    public function renderFairgateReminder(string $fairgateUrl, string $status = 'not_found', ?string $documentEmail = null): array
-    {
-        $html = $this->twig->render('fairgate-reminder.html.twig', [
-            'FAIRGATE_URL' => $fairgateUrl,
-            'FAIRGATE_STATUS' => $status,
-            'DOCUMENT_EMAIL' => $documentEmail,
-        ]);
-
-        return [
-            'subject' => $this->translator->trans('app.mail.fairgateReminder.subject'),
-            'html' => $html,
-            'text' => $this->plainText($html),
-        ];
     }
 
     public function sendStoredEmail(string $recipient, string $subject, string $html, string $text): void
@@ -246,7 +230,6 @@ final class EmailSender implements EmailSenderInterface
             'user-created' => $this->renderUserCreatedTest((string) $parameters['loginUrl'], (string) $parameters['temporaryPassword']),
             'user-email-changed' => $this->renderUserEmailChangedTest((string) $parameters['loginUrl']),
             'password-reset' => $this->renderPasswordResetTest((string) $parameters['resetUrl']),
-            'fairgate-reminder' => $this->renderFairgateReminder((string) $parameters['fairgateUrl'], (string) $parameters['status'], $this->optionalString($parameters['documentEmail'] ?? null)),
             default => $this->renderOrderTest($template, $parameters),
         };
 
@@ -310,11 +293,6 @@ final class EmailSender implements EmailSenderInterface
         $order = $parameters;
         $order['status'] = $status;
         return $this->renderOrderConfirmation($order, $status);
-    }
-
-    private function optionalString(mixed $value): ?string
-    {
-        return is_string($value) && trim($value) !== '' ? trim($value) : null;
     }
 
     private function sendUserEmail(string $recipient, string $subject, string $html, ?string $text = null): void

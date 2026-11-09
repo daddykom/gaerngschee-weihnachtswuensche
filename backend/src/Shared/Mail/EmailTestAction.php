@@ -41,45 +41,13 @@ final class EmailTestAction
         'password-reset' => ['fields' => [
             ['key' => 'resetUrl', 'type' => 'url', 'required' => true],
         ]],
-        'fairgate-reminder' => ['fields' => [
-            ['key' => 'fairgateUrl', 'type' => 'url', 'required' => true],
-            ['key' => 'status', 'type' => 'text', 'required' => true],
-            ['key' => 'documentEmail', 'type' => 'email', 'required' => false],
-        ]],
         'order-confirmation-saved' => ['fields' => [
             ['key' => 'year', 'type' => 'number', 'required' => true],
             ['key' => 'loginUrl', 'type' => 'url', 'required' => true],
         ]],
-        'order-confirmation-released' => ['fields' => [
-            ['key' => 'year', 'type' => 'number', 'required' => true],
-            ['key' => 'adultsCount', 'type' => 'number', 'required' => true],
-            ['key' => 'childrenCount', 'type' => 'number', 'required' => true],
-        ]],
         'order-confirmation-changes_requested' => ['fields' => [
             ['key' => 'year', 'type' => 'number', 'required' => true],
             ['key' => 'loginUrl', 'type' => 'url', 'required' => true],
-        ]],
-        'order-confirmation-definitive' => ['fields' => [
-            ['key' => 'year', 'type' => 'number', 'required' => true],
-            ['key' => 'adultsCount', 'type' => 'number', 'required' => true],
-            ['key' => 'childrenCount', 'type' => 'number', 'required' => true],
-            ['key' => 'correctionNotice', 'type' => 'text', 'required' => false],
-            ['key' => 'startUrl', 'type' => 'url', 'required' => false],
-        ]],
-        'order-confirmation-waiting_for_fairgate' => ['fields' => [
-            ['key' => 'year', 'type' => 'number', 'required' => true],
-            ['key' => 'adultsCount', 'type' => 'number', 'required' => true],
-            ['key' => 'childrenCount', 'type' => 'number', 'required' => true],
-            ['key' => 'fairgateStatus', 'type' => 'text', 'required' => true],
-            ['key' => 'fairgateUrl', 'type' => 'url', 'required' => false],
-            ['key' => 'fairgateDocumentEmail', 'type' => 'email', 'required' => false],
-        ]],
-        'order-confirmation-family_size_exceeded' => ['fields' => [
-            ['key' => 'adultsCount', 'type' => 'number', 'required' => true],
-            ['key' => 'childrenCount', 'type' => 'number', 'required' => true],
-            ['key' => 'fairgateAdultsCount', 'type' => 'number', 'required' => true],
-            ['key' => 'fairgateChildrenCount', 'type' => 'number', 'required' => true],
-            ['key' => 'startUrl', 'type' => 'url', 'required' => true],
         ]],
     ];
 
