@@ -2,8 +2,9 @@
 
 ## Ablauf
 
-Beim Absenden der Startseite prüft das Backend die E-Mail-Adresse synchron
-gegen Fairgate.
+Beim Absenden der Startseite prüft das Backend die E-Mail-Adresse im Real-Modus
+gegen den lokalen Fairgate-Kontaktbestand; im Fake-Modus wird sie direkt anhand
+des E-Mail-Markers ausgewertet.
 
 - Wird der Kontakt gefunden, wird wie bisher ein einmaliger Client-
   Registrierungstoken versendet.
@@ -21,8 +22,8 @@ Startseite erneut ein und erhält dann den normalen persönlichen Link.
 ## Betrieb
 
 Der Batch benötigt dieselbe `backend/.env` wie das Backend. Im Regelbetrieb
-wird er über den gemeinsamen Runner zusammen mit dem Bestellungsbatch
-ausgeführt:
+wird er über den gemeinsamen Runner nach der Kontaktsynchronisation und vor
+dem Bestellungsbatch ausgeführt:
 
 ```bash
 cd backend
@@ -41,6 +42,11 @@ andere fällige Anfragen werden trotzdem weiterverarbeitet. Bei Fehlern beendet
 der Prozess den Lauf mit Exit-Code `1`, damit die Prozessüberwachung dies
 erkennen kann.
 
+Schlägt die vorgelagerte Kontaktsynchronisation fehl, überspringt der Runner
+die Registrierungsprüfung. Im Fake-Modus wird nur die Kontaktsynchronisation
+übersprungen; die dynamische E-Mail-Auswertung bleibt aktiv.
+
 Der frühere Order-Batch fragt Fairgate nicht mehr ab. `process-orders.php`
 verarbeitet nur noch die bestehende E-Mail-Queue und die Token-Bereinigung;
-`process-all-batches.php` verbindet beide Aufgaben für den Cronbetrieb.
+`process-all-batches.php` verbindet die Kontaktsynchronisation und beide
+Aufgaben für den Cronbetrieb.

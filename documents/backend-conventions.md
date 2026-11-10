@@ -114,6 +114,29 @@ final class Application
 
 ## Testumgebung und Fairgate-Fake
 
+### Fairgate-Zugriff im Real-Modus
+
+`FairgateClient` löst E-Mail-Adressen ausschliesslich über die lokale Tabelle
+`fairgate_contacts` auf. Die Tabelle enthält nur Kontakte der Membership
+`Klient*innen`. Existenzprüfungen benötigen keinen Fairgate-Aufruf; Extended
+Data werden direkt mit der lokal gespeicherten Fairgate-ID geladen. Die
+bestehende fachliche Auswertung der Daten bleibt unverändert.
+
+Fehlende Zuordnungen ergeben „Kontakt nicht gefunden“, ohne erneute Suche in
+der Fairgate-Kontaktliste. Datenbankfehler werden als `FairgateException`
+weitergegeben und nicht als fehlender Kontakt behandelt. Das vollständige
+Lesen der Kontaktliste erfolgt nur über `fetchAllClientContacts()` für den
+Synchronisationsbatch.
+
+Vor Verwendung des Real-Modus muss die Tabelle migriert und über
+`backend/bin/sync-fairgate-contacts.php` befüllt sein. Der gemeinsame
+Batch-Runner führt die Synchronisation vor der Registrierungsprüfung aus.
+Das Deployment führt den Kontaktabgleich nach den Migrationen und vor der
+Veröffentlichung aus und bricht bei einem Fehler ab. Im Fake-Modus entfällt
+der Kontaktimport; die dynamische E-Mail-Auswertung bleibt unverändert.
+
+### Dynamischer Fake
+
 Die lokale Docker-Umgebung verwendet:
 
 ```env

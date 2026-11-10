@@ -169,15 +169,18 @@ composer update        # Dependencies aktualisieren
 vendor/bin/phinx       # Phinx CLI für Migrationen
 ```
 
-Für den Regelbetrieb werden beide Backend-Batches über einen gemeinsamen
-Runner ausgeführt. Dieser verarbeitet zuerst die E-Mail-Warteschlange und
-danach fällige Fairgate-Anmeldungen:
+Für den Regelbetrieb werden die drei Backend-Batches über einen gemeinsamen
+Runner ausgeführt: zuerst der Fairgate-Kontaktabgleich, danach fällige
+Fairgate-Anmeldungen und zuletzt E-Mail-Warteschlange und Bereinigung.
+Im Fake-Modus wird der Kontaktabgleich übersprungen. Bei einem Fehler des
+Kontaktabgleichs entfällt die abhängige Anmeldungsprüfung; die unabhängige
+E-Mail-Verarbeitung läuft weiter. Eine Sperre verhindert parallele Runner-Läufe.
 
 ```bash
 cd backend && php bin/process-all-batches.php
 ```
 
-Die beiden Einzel-Batches bleiben für manuelle oder gezielte Ausführungen
+Die Einzel-Batches bleiben für manuelle oder gezielte Ausführungen
 verfügbar. In der Docker-Entwicklungsumgebung kann der gemeinsame Runner so
 gestartet werden:
 
