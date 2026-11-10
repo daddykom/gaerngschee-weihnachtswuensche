@@ -75,7 +75,7 @@ export class UserEditComponent {
       }
       const form = {
         email: user.email,
-        group: user.group === 'admin' ? 'admin' : 'user',
+        group: user.group,
         requiredPasswordReset: user.required_password_reset,
       } as const;
       this.store.dispatch(AdminUsersActions.formLoaded({ form }));

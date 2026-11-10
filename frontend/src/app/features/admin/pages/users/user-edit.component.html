@@ -27,6 +27,14 @@
         <mat-select [formField]="form.group">
           <mat-option value="admin">{{ 'app.admin.users.groups.admin' | translate }}</mat-option>
           <mat-option value="user">{{ 'app.admin.users.groups.user' | translate }}</mat-option>
+          @if (!isNew) {
+            <mat-option value="wunschbesteller">{{
+              'app.admin.users.groups.wunschbesteller' | translate
+            }}</mat-option>
+            <mat-option value="wunscherfueller">{{
+              'app.admin.users.groups.wunscherfueller' | translate
+            }}</mat-option>
+          }
         </mat-select>
       </mat-form-field>
     }

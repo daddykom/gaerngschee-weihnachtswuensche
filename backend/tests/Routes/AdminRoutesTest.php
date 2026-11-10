@@ -53,6 +53,7 @@ final class AdminRoutesTest extends TestCase
         $admin = $this->repository->createUser('admin@example.com', 'secret', 'admin');
         $this->repository->createUser('user@example.com', 'secret', 'user');
         $this->repository->createUser('client@example.com', 'secret', 'wunschbesteller');
+        $this->repository->createUser('fulfiller@example.com', 'secret', 'wunscherfueller');
         (new SessionService())->setUser($admin['id'], 'admin');
         $app = AppFactory::create();
         $app->addRoutingMiddleware();
@@ -62,12 +63,11 @@ final class AdminRoutesTest extends TestCase
 
         self::assertSame(200, $response->getStatusCode());
         $users = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
-        self::assertCount(2, $users);
-        self::assertNotSame('client@example.com', $users[0]['email']);
-        self::assertNotSame('client@example.com', $users[1]['email']);
+        self::assertCount(4, $users);
+        self::assertEqualsCanonicalizing(['admin', 'user', 'wunschbesteller', 'wunscherfueller'], array_column($users, 'group'));
     }
 
-    public function testAdminCannotAccessClientUserDetails(): void
+    public function testAdminCanAccessClientUserDetails(): void
     {
         $admin = $this->repository->createUser('admin@example.com', 'secret', 'admin');
         $client = $this->repository->createUser('client@example.com', 'secret', 'wunschbesteller');
@@ -77,7 +77,8 @@ final class AdminRoutesTest extends TestCase
             (new ServerRequestFactory())->createServerRequest('GET', '/admin/users/' . $client['id']),
         );
 
-        self::assertSame(404, $response->getStatusCode());
+        self::assertSame(200, $response->getStatusCode());
+        self::assertSame($client['id'], json_decode((string) $response->getBody(), true)['user']['id']);
     }
 
     public function testUserCannotListAdminUsers(): void
@@ -272,20 +273,25 @@ final class AdminRoutesTest extends TestCase
         self::assertFalse((bool) $data['user']['required_password_reset']);
     }
 
-    public function testAdminCannotUpdateClientUser(): void
+    public function testAdminCanUpdateClientEmailGroupAndPasswordResetFlag(): void
     {
         $admin = $this->repository->createUser('admin@example.com', 'secret', 'admin');
         $client = $this->repository->createUser('client@example.com', 'secret', 'wunschbesteller');
         (new SessionService())->setUser($admin['id'], 'admin');
 
-        $response = $this->createApp()->handle($this->request('PATCH', '/admin/users/' . $client['id'], [
+        $emails = new RecordingEmailSender();
+        $response = $this->createApp($emails)->handle($this->request('PATCH', '/admin/users/' . $client['id'], [
             'email' => 'changed@example.com',
-            'group' => 'user',
-            'required_password_reset' => false,
+            'group' => 'wunscherfueller',
+            'required_password_reset' => true,
         ]));
 
-        self::assertSame(404, $response->getStatusCode());
-        self::assertSame('client@example.com', $this->repository->findById($client['id'])['email']);
+        self::assertSame(200, $response->getStatusCode());
+        $updated = $this->repository->findById($client['id']);
+        self::assertSame('changed@example.com', $updated['email']);
+        self::assertSame('wunscherfueller', $updated['group']);
+        self::assertTrue((bool) $updated['required_password_reset']);
+        self::assertSame('changed@example.com', $emails->changedRecipient);
     }
 
     public function testAdminCanReadUserDetails(): void
@@ -315,7 +321,7 @@ final class AdminRoutesTest extends TestCase
         self::assertNull($this->repository->findById($user['id']));
     }
 
-    public function testAdminCannotDeleteClientUser(): void
+    public function testAdminCanDeleteClientUser(): void
     {
         $admin = $this->repository->createUser('admin@example.com', 'secret', 'admin');
         $client = $this->repository->createUser('client@example.com', 'secret', 'wunschbesteller');
@@ -325,21 +331,42 @@ final class AdminRoutesTest extends TestCase
             $this->request('DELETE', '/admin/users/' . $client['id']),
         );
 
-        self::assertSame(404, $response->getStatusCode());
-        self::assertNotNull($this->repository->findById($client['id']));
+        self::assertSame(200, $response->getStatusCode());
+        self::assertNull($this->repository->findById($client['id']));
     }
 
-    public function testAdminCannotSendPasswordResetToClientUser(): void
+    public function testAdminCannotSendPasswordResetToMissingUser(): void
     {
         $admin = $this->repository->createUser('admin@example.com', 'secret', 'admin');
-        $client = $this->repository->createUser('client@example.com', 'secret', 'wunschbesteller');
         (new SessionService())->setUser($admin['id'], 'admin');
 
         $response = $this->createApp()->handle(
-            $this->request('POST', '/admin/users/' . $client['id'] . '/password-reset'),
+            $this->request('POST', '/admin/users/missing-user/password-reset'),
         );
 
         self::assertSame(404, $response->getStatusCode());
+    }
+
+    public function testAdminCanReadChangeAndDeleteAccountsInEveryGroup(): void
+    {
+        $admin = $this->repository->createUser('admin@example.com', 'secret', 'admin');
+        (new SessionService())->setUser($admin['id'], 'admin');
+        $app = $this->createApp();
+        $groups = ['admin', 'user', 'wunschbesteller', 'wunscherfueller'];
+        foreach ($groups as $group) {
+            $user = $this->repository->createUser($group . '@groups.example.com', 'secret', $group);
+            self::assertSame(200, $app->handle($this->request('GET', '/admin/users/' . $user['id']))->getStatusCode());
+            foreach ($groups as $targetGroup) {
+                $response = $app->handle($this->request('PATCH', '/admin/users/' . $user['id'], [
+                    'group' => $targetGroup,
+                    'required_password_reset' => true,
+                ]));
+                self::assertSame(200, $response->getStatusCode());
+                self::assertSame($targetGroup, $this->repository->findById($user['id'])['group']);
+            }
+            self::assertSame(200, $app->handle($this->request('DELETE', '/admin/users/' . $user['id']))->getStatusCode());
+            self::assertNull($this->repository->findById($user['id']));
+        }
     }
 
     private function createApp(

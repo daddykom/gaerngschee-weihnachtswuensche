@@ -60,7 +60,7 @@ test.describe('User edit route', () => {
     await expect(page.locator('input[type="email"]')).toHaveValue('user@example.com');
     await page.locator('input[type="email"]').fill('changed@example.com');
     await page.getByRole('combobox').click();
-    await expect(page.getByRole('option')).toHaveCount(2);
+    await expect(page.getByRole('option')).toHaveCount(4);
     await page.getByRole('option', { name: 'Administrator' }).click();
     await page.getByRole('checkbox').check();
     await page.getByRole('button', { name: 'Speichern' }).click();
@@ -74,6 +74,42 @@ test.describe('User edit route', () => {
     await expect(page.getByRole('button', { name: 'Administrationsmenü öffnen' })).toHaveCount(0);
     await expect(page).toHaveURL(/\/not-found$/);
   });
+
+  for (const group of ['wunschbesteller', 'wunscherfueller']) {
+    test(`preserves and updates an existing ${group} account`, async ({ page }) => {
+      await loginAsAdmin(page);
+      const user = {
+        id: 'client-1',
+        email: `${group}@example.com`,
+        group,
+        required_password_reset: false,
+      };
+      await page.route('http://localhost:8083/admin/users', (route) =>
+        route.fulfill({ json: [user] }),
+      );
+      let changes: unknown;
+      await page.route('http://localhost:8083/admin/users/client-1', async (route) => {
+        if (route.request().method() === 'GET') {
+          await route.fulfill({ json: { user } });
+          return;
+        }
+        changes = route.request().postDataJSON();
+        await route.fulfill({
+          json: { user: { ...user, required_password_reset: true }, emailSentTo: null },
+        });
+      });
+      await page.getByRole('button', { name: 'Administrationsmenü öffnen' }).click();
+      await page.getByRole('menuitem', { name: 'Benutzerverwaltung' }).click();
+      await page.getByRole('link', { name: 'Bearbeiten' }).click();
+      await expect(page.locator('input[type="email"]')).toHaveValue(user.email);
+      const select = page.getByRole('combobox');
+      await expectTranslatedText(select, `app.admin.users.groups.${group}`);
+      await page.getByRole('checkbox').check();
+      await page.getByRole('button', { name: 'Speichern' }).click();
+      await page.waitForURL('**/admin/users');
+      expect(changes).toEqual({ email: user.email, group, required_password_reset: true });
+    });
+  }
 
   test('cancel navigates back without saving', async ({ page }) => {
     await loginAsAdmin(page);

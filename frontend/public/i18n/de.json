@@ -825,6 +825,12 @@
         "createTitle": "Benutzer erstellen",
         "editTitle": "Benutzer bearbeiten",
         "heading": "Benutzer",
+        "filters": {
+          "email": "E-Mail-Adresse filtern",
+          "group": "Benutzergruppe",
+          "allGroups": "Alle Gruppen",
+          "noResults": "Keine Benutzer entsprechen den gewählten Filtern."
+        },
         "createHeading": "Neuen Benutzer erstellen",
         "editHeading": "Benutzer bearbeiten",
         "create": "Benutzer erstellen",
@@ -840,7 +846,8 @@
         "sendPasswordReset": "Passwort senden",
         "passwordResetSent": "Der Link zum Zurücksetzen des Passworts wurde an {{recipient}} gesendet.",
         "deleteTitle": "Benutzer löschen",
-        "deleteMessage": "Soll dieser Benutzer wirklich gelöscht werden?",
+        "deleteMessage": "Soll dieser Benutzer wirklich gelöscht werden? Zugehörige Bestellungen und Wünsche werden ebenfalls unwiderruflich gelöscht.",
+        "deleteClientMessage": "Soll dieser Wunschbesteller wirklich gelöscht werden? Alle seine Bestellungen und Wünsche werden ebenfalls unwiderruflich gelöscht.",
         "deleteConfirm": "Löschen",
         "clientDeletion": {
           "title": "Client-Wunschzettel löschen",
@@ -876,6 +883,8 @@
         "groups": {
           "admin": "Administrator",
           "user": "Benutzer",
+          "wunschbesteller": "Wunschbesteller",
+          "wunscherfueller": "Wunscherfüller",
           "client": "Klient"
         },
         "errors": {

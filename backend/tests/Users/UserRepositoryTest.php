@@ -50,6 +50,21 @@ final class UserRepositoryTest extends TestCase
         self::assertSame($created, $this->repository->findByEmail('admin@example.com'));
     }
 
+    public function testAdministrationListsAllGroupsWithoutExposingCredentials(): void
+    {
+        $groups = ['admin', 'user', 'wunschbesteller', 'wunscherfueller'];
+        foreach ($groups as $group) {
+            $this->repository->createUser($group . '@example.com', 'secret', $group);
+        }
+        $users = $this->repository->findAllForAdministration();
+        self::assertCount(4, $users);
+        self::assertEqualsCanonicalizing($groups, array_column($users, 'group'));
+        foreach ($users as $user) {
+            self::assertArrayNotHasKey('password', $user);
+            self::assertArrayNotHasKey('token_version', $user);
+        }
+    }
+
     public function testInvalidGroupIsRejected(): void
     {
         $this->expectException(\InvalidArgumentException::class);

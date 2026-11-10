@@ -23,7 +23,6 @@ final class UserRepository
         $stmt = $this->pdo->query(
             "SELECT id, email, `group`, required_password_reset, created_at, updated_at
              FROM users
-             WHERE `group` IN ('admin', 'user')
              ORDER BY created_at DESC",
         );
         return $stmt->fetchAll();

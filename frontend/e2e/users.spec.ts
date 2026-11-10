@@ -2,6 +2,50 @@ import { expectTranslatedText } from './support/assertions';
 import { expect, Page, test } from './support/test';
 
 test.describe('User administration route', () => {
+  test('filters all user groups locally by email and group', async ({ page }) => {
+    await loginAsAdmin(page);
+    let listRequests = 0;
+    const groups = ['admin', 'user', 'wunschbesteller', 'wunscherfueller'];
+    await page.route('http://localhost:8083/admin/users', async (route) => {
+      listRequests += 1;
+      await route.fulfill({
+        json: groups.map((group) => ({
+          id: group,
+          email: `${group}@example.com`,
+          group,
+          required_password_reset: false,
+        })),
+      });
+    });
+    await openUserManagement(page);
+    const rows = page.getByRole('listitem');
+    await expect(rows).toHaveCount(4);
+    const requestsBeforeFiltering = listRequests;
+    for (const group of groups.slice(2)) {
+      const row = rows.filter({ hasText: `${group}@example.com` });
+      await expectTranslatedText(row, `app.admin.users.groups.${group}`);
+      await expect(row.getByRole('button', { name: 'Passwort senden' })).toBeVisible();
+      await expect(row.getByRole('button', { name: 'Löschen' })).toBeVisible();
+      await expect(row.getByRole('link', { name: 'Bearbeiten' })).toBeVisible();
+    }
+    const emailFilter = page.getByRole('searchbox');
+    const groupFilter = page.getByRole('combobox');
+    await emailFilter.fill('  @EXAMPLE.COM  ');
+    await expect(rows).toHaveCount(4);
+    await groupFilter.click();
+    await page.getByRole('option', { name: 'Wunschbesteller', exact: true }).click();
+    await expect(rows).toHaveCount(1);
+    await expect(rows.first()).toContainText('wunschbesteller@example.com');
+    await emailFilter.fill('admin');
+    await expect(rows).toHaveCount(0);
+    await expectTranslatedText(page.getByRole('list'), 'app.admin.users.filters.noResults');
+    await emailFilter.fill('');
+    await groupFilter.click();
+    await page.getByRole('option', { name: 'Alle Gruppen', exact: true }).click();
+    await expect(rows).toHaveCount(4);
+    expect(listRequests).toBe(requestsBeforeFiltering);
+  });
+
   test('loads the users and shows the create action', async ({ page }) => {
     await loginAsAdmin(page);
     await page.route('http://localhost:8083/admin/users', async (route) => {

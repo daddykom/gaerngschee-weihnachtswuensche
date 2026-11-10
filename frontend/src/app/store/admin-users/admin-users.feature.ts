@@ -1,4 +1,4 @@
-import { createFeature, createReducer, on } from '@ngrx/store';
+import { createFeature, createReducer, createSelector, on } from '@ngrx/store';
 import { AdminUsersActions } from './admin-users.actions';
 import { AdminUsersState, initialState } from './admin-users.state';
 
@@ -6,6 +6,10 @@ export const adminUsersFeature = createFeature({
   name: 'adminUsers',
   reducer: createReducer<AdminUsersState>(
     initialState,
+    on(AdminUsersActions.filtersChanged, (state, { changes }) => ({
+      ...state,
+      filters: { ...state.filters, ...changes },
+    })),
     on(AdminUsersActions.formLoaded, (state, { form }) => ({
       ...state,
       form,
@@ -92,12 +96,24 @@ export const adminUsersFeature = createFeature({
       }),
     ),
   ),
+  extraSelectors: ({ selectUsers, selectFilters }) => ({
+    selectFilteredUsers: createSelector(selectUsers, selectFilters, (users, filters) => {
+      const email = filters.email.trim().toLowerCase();
+      return users.filter(
+        (user) =>
+          user.email.toLowerCase().includes(email) &&
+          (filters.group === '' || user.group === filters.group),
+      );
+    }),
+  }),
 });
 
 export const {
   name: adminUsersFeatureName,
   reducer: adminUsersReducer,
   selectUsers: selectAdminUsers,
+  selectFilters: selectAdminUsersFilters,
+  selectFilteredUsers: selectAdminUsersFilteredUsers,
   selectSelectedUser: selectAdminUsersSelectedUser,
   selectDetailStatus: selectAdminUsersDetailStatus,
   selectLoadStatus: selectAdminUsersLoadStatus,
