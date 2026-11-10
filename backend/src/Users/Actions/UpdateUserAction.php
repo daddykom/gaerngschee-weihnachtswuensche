@@ -32,7 +32,7 @@ final class UpdateUserAction
 
         $repository = $this->users ?? new UserRepository();
         $current = $repository->findById($userId);
-        if ($current === null || in_array($current['group'], ['wunschbesteller', 'wunscherfueller'], true)) {
+        if ($current === null || (!$this->isAdmin($actor) && in_array($current['group'], ['wunschbesteller', 'wunscherfueller'], true))) {
             return JsonResponse::error($response, 'NOT_FOUND', 404);
         }
 
@@ -47,7 +47,7 @@ final class UpdateUserAction
         $reset = array_key_exists('required_password_reset', $data) && is_bool($data['required_password_reset'])
             ? $data['required_password_reset']
             : (array_key_exists('required_password_reset', $data) ? null : (bool) $current['required_password_reset']);
-        if ($email === null || filter_var($email, FILTER_VALIDATE_EMAIL) === false || !is_string($group) || !in_array($group, ['admin', 'user'], true) || $reset === null) {
+        if ($email === null || filter_var($email, FILTER_VALIDATE_EMAIL) === false || !is_string($group) || !in_array($group, ['admin', 'user', 'wunschbesteller', 'wunscherfueller'], true) || $reset === null) {
             return JsonResponse::error($response, 'INVALID_USER_DATA', 422);
         }
 

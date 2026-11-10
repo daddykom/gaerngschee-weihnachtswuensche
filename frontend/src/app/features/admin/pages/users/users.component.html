@@ -6,6 +6,24 @@
     </a>
   </div>
 
+  <div class="gl-grid gl-grid--2">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>{{ 'app.admin.users.filters.email' | translate }}</mat-label>
+      <input matInput type="search" [formField]="filterForm.email" />
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>{{ 'app.admin.users.filters.group' | translate }}</mat-label>
+      <mat-select [formField]="filterForm.group">
+        <mat-option value="">{{ 'app.admin.users.filters.allGroups' | translate }}</mat-option>
+        @for (group of groups; track group) {
+          <mat-option [value]="group">{{
+            'app.admin.users.groups.' + group | translate
+          }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+
   @if (loading()) {
     <p>{{ 'app.admin.users.loading' | translate }}</p>
   } @else {
@@ -43,7 +61,14 @@
           </div>
         </article>
       } @empty {
-        <p>{{ 'app.admin.users.empty' | translate }}</p>
+        <p>
+          {{
+            (filters().email || filters().group
+              ? 'app.admin.users.filters.noResults'
+              : 'app.admin.users.empty'
+            ) | translate
+          }}
+        </p>
       }
     </div>
   }

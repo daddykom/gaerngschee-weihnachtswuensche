@@ -76,6 +76,18 @@ Implemented routes:
 | `POST` | `/public/fulfiller-start` | Request a fulfiller registration link after required privacy opt-in |
 | `GET` | `/admin/users` | List users for administrators |
 
+### User administration list
+
+- Administrators can list all four user groups, including clients and fulfillers.
+- The frontend filters the loaded list locally by case-insensitive email substring
+  and user group. Both filters can be combined and are stored in NgRx.
+- Administrators can edit email, group and the required-password-reset flag,
+  send password-reset links and delete accounts in all four groups.
+- Account creation remains limited to `admin` and `user`. Normal users do not
+  gain access to other accounts or role changes.
+- Deleting a client account also deletes its orders and wishes through the
+  existing database cascade; the confirmation dialog explicitly warns about this.
+
 ### Middleware
 
 - `AuthMiddleware` accepts either the authenticated PHP session or a valid
