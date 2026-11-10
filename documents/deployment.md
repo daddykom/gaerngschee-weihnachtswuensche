@@ -69,6 +69,36 @@ Angular-Builds nach `<deployment>/frontend` veröffentlicht.
 
 ## Regelmässige Batch-Prozesse
 
+### Manueller Fairgate-Kontaktabgleich
+
+Nach der Migration für `fairgate_contacts` kann der Kontaktbestand manuell
+synchronisiert werden:
+
+```bash
+cd <deployment>/backend
+php bin/sync-fairgate-contacts.php
+```
+
+Das Script verwendet die Environment-Konfiguration und `FSA_MODE`. Im Modus
+`real` werden alle Kontakte der Membership `Klient*innen` gelesen. Im Modus
+`fake` wird der Kontaktabgleich mit einem Hinweis und Exit-Code `0`
+übersprungen, ohne Datenbankzugriff oder Fairgate-Aufrufe. Der lokale
+Kontaktbestand bleibt unverändert. Der Fake liefert die benötigten Daten
+weiterhin direkt anhand des E-Mail-Markers (`+fair1`, `+fair2` usw.); es gibt
+keine feste Kontaktliste und beliebige Testadressen müssen nicht vorab erfasst
+werden.
+
+Das Script gibt die Anzahl gelesener, eingefügter, geänderter und gelöschter
+Kontakte aus. Exit-Code `0` bedeutet Erfolg. Bei einem Fehler wird die Meldung
+nach stderr geschrieben und das Script mit Exit-Code `1` beendet. Leere
+Kontaktlisten werden als Löschschutz abgelehnt; bei Abfrage- oder
+Schreibfehlern bleibt der bisherige Bestand erhalten.
+
+Das Script ist noch nicht in den gemeinsamen Batch-Runner oder das
+Deployment-Script eingebunden.
+
+### Gemeinsamer Runner
+
 Die beiden Backend-Batches werden im Regelbetrieb über den gemeinsamen Runner
 `process-all-batches.php` mindestens einmal innerhalb von zwölf Stunden
 ausgeführt. Empfohlen ist ein einziger Cron-Eintrag:
