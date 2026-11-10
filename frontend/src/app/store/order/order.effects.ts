@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { catchError, exhaustMap, map, of } from 'rxjs';
+import { catchError, exhaustMap, filter, map, of } from 'rxjs';
 import { OrderStatus } from '../../shared/models/order.model';
 import { OrderService } from '../../shared/services/order.service';
 import { AuthActions } from '../auth/auth.actions';
@@ -34,21 +34,26 @@ export const loadOrderEffect = createEffect(
 export const saveOrderEffect = createEffect(
   (actions$ = inject(Actions), orderService = inject(OrderService)) =>
     actions$.pipe(
-      ofType(OrderActions.save),
-      exhaustMap(({ form }) =>
-        orderService.save(form).pipe(
-          map((result) => OrderActions.saveSuccess({ result })),
-          catchError((error: HttpErrorResponse) =>
-            of(
-              OrderActions.saveFailure({
-                errorCode:
-                  typeof error.error?.error?.code === 'string'
-                    ? error.error.error.code
-                    : 'ORDER_SAVE_FAILED',
-              }),
+      ofType(OrderActions.save, OrderActions.draftSaveClicked),
+      exhaustMap((action) =>
+        orderService
+          .save(
+            action.form,
+            action.type === OrderActions.draftSaveClicked.type ? 'draft' : 'submit',
+          )
+          .pipe(
+            map((result) => OrderActions.saveSuccess({ result })),
+            catchError((error: HttpErrorResponse) =>
+              of(
+                OrderActions.saveFailure({
+                  errorCode:
+                    typeof error.error?.error?.code === 'string'
+                      ? error.error.error.code
+                      : 'ORDER_SAVE_FAILED',
+                }),
+              ),
             ),
           ),
-        ),
       ),
     ),
   { functional: true },
@@ -58,6 +63,7 @@ export const logoutAfterOrderSaveEffect = createEffect(
   (actions$ = inject(Actions)) =>
     actions$.pipe(
       ofType(OrderActions.saveSuccess),
+      filter(({ result }) => result.status !== 'draft'),
       map(({ result }) =>
         AuthActions.logoutRequestedWithRedirect({
           target: `/bestellung/bestaetigung?status=${result.status}`,
@@ -107,19 +113,26 @@ export const orderSaveSuccessNotificationEffect = createEffect(
     actions$.pipe(
       ofType(OrderActions.saveSuccess),
       map(({ result }) =>
-        result.status === 'released'
+        result.status === 'draft'
           ? NotificationActions.show({
               variant: 'success',
-              titleKey: 'app.order.confirmation.releasedTitle',
-              messageKey: 'app.order.confirmation.releasedMessage',
-              preserveOnRoutes: ['/bestellung/bestaetigung'],
+              titleKey: 'app.order.notifications.draftSavedTitle',
+              messageKey: 'app.order.notifications.draftSaved',
+              preserveOnRoutes: ['/bestellung'],
             })
-          : NotificationActions.show({
-              variant: 'warning',
-              titleKey: 'app.order.confirmation.waitingForFairgateTitle',
-              messageKey: 'app.order.confirmation.waitingForFairgateMessage',
-              preserveOnRoutes: ['/bestellung/bestaetigung'],
-            }),
+          : result.status === 'released'
+            ? NotificationActions.show({
+                variant: 'success',
+                titleKey: 'app.order.confirmation.releasedTitle',
+                messageKey: 'app.order.confirmation.releasedMessage',
+                preserveOnRoutes: ['/bestellung/bestaetigung'],
+              })
+            : NotificationActions.show({
+                variant: 'warning',
+                titleKey: 'app.order.confirmation.waitingForFairgateTitle',
+                messageKey: 'app.order.confirmation.waitingForFairgateMessage',
+                preserveOnRoutes: ['/bestellung/bestaetigung'],
+              }),
       ),
     ),
   { functional: true },

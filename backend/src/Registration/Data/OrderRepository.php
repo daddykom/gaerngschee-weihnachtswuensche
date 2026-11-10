@@ -587,7 +587,7 @@ final class OrderRepository
                 $this->recordStatusChanges(1);
             }
             if ($items === [] || isset($items[0]['category'], $items[0]['description'])) {
-                $this->saveItems($orderId, $items);
+                $this->saveItems($orderId, $items, $status === 'draft' ? 'draft' : 'submitted');
             }
             $this->pdo->commit();
         } catch (\Throwable $exception) {
@@ -598,7 +598,7 @@ final class OrderRepository
     }
 
     /** @param list<array{id?: string, category: string, personType: ?string, personIndex: ?int, title: string, description: string, giftLink: ?string, personalMessage: string}> $items */
-    private function saveItems(string $orderId, array $items): void
+    private function saveItems(string $orderId, array $items, string $itemStatus): void
     {
         $existing = $this->pdo->prepare('SELECT id FROM order_items WHERE order_id = :order_id');
         $existing->execute(['order_id' => $orderId]);
@@ -613,8 +613,8 @@ final class OrderRepository
             if (in_array($itemId, $existingIds, true)) {
                 $statement = $this->pdo->prepare(
                     'UPDATE order_items SET category = :category, person_type = :person_type, person_index = :person_index, current_title = :title, current_description = :description,
-                     gift_link = :gift_link, personal_message = :personal_message, current_reason = :personal_message,
-                      status = \'submitted\', publication_status = \'submitted\', updated_at = CURRENT_TIMESTAMP
+                     gift_link = :gift_link, personal_message = :personal_message, current_reason = :current_reason,
+                       status = :status, publication_status = :publication_status, updated_at = CURRENT_TIMESTAMP
                      WHERE id = :id AND order_id = :order_id',
                 );
                 $statement->execute([
@@ -627,6 +627,9 @@ final class OrderRepository
                     'description' => $item['description'],
                     'gift_link' => $item['giftLink'] ?? null,
                     'personal_message' => $personalMessage,
+                    'current_reason' => $personalMessage,
+                    'status' => $itemStatus,
+                    'publication_status' => $itemStatus,
                 ]);
                 continue;
             }
@@ -636,7 +639,7 @@ final class OrderRepository
                  (id, order_id, category, person_type, person_index, original_title, current_title, original_description, current_description,
                    gift_link, original_reason, current_reason, personal_message, status, publication_status)
                   VALUES (:id, :order_id, :category, :person_type, :person_index, :original_title, :current_title, :original_description,
-                           :current_description, :gift_link, :original_reason, :current_reason, :personal_message, \'submitted\', \'submitted\')',
+                           :current_description, :gift_link, :original_reason, :current_reason, :personal_message, :status, :publication_status)',
             );
             $statement->execute([
                 'id' => $itemId,
@@ -652,6 +655,8 @@ final class OrderRepository
                 'original_reason' => $personalMessage !== '' ? $personalMessage : null,
                 'current_reason' => $personalMessage !== '' ? $personalMessage : null,
                 'personal_message' => $personalMessage !== '' ? $personalMessage : null,
+                'status' => $itemStatus,
+                'publication_status' => $itemStatus,
             ]);
         }
 

@@ -154,7 +154,11 @@ export class OrderComponent {
     this.orderForm().markAsTouched();
   }
 
-  save(): void {
+  saveDraft(): void {
+    this.save('draft');
+  }
+
+  save(mode: 'draft' | 'submit' = 'submit'): void {
     const itemCount = this.storeForm().items.length;
     if (itemCount < 1 || itemCount > this.maxItems()) {
       this.store.dispatch(
@@ -193,6 +197,10 @@ export class OrderComponent {
     }
 
     if (this.canEdit() && this.saving() !== 'loading') {
+      if (mode === 'draft') {
+        this.store.dispatch(OrderActions.draftSaveClicked({ form: this.storeForm() }));
+        return;
+      }
       const itemCount = this.storeForm().items.length;
       const maximumItemCount = this.maxItems();
       const dialogRef = this.dialog.open(ConfirmDialogComponent, {

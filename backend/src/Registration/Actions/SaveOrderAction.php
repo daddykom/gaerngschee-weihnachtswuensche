@@ -46,6 +46,11 @@ final class SaveOrderAction
         }
 
         $body = JsonRequest::body($request);
+        $mode = $body['mode'] ?? 'submit';
+        if (!in_array($mode, ['draft', 'submit'], true)) {
+            return JsonResponse::error($response, 'INVALID_ORDER', 422);
+        }
+        $isDraft = $mode === 'draft';
         $adultsCount = $this->integer($body['adultsCount'] ?? null);
         $childrenCount = $this->integer($body['childrenCount'] ?? null);
         $text = $body['text'] ?? null;
@@ -102,6 +107,9 @@ final class SaveOrderAction
                 ? OrderStatus::RELEASED
                 : OrderStatus::FAMILY_SIZE_EXCEEDED;
         }
+        if ($isDraft) {
+            $status = OrderStatus::DRAFT;
+        }
         if (count($items) < 1 || count($items) > $adultsCount + $childrenCount) {
             return JsonResponse::error($response, 'INVALID_ORDER_ITEMS', 422);
         }
@@ -131,6 +139,13 @@ final class SaveOrderAction
             $evaluation['valid'] ? $evaluation['adultsCount'] : null,
             $evaluation['valid'] ? $evaluation['childrenCount'] : null,
         );
+        if ($isDraft) {
+            return JsonResponse::success($response, [
+                'order' => $order,
+                'status' => $status,
+                'fairgateUserExists' => $evaluation['valid'],
+            ]);
+        }
         $order['loginUrl'] = rtrim(getenv('FRONTEND_BASE_URL') ?: 'http://localhost:4200', '/') . '/login';
         $emails = $this->emails ?? new EmailSender();
         $message = $emails->renderOrderConfirmation($order, 'saved');

@@ -4,6 +4,8 @@ import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { provideTranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 import { NotificationActions } from '../../../../store/notification/notification.actions';
+import { OrderActions } from '../../../../store/order/order.actions';
+import { selectOrderForm } from '../../../../store/order/order.feature';
 import { OrderComponent } from './order.component';
 
 describe('OrderComponent', () => {
@@ -66,20 +68,23 @@ describe('OrderComponent', () => {
     await fixture.whenStable();
   });
 
-  it('rejects an order containing a wish without a description', () => {
-    const dispatch = vi.spyOn(store, 'dispatch');
+  it.each(['draft', 'submit'] as const)(
+    'rejects a %s containing a wish without a description',
+    (mode) => {
+      const dispatch = vi.spyOn(store, 'dispatch');
 
-    component.save();
+      component.save(mode);
 
-    expect(dispatch).toHaveBeenCalledWith(
-      NotificationActions.show({
-        variant: 'error',
-        titleKey: 'app.order.notifications.errorTitle',
-        messageKey: 'app.order.errors.items.description.required',
-        preserveOnRoutes: ['/bestellung'],
-      }),
-    );
-  });
+      expect(dispatch).toHaveBeenCalledWith(
+        NotificationActions.show({
+          variant: 'error',
+          titleKey: 'app.order.notifications.errorTitle',
+          messageKey: 'app.order.errors.items.description.required',
+          preserveOnRoutes: ['/bestellung'],
+        }),
+      );
+    },
+  );
 
   it('requires the password when no order exists after loading', () => {
     store.setState({
@@ -109,5 +114,48 @@ describe('OrderComponent', () => {
     expect(component.firstAccess()).toBe(true);
     expect(fixture.nativeElement.querySelectorAll('input[type="password"]')).toHaveLength(2);
     expect(component.orderForm().valid()).toBe(false);
+    const dispatch = vi.spyOn(store, 'dispatch');
+    component.saveDraft();
+    expect(dispatch).not.toHaveBeenCalledWith(
+      expect.objectContaining({ type: OrderActions.draftSaveClicked.type }),
+    );
+  });
+
+  it('saves the complete form as a draft without opening the submission dialog', () => {
+    const dispatch = vi.spyOn(store, 'dispatch');
+    const dialog = TestBed.inject(MatDialog);
+    const validForm = {
+      ...component.storeForm(),
+      items: component.storeForm().items.map((item) => ({ ...item, description: 'A warm coat' })),
+    };
+    store.overrideSelector(selectOrderForm, validForm);
+    store.refreshState();
+    component.formModel.set(validForm);
+    fixture.detectChanges();
+
+    component.saveDraft();
+
+    expect(dispatch).toHaveBeenCalledWith(
+      OrderActions.draftSaveClicked({ form: component.storeForm() }),
+    );
+    expect(dialog.open).not.toHaveBeenCalled();
+  });
+
+  it.each(['draft', 'submit'] as const)('rejects a %s without situation text or wishes', (mode) => {
+    component.formModel.update((value) => ({ ...value, text: '', items: [] }));
+    fixture.detectChanges();
+    const dispatch = vi.spyOn(store, 'dispatch');
+
+    component.save(mode);
+
+    expect(component.orderForm().valid()).toBe(false);
+    expect(component.orderForm().touched()).toBe(true);
+    expect(dispatch).not.toHaveBeenCalledWith(
+      expect.objectContaining({ type: OrderActions.draftSaveClicked.type }),
+    );
+    expect(dispatch).not.toHaveBeenCalledWith(
+      expect.objectContaining({ type: OrderActions.save.type }),
+    );
+    expect(TestBed.inject(MatDialog).open).not.toHaveBeenCalled();
   });
 });

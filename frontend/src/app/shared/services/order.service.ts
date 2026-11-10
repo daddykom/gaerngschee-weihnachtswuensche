@@ -14,9 +14,13 @@ export class OrderService {
     });
   }
 
-  save(form: OrderFormValue): Observable<SaveOrderResponse> {
-    return this.http.post<SaveOrderResponse>(`${environment.apiUrl}/client/order`, form, {
-      withCredentials: true,
-    });
+  save(form: OrderFormValue, mode: 'draft' | 'submit' = 'submit'): Observable<SaveOrderResponse> {
+    return this.http.post<SaveOrderResponse>(
+      `${environment.apiUrl}/client/order`,
+      { ...form, mode },
+      {
+        withCredentials: true,
+      },
+    );
   }
 }

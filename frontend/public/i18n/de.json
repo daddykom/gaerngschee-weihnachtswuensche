@@ -265,17 +265,18 @@
         "editTitle": "Wunsch ändern",
         "description": "Bitte erfasse deinen Wunsch.",
         "back": "Zurück",
-        "save": "Speichern"
+        "save": "Weiter"
       },
       "actions": {
         "newItem": "Neuen Wunsch aufnehmen",
-        "save": "Speichern"
+        "save": "Speichern",
+        "submit": "Einreichen"
       },
       "confirmSave": {
-        "title": "Wunschzettel speichern",
-        "message": "Willst Du wirklich speichern? Du kannst es nachher nicht mehr ändern.",
-        "incompleteMessage": "Willst Du wirklich speichern? Du kannst es nachher nicht mehr ändern. Du hast {{itemCount}} von {{maximumItemCount}} möglichen Wünschen erfasst.",
-        "confirm": "Speichern",
+        "title": "Wunschzettel einreichen",
+        "message": "Willst Du wirklich einreichen? Du kannst es nachher nicht mehr ändern.",
+        "incompleteMessage": "Willst Du wirklich einreichen? Du kannst es nachher nicht mehr ändern. Du hast {{itemCount}} von {{maximumItemCount}} möglichen Wünschen erfasst.",
+        "confirm": "Einreichen",
         "cancel": "Abbrechen"
       },
       "confirmation": {
@@ -384,6 +385,8 @@
         "noOrder": "Es ist kein Wunschzettel zur Bestätigung vorhanden."
       },
       "notifications": {
+        "draftSavedTitle": "Wunschzettel gespeichert",
+        "draftSaved": "Dein Wunschzettel wurde als Entwurf gespeichert. Du kannst ihn weiter bearbeiten und später einreichen.",
         "successTitle": "Wunschzettel gespeichert",
         "success": "Dein Wunschzettel wurde erfolgreich gespeichert.",
         "loadErrorTitle": "Wunschzettel konnte nicht geladen werden",

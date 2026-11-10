@@ -53,7 +53,11 @@ export const orderFeature = createFeature({
         ),
       },
     })),
-    on(OrderActions.save, (state) => ({ ...state, saveStatus: 'loading', saveErrorCode: null })),
+    on(OrderActions.save, OrderActions.draftSaveClicked, (state) => ({
+      ...state,
+      saveStatus: 'loading',
+      saveErrorCode: null,
+    })),
     on(OrderActions.saveSuccess, (state, { result }) => ({
       ...state,
       order: result.order,
