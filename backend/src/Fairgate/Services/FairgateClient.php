@@ -43,6 +43,73 @@ final class FairgateClient implements FairgateContactProvider
     /** @var callable(string): bool */
     private $tokenValidator;
 
+    /** @return list<array{email: string, fairgate_contact_id: string}> */
+    public function fetchAllClientContacts(): array
+    {
+        $contacts = [];
+        $page = 1;
+        $totalPages = null;
+        $totalRecords = null;
+
+        do {
+            $response = $this->requestContacts(null, $page, self::CONTACT_PAGE_LIMIT, 'Klient*innen');
+            $data = $response['data'] ?? null;
+            if (!is_array($data) || !is_array($data['contacts'] ?? null) || !array_is_list($data['contacts'])) {
+                throw new FairgateException('FSA returned an invalid contact list.');
+            }
+
+            // Missing pagination must not turn a partial list into a deletion snapshot.
+            $pageCount = filter_var($data['totalPages'] ?? null, FILTER_VALIDATE_INT);
+            if ($pageCount === false || $pageCount < 0 || ($pageCount === 0 && ($page !== 1 || $data['contacts'] !== []))) {
+                throw new FairgateException('FSA returned invalid contact pagination.');
+            }
+            $pageCount = max(1, $pageCount);
+            if (($totalPages !== null && $totalPages !== $pageCount)
+                || (isset($data['pageNo']) && filter_var($data['pageNo'], FILTER_VALIDATE_INT) !== $page)
+                || ($data['contacts'] === [] && $pageCount > 1)) {
+                throw new FairgateException('FSA returned inconsistent contact pagination.');
+            }
+            $totalPages = $pageCount;
+
+            if (array_key_exists('totalRecords', $data)) {
+                $recordCount = filter_var($data['totalRecords'], FILTER_VALIDATE_INT);
+                if ($recordCount === false || $recordCount < 0 || ($totalRecords !== null && $totalRecords !== $recordCount)) {
+                    throw new FairgateException('FSA returned inconsistent contact counts.');
+                }
+                $totalRecords = $recordCount;
+            }
+
+            foreach ($data['contacts'] as $contact) {
+                if (!is_array($contact)) {
+                    throw new FairgateException('FSA returned an invalid contact.');
+                }
+                $email = $contact['primary_email'] ?? $contact['communication']['primary_email'] ?? null;
+                $id = $contact['contact_id'] ?? $contact['basefields']['contact_id'] ?? null;
+                if (!is_string($email) || (!is_string($id) && !is_int($id))) {
+                    throw new FairgateException('FSA returned a contact without an email or ID.');
+                }
+                $email = strtolower(trim($email));
+                $id = (string) $id;
+                if (strlen($email) > 255 || filter_var($email, FILTER_VALIDATE_EMAIL) === false
+                    || $id === '' || trim($id) !== $id || strlen($id) > 255) {
+                    throw new FairgateException('FSA returned an invalid contact email or ID.');
+                }
+                $contacts[] = ['email' => $email, 'fairgate_contact_id' => $id];
+            }
+            $page++;
+        } while ($page <= $totalPages);
+
+        if ($totalRecords !== null && count($contacts) !== $totalRecords) {
+            throw new FairgateException('FSA returned an incomplete contact list.');
+        }
+        if (count(array_unique(array_column($contacts, 'email'))) !== count($contacts)
+            || count(array_unique(array_column($contacts, 'fairgate_contact_id'))) !== count($contacts)) {
+            throw new FairgateException('FSA returned duplicate contact emails or IDs.');
+        }
+
+        return $contacts;
+    }
+
     public function hasContactByEmail(string $email, string $membership): bool
     {
         $data = $this->findContactsByEmail($email, $membership);
