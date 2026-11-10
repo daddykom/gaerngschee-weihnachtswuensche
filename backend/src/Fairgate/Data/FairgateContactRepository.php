@@ -7,6 +7,7 @@ namespace App\Fairgate\Data;
 use DateTimeImmutable;
 use InvalidArgumentException;
 use PDO;
+use Throwable;
 
 final class FairgateContactRepository
 {
@@ -16,13 +17,7 @@ final class FairgateContactRepository
 
     public function upsert(string $fairgateContactId, string $email, DateTimeImmutable $now): void
     {
-        $email = strtolower(trim($email));
-        if ($fairgateContactId === '' || trim($fairgateContactId) !== $fairgateContactId || strlen($fairgateContactId) > 255) {
-            throw new InvalidArgumentException('Invalid Fairgate contact ID.');
-        }
-        if (strlen($email) > 255 || filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
-            throw new InvalidArgumentException('Invalid Fairgate contact email.');
-        }
+        $email = $this->validateContact($fairgateContactId, $email);
 
         $timestamp = $now->format('Y-m-d H:i:s');
         $existing = $this->findByFairgateId($fairgateContactId);
@@ -51,6 +46,68 @@ final class FairgateContactRepository
             'created_at' => $timestamp,
             'updated_at' => $timestamp,
         ]);
+    }
+
+    /**
+     * @param list<array{email: string, fairgate_contact_id: string}> $contacts
+     * @return array{read: int, inserted: int, updated: int, deleted: int}
+     */
+    public function synchronize(array $contacts, DateTimeImmutable $now): array
+    {
+        if ($contacts === [] || !array_is_list($contacts)) {
+            throw new InvalidArgumentException('A non-empty, complete contact snapshot is required.');
+        }
+        $snapshot = [];
+        $emails = [];
+        foreach ($contacts as $contact) {
+            if (!is_array($contact) || !is_string($contact['fairgate_contact_id'] ?? null) || !is_string($contact['email'] ?? null)) {
+                throw new InvalidArgumentException('Invalid Fairgate contact snapshot.');
+            }
+            $id = $contact['fairgate_contact_id'];
+            $email = $this->validateContact($id, $contact['email']);
+            if (isset($snapshot[$id]) || isset($emails[$email])) {
+                throw new InvalidArgumentException('Duplicate Fairgate contact ID or email.');
+            }
+            $snapshot[$id] = $email;
+            $emails[$email] = true;
+        }
+
+        $this->pdo->beginTransaction();
+        try {
+            $existing = [];
+            foreach ($this->pdo->query('SELECT id, email, fairgate_contact_id, created_at, updated_at FROM fairgate_contacts')->fetchAll() as $contact) {
+                $existing[$contact['fairgate_contact_id']] = $contact;
+            }
+            $result = ['read' => count($snapshot), 'inserted' => 0, 'updated' => 0, 'deleted' => count(array_diff_key($existing, $snapshot))];
+            $timestamp = $now->format('Y-m-d H:i:s');
+
+            // Rebuild within the transaction so email reassignments cannot collide
+            // with obsolete mappings. Readers only see the committed snapshot.
+            $this->pdo->exec('DELETE FROM fairgate_contacts');
+            $statement = $this->pdo->prepare(
+                'INSERT INTO fairgate_contacts (id, email, fairgate_contact_id, created_at, updated_at)
+                 VALUES (:id, :email, :fairgate_contact_id, :created_at, :updated_at)',
+            );
+            foreach ($snapshot as $fairgateContactId => $email) {
+                $previous = $existing[$fairgateContactId] ?? null;
+                $changed = $previous !== null && $previous['email'] !== $email;
+                $result['inserted'] += $previous === null ? 1 : 0;
+                $result['updated'] += $changed ? 1 : 0;
+                $statement->execute([
+                    'id' => $previous['id'] ?? $this->createUuid(),
+                    'email' => $email,
+                    'fairgate_contact_id' => (string) $fairgateContactId,
+                    'created_at' => $previous['created_at'] ?? $timestamp,
+                    'updated_at' => $previous === null || $changed ? $timestamp : $previous['updated_at'],
+                ]);
+            }
+            $this->pdo->commit();
+
+            return $result;
+        } catch (Throwable $exception) {
+            $this->pdo->rollBack();
+            throw $exception;
+        }
     }
 
     /** @return array<string, mixed>|null */
@@ -95,6 +152,19 @@ final class FairgateContactRepository
         $statement->execute($fairgateContactIds);
 
         return $statement->rowCount();
+    }
+
+    private function validateContact(string $fairgateContactId, string $email): string
+    {
+        $email = strtolower(trim($email));
+        if ($fairgateContactId === '' || trim($fairgateContactId) !== $fairgateContactId || strlen($fairgateContactId) > 255) {
+            throw new InvalidArgumentException('Invalid Fairgate contact ID.');
+        }
+        if (strlen($email) > 255 || filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
+            throw new InvalidArgumentException('Invalid Fairgate contact email.');
+        }
+
+        return $email;
     }
 
     private function createUuid(): string
