@@ -199,6 +199,14 @@
           {{ 'app.order.items.new' | translate }}
         </button>
         <button
+          mat-stroked-button
+          type="button"
+          [disabled]="saving() === 'loading'"
+          (click)="saveDraft()"
+        >
+          {{ 'app.order.actions.save' | translate }}
+        </button>
+        <button
           mat-flat-button
           color="primary"
           type="button"
@@ -206,7 +214,7 @@
           [attr.aria-busy]="saving() === 'loading' ? 'true' : null"
           (click)="save()"
         >
-          {{ 'app.order.actions.save' | translate }}
+          {{ 'app.order.actions.submit' | translate }}
         </button>
       </div>
     }

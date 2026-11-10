@@ -99,19 +99,19 @@ test.describe('Bestellung route', () => {
     await page
       .getByRole('textbox', { name: /Persönliche Nachricht zum Wunsch/ })
       .fill('Das würde mir Freude machen.');
-    await page.getByRole('button', { name: 'Speichern' }).click();
+    await page.getByRole('button', { name: 'Weiter' }).click();
     await page.waitForURL('**/bestellung');
-    await page.getByRole('button', { name: 'Speichern' }).click();
+    await page.getByRole('button', { name: 'Einreichen' }).click();
     const confirmationDialog = page.getByRole('dialog');
     await expect(confirmationDialog).toContainText('Du hast 1 von 4 möglichen Wünschen erfasst.');
-    await expect(confirmationDialog.getByRole('button', { name: 'Speichern' })).toBeVisible();
+    await expect(confirmationDialog.getByRole('button', { name: 'Einreichen' })).toBeVisible();
     await expect(confirmationDialog.getByRole('button', { name: 'Abbrechen' })).toBeVisible();
     await confirmationDialog.getByRole('button', { name: 'Abbrechen' }).click();
     await expect(confirmationDialog).toHaveCount(0);
     expect(saveRequestReceived).toBe(false);
 
-    await page.getByRole('button', { name: 'Speichern' }).click();
-    await confirmationDialog.getByRole('button', { name: 'Speichern' }).click();
+    await page.getByRole('button', { name: 'Einreichen' }).click();
+    await confirmationDialog.getByRole('button', { name: 'Einreichen' }).click();
 
     await page.waitForURL('**/bestellung/bestaetigung?status=released');
     expect(saveRequestReceived).toBe(true);
@@ -140,20 +140,18 @@ test.describe('Bestellung route', () => {
       },
     });
 
-    await page.getByRole('button', { name: 'Speichern' }).click();
+    await page.getByRole('button', { name: 'Einreichen' }).click();
     const confirmationDialog = page.getByRole('dialog');
-    await expect(confirmationDialog).toContainText(
-      'Willst Du wirklich speichern? Du kannst es nachher nicht mehr ändern.',
-    );
+    await expectTranslatedText(confirmationDialog, 'app.order.confirmSave.message');
     await expect(confirmationDialog).not.toContainText('möglichen Wünschen erfasst');
-    await expect(confirmationDialog.getByRole('button', { name: 'Speichern' })).toBeVisible();
+    await expect(confirmationDialog.getByRole('button', { name: 'Einreichen' })).toBeVisible();
     await expect(confirmationDialog.getByRole('button', { name: 'Abbrechen' })).toBeVisible();
     await confirmationDialog.getByRole('button', { name: 'Abbrechen' }).click();
     await expect(confirmationDialog).toHaveCount(0);
     expect(saveRequestReceived).toBe(false);
 
-    await page.getByRole('button', { name: 'Speichern' }).click();
-    await confirmationDialog.getByRole('button', { name: 'Speichern' }).click();
+    await page.getByRole('button', { name: 'Einreichen' }).click();
+    await confirmationDialog.getByRole('button', { name: 'Einreichen' }).click();
     await page.waitForURL('**/bestellung/bestaetigung?status=released');
     expect(saveRequestReceived).toBe(true);
   });
@@ -173,11 +171,11 @@ test.describe('Bestellung route', () => {
     await page.getByRole('button', { name: 'Ändern' }).click();
     await page.waitForURL('**/bestellung/wunsch/item-1');
     await page.getByRole('textbox', { name: 'Wunschtitel' }).fill('Neuer Wunschtitel');
-    await page.getByRole('button', { name: 'Speichern' }).click();
+    await page.getByRole('button', { name: 'Weiter' }).click();
     await page.waitForURL('**/bestellung');
     await expect(page.locator('tbody tr').first()).toContainText('Neuer Wunschtitel');
-    await page.getByRole('button', { name: 'Speichern' }).click();
-    await page.getByRole('dialog').getByRole('button', { name: 'Speichern' }).click();
+    await page.getByRole('button', { name: 'Einreichen' }).click();
+    await page.getByRole('dialog').getByRole('button', { name: 'Einreichen' }).click();
     await page.waitForURL('**/bestellung/bestaetigung?status=released');
 
     expect(savedItems).toEqual([
@@ -214,7 +212,7 @@ test.describe('Bestellung route', () => {
 
     await page.getByRole('button', { name: 'Wunsch hinzufügen' }).click();
     await page.waitForURL('**/bestellung/wunsch/neu');
-    await page.getByRole('button', { name: 'Speichern' }).click();
+    await page.getByRole('button', { name: 'Weiter' }).click();
 
     await expect(page).toHaveURL(/\/bestellung\/wunsch\/neu$/);
     await expectTranslatedText(
@@ -242,6 +240,72 @@ test.describe('Bestellung route', () => {
     await expect(page.getByRole('button', { name: 'Löschen' })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Wunsch hinzufügen' })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Speichern' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Einreichen' })).toHaveCount(0);
+  });
+
+  test('validates a draft before saving without confirmation or logout and restores it after reload', async ({
+    page,
+  }) => {
+    let savedOrder = orderWithItems('draft', [
+      orderItem('item-1', 'gift', 'Winter coat', 'A warm coat'),
+    ]);
+    let saveCount = 0;
+    await mockClientLogin(page, {
+      order: savedOrder,
+      onSave: async (route) => {
+        const payload = route.request().postDataJSON();
+        expect(payload).toMatchObject({
+          mode: 'draft',
+          text: 'My situation',
+          items: [expect.objectContaining({ title: 'Winter coat' })],
+        });
+        savedOrder = { ...savedOrder, currentText: payload.text };
+        saveCount += 1;
+        await route.fulfill({
+          json: { order: savedOrder, status: 'draft', fairgateUserExists: true },
+        });
+      },
+    });
+    let loggedOut = false;
+    await page.route('http://localhost:8083/auth/logout', async (route) => {
+      loggedOut = true;
+      await route.fulfill({ status: 204 });
+    });
+    await page.locator('textarea').fill('');
+    await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+    await expectTranslatedText(
+      page
+        .locator('mat-form-field')
+        .filter({ has: page.locator('textarea') })
+        .locator('.control-error'),
+      'app.order.errors.text.required',
+    );
+    expect(saveCount).toBe(0);
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    await page.locator('textarea').fill('My situation');
+    await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+    await expectTranslatedText(page.getByRole('alert'), 'app.order.notifications.draftSaved');
+    expect(saveCount).toBe(1);
+    expect(loggedOut).toBe(false);
+    await expect(page).toHaveURL(/\/bestellung$/);
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+
+    await page.route('http://localhost:8083/client/order', (route) =>
+      route.fulfill({
+        json: {
+          order: savedOrder,
+          year: 2026,
+          fairgateStatus: 'valid',
+          fairgateUserExists: true,
+          adultsCount: 2,
+          childrenCount: 2,
+        },
+      }),
+    );
+    await page.reload();
+    await expect(page.locator('textarea')).toHaveValue('My situation');
+    await expect(page.getByRole('button', { name: 'Speichern', exact: true })).toBeEnabled();
+    await expect(page.getByRole('button', { name: 'Einreichen', exact: true })).toBeVisible();
   });
 });
 

@@ -321,8 +321,13 @@ Für die Weiterverarbeitung gelten folgende Regeln:
 - Die fachlichen Statuswerte lauten `draft`, `waiting_for_fairgate`, `released`,
   `family_size_exceeded`, `in_review`, `changes_requested`, `definitive`,
   `ready_for_pickup` und `completed`.
-- `fairgateUserExists = true` ergibt beim Speichern den Status `released`.
-- Jeder andere Fairgate-Status ergibt beim Speichern den Status
+- Zwischenspeichern über „Speichern“ (`POST /client/order` mit `mode: draft`)
+  speichert die Bestellung und ihre Wünsche als `draft`, ohne Bestätigungs-E-Mail
+  oder Logout. Es gilt dieselbe vollständige Validierung wie beim Einreichen.
+- „Einreichen“ (`mode: submit`, auch der Standard ohne `mode`) verwendet die
+  vollständige Validierung und den bestehenden Bestätigungs-/Logout-Fluss.
+- `fairgateUserExists = true` ergibt beim Einreichen den Status `released`.
+- Jeder andere Fairgate-Status ergibt beim Einreichen den Status
   `waiting_for_fairgate`.
 - Sichtbare Übersetzungen dürfen diese technischen Werte lokalisieren.
 

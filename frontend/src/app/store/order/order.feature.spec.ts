@@ -3,6 +3,22 @@ import { orderFeature } from './order.feature';
 import { initialState } from './order.state';
 
 describe('orderFeature', () => {
+  it('tracks a draft save without losing the form values', () => {
+    const form = { ...initialState.form, text: 'My situation' };
+    const saving = orderFeature.reducer(
+      { ...initialState, form },
+      OrderActions.draftSaveClicked({ form }),
+    );
+    expect(saving.saveStatus).toBe('loading');
+    const order = { id: 'order-1', status: 'draft', items: [] } as never;
+    const saved = orderFeature.reducer(
+      saving,
+      OrderActions.saveSuccess({ result: { order, status: 'draft', fairgateUserExists: true } }),
+    );
+    expect(saved.order).toBe(order);
+    expect(saved.form).toBe(form);
+    expect(saved.saveStatus).toBe('success');
+  });
   it('maps both wish title and description from the backend order', () => {
     const result = orderFeature.reducer(
       initialState,

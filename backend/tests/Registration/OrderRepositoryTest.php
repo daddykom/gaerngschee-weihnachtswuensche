@@ -40,8 +40,18 @@ final class OrderRepositoryTest extends TestCase
         self::assertSame('Ein Geschenk', $order['items'][0]['currentDescription']);
         self::assertSame('Das wäre schön.', $order['items'][0]['originalReason']);
         self::assertSame('Das wäre schön.', $order['items'][0]['currentReason']);
-        self::assertSame('submitted', $order['items'][0]['status']);
-        self::assertSame('submitted', $order['items'][0]['publicationStatus']);
+        self::assertSame('draft', $order['items'][0]['status']);
+        self::assertSame('draft', $order['items'][0]['publicationStatus']);
+
+        $submitted = $orders->saveForYear($user['id'], 2026, 'released', 1, 1, [[
+            'id' => $order['items'][0]['id'],
+            'category' => 'gift',
+            'personType' => 'child',
+            'personIndex' => 1,
+            'description' => 'Ein Geschenk',
+        ]]);
+        self::assertSame('submitted', $submitted['items'][0]['status']);
+        self::assertSame('submitted', $submitted['items'][0]['publicationStatus']);
     }
 
     public function testAdministrationFiltersByStatusAndCategoryAndSavesApproval(): void

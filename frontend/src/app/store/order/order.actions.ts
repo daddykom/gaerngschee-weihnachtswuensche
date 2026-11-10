@@ -18,6 +18,7 @@ export const OrderActions = createActionGroup({
       changes: Partial<OrderItemFormValue>;
     }>(),
     Save: props<{ form: OrderFormValue }>(),
+    'Draft Save Clicked': props<{ form: OrderFormValue }>(),
     'Save Success': props<{ result: SaveOrderResponse }>(),
     'Save Failure': props<{ errorCode: string }>(),
   },
