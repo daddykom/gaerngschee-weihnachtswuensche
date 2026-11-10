@@ -129,8 +129,9 @@ Lesen der Kontaktliste erfolgt nur über `fetchAllClientContacts()` für den
 Synchronisationsbatch.
 
 Vor Verwendung des Real-Modus muss die Tabelle migriert und über
-`backend/bin/sync-fairgate-contacts.php` befüllt sein. Die automatische
-Einbindung in Batch-Runner und Deployment ist ein separater Umsetzungsschritt.
+`backend/bin/sync-fairgate-contacts.php` befüllt sein. Der gemeinsame
+Batch-Runner führt die Synchronisation vor der Registrierungsprüfung aus.
+Die automatische Einbindung ins Deployment ist ein separater Umsetzungsschritt.
 
 ### Dynamischer Fake
 

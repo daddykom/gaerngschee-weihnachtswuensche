@@ -94,12 +94,12 @@ nach stderr geschrieben und das Script mit Exit-Code `1` beendet. Leere
 Kontaktlisten werden als Löschschutz abgelehnt; bei Abfrage- oder
 Schreibfehlern bleibt der bisherige Bestand erhalten.
 
-Das Script ist noch nicht in den gemeinsamen Batch-Runner oder das
-Deployment-Script eingebunden.
+Das Script ist in den gemeinsamen Batch-Runner eingebunden. Die Einbindung
+in das Deployment-Script ist noch ein separater Umsetzungsschritt.
 
 ### Gemeinsamer Runner
 
-Die beiden Backend-Batches werden im Regelbetrieb über den gemeinsamen Runner
+Die drei Backend-Batches werden im Regelbetrieb über den gemeinsamen Runner
 `process-all-batches.php` mindestens einmal innerhalb von zwölf Stunden
 ausgeführt. Empfohlen ist ein einziger Cron-Eintrag:
 
@@ -107,10 +107,28 @@ ausgeführt. Empfohlen ist ein einziger Cron-Eintrag:
 0 */12 * * * cd /home/<user>/public_html/gaerngschee/weihnachtswuensche/prod/backend && php bin/process-all-batches.php >> /var/log/gaerngschee-batches.log 2>&1
 ```
 
-Der Runner verwendet die konfigurierte `backend/.env` und führt beide Prozesse
-nacheinander aus. Ein Fehler in einem Prozess wird protokolliert; der jeweils
-andere Prozess wird trotzdem gestartet. Der Runner beendet sich mit Exit-Code
-`1`, wenn mindestens ein Prozess fehlgeschlagen ist.
+Die einzelnen Prozesse verwenden die konfigurierte `backend/.env`. Die
+Reihenfolge ist:
+
+1. Fairgate-Kontakte synchronisieren.
+2. Wartende Fairgate-Registrierungen anhand des aktualisierten Bestands prüfen.
+3. E-Mail-Queue und Bereinigung über den bisherigen Bestellungsbatch verarbeiten.
+
+Bei einem Fehler der Kontaktsynchronisation wird die Registrierungsprüfung
+übersprungen, damit sie nicht mit einem veralteten Bestand arbeitet. Der
+unabhängige Bestellungsbatch läuft trotzdem. Schlägt die Registrierungsprüfung
+fehl, wird der Bestellungsbatch ebenfalls noch ausgeführt. Der Runner beendet
+sich mit Exit-Code `1`, wenn mindestens ein Prozess fehlgeschlagen ist.
+Im Fake-Modus wird die Synchronisation erfolgreich übersprungen; die übrigen
+Batches laufen wie gewohnt.
+
+Ein nicht blockierender Dateilock verhindert parallele Läufe dieses Runners
+pro Installation. Ein zweiter Lauf wird mit einem Hinweis und Exit-Code `0`
+übersprungen. Kann der Lock nicht geöffnet oder erworben werden, ist der
+Exit-Code `1`. Die Lockdatei liegt im temporären Verzeichnis des PHP-Prozesses
+und wird anhand des Installationspfads benannt. Sie bleibt bestehen; die Sperre
+wird beim Prozessende freigegeben. Direkte Einzelaufrufe der Batch-Scripts
+werden von dieser Runner-Sperre nicht erfasst.
 
 ## Deployment-Script
 
