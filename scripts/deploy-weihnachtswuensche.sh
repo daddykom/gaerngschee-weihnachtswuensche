@@ -85,8 +85,11 @@ phinx_environment='production'
 (
   cd "$temporary_directory/release/backend"
   unset ADMIN_SEED_PASSWORD DB_HOST DB_PORT DB_NAME DB_TEST_NAME DB_USER DB_PASS
+  unset APP_ENV FSA_MODE FSA_BASE_URL FSA_ORGANIZATION_ID FSA_ACCESS_KEY FSA_PUBLIC_KEY
   export GAERNGSCHEE_ENV_FILE="$environment_file"
   php84 vendor/bin/phinx migrate -e "$phinx_environment" -c "$temporary_directory/release/db/phinx.php"
+  printf 'Synchronizing Fairgate contacts before publishing the release...\n'
+  php84 bin/sync-fairgate-contacts.php
 )
 
 mkdir -p "$target_directory/backend" "$target_directory/frontend"

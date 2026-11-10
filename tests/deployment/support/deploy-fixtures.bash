@@ -11,8 +11,10 @@ setup_deploy_fixture() {
   export project_directory fake_bin target_base log_file temporary_parent
 
   mkdir -p "$fake_bin" "$target_base/pre-prod/backend" "$target_base/pre-prod/frontend" "$target_base/prod/backend"
-  printf 'APP_ENV=prod\nDB_HOST=127.0.0.1\nDB_PORT=3306\nDB_NAME=gaerngschee\nDB_USER=pre-prod-user\nDB_PASS=pre-prod-pass\n' > "$target_base/pre-prod/backend/.env"
-  printf 'APP_ENV=prod\nDB_HOST=127.0.0.1\nDB_PORT=3306\nDB_NAME=gaerngschee\nDB_USER=prod-user\nDB_PASS=prod-pass\n' > "$target_base/prod/backend/.env"
+  printf 'APP_ENV=prod\nFSA_MODE=real\nDB_HOST=127.0.0.1\nDB_PORT=3306\nDB_NAME=gaerngschee\nDB_USER=pre-prod-user\nDB_PASS=pre-prod-pass\n' > "$target_base/pre-prod/backend/.env"
+  printf 'APP_ENV=prod\nFSA_MODE=real\nDB_HOST=127.0.0.1\nDB_PORT=3306\nDB_NAME=gaerngschee\nDB_USER=prod-user\nDB_PASS=prod-pass\n' > "$target_base/prod/backend/.env"
+  printf 'old-backend\n' > "$target_base/pre-prod/backend/release-marker"
+  printf 'old-backend\n' > "$target_base/prod/backend/release-marker"
   printf 'old-pre-prod-frontend\n' > "$target_base/pre-prod/frontend/index.html"
   printf 'old-prod-frontend\n' > "$target_base/prod/frontend-placeholder"
 
@@ -21,7 +23,33 @@ setup_deploy_fixture() {
 set -Eeuo pipefail
 destination="${@: -1}"
 printf 'git %s\n' "$*" >> "${DEPLOY_TEST_LOG}"
-  mkdir -p "$destination/backend" "$destination/frontend" "$destination/db"
+  mkdir -p "$destination/backend/bin" "$destination/frontend" "$destination/db"
+  printf 'new-release-backend\n' > "$destination/backend/release-marker"
+  cat > "$destination/backend/bin/sync-fairgate-contacts.php" <<'FAKE_SYNC'
+#!/usr/bin/env bash
+set -Eeuo pipefail
+if [[ "${GAERNGSCHEE_ENV_FILE:-}" != "${DEPLOY_EXPECTED_ENV_FILE}" ]]; then
+  printf 'unexpected sync environment file\n' >&2
+  exit 1
+fi
+for variable in APP_ENV FSA_MODE FSA_BASE_URL FSA_ORGANIZATION_ID FSA_ACCESS_KEY FSA_PUBLIC_KEY DB_HOST DB_PORT DB_NAME DB_USER DB_PASS; do
+  if [[ -n "${!variable:-}" ]]; then
+    printf 'unexpected inherited sync configuration: %s\n' "$variable" >&2
+    exit 1
+  fi
+done
+printf 'fairgate-sync env=%s pwd=%s\n' "$GAERNGSCHEE_ENV_FILE" "$PWD" >> "$DEPLOY_TEST_LOG"
+if grep -q '^FSA_MODE=fake$' "$GAERNGSCHEE_ENV_FILE"; then
+  printf 'Fairgate contact synchronization skipped: fake mode uses email-based profiles.\n'
+  exit 0
+fi
+if [[ "${DEPLOY_TEST_SYNC_FAIL:-0}" == '1' ]]; then
+  printf 'Fairgate contact synchronization failed: simulated failure.\n' >&2
+  exit 1
+fi
+printf 'Fairgate contacts read: 2, inserted: 2, updated: 0, deleted: 0\n'
+FAKE_SYNC
+  chmod +x "$destination/backend/bin/sync-fairgate-contacts.php"
   mkdir -p "$destination/frontend/dist/frontend/browser"
   mkdir -p "$destination/frontend/public"
   mkdir -p "$destination/frontend/public/api"
@@ -52,6 +80,10 @@ if [[ "${GAERNGSCHEE_ENV_FILE:-}" != "${DEPLOY_EXPECTED_ENV_FILE}" ]]; then
   exit 1
 fi
 printf 'phinx %s\n' "$*" >> "${DEPLOY_TEST_LOG}"
+if [[ "${DEPLOY_TEST_MIGRATION_FAIL:-0}" == '1' ]]; then
+  printf 'Migration failed: simulated failure.\n' >&2
+  exit 1
+fi
 FAKE_PHINX
 chmod +x "$working_directory/vendor/bin/phinx"
 printf 'composer-pwd %s\n' "$PWD" >> "${DEPLOY_TEST_LOG}"
@@ -81,6 +113,13 @@ set -Eeuo pipefail
 printf 'php84 %s\n' "$*" >> "${DEPLOY_TEST_LOG}"
 "$@"
 FAKE_PHP84
+
+  cat > "$fake_bin/rsync" <<'FAKE_RSYNC'
+#!/usr/bin/env bash
+set -Eeuo pipefail
+printf 'rsync %s\n' "$*" >> "${DEPLOY_TEST_LOG}"
+/usr/bin/rsync "$@"
+FAKE_RSYNC
 
   chmod +x "$fake_bin"/*
 }

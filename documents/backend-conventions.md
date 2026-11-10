@@ -131,7 +131,9 @@ Synchronisationsbatch.
 Vor Verwendung des Real-Modus muss die Tabelle migriert und über
 `backend/bin/sync-fairgate-contacts.php` befüllt sein. Der gemeinsame
 Batch-Runner führt die Synchronisation vor der Registrierungsprüfung aus.
-Die automatische Einbindung ins Deployment ist ein separater Umsetzungsschritt.
+Das Deployment führt den Kontaktabgleich nach den Migrationen und vor der
+Veröffentlichung aus und bricht bei einem Fehler ab. Im Fake-Modus entfällt
+der Kontaktimport; die dynamische E-Mail-Auswertung bleibt unverändert.
 
 ### Dynamischer Fake
 
