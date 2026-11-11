@@ -65,6 +65,83 @@ test.describe('Client login route', () => {
     await expectTranslatedText(page.getByRole('alert'), 'app.anmeldung.registrationTokenError');
   });
 
+  test('finishes a delayed link login before checking the new session despite persisted old authentication', async ({
+    page,
+  }) => {
+    await page.addInitScript(() =>
+      localStorage.setItem(
+        'gaerngschee.auth',
+        JSON.stringify({
+          userId: 'expired-client',
+          group: 'wunschbesteller',
+          email: 'old@example.com',
+          fairgateUserExists: true,
+          childrenCount: 1,
+          adultsCount: 1,
+          salutation: 'Hallo',
+        }),
+      ),
+    );
+    let loginCompleted = false;
+    let oldSessionChecks = 0;
+    let newSessionChecks = 0;
+    let logoutRequests = 0;
+    let releaseLogin!: () => void;
+    const loginGate = new Promise<void>((resolve) => {
+      releaseLogin = resolve;
+    });
+    await page.route('**/auth/session-status', async (route) => {
+      if (!loginCompleted) {
+        oldSessionChecks++;
+        await route.fulfill({
+          status: 401,
+          json: { error: { code: 'SESSION_EXPIRED', details: {} } },
+        });
+      } else {
+        newSessionChecks++;
+        await route.fulfill({
+          json: { expiresAt: '2099-01-01T00:00:00Z', secondsRemaining: 3600 },
+        });
+      }
+    });
+    await page.route('**/auth/logout', async (route) => {
+      logoutRequests++;
+      await route.fulfill({ status: 204 });
+    });
+    await page.route('**/auth/registration-login', async (route) => {
+      await loginGate;
+      loginCompleted = true;
+      await route.fulfill({
+        json: {
+          user: { id: 'new-client', email: 'new@example.com', group: 'wunschbesteller' },
+          group: 'wunschbesteller',
+          firstAccess: true,
+          fairgateUserExists: true,
+          childrenCount: 1,
+          adultsCount: 1,
+          salutation: 'Hallo',
+        },
+      });
+    });
+
+    try {
+      const loginRequest = page.waitForRequest('**/auth/registration-login');
+      await page.goto('/client-login?token=new-token');
+      await loginRequest;
+      await expect(page.getByRole('status')).toBeVisible();
+      expect(oldSessionChecks).toBe(0);
+      releaseLogin();
+      await expect(page).toHaveURL(/\/bestellung$/);
+      await expect(page.locator('.app-header__email')).toHaveText('new@example.com');
+      await expect.poll(() => newSessionChecks).toBeGreaterThan(0);
+      expect(oldSessionChecks).toBe(0);
+      expect(logoutRequests).toBe(0);
+      await expectTranslatedText(page.locator('h1'), 'app.bestellung.pageTitle');
+    } finally {
+      releaseLogin();
+    }
+  });
+
   test('explains a Fairgate rate limit without automatically retrying the login', async ({
     page,
   }) => {

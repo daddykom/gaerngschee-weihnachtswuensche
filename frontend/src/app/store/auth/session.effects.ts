@@ -40,7 +40,9 @@ export const pollSessionStatus$ = createEffect(
       switchMap(() =>
         timer(0, 15_000).pipe(
           map(() => SessionActions.statusRequested()),
-          takeUntil(actions$.pipe(ofType(SessionActions.pollingStopped))),
+          takeUntil(
+            actions$.pipe(ofType(SessionActions.pollingStopped, AuthActions.registrationLogin)),
+          ),
         ),
       ),
     ),
@@ -56,6 +58,9 @@ export const requestSessionStatus$ = createEffect(
           map((status) => SessionActions.statusLoaded(status)),
           catchError((error: HttpErrorResponse) =>
             isSessionExpired(error) ? of(SessionActions.sessionExpired()) : EMPTY,
+          ),
+          takeUntil(
+            actions$.pipe(ofType(SessionActions.pollingStopped, AuthActions.registrationLogin)),
           ),
         ),
       ),
@@ -87,7 +92,14 @@ export const countdownSession$ = createEffect(
               : SessionActions.countdownTick({ secondsRemaining }),
           ),
           takeUntil(
-            actions$.pipe(ofType(SessionActions.countdownStopped, SessionActions.refreshSucceeded)),
+            actions$.pipe(
+              ofType(
+                SessionActions.countdownStopped,
+                SessionActions.refreshSucceeded,
+                SessionActions.pollingStopped,
+                AuthActions.registrationLogin,
+              ),
+            ),
           ),
         ),
       ),
@@ -107,6 +119,9 @@ export const refreshSession$ = createEffect(
               ? of(SessionActions.sessionExpired())
               : of(SessionActions.refreshFailed()),
           ),
+          takeUntil(
+            actions$.pipe(ofType(SessionActions.pollingStopped, AuthActions.registrationLogin)),
+          ),
         ),
       ),
     ),
@@ -116,7 +131,11 @@ export const refreshSession$ = createEffect(
 export const stopSessionPollingOnLogout$ = createEffect(
   (actions$ = inject(Actions)) =>
     actions$.pipe(
-      ofType(AuthActions.logoutRequested, SessionActions.sessionExpired),
+      ofType(
+        AuthActions.logoutRequested,
+        SessionActions.sessionExpired,
+        AuthActions.registrationLogin,
+      ),
       map(() => SessionActions.pollingStopped()),
     ),
   { functional: true },
