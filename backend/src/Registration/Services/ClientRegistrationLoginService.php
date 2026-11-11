@@ -58,6 +58,7 @@ final class ClientRegistrationLoginService
 
         return [
             'user' => $user,
+            'year' => $campaignYear,
             'firstAccess' => $order === null,
             'fairgateStatus' => $evaluation['status'],
             'fairgateUserExists' => $evaluation['valid'],
