@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace Tests\Registration;
 
 use App\Fairgate\Services\FairgateContactProvider;
+use App\Configuration\Data\FrontendConfigRepository;
+use App\Registration\Data\OrderRepository;
 use App\Registration\Services\ClientRegistrationLoginService;
 use App\Registration\Services\RegistrationTokenService;
 use App\Users\Data\UserRepository;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\Support\TestDatabase;
 
 final class ClientRegistrationLoginServiceTest extends TestCase
@@ -73,6 +76,74 @@ final class ClientRegistrationLoginServiceTest extends TestCase
         self::assertNotNull($service->login($issued['token']));
         self::assertNull($service->login($issued['token']));
         self::assertSame(1, (int) $pdo->query('SELECT COUNT(*) FROM users')->fetchColumn());
+    }
+
+    #[DataProvider('storedFairgateData')]
+    public function testExistingOrderUsesDatabaseValuesWithoutFairgateLookup(
+        ?string $status,
+        ?int $adults,
+        ?int $children,
+        bool $valid,
+    ): void {
+        $pdo = TestDatabase::create();
+        $pdo->prepare('INSERT INTO frontend_config (id, variable_name, value, access_group, update_group, label) VALUES (?, ?, ?, ?, ?, ?)')
+            ->execute(['year', 'campaign_year', '2026', '[]', '[]', 'Year']);
+        $users = new UserRepository($pdo);
+        $user = $users->createUser('returning@example.com', 'secret', 'wunschbesteller');
+        $orders = new OrderRepository($pdo);
+        $orders->saveForYear($user['id'], 2026, 'draft', 4, 5, [], $status, 'Situation', $adults, $children);
+        $tokens = new RegistrationTokenService($pdo);
+        $issued = $tokens->issue($user['email']);
+        $fairgate = $this->createMock(FairgateContactProvider::class);
+        $fairgate->expects(self::never())->method('findContactDataByEmail');
+        $fairgate->expects(self::never())->method('hasContactByEmail');
+        $service = new ClientRegistrationLoginService($tokens, $users, $fairgate, new FrontendConfigRepository($pdo), $orders);
+
+        $result = $service->login($issued['token']);
+
+        self::assertNotNull($result);
+        self::assertFalse($result['firstAccess']);
+        self::assertSame(2026, $result['year']);
+        self::assertSame($status ?? 'not_found', $result['fairgateStatus']);
+        self::assertSame($valid, $result['fairgateUserExists']);
+        self::assertSame($valid ? $adults : 1, $result['adultsCount']);
+        self::assertSame($valid ? $children : 0, $result['childrenCount']);
+        self::assertSame('Guten Tag', $result['salutation']);
+    }
+
+    public static function storedFairgateData(): array
+    {
+        return [
+            ['valid', 2, 0, true],
+            ['not_found', null, null, false],
+            ['valid', 2, null, false],
+            [null, null, null, false],
+        ];
+    }
+
+    public function testNewCampaignLoadsExtendedDataOnceWithoutCreatingAnOrder(): void
+    {
+        $pdo = TestDatabase::create();
+        $pdo->prepare('INSERT INTO frontend_config (id, variable_name, value, access_group, update_group, label) VALUES (?, ?, ?, ?, ?, ?)')
+            ->execute(['year', 'campaign_year', '2026', '[]', '[]', 'Year']);
+        $users = new UserRepository($pdo);
+        $user = $users->createUser('new-year@example.com', 'secret', 'wunschbesteller');
+        $orders = new OrderRepository($pdo);
+        $orders->saveForYear($user['id'], 2025, 'draft', 2, 3, [], 'valid', 'Situation', 2, 3);
+        $tokens = new RegistrationTokenService($pdo);
+        $issued = $tokens->issue($user['email']);
+        $fairgate = $this->createMock(FairgateContactProvider::class);
+        $fairgate->expects(self::once())->method('findContactDataByEmail')
+            ->with($user['email'], 'Klient*innen')->willReturn(['data' => ['wohnt_im_gleichen_haushalt' => 'Nein']]);
+        $service = new ClientRegistrationLoginService($tokens, $users, $fairgate, new FrontendConfigRepository($pdo), $orders);
+
+        $result = $service->login($issued['token']);
+
+        self::assertTrue($result['firstAccess']);
+        self::assertSame(1, $result['adultsCount']);
+        self::assertSame(0, $result['childrenCount']);
+        self::assertNull($orders->findForYear($user['id'], 2026));
+        self::assertSame(1, (int) $pdo->query('SELECT COUNT(*) FROM orders')->fetchColumn());
     }
 }
 

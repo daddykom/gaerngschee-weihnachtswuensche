@@ -254,6 +254,14 @@ final class AuthRoutesTest extends TestCase
         self::assertSame(1, $data['childrenCount']);
         self::assertSame(2, $data['adultsCount']);
         self::assertSame('Hallo', $data['salutation']);
+        $year = (int) gmdate('Y');
+        self::assertSame([
+            'year' => $year,
+            'status' => 'valid',
+            'adultsCount' => 2,
+            'childrenCount' => 1,
+        ], (new SessionService())->getFairgateOrderData($year));
+        self::assertSame(0, (int) $this->pdo->query('SELECT COUNT(*) FROM orders')->fetchColumn());
     }
 
     private function createAuthApp(?ClientRegistrationLoginService $registrationLoginService = null): \Slim\App

@@ -6,12 +6,8 @@ namespace App\Registration\Actions;
 
 use App\Configuration\Data\FrontendConfigRepository;
 use App\Auth\Services\PasswordPolicy;
-use App\Fairgate\Services\FairgateContactProvider;
-use App\Fairgate\Services\FairgateContactProviderFactory;
-use App\Fairgate\Services\FairgateException;
-use App\Fairgate\Services\FairgateOrderDataEvaluator;
+use App\Auth\Services\SessionService;
 use App\Registration\Data\OrderRepository;
-use App\Registration\Services\ClientRegistrationLoginService;
 use App\Registration\Services\OrderStatus;
 use App\Shared\Database\Database;
 use App\Shared\Http\JsonRequest;
@@ -20,8 +16,6 @@ use App\Shared\Mail\EmailQueueRepository;
 use App\Shared\Mail\EmailSender;
 use App\Shared\Mail\EmailSenderInterface;
 use App\Users\Data\UserRepository;
-use DateTimeImmutable;
-use DateTimeZone;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -30,8 +24,7 @@ final class SaveOrderAction
     public function __construct(
         private readonly ?OrderRepository $orders = null,
         private readonly ?FrontendConfigRepository $config = null,
-        private readonly ?FairgateContactProvider $fairgate = null,
-        private readonly ?FairgateOrderDataEvaluator $evaluator = null,
+        private readonly ?SessionService $session = null,
         private readonly ?UserRepository $users = null,
         private readonly ?EmailSenderInterface $emails = null,
         private readonly ?EmailQueueRepository $emailQueue = null,
@@ -73,7 +66,6 @@ final class SaveOrderAction
 
         $config = $this->config ?? new FrontendConfigRepository(Database::getConnection());
         $orders = $this->orders ?? new OrderRepository(Database::getConnection());
-        $fairgate = $this->fairgate ?? FairgateContactProviderFactory::create();
         $year = $config->findCampaignYear();
         $existingOrder = $orders->findForYear($user['id'], $year);
         if ($existingOrder !== null && !OrderStatus::canClientEdit((string) $existingOrder['status'])) {
@@ -87,23 +79,23 @@ final class SaveOrderAction
             return JsonResponse::error($response, 'WEAK_PASSWORD', 422);
         }
 
-        try {
-            $data = $fairgate->findContactDataByEmail($user['email'], ClientRegistrationLoginService::MEMBERSHIP)['data'] ?? null;
-        } catch (FairgateException $exception) {
-            return JsonResponse::error($response, 'FAIRGATE_LOOKUP_FAILED', 502);
+        $fairgateData = $existingOrder !== null
+            ? [
+                'status' => $existingOrder['fairgateStatus'] ?? 'not_found',
+                'adultsCount' => $existingOrder['fairgateAdultsCount'],
+                'childrenCount' => $existingOrder['fairgateChildrenCount'],
+            ]
+            : ($this->session ?? new SessionService())->getFairgateOrderData($year);
+        if ($fairgateData === null) {
+            return JsonResponse::error($response, 'SESSION_EXPIRED', 401);
         }
-
-        $evaluation = is_array($data) && $this->hasUsableData($data)
-            ? ($this->evaluator ?? new FairgateOrderDataEvaluator())->evaluate(
-                $data,
-                new DateTimeImmutable('now', new DateTimeZone('UTC')),
-                $year,
-            )
-            : ['status' => 'not_found', 'valid' => false, 'childrenCount' => 0, 'adultsCount' => 1];
+        $valid = $fairgateData['status'] === 'valid'
+            && $fairgateData['adultsCount'] !== null
+            && $fairgateData['childrenCount'] !== null;
 
         $status = OrderStatus::WAITING_FOR_FAIRGATE;
-        if ($evaluation['valid']) {
-            $status = $evaluation['adultsCount'] === $adultsCount && $evaluation['childrenCount'] === $childrenCount
+        if ($valid) {
+            $status = $fairgateData['adultsCount'] === $adultsCount && $fairgateData['childrenCount'] === $childrenCount
                 ? OrderStatus::RELEASED
                 : OrderStatus::FAMILY_SIZE_EXCEEDED;
         }
@@ -134,16 +126,16 @@ final class SaveOrderAction
             $adultsCount,
             $childrenCount,
             $items,
-            $evaluation['status'],
+            $fairgateData['status'],
             $text,
-            $evaluation['valid'] ? $evaluation['adultsCount'] : null,
-            $evaluation['valid'] ? $evaluation['childrenCount'] : null,
+            $valid ? $fairgateData['adultsCount'] : null,
+            $valid ? $fairgateData['childrenCount'] : null,
         );
         if ($isDraft) {
             return JsonResponse::success($response, [
                 'order' => $order,
                 'status' => $status,
-                'fairgateUserExists' => $evaluation['valid'],
+                'fairgateUserExists' => $valid,
             ]);
         }
         $order['loginUrl'] = rtrim(getenv('FRONTEND_BASE_URL') ?: 'http://localhost:4200', '/') . '/login';
@@ -165,7 +157,7 @@ final class SaveOrderAction
         return JsonResponse::success($response, [
             'order' => $order,
             'status' => $status,
-            'fairgateUserExists' => $evaluation['valid'],
+            'fairgateUserExists' => $valid,
         ]);
     }
 
@@ -254,15 +246,5 @@ final class SaveOrderAction
             $assigned[$key] = true;
         }
         return true;
-    }
-
-    /** @param array<string, mixed> $data */
-    private function hasUsableData(array $data): bool
-    {
-        return array_reduce(
-            $data,
-            static fn (bool $hasValue, mixed $value): bool => $hasValue || (is_scalar($value) && trim((string) $value) !== ''),
-            false,
-        );
     }
 }

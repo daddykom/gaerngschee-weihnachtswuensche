@@ -42,11 +42,18 @@ final class ClientRegistrationLoginAction
         }
 
         $user = $result['user'];
-        ($this->session ?? new SessionService())->setUser(
+        $session = $this->session ?? new SessionService();
+        $session->setUser(
             $user['id'],
             'wunschbesteller',
             $result['fairgateUserExists'],
             $result['fairgateStatus'],
+        );
+        $session->setFairgateOrderData(
+            $result['year'],
+            $result['fairgateStatus'],
+            $result['fairgateUserExists'] ? $result['adultsCount'] : null,
+            $result['fairgateUserExists'] ? $result['childrenCount'] : null,
         );
 
         return JsonResponse::success($response, [

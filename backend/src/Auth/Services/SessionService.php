@@ -11,6 +11,7 @@ final class SessionService
     private const GROUP_KEY = 'group';
     private const FAIRGATE_USER_EXISTS_KEY = 'fairgate_user_exists';
     private const FAIRGATE_STATUS_KEY = 'fairgate_status';
+    private const FAIRGATE_ORDER_DATA_KEY = 'fairgate_order_data';
     private const CSRF_TOKEN_KEY = 'csrf_token';
     private const LAST_ACTIVITY_KEY = 'last_activity';
 
@@ -35,6 +36,7 @@ final class SessionService
         $this->ensureSession();
         session_regenerate_id(true);
         $_SESSION[self::USER_ID_KEY] = $userId;
+        unset($_SESSION[self::FAIRGATE_ORDER_DATA_KEY]);
         $_SESSION[self::LAST_ACTIVITY_KEY] = time();
     }
 
@@ -44,6 +46,7 @@ final class SessionService
         session_regenerate_id(true);
         $_SESSION[self::USER_ID_KEY] = $userId;
         $_SESSION[self::GROUP_KEY] = $group;
+        unset($_SESSION[self::FAIRGATE_ORDER_DATA_KEY]);
         $_SESSION[self::LAST_ACTIVITY_KEY] = time();
         if ($fairgateUserExists !== null) {
             $_SESSION[self::FAIRGATE_USER_EXISTS_KEY] = $fairgateUserExists;
@@ -98,6 +101,29 @@ final class SessionService
         $value = $_SESSION[self::FAIRGATE_STATUS_KEY] ?? null;
 
         return is_string($value) && $value !== '' ? $value : null;
+    }
+
+    public function setFairgateOrderData(int $year, string $status, ?int $adultsCount, ?int $childrenCount): void
+    {
+        $this->ensureSession();
+        $_SESSION[self::FAIRGATE_ORDER_DATA_KEY] = [
+            'year' => $year,
+            'status' => $status,
+            'adultsCount' => $adultsCount,
+            'childrenCount' => $childrenCount,
+        ];
+    }
+
+    /** @return array{year: int, status: string, adultsCount: ?int, childrenCount: ?int}|null */
+    public function getFairgateOrderData(int $year): ?array
+    {
+        if ($this->getUserId() === null) {
+            return null;
+        }
+
+        $data = $_SESSION[self::FAIRGATE_ORDER_DATA_KEY] ?? null;
+
+        return is_array($data) && $data['year'] === $year ? $data : null;
     }
 
     public function getCsrfToken(): string

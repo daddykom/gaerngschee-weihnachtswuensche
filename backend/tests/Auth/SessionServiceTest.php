@@ -90,4 +90,78 @@ final class SessionServiceTest extends TestCase
         self::assertNull($service->getUserId());
         putenv('SESSION_IDLE_TIMEOUT');
     }
+
+    public function testFairgateOrderDataCanBeReadFromAnotherServiceInstance(): void
+    {
+        $service = new SessionService();
+        $service->setUser('user-123', 'wunschbesteller');
+        $service->setFairgateOrderData(2026, 'valid', 2, 0);
+
+        self::assertSame([
+            'year' => 2026,
+            'status' => 'valid',
+            'adultsCount' => 2,
+            'childrenCount' => 0,
+        ], (new SessionService())->getFairgateOrderData(2026));
+        self::assertNull($service->getFairgateOrderData(2027));
+    }
+
+    public function testMissingFairgateCountsRemainNull(): void
+    {
+        $service = new SessionService();
+        $service->setUser('user-123', 'wunschbesteller');
+        $service->setFairgateOrderData(2026, 'not_found', null, null);
+
+        self::assertSame([
+            'year' => 2026,
+            'status' => 'not_found',
+            'adultsCount' => null,
+            'childrenCount' => null,
+        ], $service->getFairgateOrderData(2026));
+    }
+
+    public function testNewLoginDiscardsFairgateOrderData(): void
+    {
+        $service = new SessionService();
+        $service->setUser('user-123', 'wunschbesteller');
+        $service->setFairgateOrderData(2026, 'valid', 2, 1);
+        $service->setUser('user-123', 'wunschbesteller');
+
+        self::assertNull($service->getFairgateOrderData(2026));
+    }
+
+    public function testUserIdChangeDiscardsFairgateOrderData(): void
+    {
+        $service = new SessionService();
+        $service->setUser('user-123', 'wunschbesteller');
+        $service->setFairgateOrderData(2026, 'valid', 2, 1);
+        $service->setUserId('user-456');
+
+        self::assertNull($service->getFairgateOrderData(2026));
+    }
+
+    public function testLogoutDiscardsFairgateOrderData(): void
+    {
+        $service = new SessionService();
+        $service->setUser('user-123', 'wunschbesteller');
+        $service->setFairgateOrderData(2026, 'valid', 2, 1);
+        $service->clear();
+
+        self::assertNull($service->getFairgateOrderData(2026));
+    }
+
+    public function testExpiredSessionDoesNotExposeFairgateOrderData(): void
+    {
+        putenv('SESSION_IDLE_TIMEOUT=60');
+        try {
+            $service = new SessionService();
+            $service->setUser('user-123', 'wunschbesteller');
+            $service->setFairgateOrderData(2026, 'valid', 2, 1);
+            $_SESSION['last_activity'] = time() - 61;
+
+            self::assertNull($service->getFairgateOrderData(2026));
+        } finally {
+            putenv('SESSION_IDLE_TIMEOUT');
+        }
+    }
 }
