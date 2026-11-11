@@ -175,7 +175,7 @@ final class AdminOrderUpdateActionTest extends TestCase
 
     public function testAllowsEveryOrderStatusFromTheAdminEditor(): void
     {
-        foreach (['draft', 'waiting_for_fairgate', 'released', 'family_size_exceeded', 'in_review', 'changes_requested', 'definitive', 'ready_for_pickup', 'completed'] as $status) {
+        foreach (['draft', 'released', 'in_review', 'changes_requested', 'definitive', 'ready_for_pickup', 'completed'] as $status) {
             [$pdo, $order] = $this->orderWithItems('released');
             $action = new AdminOrderUpdateAction(new OrderRepository($pdo), new RecordingEmailSender());
 

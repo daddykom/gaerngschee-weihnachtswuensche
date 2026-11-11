@@ -93,15 +93,12 @@ final class SaveOrderAction
             && $fairgateData['adultsCount'] !== null
             && $fairgateData['childrenCount'] !== null;
 
-        $status = OrderStatus::WAITING_FOR_FAIRGATE;
-        if ($valid) {
-            $status = $fairgateData['adultsCount'] === $adultsCount && $fairgateData['childrenCount'] === $childrenCount
-                ? OrderStatus::RELEASED
-                : OrderStatus::FAMILY_SIZE_EXCEEDED;
+        if (!$valid) {
+            return JsonResponse::error($response, 'FAIRGATE_DATA_REQUIRED', 403);
         }
-        if ($isDraft) {
-            $status = OrderStatus::DRAFT;
-        }
+        $adultsCount = $existingOrder['adultsCount'] ?? $fairgateData['adultsCount'];
+        $childrenCount = $existingOrder['childrenCount'] ?? $fairgateData['childrenCount'];
+        $status = $isDraft ? OrderStatus::DRAFT : OrderStatus::RELEASED;
         if (count($items) < 1 || count($items) > $adultsCount + $childrenCount) {
             return JsonResponse::error($response, 'INVALID_ORDER_ITEMS', 422);
         }

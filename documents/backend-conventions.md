@@ -135,6 +135,54 @@ Das Deployment führt den Kontaktabgleich nach den Migrationen und vor der
 Veröffentlichung aus und bricht bei einem Fehler ab. Im Fake-Modus entfällt
 der Kontaktimport; die dynamische E-Mail-Auswertung bleibt unverändert.
 
+### Gemeinsamer Fairgate-Token-Speicher
+
+Im Real-Modus teilen Webanfragen und CLI-Batches ihre Tokens über
+`fairgate_api_tokens`. Der Scope ist ein SHA-256-Hash aus Basis-URL,
+Organisations-ID und Access-Key; unterschiedliche Zugänge teilen keine Tokens.
+Der Access-Key selbst wird nicht in dieser Tabelle abgelegt.
+
+Vor dem ersten realen Aufruf muss die Migration
+`20261111202851_create_fairgate_api_tokens_table.php` ausgeführt sein. Bei
+fehlendem oder nicht verfügbarem Speicher gibt es keinen ungesicherten
+Fallback zur Token-Erstellung. Im Fake-Modus wird der Speicher nicht verwendet.
+
+`FairgateTokenRepository` sperrt den Datensatz innerhalb einer Transaktion
+(`SELECT ... FOR UPDATE` auf MariaDB). Unter dieser Sperre prüft
+`FairgateTokenService` den aktuellen Stand erneut. Ein gültiges Token wird
+wiederverwendet; innerhalb von 30 Sekunden vor seinem JWT-Ablauf wird es mit
+`POST /fsa/v1.1/auth/refresh/{oid}/token` erneuert. Die Antwortfelder
+`data.token` und `data.refresh_token` werden gemeinsam gespeichert. Nur ohne
+Refresh-Token oder nach dessen ausdrücklicher Ablehnung (HTTP 400/401) wird
+`POST /fsa/v1.1/auth/create/{oid}/token` verwendet. Netzwerk- und Serverfehler
+beim Refresh lösen keine neue Authentifizierung aus.
+
+HTTP 429 setzt eine gemeinsame Sperrfrist anhand von
+`X-RateLimit-Retry-After` (Sekunden), ersatzweise `Retry-After`. Ohne gültigen
+Header gelten konservativ 900 Sekunden für Authentifizierung und 300 Sekunden
+für Datenanfragen. Authentifizierungs- und Datenlimits werden getrennt gehalten.
+Eine bestehende Sperrfrist wird nicht verkürzt. Es wird weder sofort erneut
+angefragt noch ein Webrequest schlafend blockiert. Andere fehlgeschlagene
+Authentifizierungsversuche werden für 90 Sekunden gesperrt.
+
+Eine Kontaktlisten-Antwort mit HTTP 429 und `X-RateLimit-Limit: 1` wird als
+separate Listenquote behandelt und sperrt nur weitere Kontaktimporte, nicht
+die Extended-Data-Abfragen bei Anmeldungen. Fehlt dabei ein gültiger
+Retry-Header, beträgt die Listen-Sperrfrist vorsichtshalber 24 Stunden.
+
+Nach HTTP 401 wird höchstens einmal erneuert und die Datenanfrage wiederholt.
+Ein zwischenzeitlich von einem anderen Prozess erneuertes Token wird übernommen.
+Ein zweites HTTP 401 sperrt weitere Authentifizierungsversuche für 90 Sekunden.
+Beim Link-Login erhält das Frontend bei einer Sperrfrist HTTP 503 mit
+`FAIRGATE_RATE_LIMITED` und `Retry-After` sowie einen verständlichen Hinweis.
+Weil Registrierungstoken einmalig sind, muss danach ein neuer Link angefordert
+werden.
+
+Access- und Refresh-Token sind Zugangsdaten. Sie werden nur serverseitig
+gespeichert und weder in API-Antworten noch in Authentifizierungs-Fehlerlogs
+ausgegeben. Die Tabelle und Datenbanksicherungen müssen entsprechend geschützt
+werden. Dokumentation: <https://fsa.fairgate.ch/docs/fsa_openapi3>.
+
 ### Dynamischer Fake
 
 Die lokale Docker-Umgebung verwendet:

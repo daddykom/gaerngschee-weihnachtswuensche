@@ -69,9 +69,12 @@ final class SaveOrderActionTest extends TestCase
         }
         self::assertNull($orders->findForYear($user['id'], 2026));
         self::assertSame(422, $save([...$body, 'passwordConfirmation' => 'wrong-password'])->getStatusCode());
-        self::assertSame(200, $save($body)->getStatusCode());
+        self::assertSame(422, $save([...$body, 'adultsCount' => 99, 'items' => [$body['items'][0], $body['items'][0]]])->getStatusCode());
+        self::assertSame(200, $save([...$body, 'adultsCount' => 99, 'childrenCount' => 99])->getStatusCode());
         $draft = $orders->findForYear($user['id'], 2026);
         self::assertSame('draft', $draft['status']);
+        self::assertSame(1, $draft['adultsCount']);
+        self::assertSame(0, $draft['childrenCount']);
         self::assertSame('My situation', $draft['currentText']);
         self::assertCount(1, $draft['items']);
         self::assertNull($draft['releasedAt']);
@@ -98,11 +101,11 @@ final class SaveOrderActionTest extends TestCase
 
     public static function fairgateStatuses(): array
     {
-        return [[true, 'released'], [false, 'waiting_for_fairgate']];
+        return [[true, 'released']];
     }
 
     #[DataProvider('missingLoginData')]
-    public function testNewOrderWithoutCurrentLoginDataCannotBeSaved(?int $snapshotYear): void
+    public function testNewOrderWithoutUsableLoginDataCannotBeSaved(?int $snapshotYear, string $mode): void
     {
         $pdo = TestDatabase::create();
         $pdo->prepare('INSERT INTO frontend_config (id, variable_name, value, access_group, update_group, label) VALUES (?, ?, ?, ?, ?, ?)')
@@ -112,7 +115,7 @@ final class SaveOrderActionTest extends TestCase
         $session = new SessionService();
         $session->setUser($user['id'], 'wunschbesteller');
         if ($snapshotYear !== null) {
-            $session->setFairgateOrderData($snapshotYear, 'valid', 1, 0);
+            $session->setFairgateOrderData($snapshotYear, 'not_found', null, null);
         }
         $emails = $this->createMock(EmailSenderInterface::class);
         $emails->expects(self::never())->method('renderOrderConfirmation');
@@ -121,6 +124,7 @@ final class SaveOrderActionTest extends TestCase
         $action = new SaveOrderAction($orders, new FrontendConfigRepository($pdo), $session, users: $users, emails: $emails);
         $request = (new ServerRequestFactory())->createServerRequest('POST', '/client/order')->withAttribute('user', $user);
         $request->getBody()->write(json_encode([
+            'mode' => $mode,
             'adultsCount' => 1, 'childrenCount' => 0, 'text' => 'Situation',
             'password' => 'long-enough-password', 'passwordConfirmation' => 'long-enough-password',
             'items' => [['category' => 'gift', 'personType' => 'adult', 'personIndex' => 1, 'title' => 'Coat', 'description' => 'A warm coat']],
@@ -128,15 +132,15 @@ final class SaveOrderActionTest extends TestCase
 
         $response = $action($request, new Response());
 
-        self::assertSame(401, $response->getStatusCode());
-        self::assertSame('SESSION_EXPIRED', json_decode((string) $response->getBody(), true)['error']['code']);
+        self::assertSame($snapshotYear === 2026 ? 403 : 401, $response->getStatusCode());
+        self::assertSame($snapshotYear === 2026 ? 'FAIRGATE_DATA_REQUIRED' : 'SESSION_EXPIRED', json_decode((string) $response->getBody(), true)['error']['code']);
         self::assertNull($orders->findForYear($user['id'], 2026));
         self::assertNotNull($users->verifyPassword($user['email'], 'old-password'));
     }
 
     public static function missingLoginData(): array
     {
-        return [[null], [2025]];
+        return [[null, 'draft'], [null, 'submit'], [2025, 'draft'], [2025, 'submit'], [2026, 'draft'], [2026, 'submit']];
     }
 
     #[DataProvider('storedFairgateData')]
@@ -144,7 +148,7 @@ final class SaveOrderActionTest extends TestCase
         ?string $fairgateStatus,
         ?int $fairgateAdults,
         ?int $fairgateChildren,
-        string $expectedStatus,
+        ?string $expectedStatus,
     ): void {
         $pdo = TestDatabase::create();
         $pdo->prepare('INSERT INTO frontend_config (id, variable_name, value, access_group, update_group, label) VALUES (?, ?, ?, ?, ?, ?)')
@@ -154,8 +158,8 @@ final class SaveOrderActionTest extends TestCase
         $orders = new OrderRepository($pdo);
         $orders->saveForYear($user['id'], 2026, 'draft', 2, 0, [], $fairgateStatus, 'Situation', $fairgateAdults, $fairgateChildren);
         $emails = $this->createMock(EmailSenderInterface::class);
-        $emails->expects(self::once())->method('renderOrderConfirmation')->willReturn(['subject' => 'Submitted', 'html' => '<p>Submitted</p>', 'text' => 'Submitted']);
-        $emails->expects(self::once())->method('sendStoredEmail');
+        $emails->expects($expectedStatus === null ? self::never() : self::once())->method('renderOrderConfirmation')->willReturn(['subject' => 'Submitted', 'html' => '<p>Submitted</p>', 'text' => 'Submitted']);
+        $emails->expects($expectedStatus === null ? self::never() : self::once())->method('sendStoredEmail');
         $action = new SaveOrderAction($orders, new FrontendConfigRepository($pdo), users: $users, emails: $emails);
         $request = (new ServerRequestFactory())->createServerRequest('POST', '/client/order')->withAttribute('user', $user);
         $request->getBody()->write(json_encode([
@@ -167,6 +171,12 @@ final class SaveOrderActionTest extends TestCase
         $response = $action($request, new Response());
         $data = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
 
+        if ($expectedStatus === null) {
+            self::assertSame(403, $response->getStatusCode());
+            self::assertSame('FAIRGATE_DATA_REQUIRED', $data['error']['code']);
+            self::assertSame('draft', $orders->findForYear($user['id'], 2026)['status']);
+            return;
+        }
         self::assertSame(200, $response->getStatusCode());
         self::assertSame($expectedStatus, $data['status']);
         self::assertSame($fairgateStatus ?? 'not_found', $data['order']['fairgateStatus']);
@@ -179,10 +189,10 @@ final class SaveOrderActionTest extends TestCase
     {
         return [
             ['valid', 2, 0, 'released'],
-            ['valid', 1, 0, 'family_size_exceeded'],
-            ['not_found', null, null, 'waiting_for_fairgate'],
-            ['valid', 2, null, 'waiting_for_fairgate'],
-            [null, null, null, 'waiting_for_fairgate'],
+            ['valid', 1, 0, 'released'],
+            ['not_found', null, null, null],
+            ['valid', 2, null, null],
+            [null, null, null, null],
         ];
     }
 }

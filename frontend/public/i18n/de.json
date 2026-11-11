@@ -111,6 +111,7 @@
       "sendError": "Die E-Mail konnte gerade nicht gesendet werden. Bitte versuche es später noch einmal.",
       "errorTitle": "Fehler",
       "registrationTokenError": "Der Anmeldelink ist ungültig oder abgelaufen. Bitte fordere auf der Startseite einen neuen Link an.",
+      "fairgateRateLimited": "Fairgate nimmt vorübergehend keine weiteren Anfragen an. Bitte warte etwas und fordere danach auf der Startseite einen neuen Anmeldelink an.",
       "emailSentTitle": "E-Mail versandt",
       "emailSentMessage": "Wir haben dir eine E-Mail mit deinem persönlichen Anmeldelink geschickt. Der Link ist 10 Minuten gültig.",
       "privacyTitle": "Warum brauchen wir deine E-Mail-Adresse?",
@@ -287,15 +288,9 @@
         "title": "Dein Wunschzettel wurde gespeichert",
         "releasedTitle": "Wunschzettel freigegeben",
         "releasedMessage": "Deine Daten werden den Administratoren zur Prüfung vorgelegt.",
-        "waitingForFairgateTitle": "Fairgate-Zugang noch nicht gefunden",
-        "waitingForFairgateMessage": "Sobald Du bei Fairgate angemeldet bist, senden wir dir eine E-Mail darüber, wie es weitergeht.",
         "login": "Zur Login-Seite"
       },
       "status": {
-        "waiting_for_fairgate": {
-          "title": "Warten auf Fairgate",
-          "message": "Deine Anmeldung wird bearbeitet, sobald du bei Fairgate gefunden wurdest. Darum kann sie gerade nicht verändert werden."
-        },
         "released": {
           "title": "Zur Prüfung freigegeben",
           "message": "Deine Anmeldung wurde zur administrativen Prüfung freigegeben. Darum kann sie gerade nicht verändert werden."
@@ -319,6 +314,7 @@
       },
       "errors": {
         "INVALID_ORDER": "Bitte prüfe deine Angaben.",
+        "FAIRGATE_DATA_REQUIRED": "Für einen Wunschzettel werden gültige Fairgate-Personendaten benötigt. Bitte melde dich erneut über deinen Anmeldelink an.",
         "WEAK_PASSWORD": "Das Passwort erfüllt die Anforderungen nicht.",
         "FAIRGATE_LOOKUP_FAILED": "Die Fairgate-Daten konnten nicht geprüft werden.",
         "ORDER_NOT_EDITABLE": "Dieser Wunschzettel kann in seinem aktuellen Status nicht mehr geändert werden.",
@@ -380,7 +376,6 @@
         "description": "Dein Wunschzettel für das Jahr {{year}}.",
         "status": "Status",
         "statuses": {
-          "waiting_for_fairgate": "Wartet auf Fairgate",
           "definitive": "Definitiv"
         },
         "back": "Zurück",
@@ -709,9 +704,7 @@
         },
         "statuses": {
           "draft": "Entwurf",
-          "waiting_for_fairgate": "Wartet auf Fairgate",
           "released": "Freigegeben",
-          "family_size_exceeded": "Familiengrösse überschritten",
           "in_review": "In Prüfung",
           "changes_requested": "Änderungen verlangt",
           "definitive": "Definitiv",
@@ -772,15 +765,9 @@
         "saveErrorTitle": "Wunschzettel konnte nicht gespeichert werden",
         "loading": "Übersicht wird geladen ...",
         "definitiveTitle": "Wunschzettel",
-        "waiting_for_fairgateTitle": "Wunschzettelen warten auf Fairgate",
-        "recentProvisionalTitle": "Wunschzettelen warten in den letzten {{ days }} Tagen auf Fairgate",
         "orderCount": "Anzahl Wunschzettelen",
         "category": "Wunschzettelen/Kategorie",
         "orders": "Wunschzettelen",
-        "waiting_for_fairgate": "Wartet",
-        "waiting_for_fairgateShort": "Prov.",
-        "recentProvisional": "Wartet letzte {{ days }} Tage",
-        "recentProvisionalShort": "P. {{ days }} Tg",
         "definitive": "Definitiv",
         "definitiveShort": "Def.",
         "toDeliver": "Bereit auszuliefern",
@@ -793,8 +780,6 @@
         "empty": "Keine Wunschzettelen vorhanden.",
         "legend": {
           "title": "Legende",
-          "waiting_for_fairgate": "Wunschzettelen, deren Person noch nicht bei Fairgate gefunden wurde",
-          "recentProvisional": "Wunschzettelen, die in den letzten {{ days }} Tagen auf Fairgate warten",
           "definitive": "Wunschzettel",
           "toDeliver": "Zur Auslieferung gekennzeichnet",
           "qrcode": "QR-Code per E-Mail versandt",

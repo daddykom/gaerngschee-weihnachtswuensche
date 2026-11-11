@@ -318,7 +318,9 @@ export const authNotificationEffect = createEffect(
                 : action.type === AuthActions.passwordResetFailure.type
                   ? 'app.passwordReset.errors.invalid'
                   : action.type === AuthActions.registrationLoginFailure.type
-                    ? 'app.anmeldung.registrationTokenError'
+                    ? action.errorCode === 'FAIRGATE_RATE_LIMITED'
+                      ? 'app.anmeldung.fairgateRateLimited'
+                      : 'app.anmeldung.registrationTokenError'
                     : `app.auth.errors.${action.errorCode}`,
           ...(action.type === AuthActions.registrationLoginFailure.type
             ? { preserveOnRoutes: ['/start'] }

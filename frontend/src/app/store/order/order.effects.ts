@@ -120,19 +120,12 @@ export const orderSaveSuccessNotificationEffect = createEffect(
               messageKey: 'app.order.notifications.draftSaved',
               preserveOnRoutes: ['/bestellung'],
             })
-          : result.status === 'released'
-            ? NotificationActions.show({
-                variant: 'success',
-                titleKey: 'app.order.confirmation.releasedTitle',
-                messageKey: 'app.order.confirmation.releasedMessage',
-                preserveOnRoutes: ['/bestellung/bestaetigung'],
-              })
-            : NotificationActions.show({
-                variant: 'warning',
-                titleKey: 'app.order.confirmation.waitingForFairgateTitle',
-                messageKey: 'app.order.confirmation.waitingForFairgateMessage',
-                preserveOnRoutes: ['/bestellung/bestaetigung'],
-              }),
+          : NotificationActions.show({
+              variant: 'success',
+              titleKey: 'app.order.confirmation.releasedTitle',
+              messageKey: 'app.order.confirmation.releasedMessage',
+              preserveOnRoutes: ['/bestellung/bestaetigung'],
+            }),
       ),
     ),
   { functional: true },

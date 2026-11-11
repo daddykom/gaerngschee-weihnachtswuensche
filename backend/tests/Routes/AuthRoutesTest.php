@@ -13,6 +13,7 @@ use App\Auth\Services\SessionService;
 use App\Registration\Services\ClientRegistrationLoginService;
 use App\Registration\Services\RegistrationTokenService;
 use App\Fairgate\Services\FairgateContactProvider;
+use App\Fairgate\Services\FairgateException;
 use App\Shared\Http\RateLimitService;
 use PDO;
 use PHPUnit\Framework\TestCase;
@@ -261,6 +262,24 @@ final class AuthRoutesTest extends TestCase
             'adultsCount' => 2,
             'childrenCount' => 1,
         ], (new SessionService())->getFairgateOrderData($year));
+        self::assertSame(0, (int) $this->pdo->query('SELECT COUNT(*) FROM orders')->fetchColumn());
+    }
+
+    public function testFairgateRateLimitReturnsRetryAfterWithoutCreatingAnOrderOrSession(): void
+    {
+        $tokens = new RegistrationTokenService($this->pdo);
+        $issued = $tokens->issue('limited@example.com');
+        $fairgate = $this->createMock(FairgateContactProvider::class);
+        $fairgate->expects(self::once())->method('findContactDataByEmail')
+            ->willThrowException(new FairgateException('Rate limited.', 429, retryAfter: 120));
+        $service = new ClientRegistrationLoginService($tokens, $this->repository, $fairgate);
+
+        $response = $this->createAuthApp($service)->handle($this->request('/auth/registration-login', ['token' => $issued['token']]));
+
+        self::assertSame(503, $response->getStatusCode());
+        self::assertSame('120', $response->getHeaderLine('Retry-After'));
+        self::assertSame('FAIRGATE_RATE_LIMITED', json_decode((string) $response->getBody(), true)['error']['code']);
+        self::assertNull((new SessionService())->getUserId());
         self::assertSame(0, (int) $this->pdo->query('SELECT COUNT(*) FROM orders')->fetchColumn());
     }
 

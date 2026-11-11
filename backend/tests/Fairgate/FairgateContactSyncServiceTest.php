@@ -6,6 +6,7 @@ namespace Tests\Fairgate;
 
 use App\Fairgate\Data\FairgateContactRepository;
 use App\Fairgate\Services\FairgateClient;
+use Tests\Support\FairgateTestTokens;
 use App\Fairgate\Services\FairgateContactSyncService;
 use App\Fairgate\Services\FairgateException;
 use DateTimeImmutable;
@@ -105,11 +106,11 @@ final class FairgateContactSyncServiceTest extends TestCase
         $this->contacts->upsert('1', 'existing@example.com', $this->date('2026-11-10 10:00:00'));
         $before = $this->rows();
         $handler = HandlerStack::create(new MockHandler([
-            new Response(200, [], '{"success":true,"data":{"token":"test-token"}}'),
+            FairgateTestTokens::response(),
             new Response(200, [], '{"success":true,"data":{"contacts":[{"contact_id":2,"primary_email":"new@example.com"}],"totalPages":2,"totalRecords":2}}'),
             new Response(503, [], '{"success":false}'),
         ]));
-        $client = new FairgateClient(new Client(['handler' => $handler, 'base_uri' => 'https://fairgate.example', 'http_errors' => false]), 'https://fairgate.example', 'org', 'access-key', null, static fn (): bool => true);
+        $client = new FairgateClient(new Client(['handler' => $handler, 'base_uri' => 'https://fairgate.example', 'http_errors' => false]), 'https://fairgate.example', 'org', 'access-key', null, static fn (): bool => true, tokenRepository: FairgateTestTokens::repository());
         $service = new FairgateContactSyncService($this->contacts, $client->fetchAllClientContacts(...));
 
         try {

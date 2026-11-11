@@ -318,17 +318,20 @@ Für die Weiterverarbeitung gelten folgende Regeln:
 ### Bestellstatus
 
 - Bestellungen werden pro Kunde und Kalenderjahr gespeichert.
-- Die fachlichen Statuswerte lauten `draft`, `waiting_for_fairgate`, `released`,
-  `family_size_exceeded`, `in_review`, `changes_requested`, `definitive`,
+- Die fachlichen Statuswerte lauten `draft`, `released`,
+  `in_review`, `changes_requested`, `definitive`,
   `ready_for_pickup` und `completed`.
 - Zwischenspeichern über „Speichern“ (`POST /client/order` mit `mode: draft`)
   speichert die Bestellung und ihre Wünsche als `draft`, ohne Bestätigungs-E-Mail
   oder Logout. Es gilt dieselbe vollständige Validierung wie beim Einreichen.
 - „Einreichen“ (`mode: submit`, auch der Standard ohne `mode`) verwendet die
   vollständige Validierung und den bestehenden Bestätigungs-/Logout-Fluss.
-- `fairgateUserExists = true` ergibt beim Einreichen den Status `released`.
-- Jeder andere Fairgate-Status ergibt beim Einreichen den Status
-  `waiting_for_fairgate`.
+- Einreichen ergibt den Status `released`. Ohne gültige gespeicherte
+  Fairgate-Personenzahlen darf keine Bestellung gespeichert oder eingereicht werden.
+- Personenzahlen werden beim ersten Speichern aus der Backend-Session übernommen;
+  bei bestehenden Bestellungen sind die im Auftrag gespeicherten Zahlen verbindlich.
+- Registrierungsanfragen verwenden keinen Status. Offene Anfragen werden über
+  `notification_sent_at IS NULL` erkannt.
 - Sichtbare Übersetzungen dürfen diese technischen Werte lokalisieren.
 
 ## Arbeitsweise & Verhaltensregeln
