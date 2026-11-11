@@ -99,9 +99,9 @@ final class OrderOverviewActionTest extends TestCase
         self::assertFalse($data['canEdit']);
     }
 
-    public function testWaitingOrderDoesNotUseMoreRecentSessionData(): void
+    public function testStoredOrderDoesNotUseMoreRecentSessionData(): void
     {
-        $this->orders->saveForYear($this->user['id'], 2026, 'waiting_for_fairgate', 2, 1, [], 'not_found');
+        $this->orders->saveForYear($this->user['id'], 2026, 'draft', 2, 1, [], 'not_found');
         $this->session->setFairgateOrderData(2026, 'valid', 2, 1);
 
         $data = $this->payload($this->load());

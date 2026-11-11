@@ -45,7 +45,7 @@ final class OrderBatchServiceTest extends TestCase
         $emails = new RecordingEmailSender();
         $orders = new OrderRepository($pdo);
         $user = (new UserRepository($pdo))->createUser('person@example.com', 'secret', 'wunschbesteller');
-        $order = $orders->saveForYear($user['id'], 2026, 'waiting_for_fairgate', 1, 0, []);
+        $order = $orders->saveForYear($user['id'], 2026, 'in_review', 1, 0, []);
         (new EmailQueueRepository($pdo))->enqueue(
             'order',
             $order['id'],
@@ -58,7 +58,8 @@ final class OrderBatchServiceTest extends TestCase
         $result = $this->service($pdo, $emails)->run();
 
         self::assertSame(1, $result['sent']);
-        self::assertSame('released', $orders->findForYear($user['id'], 2026)['status']);
+        self::assertSame('in_review', $orders->findForYear($user['id'], 2026)['status']);
+        self::assertNotNull($orders->findForYear($user['id'], 2026)['confirmationEmailSentAt']);
         self::assertCount(0, (new EmailQueueRepository($pdo))->pending());
     }
 
