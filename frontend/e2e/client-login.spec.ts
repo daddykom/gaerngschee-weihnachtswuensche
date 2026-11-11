@@ -64,4 +64,23 @@ test.describe('Client login route', () => {
     await expectTranslatedText(page.getByRole('alert'), 'app.anmeldung.errorTitle');
     await expectTranslatedText(page.getByRole('alert'), 'app.anmeldung.registrationTokenError');
   });
+
+  test('explains a Fairgate rate limit without automatically retrying the login', async ({
+    page,
+  }) => {
+    let requests = 0;
+    await page.route('http://localhost:8083/auth/registration-login', async (route) => {
+      requests++;
+      await route.fulfill({
+        status: 503,
+        headers: { 'Retry-After': '120' },
+        json: { error: { code: 'FAIRGATE_RATE_LIMITED', details: {} } },
+      });
+    });
+
+    await page.goto('/client-login?token=limited-token');
+    await expect(page).toHaveURL(/\/start$/);
+    await expectTranslatedText(page.getByRole('alert'), 'app.anmeldung.fairgateRateLimited');
+    expect(requests).toBe(1);
+  });
 });

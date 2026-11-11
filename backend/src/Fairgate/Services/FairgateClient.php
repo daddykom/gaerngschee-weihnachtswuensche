@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Fairgate\Services;
 
 use App\Fairgate\Data\FairgateContactRepository;
+use App\Fairgate\Data\FairgateTokenRepository;
 use App\Shared\Database\Database;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
@@ -17,6 +18,7 @@ use Lcobucci\JWT\UnencryptedToken;
 use Lcobucci\JWT\Validation\Constraint\SignedWith;
 use Lcobucci\JWT\Validation\Validator;
 use Psr\Http\Client\ClientInterface;
+use Psr\Http\Message\ResponseInterface;
 use PDOException;
 
 final class FairgateClient implements FairgateContactProvider
@@ -24,9 +26,10 @@ final class FairgateClient implements FairgateContactProvider
     private const CONTACTS_PATH = '/fsa/v1.1/contact/%s/contacts';
     private const CONTACT_DATA_PATH = '/fsa/v2.0/contact/%s/data/%s';
     private const TOKEN_PATH = '/fsa/v1.1/auth/create/%s/token';
+    private const REFRESH_TOKEN_PATH = '/fsa/v1.1/auth/refresh/%s/token';
     private const CONTACT_PAGE_LIMIT = 100;
 
-    private ?string $bearerToken = null;
+    private ?FairgateTokenService $tokens = null;
 
     /**
      * @param callable(string): bool|null $tokenValidator
@@ -39,6 +42,7 @@ final class FairgateClient implements FairgateContactProvider
         private readonly ?string $publicKey = null,
         ?callable $tokenValidator = null,
         private readonly ?FairgateContactRepository $contacts = null,
+        private readonly ?FairgateTokenRepository $tokenRepository = null,
     ) {
         $this->tokenValidator = $tokenValidator ?? $this->validateToken(...);
     }
@@ -154,20 +158,7 @@ final class FairgateClient implements FairgateContactProvider
     /** @return array<string, mixed> */
     public function findContactDataById(string $contactId): array
     {
-        try {
-            $response = $this->client()->request('GET', sprintf(
-                self::CONTACT_DATA_PATH,
-                $this->organizationId(),
-                $contactId,
-            ), [
-                'headers' => $this->headers(),
-            ]);
-        } catch (GuzzleException $exception) {
-            ExternalErrorLogger::log('fairgate', 'contact_data', $exception->getMessage());
-            throw new FairgateException('FSA contact data request failed.', 0, $exception);
-        }
-
-        return $this->decodeResponse('contact_data', $response->getStatusCode(), (string) $response->getBody());
+        return $this->requestAuthenticated('contact_data', sprintf(self::CONTACT_DATA_PATH, $this->organizationId(), $contactId));
     }
 
     /** @return array<string, mixed> */
@@ -175,17 +166,7 @@ final class FairgateClient implements FairgateContactProvider
     {
         $query = ['pageNo' => $page, 'pageLimit' => self::CONTACT_PAGE_LIMIT, 'membership[]' => 'Klient*innen'];
 
-        try {
-            $response = $this->client()->request('GET', sprintf(self::CONTACTS_PATH, $this->organizationId()), [
-                'headers' => $this->headers(),
-                'query' => $query,
-            ]);
-        } catch (GuzzleException $exception) {
-            ExternalErrorLogger::log('fairgate', 'contact_lookup', $exception->getMessage());
-            throw new FairgateException('FSA contact request failed.', 0, $exception);
-        }
-
-        return $this->decodeResponse('contact_lookup', $response->getStatusCode(), (string) $response->getBody());
+        return $this->requestAuthenticated('contact_lookup', sprintf(self::CONTACTS_PATH, $this->organizationId()), $query);
     }
 
     private function client(): ClientInterface
@@ -197,80 +178,122 @@ final class FairgateClient implements FairgateContactProvider
         ]);
     }
 
-    /** @return array<string, string> */
-    private function headers(): array
+    /** @param array<string, mixed> $query @return array<string, mixed> */
+    private function requestAuthenticated(string $operation, string $path, array $query = []): array
     {
-        return [
-            'Accept' => 'application/json',
-            'Accept-Language' => 'de',
-            'Authorization' => $this->bearerToken(),
-        ];
+        $tokens = $this->tokenService();
+        $contactList = $operation === 'contact_lookup';
+        $token = $tokens->token(contactList: $contactList);
+        for ($attempt = 0; $attempt < 2; $attempt++) {
+            try {
+                $response = $this->client()->request('GET', $path, [
+                    'headers' => ['Accept' => 'application/json', 'Accept-Language' => 'de', 'Authorization' => $token],
+                    'query' => $query,
+                    'http_errors' => false,
+                ]);
+            } catch (GuzzleException) {
+                ExternalErrorLogger::log('fairgate', $operation, 'FSA data transport failed.');
+                throw new FairgateException('FSA data request failed.');
+            }
+            if ($response->getStatusCode() === 401 && $attempt === 0) {
+                $token = $tokens->token($token, $contactList);
+                continue;
+            }
+            if ($response->getStatusCode() === 401) {
+                $tokens->rejectAccessToken($token);
+            }
+            if ($response->getStatusCode() === 429) {
+                $listQuota = $contactList && trim($response->getHeaderLine('X-RateLimit-Limit')) === '1';
+                $tokens->deferDataRequests($this->retryAfter($response, $listQuota ? 86400 : 300), $listQuota);
+            }
+            return $this->decodeResponse($operation, $response);
+        }
+        throw new FairgateException('FSA authorization failed.', 401);
     }
 
-    private function bearerToken(): string
+    private function tokenService(): FairgateTokenService
     {
-        if ($this->bearerToken !== null) {
-            return $this->bearerToken;
-        }
-
         try {
-            $response = $this->client()->request('POST', sprintf(self::TOKEN_PATH, $this->organizationId()), [
+            return $this->tokens ??= new FairgateTokenService(
+                $this->tokenRepository ?? new FairgateTokenRepository(Database::getConnection()),
+                hash('sha256', json_encode([rtrim($this->baseUrl(), '/'), $this->organizationId(), $this->accessKey()], JSON_THROW_ON_ERROR)),
+                $this->requestToken(...),
+                $this->tokenValidator,
+            );
+        } catch (PDOException $exception) {
+            throw new FairgateException('Shared Fairgate token storage is unavailable.', 0, $exception);
+        }
+    }
+
+    /** @return array<string, mixed> */
+    private function requestToken(?string $refreshToken): array
+    {
+        $operation = $refreshToken === null ? 'authentication' : 'token_refresh';
+        try {
+            $response = $this->client()->request('POST', sprintf($refreshToken === null ? self::TOKEN_PATH : self::REFRESH_TOKEN_PATH, $this->organizationId()), [
                 'headers' => [
                     'Accept' => 'application/json',
                     'Accept-Language' => 'de',
                     'Content-Type' => 'application/json',
                 ],
-                'json' => ['access_key' => $this->accessKey()],
+                'json' => $refreshToken === null ? ['access_key' => $this->accessKey()] : ['refresh_token' => $refreshToken],
+                'http_errors' => false,
             ]);
-        } catch (GuzzleException $exception) {
-            ExternalErrorLogger::log('fairgate', 'authentication', $exception->getMessage());
-            throw new FairgateException('FSA authentication request failed.', 0, $exception);
+        } catch (GuzzleException) {
+            ExternalErrorLogger::log('fairgate', $operation, 'FSA authentication transport failed.');
+            throw new FairgateException('FSA authentication request failed.');
         }
-
-        $data = $this->decodeResponse('authentication', $response->getStatusCode(), (string) $response->getBody());
-        $token = $data['data']['token'] ?? null;
-        if (!is_string($token) || $token === '' || !($this->tokenValidator)($token)) {
-            $details = json_encode($data);
-            ExternalErrorLogger::log(
-                'fairgate',
-                'authentication',
-                'FSA authentication returned an invalid token.',
-                $details === false ? null : $details,
-            );
-            throw new FairgateException('FSA authentication returned an invalid token.');
-        }
-
-        return $this->bearerToken = $token;
+        return $this->decodeResponse($operation, $response);
     }
 
     /** @return array<string, mixed> */
-    private function decodeResponse(string $operation, int $statusCode, string $body): array
+    private function decodeResponse(string $operation, ResponseInterface $response): array
     {
+        $statusCode = $response->getStatusCode();
+        $body = (string) $response->getBody();
+        // Authentication bodies can contain access and refresh tokens, including on errors.
+        $details = in_array($operation, ['authentication', 'token_refresh'], true) ? null : $body;
         if ($statusCode < 200 || $statusCode >= 300) {
             $message = sprintf('FSA returned HTTP status %d.', $statusCode);
-            ExternalErrorLogger::log('fairgate', $operation, $message, $body, $statusCode);
-            throw new FairgateException($message);
+            ExternalErrorLogger::log('fairgate', $operation, $message, $details, $statusCode);
+            $fallback = $operation === 'contact_lookup' && trim($response->getHeaderLine('X-RateLimit-Limit')) === '1'
+                ? 86400
+                : ($details === null ? 900 : 300);
+            throw new FairgateException($message, $statusCode, retryAfter: $statusCode === 429 ? $this->retryAfter($response, $fallback) : null);
         }
 
         try {
             $data = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
         } catch (\JsonException $exception) {
-            ExternalErrorLogger::log('fairgate', $operation, $exception->getMessage(), $body, $statusCode);
+            ExternalErrorLogger::log('fairgate', $operation, $exception->getMessage(), $details, $statusCode);
             throw new FairgateException('FSA returned invalid JSON.', 0, $exception);
         }
 
         if (!is_array($data) || ($data['success'] ?? true) === false) {
-            ExternalErrorLogger::log('fairgate', $operation, 'FSA returned an unsuccessful response.', $body, $statusCode);
+            ExternalErrorLogger::log('fairgate', $operation, 'FSA returned an unsuccessful response.', $details, $statusCode);
             throw new FairgateException('FSA returned an unsuccessful response.');
         }
 
         return $data;
     }
 
+    private function retryAfter(ResponseInterface $response, int $fallback): int
+    {
+        $value = trim($response->getHeaderLine('X-RateLimit-Retry-After'));
+        if ($value === '') {
+            $value = trim($response->getHeaderLine('Retry-After'));
+        }
+        if (ctype_digit($value)) {
+            return max(1, (int) $value);
+        }
+        $deadline = $value !== '' ? strtotime($value) : false;
+        return $deadline !== false ? max(1, $deadline - time()) : $fallback;
+    }
+
     private function validateToken(string $token): bool
     {
         try {
-            $parsedToken = (new Parser(new JoseEncoder()))->parse($token);
+            $parsedToken = (new Parser(new JoseEncoder()))->parse(preg_replace('/^Bearer\s+/i', '', $token));
             if (!$parsedToken instanceof UnencryptedToken || $parsedToken->isExpired(new \DateTimeImmutable())) {
                 return false;
             }

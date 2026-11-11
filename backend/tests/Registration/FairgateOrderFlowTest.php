@@ -30,6 +30,8 @@ use Psr\Http\Message\ServerRequestInterface;
 use Slim\Psr7\Factory\ServerRequestFactory;
 use Slim\Psr7\Response;
 use Tests\Support\TestDatabase;
+use Tests\Support\FairgateTestTokens;
+use App\Fairgate\Data\FairgateTokenRepository;
 
 require_once __DIR__ . '/../../../db/migrations/20261110134342_create_fairgate_contacts_table.php';
 
@@ -38,6 +40,7 @@ final class FairgateOrderFlowTest extends TestCase
     private PDO $pdo;
     private SessionService $session;
     private MockHandler $http;
+    private FairgateTokenRepository $tokens;
     private array $history = [];
 
     protected function setUp(): void
@@ -51,6 +54,7 @@ final class FairgateOrderFlowTest extends TestCase
         $_SESSION = [];
         $this->session = new SessionService();
         $this->pdo = TestDatabase::create();
+        $this->tokens = FairgateTestTokens::repository($this->pdo);
         $this->pdo->prepare('INSERT INTO frontend_config (id, variable_name, value, access_group, update_group, label) VALUES (?, ?, ?, ?, ?, ?)')
             ->execute(['year', 'campaign_year', '2026', '[]', '[]', 'Year']);
 
@@ -125,15 +129,18 @@ final class FairgateOrderFlowTest extends TestCase
             baseUrl: 'https://fairgate.invalid',
             organizationId: 'org-test',
             accessKey: 'test-key',
-            tokenValidator: static fn (string $token): bool => $token === 'Bearer test-token',
+            tokenValidator: static fn (string $token): bool => $token === FairgateTestTokens::token(),
             contacts: new FairgateContactRepository($this->pdo),
+            tokenRepository: $this->tokens,
         );
     }
 
     private function queueExtendedData(): void
     {
+        if ($this->history === []) {
+            $this->http->append(FairgateTestTokens::response());
+        }
         $this->http->append(
-            new HttpResponse(200, [], '{"success":true,"data":{"token":"Bearer test-token"}}'),
             new HttpResponse(200, [], '{"success":true,"data":{"wohnt_im_gleichen_haushalt":"Nein"}}'),
         );
     }
@@ -202,8 +209,8 @@ final class FairgateOrderFlowTest extends TestCase
     private function assertOnlyAuthenticationAndExtendedData(int $logins): void
     {
         $expected = [];
+        $expected[] = ['POST', '/fsa/v1.1/auth/create/org-test/token'];
         for ($login = 0; $login < $logins; $login++) {
-            $expected[] = ['POST', '/fsa/v1.1/auth/create/org-test/token'];
             $expected[] = ['GET', '/fsa/v2.0/contact/org-test/data/42'];
         }
 

@@ -345,4 +345,17 @@ describe('loginEffect', () => {
       }),
     );
   });
+
+  it('explains a Fairgate cooldown instead of reporting an invalid registration link', async () => {
+    const result = firstValueFrom(TestBed.runInInjectionContext(() => authNotificationEffect()));
+    actions$.next(AuthActions.registrationLoginFailure({ errorCode: 'FAIRGATE_RATE_LIMITED' }));
+    await expect(result).resolves.toEqual(
+      NotificationActions.show({
+        variant: 'error',
+        titleKey: 'app.anmeldung.errorTitle',
+        messageKey: 'app.anmeldung.fairgateRateLimited',
+        preserveOnRoutes: ['/start'],
+      }),
+    );
+  });
 });
