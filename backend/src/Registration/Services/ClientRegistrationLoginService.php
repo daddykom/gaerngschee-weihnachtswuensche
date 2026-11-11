@@ -44,16 +44,28 @@ final class ClientRegistrationLoginService
             $user = $this->users->createUser($email, bin2hex(random_bytes(24)), 'wunschbesteller', true);
         }
 
-        $fairgateResponse = $this->fairgate->findContactDataByEmail($email, self::MEMBERSHIP);
-        $data = $fairgateResponse['data'] ?? null;
         $campaignYear = $this->config?->findCampaignYear() ?? (int) (new DateTimeImmutable('now', new DateTimeZone('UTC')))->format('Y');
         $order = $this->orders?->findForYear((string) $user['id'], $campaignYear);
-        $orderCreatedAt = is_array($order) && is_string($order['createdAt'] ?? null)
-            ? new DateTimeImmutable($order['createdAt'], new DateTimeZone('UTC'))
-            : new DateTimeImmutable('now', new DateTimeZone('UTC'));
-        $evaluation = is_array($data) && $this->hasUsableData($data)
-            ? ($this->evaluator ?? new FairgateOrderDataEvaluator())->evaluate($data, $orderCreatedAt, $campaignYear)
-            : ['status' => 'not_found', 'valid' => false, 'childrenCount' => 0, 'adultsCount' => 1];
+        $data = null;
+        if ($order !== null) {
+            $evaluation = [
+                'status' => $order['fairgateStatus'] ?? 'not_found',
+                'valid' => $order['fairgateStatus'] === 'valid'
+                    && $order['fairgateAdultsCount'] !== null
+                    && $order['fairgateChildrenCount'] !== null,
+                'adultsCount' => $order['fairgateAdultsCount'],
+                'childrenCount' => $order['fairgateChildrenCount'],
+            ];
+        } else {
+            $data = $this->fairgate->findContactDataByEmail($email, self::MEMBERSHIP)['data'] ?? null;
+            $evaluation = is_array($data) && $this->hasUsableData($data)
+                ? ($this->evaluator ?? new FairgateOrderDataEvaluator())->evaluate(
+                    $data,
+                    new DateTimeImmutable('now', new DateTimeZone('UTC')),
+                    $campaignYear,
+                )
+                : ['status' => 'not_found', 'valid' => false, 'childrenCount' => 0, 'adultsCount' => 1];
+        }
         $summaryData = $evaluation['valid'] ? $data : null;
 
         return [
