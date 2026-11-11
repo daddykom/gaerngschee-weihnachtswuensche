@@ -165,8 +165,11 @@ final class FairgateOrderFlowTest extends TestCase
         $emails = $this->createMock(EmailSenderInterface::class);
         $emails->method('renderOrderConfirmation')->willReturn(['subject' => 'Saved', 'html' => '<p>Saved</p>', 'text' => 'Saved']);
         $action = new SaveOrderAction(
-            new OrderRepository($this->pdo), new FrontendConfigRepository($this->pdo), $this->session,
-            users: new UserRepository($this->pdo), emails: $emails,
+            new OrderRepository($this->pdo),
+            new FrontendConfigRepository($this->pdo),
+            $this->session,
+            users: new UserRepository($this->pdo),
+            emails: $emails,
         );
 
         return $this->payload($action($this->request('POST', '/client/order', [
