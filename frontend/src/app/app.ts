@@ -1,3 +1,4 @@
+import { Location } from '@angular/common';
 import {
   afterRenderEffect,
   ChangeDetectionStrategy,
@@ -44,6 +45,7 @@ export class App {
   protected title = 'Gaerngschee';
   private readonly store = inject(Store);
   private readonly router = inject(Router);
+  private readonly location = inject(Location);
   private readonly activatedRoute = inject(ActivatedRoute);
 
   private readonly navigation = toSignal(
@@ -74,7 +76,10 @@ export class App {
       })
       .catch(() => undefined);
 
-    if (this.store.selectSignal(selectAuthGroup)() !== null) {
+    const isRegistrationLogin =
+      this.router.parseUrl(this.location.path()).root.children['primary']?.segments[0]?.path ===
+      'client-login';
+    if (this.store.selectSignal(selectAuthGroup)() !== null && !isRegistrationLogin) {
       this.store.dispatch(SessionActions.pollingStarted());
     }
 

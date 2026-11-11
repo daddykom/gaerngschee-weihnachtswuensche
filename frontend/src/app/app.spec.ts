@@ -1,3 +1,4 @@
+import { Location } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { DeferBlockState, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
@@ -7,6 +8,7 @@ import { provideTranslateService } from '@ngx-translate/core';
 import { App } from './app';
 import { AuthActions } from './store/auth/auth.actions';
 import { initialState as authInitialState } from './store/auth/auth.state';
+import { SessionActions } from './store/auth/session.actions';
 import { initialState as frontendConfigInitialState } from './store/frontend-config/frontend-config.state';
 
 @Component({ changeDetection: ChangeDetectionStrategy.Eager, template: '' })
@@ -34,6 +36,32 @@ describe('App', () => {
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('router-outlet')).toBeTruthy();
+  });
+
+  it.each(['/client-login?token=registration-token', '/client-login/'])(
+    'does not check a persisted session when booting on %s before router navigation',
+    (path) => {
+      const store = TestBed.inject(MockStore);
+      store.setState({ auth: { ...authInitialState, group: 'wunschbesteller' } });
+      vi.spyOn(TestBed.inject(Location), 'path').mockReturnValue(path);
+      const dispatch = vi.spyOn(store, 'dispatch');
+
+      expect(TestBed.inject(Router).url).toBe('/');
+      TestBed.createComponent(App);
+
+      expect(dispatch).not.toHaveBeenCalledWith(SessionActions.pollingStarted());
+    },
+  );
+
+  it('continues checking persisted sessions outside the link-login route', () => {
+    const store = TestBed.inject(MockStore);
+    store.setState({ auth: { ...authInitialState, group: 'admin' } });
+    vi.spyOn(TestBed.inject(Location), 'path').mockReturnValue('/admin/overview');
+    const dispatch = vi.spyOn(store, 'dispatch');
+
+    TestBed.createComponent(App);
+
+    expect(dispatch).toHaveBeenCalledWith(SessionActions.pollingStarted());
   });
 
   it('shows the global notification in the info box', async () => {
