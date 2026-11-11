@@ -110,6 +110,7 @@
       "sendError": "Die E-Mail konnte gerade nicht gesendet werden. Bitte versuche es später noch einmal.",
       "errorTitle": "Fehler",
       "registrationTokenError": "Der Anmeldelink ist ungültig oder abgelaufen. Bitte fordere auf der Startseite einen neuen Link an.",
+      "fairgateRateLimited": "Fairgate nimmt vorübergehend keine weiteren Anfragen an. Bitte warte etwas und fordere danach auf der Startseite einen neuen Anmeldelink an.",
       "emailSentTitle": "E-Mail versandt",
       "emailSentMessage": "Wir haben dir eine E-Mail mit deinem persönlichen Anmeldelink geschickt. Der Link ist 10 Minuten gültig.",
       "privacyTitle": "Warum brauchen wir deine E-Mail-Adresse?",

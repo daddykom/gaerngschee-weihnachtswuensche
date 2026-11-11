@@ -6,6 +6,7 @@ namespace App\Registration\Actions;
 
 use App\Auth\Services\SessionService;
 use App\Configuration\Data\FrontendConfigRepository;
+use App\Fairgate\Services\FairgateException;
 use App\Registration\Data\OrderRepository;
 use App\Registration\Services\ClientRegistrationLoginService;
 use App\Shared\Http\JsonRequest;
@@ -33,6 +34,10 @@ final class ClientRegistrationLoginAction
         try {
             $result = ($this->loginService ?? self::createService())->login($token);
         } catch (Throwable $exception) {
+            if ($exception instanceof FairgateException && $exception->getCode() === 429) {
+                return JsonResponse::error($response, 'FAIRGATE_RATE_LIMITED', 503)
+                    ->withHeader('Retry-After', (string) ($exception->retryAfter ?? 900));
+            }
             ExceptionLogger::log('Client registration login failed', $exception);
             return JsonResponse::error($response, 'REGISTRATION_LOGIN_FAILED', 503);
         }

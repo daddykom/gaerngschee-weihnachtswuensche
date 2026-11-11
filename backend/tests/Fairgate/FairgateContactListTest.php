@@ -15,6 +15,7 @@ use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use Tests\Support\FairgateTestTokens;
 
 final class FairgateContactListTest extends TestCase
 {
@@ -36,7 +37,7 @@ final class FairgateContactListTest extends TestCase
             $request = $history[$page]['request'];
             self::assertSame('/fsa/v1.1/contact/org-123/contacts', $request->getUri()->getPath());
             self::assertSame('pageNo=' . $page . '&pageLimit=100&membership%5B%5D=Klient%2Ainnen', $request->getUri()->getQuery());
-            self::assertSame('test-token', $request->getHeaderLine('Authorization'));
+            self::assertSame(FairgateTestTokens::token(), $request->getHeaderLine('Authorization'));
         }
     }
 
@@ -163,7 +164,7 @@ final class FairgateContactListTest extends TestCase
     private function client(array $responses, array &$history): FairgateClient
     {
         $handler = HandlerStack::create(new MockHandler([
-            new Response(200, [], '{"success":true,"data":{"token":"test-token"}}'),
+            FairgateTestTokens::response(),
             ...$responses,
         ]));
         $handler->push(Middleware::history($history));
@@ -174,7 +175,8 @@ final class FairgateContactListTest extends TestCase
             'org-123',
             'access-key',
             null,
-            static fn (string $token): bool => $token === 'test-token',
+            static fn (string $token): bool => $token === FairgateTestTokens::token(),
+            tokenRepository: FairgateTestTokens::repository(),
         );
     }
 }
