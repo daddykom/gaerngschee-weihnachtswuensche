@@ -20,6 +20,7 @@ describe('AdminOverviewComponent', () => {
               orders: [],
               statuses: ['definitive'],
               categories: ['gift'],
+              searchForm: { email: '' },
               loadStatus: 'loaded',
               saveStatus: 'initial',
               errorCode: null,
@@ -62,6 +63,19 @@ describe('AdminOverviewComponent', () => {
         statuses: ['completed'],
         categories: ['gift'],
       }),
+    );
+  });
+
+  it('dispatches only the changed email search field', () => {
+    const dispatch = vi.spyOn(store, 'dispatch');
+    const input = fixture.nativeElement.querySelector('input[type="search"]') as HTMLInputElement;
+
+    input.value = 'EXAMPLE';
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    expect(dispatch).toHaveBeenCalledWith(
+      AdminOrdersActions.searchFormChanged({ changes: { email: 'EXAMPLE' } }),
     );
   });
 });

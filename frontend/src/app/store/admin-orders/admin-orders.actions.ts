@@ -1,12 +1,14 @@
 import { createActionGroup, emptyProps, props } from '@ngrx/store';
 import { AdminOrder, AdminOrderFormValue } from '../../shared/models/admin-order.model';
 import type { AdminOrderAction } from '../../shared/services/admin-orders.service';
+import { AdminOrderSearchForm } from './admin-orders.state';
 
 export const AdminOrdersActions = createActionGroup({
   source: 'Admin Orders',
   events: {
     Load: emptyProps(),
     'Filters Changed': props<{ statuses: string[]; categories: string[] }>(),
+    'Search Form Changed': props<{ changes: Partial<AdminOrderSearchForm> }>(),
     'Load Success': props<{ orders: AdminOrder[] }>(),
     'Load Failure': props<{ errorCode: string }>(),
     Save: props<{ order: AdminOrder; action?: AdminOrderAction }>(),

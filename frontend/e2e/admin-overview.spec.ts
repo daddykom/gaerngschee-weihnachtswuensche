@@ -54,6 +54,53 @@ test.describe('Admin order overview route', () => {
     await expect(page).toHaveURL(/\/admin\/orders\/order-1\/edit$/);
   });
 
+  test('filters email substrings locally and restores the search after browser back', async ({
+    page,
+  }) => {
+    await loginAsAdmin(page);
+    let listRequests = 0;
+    await page.route('http://localhost:8083/admin/orders**', async (route) => {
+      if (new URL(route.request().url()).pathname !== '/admin/orders') {
+        await route.fulfill({ json: { order: orderFixture() } });
+        return;
+      }
+      listRequests++;
+      await route.fulfill({
+        json: {
+          orders: [
+            { ...orderFixture(), requesterEmail: 'Anna@Example.ch' },
+            { ...orderFixture(), id: 'order-2', requesterEmail: 'other@example.org' },
+          ],
+          statuses: ['released', 'in_review'],
+          categories: [],
+        },
+      });
+    });
+    await page.goto('/admin/overview');
+    const search = page.getByRole('searchbox');
+    await expectTranslatedText(
+      page.locator('mat-label').first(),
+      'app.admin.overview.filters.email',
+    );
+    await expect(page.getByRole('table').getByRole('row')).toHaveCount(3);
+    const requestsBeforeSearch = listRequests;
+    await search.fill('NA@EXAMPLE');
+    await expect(page.getByRole('table').getByRole('row')).toHaveCount(2);
+    await expect(page.getByRole('table')).toContainText('Anna@Example.ch');
+    await expect(page.getByRole('table')).not.toContainText('other@example.org');
+    expect(listRequests).toBe(requestsBeforeSearch);
+    await page.locator('a[href="/admin/orders/order-1/edit"]').click();
+    await page.getByRole('button', { name: 'Abbrechen' }).first().click();
+    await expect(page).toHaveURL(/\/admin\/overview$/);
+    await expect(search).toHaveValue('NA@EXAMPLE');
+    await expect(page.getByRole('table').getByRole('row')).toHaveCount(2);
+    await search.fill('missing');
+    await expect(page.getByRole('table').getByRole('row')).toHaveCount(1);
+    await expectTranslatedText(page.getByRole('table').locator('p'), 'app.admin.overview.empty');
+    await search.clear();
+    await expect(page.getByRole('table').getByRole('row')).toHaveCount(3);
+  });
+
   test('restores selected filters after browser back from order processing', async ({ page }) => {
     await loginAsAdmin(page);
     const requests: URL[] = [];
