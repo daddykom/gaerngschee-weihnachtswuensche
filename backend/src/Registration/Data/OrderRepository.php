@@ -465,30 +465,12 @@ final class OrderRepository
     }
 
     /** @return list<array{order: array<string, mixed>, email: string}> */
-    public function findWaitingForFairgateWithUsers(): array
-    {
-        $statement = $this->pdo->query(
-            "SELECT orders.id, orders.user_id, users.email FROM orders
-             INNER JOIN users ON users.id = orders.user_id
-              WHERE orders.status = 'waiting_for_fairgate' ORDER BY orders.created_at, orders.id",
-        );
-        $orders = [];
-        foreach ($statement->fetchAll() as $row) {
-            $order = $this->findForYear((string) $row['user_id'], (int) $this->findYear((string) $row['id']));
-            if ($order !== null) {
-                $orders[] = ['order' => $order, 'email' => (string) $row['email']];
-            }
-        }
-        return $orders;
-    }
-
-    /** @return list<array{order: array<string, mixed>, email: string}> */
     public function findOrdersWithPendingStatusEmails(): array
     {
         $statement = $this->pdo->query(
             "SELECT orders.id, orders.user_id, orders.year, users.email FROM orders
              INNER JOIN users ON users.id = orders.user_id
-             WHERE orders.status IN ('released', 'family_size_exceeded')
+             WHERE orders.status = 'released'
                AND orders.confirmation_email_sent_at IS NULL
              ORDER BY orders.created_at, orders.id",
         );
@@ -501,26 +483,6 @@ final class OrderRepository
         }
 
         return $orders;
-    }
-
-    public function updateCountsFromBatch(string $orderId, int $adultsCount, int $childrenCount): void
-    {
-        $statement = $this->pdo->prepare(
-            "UPDATE orders SET adults_count = :adults_count, children_count = :children_count,
-             fairgate_adults_count = :fairgate_adults_count, fairgate_children_count = :fairgate_children_count,
-             updated_at = CURRENT_TIMESTAMP WHERE id = :id AND status = 'waiting_for_fairgate'",
-        );
-        $statement->execute(['id' => $orderId, 'adults_count' => $adultsCount, 'children_count' => $childrenCount, 'fairgate_adults_count' => $adultsCount, 'fairgate_children_count' => $childrenCount]);
-    }
-
-    public function markReleased(string $orderId): void
-    {
-        $statement = $this->pdo->prepare(
-            "UPDATE orders SET status = 'released', confirmation_email_sent_at = CURRENT_TIMESTAMP,
-             updated_at = CURRENT_TIMESTAMP WHERE id = :id AND status = 'waiting_for_fairgate'",
-        );
-        $statement->execute(['id' => $orderId]);
-        $this->recordStatusChanges($statement->rowCount());
     }
 
     public function recordFairgateCounts(string $orderId, int $adultsCount, int $childrenCount): void

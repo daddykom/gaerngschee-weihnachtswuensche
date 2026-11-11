@@ -70,4 +70,17 @@ describe('order save effects', () => {
       preserveOnRoutes: ['/bestellung'],
     });
   });
+
+  it('announces submission as released', async () => {
+    const notification = firstValueFrom(
+      TestBed.runInInjectionContext(() => orderSaveSuccessNotificationEffect()),
+    );
+    actions$.next(OrderActions.saveSuccess({ result: result('released') }));
+    await expect(notification).resolves.toMatchObject({
+      variant: 'success',
+      titleKey: 'app.order.confirmation.releasedTitle',
+      messageKey: 'app.order.confirmation.releasedMessage',
+      preserveOnRoutes: ['/bestellung/bestaetigung'],
+    });
+  });
 });

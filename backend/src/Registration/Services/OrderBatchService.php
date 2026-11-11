@@ -52,7 +52,6 @@ final class OrderBatchService
                 $this->emails->sendStoredEmail($email['recipient'], $email['subject'], $email['html_body'], $email['text_body']);
                 $this->queue->remove($email['id']);
                 if ($email['email_type'] === 'order_confirmation') {
-                    $this->orders->markReleased($email['reference_id']);
                     $this->orders->markConfirmationEmailSent($email['reference_id']);
                 }
                 $result['sent']++;

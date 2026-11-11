@@ -26,7 +26,7 @@ final class FairgateRegistrationBatchServiceTest extends TestCase
         $result = $this->service($pdo, new FairgateRegistrationFixedProvider(true), $emails)->run();
 
         self::assertSame(['checked' => 1, 'notified' => 1, 'failed' => 0], $result);
-        self::assertSame('notification_sent', $pdo->query('SELECT status FROM fairgate_registration_requests')->fetchColumn());
+        self::assertNotNull($pdo->query('SELECT notification_sent_at FROM fairgate_registration_requests')->fetchColumn());
         self::assertSame('http://localhost:4200/start', $emails->loginUrls[0]);
         self::assertSame(\App\Registration\Services\AnmeldungMailVariant::FairgateRegistrationAvailable, $emails->variants[0]);
         self::assertSame(0, (int) $pdo->query('SELECT COUNT(*) FROM registration_tokens')->fetchColumn());
@@ -42,7 +42,7 @@ final class FairgateRegistrationBatchServiceTest extends TestCase
         $result = $this->service($pdo, new FairgateRegistrationFixedProvider(false), $emails)->run();
 
         self::assertSame(['checked' => 1, 'notified' => 0, 'failed' => 0], $result);
-        self::assertSame('waiting_for_fairgate', $pdo->query('SELECT status FROM fairgate_registration_requests')->fetchColumn());
+        self::assertNull($pdo->query('SELECT notification_sent_at FROM fairgate_registration_requests')->fetchColumn());
         self::assertNotNull($pdo->query('SELECT last_checked_at FROM fairgate_registration_requests')->fetchColumn());
         self::assertCount(0, $emails->variants);
     }
@@ -71,7 +71,7 @@ final class FairgateRegistrationBatchServiceTest extends TestCase
         $result = $this->service($pdo, new FairgateRegistrationFailingProvider(), $emails)->run();
 
         self::assertSame(['checked' => 1, 'notified' => 1, 'failed' => 1], $result);
-        self::assertSame(1, (int) $pdo->query("SELECT COUNT(*) FROM fairgate_registration_requests WHERE status = 'notification_sent'")->fetchColumn());
+        self::assertSame(1, (int) $pdo->query('SELECT COUNT(*) FROM fairgate_registration_requests WHERE notification_sent_at IS NOT NULL')->fetchColumn());
     }
 
     private function service(
