@@ -1,9 +1,32 @@
+import { AdminOrder } from '../../shared/models/admin-order.model';
 import { AdminOrdersActions } from './admin-orders.actions';
 import { adminOrdersFeature } from './admin-orders.feature';
 import { initialState } from './admin-orders.state';
 
 describe('adminOrdersFeature', () => {
-  const order = { id: 'order-1', status: 'released', items: [] };
+  const order: AdminOrder = {
+    id: 'order-1',
+    userId: 'user-1',
+    requesterEmail: 'person@example.com',
+    year: 2026,
+    status: 'released',
+    adultsCount: 1,
+    childrenCount: 0,
+    originalText: null,
+    currentText: null,
+    adminNotes: null,
+    fairgateStatus: 'valid',
+    fairgateAdultsCount: 1,
+    fairgateChildrenCount: 0,
+    processingYear: 2026,
+    releasedAt: null,
+    definitiveAt: null,
+    confirmationEmailSentAt: null,
+    fairgateReminderEmailSentAt: null,
+    items: [],
+    createdAt: null,
+    updatedAt: null,
+  };
 
   it('tracks loading, loaded and failed list states', () => {
     expect(
@@ -48,6 +71,41 @@ describe('adminOrdersFeature', () => {
 
     expect(result.orders).toEqual([changed, other]);
     expect(result.orders).not.toBe(state.orders);
+  });
+
+  it('keeps the search form when list filters and results change', () => {
+    const state = adminOrdersFeature.reducer(
+      initialState,
+      AdminOrdersActions.searchFormChanged({ changes: { email: 'Example' } }),
+    );
+    expect(state.searchForm).toEqual({ email: 'Example' });
+    expect(state.loadStatus).toBe('initial');
+    const filtered = adminOrdersFeature.reducer(
+      state,
+      AdminOrdersActions.filtersChanged({ statuses: ['definitive'], categories: ['gift'] }),
+    );
+    const loaded = adminOrdersFeature.reducer(
+      filtered,
+      AdminOrdersActions.loadSuccess({ orders: [] }),
+    );
+    expect(loaded.searchForm).toEqual({ email: 'Example' });
+    expect(initialState.searchForm).toEqual({ email: '' });
+  });
+
+  it('matches email substrings without case sensitivity and ignores surrounding whitespace', () => {
+    const orders = [
+      { ...order, requesterEmail: 'Anna@Example.ch' },
+      { ...order, id: 'order-2', requesterEmail: 'other@example.org' },
+    ] as AdminOrder[];
+    expect(
+      adminOrdersFeature.selectFilteredOrders.projector(orders, { email: ' NA@EXAMPLE ' }),
+    ).toEqual([orders[0]]);
+    expect(adminOrdersFeature.selectFilteredOrders.projector(orders, { email: '' })).toEqual(
+      orders,
+    );
+    expect(adminOrdersFeature.selectFilteredOrders.projector(orders, { email: 'missing' })).toEqual(
+      [],
+    );
   });
 
   it('tracks save success and failure without changing the draft on save start', () => {

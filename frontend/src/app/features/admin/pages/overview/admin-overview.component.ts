@@ -1,7 +1,9 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, linkedSignal } from '@angular/core';
+import { form, FormField } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { RouterLink } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -9,10 +11,11 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { ORDER_STATUS_WORKFLOW } from '../../../../shared/models/order.model';
 import { AdminOrdersActions } from '../../../../store/admin-orders/admin-orders.actions';
 import {
+  selectAdminFilteredOrders,
   selectAdminOrderCategories,
-  selectAdminOrderStatuses,
-  selectAdminOrders,
+  selectAdminOrderSearchForm,
   selectAdminOrdersLoadStatus,
+  selectAdminOrderStatuses,
 } from '../../../../store/admin-orders/admin-orders.feature';
 
 @Component({
@@ -23,7 +26,9 @@ import {
     MatButtonModule,
     MatChipsModule,
     MatFormFieldModule,
+    MatInputModule,
     MatSelectModule,
+    FormField,
   ],
   templateUrl: './admin-overview.component.html',
   styleUrl: './admin-overview.component.scss',
@@ -31,12 +36,24 @@ import {
 })
 export class AdminOverviewComponent {
   private readonly store = inject(Store);
-  readonly orders = this.store.selectSignal(selectAdminOrders);
+  readonly orders = this.store.selectSignal(selectAdminFilteredOrders);
+  readonly searchFormValue = this.store.selectSignal(selectAdminOrderSearchForm);
+  readonly searchModel = linkedSignal(() => this.searchFormValue());
+  readonly searchForm = form(this.searchModel);
   readonly loadStatus = this.store.selectSignal(selectAdminOrdersLoadStatus);
   readonly selectedStatuses = this.store.selectSignal(selectAdminOrderStatuses);
   readonly selectedCategories = this.store.selectSignal(selectAdminOrderCategories);
   readonly statusOptions = ORDER_STATUS_WORKFLOW;
   readonly categoryOptions = ['gift', 'voucher'];
+
+  constructor() {
+    effect(() => {
+      const email = this.searchModel().email;
+      if (email !== this.searchFormValue().email) {
+        this.store.dispatch(AdminOrdersActions.searchFormChanged({ changes: { email } }));
+      }
+    });
+  }
 
   statusChanged(statuses: string[]): void {
     this.store.dispatch(

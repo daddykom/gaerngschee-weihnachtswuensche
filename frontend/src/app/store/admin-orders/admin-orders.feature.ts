@@ -1,4 +1,4 @@
-import { createFeature, createReducer, on } from '@ngrx/store';
+import { createFeature, createReducer, createSelector, on } from '@ngrx/store';
 import { AdminOrdersActions } from './admin-orders.actions';
 import { AdminOrdersState, initialState } from './admin-orders.state';
 
@@ -7,6 +7,10 @@ export const adminOrdersFeature = createFeature({
   reducer: createReducer<AdminOrdersState>(
     initialState,
     on(AdminOrdersActions.load, (state) => ({ ...state, loadStatus: 'loading', errorCode: null })),
+    on(AdminOrdersActions.searchFormChanged, (state, { changes }) => ({
+      ...state,
+      searchForm: { ...state.searchForm, ...changes },
+    })),
     on(AdminOrdersActions.filtersChanged, (state, { statuses, categories }) => ({
       ...state,
       statuses,
@@ -53,10 +57,18 @@ export const adminOrdersFeature = createFeature({
       errorCode,
     })),
   ),
+  extraSelectors: ({ selectOrders, selectSearchForm }) => ({
+    selectFilteredOrders: createSelector(selectOrders, selectSearchForm, (orders, searchForm) => {
+      const search = searchForm.email.trim().toLowerCase();
+      return orders.filter((order) => order.requesterEmail.toLowerCase().includes(search));
+    }),
+  }),
 });
 
 export const {
   selectOrders: selectAdminOrders,
+  selectFilteredOrders: selectAdminFilteredOrders,
+  selectSearchForm: selectAdminOrderSearchForm,
   selectStatuses: selectAdminOrderStatuses,
   selectCategories: selectAdminOrderCategories,
   selectLoadStatus: selectAdminOrdersLoadStatus,
