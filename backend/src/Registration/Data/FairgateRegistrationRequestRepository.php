@@ -10,9 +10,6 @@ use PDO;
 
 final class FairgateRegistrationRequestRepository
 {
-    public const WAITING_FOR_FAIRGATE = 'waiting_for_fairgate';
-    public const NOTIFICATION_SENT = 'notification_sent';
-
     public function __construct(private readonly PDO $pdo)
     {
     }
@@ -26,7 +23,7 @@ final class FairgateRegistrationRequestRepository
         if ($existing !== null) {
             $statement = $this->pdo->prepare(
                 'UPDATE fairgate_registration_requests
-                 SET status = :status, requested_at = :requested_at,
+                 SET requested_at = :requested_at,
                      last_checked_at = NULL,
                      fairgate_found_at = NULL, notification_sent_at = NULL,
                      updated_at = :updated_at
@@ -34,7 +31,6 @@ final class FairgateRegistrationRequestRepository
             );
             $statement->execute([
                 'email' => $email,
-                'status' => self::WAITING_FOR_FAIRGATE,
                 'requested_at' => $timestamp,
                 'updated_at' => $timestamp,
             ]);
@@ -44,13 +40,12 @@ final class FairgateRegistrationRequestRepository
 
         $statement = $this->pdo->prepare(
             'INSERT INTO fairgate_registration_requests
-                (id, email, status, requested_at, created_at, updated_at)
-             VALUES (:id, :email, :status, :requested_at, :created_at, :updated_at)',
+                 (id, email, requested_at, created_at, updated_at)
+             VALUES (:id, :email, :requested_at, :created_at, :updated_at)',
         );
         $statement->execute([
             'id' => $this->createUuid(),
             'email' => $email,
-            'status' => self::WAITING_FOR_FAIRGATE,
             'requested_at' => $timestamp,
             'created_at' => $timestamp,
             'updated_at' => $timestamp,
@@ -62,15 +57,14 @@ final class FairgateRegistrationRequestRepository
     {
         $cutoff = $now->sub($interval)->format('Y-m-d H:i:s');
         $statement = $this->pdo->prepare(
-            'SELECT id, email, status, requested_at, last_checked_at,
+            'SELECT id, email, requested_at, last_checked_at,
                     fairgate_found_at, notification_sent_at, created_at, updated_at
              FROM fairgate_registration_requests
-             WHERE status = :status
+             WHERE notification_sent_at IS NULL
                AND (last_checked_at IS NULL OR last_checked_at <= :cutoff)
              ORDER BY requested_at, id',
         );
         $statement->execute([
-            'status' => self::WAITING_FOR_FAIRGATE,
             'cutoff' => $cutoff,
         ]);
 
@@ -83,11 +77,10 @@ final class FairgateRegistrationRequestRepository
         $statement = $this->pdo->prepare(
             'UPDATE fairgate_registration_requests
              SET last_checked_at = :last_checked_at, updated_at = :updated_at
-             WHERE id = :id AND status = :status',
+             WHERE id = :id AND notification_sent_at IS NULL',
         );
         $statement->execute([
             'id' => $id,
-            'status' => self::WAITING_FOR_FAIRGATE,
             'last_checked_at' => $timestamp,
             'updated_at' => $timestamp,
         ]);
@@ -97,20 +90,18 @@ final class FairgateRegistrationRequestRepository
     {
         $statement = $this->pdo->prepare(
             'UPDATE fairgate_registration_requests
-             SET status = :status, last_checked_at = :last_checked_at,
+             SET last_checked_at = :last_checked_at,
                  fairgate_found_at = :fairgate_found_at,
                  notification_sent_at = :notification_sent_at,
                  updated_at = :updated_at
-             WHERE id = :id AND status = :waiting_status',
+             WHERE id = :id AND notification_sent_at IS NULL',
         );
         $statement->execute([
             'id' => $id,
-            'status' => self::NOTIFICATION_SENT,
             'last_checked_at' => $foundAt->format('Y-m-d H:i:s'),
             'fairgate_found_at' => $foundAt->format('Y-m-d H:i:s'),
             'notification_sent_at' => $sentAt->format('Y-m-d H:i:s'),
             'updated_at' => $sentAt->format('Y-m-d H:i:s'),
-            'waiting_status' => self::WAITING_FOR_FAIRGATE,
         ]);
     }
 
@@ -118,7 +109,7 @@ final class FairgateRegistrationRequestRepository
     private function findByEmail(string $email): ?array
     {
         $statement = $this->pdo->prepare(
-            'SELECT id, email, status, requested_at, last_checked_at,
+            'SELECT id, email, requested_at, last_checked_at,
                     fairgate_found_at, notification_sent_at, created_at, updated_at
              FROM fairgate_registration_requests WHERE email = :email',
         );

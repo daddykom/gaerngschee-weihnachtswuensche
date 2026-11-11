@@ -23,7 +23,7 @@ final class FairgateRegistrationRequestRepositoryTest extends TestCase
 
         $request = $pdo->query('SELECT * FROM fairgate_registration_requests')->fetch();
         self::assertSame('person@example.com', $request['email']);
-        self::assertSame(FairgateRegistrationRequestRepository::WAITING_FOR_FAIRGATE, $request['status']);
+        self::assertNull($request['notification_sent_at']);
         self::assertSame('2026-11-08 12:00:00', $request['requested_at']);
     }
 
@@ -37,8 +37,8 @@ final class FairgateRegistrationRequestRepositoryTest extends TestCase
         $repository->saveWaiting('PERSON@example.com', $this->date('2026-11-08 13:00:00'));
 
         self::assertSame(1, (int) $pdo->query('SELECT COUNT(*) FROM fairgate_registration_requests')->fetchColumn());
-        $request = $pdo->query('SELECT status, requested_at, last_checked_at FROM fairgate_registration_requests')->fetch();
-        self::assertSame(FairgateRegistrationRequestRepository::WAITING_FOR_FAIRGATE, $request['status']);
+        $request = $pdo->query('SELECT notification_sent_at, requested_at, last_checked_at FROM fairgate_registration_requests')->fetch();
+        self::assertNull($request['notification_sent_at']);
         self::assertSame('2026-11-08 13:00:00', $request['requested_at']);
         self::assertNull($request['last_checked_at']);
     }
@@ -69,7 +69,6 @@ final class FairgateRegistrationRequestRepositoryTest extends TestCase
         $repository->markNotificationSent($id, $foundAt, $foundAt->modify('+1 minute'));
 
         $request = $pdo->query('SELECT * FROM fairgate_registration_requests')->fetch();
-        self::assertSame(FairgateRegistrationRequestRepository::NOTIFICATION_SENT, $request['status']);
         self::assertSame('2026-11-08 12:00:00', $request['fairgate_found_at']);
         self::assertSame('2026-11-08 12:01:00', $request['notification_sent_at']);
         self::assertCount(0, $repository->findDue($foundAt->modify('+12 hours'), new DateInterval('PT12H')));

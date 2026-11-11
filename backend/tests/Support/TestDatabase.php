@@ -43,7 +43,6 @@ final class TestDatabase
             'CREATE TABLE fairgate_registration_requests (
                 id TEXT PRIMARY KEY,
                 email TEXT UNIQUE NOT NULL,
-                status TEXT NOT NULL DEFAULT \'waiting_for_fairgate\',
                 requested_at TEXT NOT NULL,
                 last_checked_at TEXT NULL,
                 fairgate_found_at TEXT NULL,
