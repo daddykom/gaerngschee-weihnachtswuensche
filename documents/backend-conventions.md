@@ -153,7 +153,7 @@ Fallback zur Token-Erstellung. Im Fake-Modus wird der Speicher nicht verwendet.
 wiederverwendet; innerhalb von 30 Sekunden vor seinem JWT-Ablauf wird es mit
 `POST /fsa/v1.1/auth/refresh/{oid}/token` erneuert. Die Antwortfelder
 `data.token` und `data.refresh_token` werden gemeinsam gespeichert. Nur ohne
-Refresh-Token oder nach dessen ausdrücklicher Ablehnung (HTTP 400/401) wird
+Refresh-Token oder nach dessen Ablehnung (HTTP 400/401/403) wird
 `POST /fsa/v1.1/auth/create/{oid}/token` verwendet. Netzwerk- und Serverfehler
 beim Refresh lösen keine neue Authentifizierung aus.
 

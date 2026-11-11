@@ -269,6 +269,32 @@ final class FairgateClientTest extends TestCase
         }
     }
 
+    public function testForbiddenRefreshUsesOneNewAuthenticationAndReusesItsToken(): void
+    {
+        $history = [];
+        $client = $this->client([
+            $this->authentication(),
+            new Response(401),
+            new Response(403, [], '{"success":false,"message":"Refresh rejected"}'),
+            $this->authentication(),
+            new Response(200, [], '{"data":{"contactId":42}}'),
+        ], $history);
+
+        self::assertSame(42, $client->findContactDataById('42')['data']['contactId']);
+        self::assertSame([
+            '/fsa/v1.1/auth/create/org-123/token',
+            '/fsa/v2.0/contact/org-123/data/42',
+            '/fsa/v1.1/auth/refresh/org-123/token',
+            '/fsa/v1.1/auth/create/org-123/token',
+            '/fsa/v2.0/contact/org-123/data/42',
+        ], array_map(static fn (array $entry): string => $entry['request']->getUri()->getPath(), $history));
+        self::assertSame(['access_key' => 'access-key'], json_decode((string) $history[3]['request']->getBody(), true));
+        $nextHistory = [];
+        self::assertSame(43, $this->client([new Response(200, [], '{"data":{"contactId":43}}')], $nextHistory)
+            ->findContactDataById('43')['data']['contactId']);
+        self::assertCount(1, $nextHistory);
+    }
+
     public function testAuthentication429StoresTheRetryHeaderWithoutSendingDataRequests(): void
     {
         $history = [];

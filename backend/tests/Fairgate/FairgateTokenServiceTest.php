@@ -80,12 +80,44 @@ final class FairgateTokenServiceTest extends TestCase
             return $this->response('replacement');
         };
         self::assertNotEmpty($this->service($request)->token());
+        self::assertNotEmpty($this->service($request)->token());
         self::assertSame(['refresh-1', null], $calls);
     }
 
     public static function rejectedRefreshStatuses(): array
     {
-        return [[400], [401]];
+        return [[400], [401], [403]];
+    }
+
+    #[DataProvider('failedReplacementStatuses')]
+    public function testRejectedRefreshFollowedByFailedAuthenticationStopsAndDiscardsOldCredentials(int $status, ?int $retryAfter): void
+    {
+        $this->service(fn (): array => $this->response())->token();
+        $this->now += 3600;
+        $calls = [];
+        $request = static function (?string $refresh) use (&$calls, $status, $retryAfter): array {
+            $calls[] = $refresh;
+            throw new FairgateException('Rejected.', $refresh !== null ? 403 : $status, retryAfter: $refresh !== null ? null : $retryAfter);
+        };
+
+        foreach ([$status, 429] as $expectedStatus) {
+            try {
+                $this->service($request)->token();
+                self::fail('A failed replacement must not trigger another authentication.');
+            } catch (FairgateException $exception) {
+                self::assertSame($expectedStatus, $exception->getCode());
+            }
+        }
+        self::assertSame(['refresh-1', null], $calls);
+        $state = $this->tokens->synchronized('test-scope', static fn (array $row): array => $row);
+        self::assertNull($state['access_token']);
+        self::assertNull($state['refresh_token']);
+        self::assertSame($this->now + ($retryAfter ?? 90), (int) $state['auth_retry_after']);
+    }
+
+    public static function failedReplacementStatuses(): array
+    {
+        return [[403, null], [503, null], [429, 120]];
     }
 
     public function testRefreshServerErrorsDoNotCauseNewAuthenticationOrAnImmediateRetry(): void

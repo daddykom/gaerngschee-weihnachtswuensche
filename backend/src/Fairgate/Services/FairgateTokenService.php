@@ -63,7 +63,7 @@ final class FairgateTokenService
                         try {
                             $response = ($this->requestToken)($refreshToken);
                         } catch (FairgateException $exception) {
-                            if (!in_array($exception->getCode(), [400, 401], true)) {
+                            if (!in_array($exception->getCode(), [400, 401, 403], true)) {
                                 throw $exception;
                             }
                             // Only an explicitly rejected refresh token permits a new authentication.
