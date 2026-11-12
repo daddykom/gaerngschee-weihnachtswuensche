@@ -1,10 +1,26 @@
 <div class="gl-stack gl-stack--section">
   <section class="gl-stack gl-stack--group" aria-labelledby="order-filter-heading">
     <h2 id="order-filter-heading">{{ 'app.admin.overview.filters.title' | translate }}</h2>
-    <mat-form-field appearance="outline" subscriptSizing="dynamic">
-      <mat-label>{{ 'app.admin.overview.filters.email' | translate }}</mat-label>
-      <input matInput type="search" [formField]="searchForm.email" />
-    </mat-form-field>
+    <div class="gl-grid gl-grid--2">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>{{ 'app.admin.overview.filters.email' | translate }}</mat-label>
+        <input matInput type="search" [formField]="searchForm.email" />
+      </mat-form-field>
+      @if (loadStatus() === 'loaded') {
+        <p role="status">
+          <span>{{
+            'app.admin.overview.filteredOrderCount' | translate: { count: orders().length }
+          }}</span>
+          ·
+          <span>{{
+            (itemCount() === 1
+              ? 'app.admin.overview.itemCountSingular'
+              : 'app.admin.overview.itemCount'
+            ) | translate: { count: itemCount() }
+          }}</span>
+        </p>
+      }
+    </div>
     <div class="gl-grid gl-grid--2">
       <mat-form-field appearance="outline" subscriptSizing="dynamic">
         <mat-label>{{ 'app.admin.overview.filters.status' | translate }}</mat-label>

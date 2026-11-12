@@ -1,9 +1,11 @@
 :host {
   display: block;
+  min-width: 0;
 }
 
 .order-list {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--gl-space-sm);
 }
 
@@ -16,10 +18,11 @@
 }
 
 .order-list__row:not(.order-list__row--header) {
-  grid-template-columns: minmax(0, 1fr) auto max-content;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   grid-template-areas:
-    'number . status'
-    'email count actions';
+    'number status'
+    'email count'
+    'actions actions';
 }
 
 .order-list__cell--number {
@@ -45,6 +48,7 @@
 .order-list__cell {
   display: block;
   min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .order-list__cell::before {
@@ -63,11 +67,15 @@
 }
 
 .order-list__cell--actions {
-  justify-self: end;
+  justify-self: start;
 }
 
 .order-list__cell--actions a {
-  white-space: nowrap;
+  max-width: 100%;
+  height: auto;
+  min-height: 2.5rem;
+  padding-block: var(--gl-space-xs);
+  white-space: normal;
 }
 
 .order-list__row--header {
@@ -77,7 +85,9 @@
 @media (min-width: 65rem) {
   .order-list__row:not(.order-list__row--header),
   .order-list__row--header {
-    grid-template-columns: 8rem 16rem 9rem 8rem max-content;
+    grid-template-columns:
+      minmax(0, 0.8fr) minmax(0, 2fr) minmax(0, 1fr) minmax(0, 0.8fr)
+      minmax(0, 1.5fr);
     grid-template-areas: 'number email status count actions';
     align-items: center;
     justify-content: start;
@@ -89,7 +99,7 @@
 
   .order-list__row--header {
     display: grid;
-    padding: 0 var(--gl-space-md) var(--gl-space-sm);
+    padding: 0 calc(var(--gl-space-md) + 1px) var(--gl-space-sm);
     border: 0;
     background: transparent;
     color: #6f6069;
@@ -99,19 +109,5 @@
 
   .order-list__cell--actions {
     justify-self: stretch;
-  }
-}
-
-@media (max-width: 36rem) {
-  .order-list__row:not(.order-list__row--header) {
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas:
-      'number status'
-      'email count'
-      'actions actions';
-  }
-
-  .order-list__cell--actions {
-    justify-self: start;
   }
 }

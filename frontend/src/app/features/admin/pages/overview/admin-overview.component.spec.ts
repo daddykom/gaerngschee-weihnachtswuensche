@@ -1,7 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { provideTranslateService } from '@ngx-translate/core';
+import { AdminOrder } from '../../../../shared/models/admin-order.model';
 import { AdminOrdersActions } from '../../../../store/admin-orders/admin-orders.actions';
+import { selectAdminFilteredOrders } from '../../../../store/admin-orders/admin-orders.feature';
 import { AdminOverviewComponent } from './admin-overview.component';
 
 describe('AdminOverviewComponent', () => {
@@ -39,6 +41,26 @@ describe('AdminOverviewComponent', () => {
   it('reads active filters from the store', () => {
     expect(component.selectedStatuses()).toEqual(['definitive']);
     expect(component.selectedCategories()).toEqual(['gift']);
+  });
+
+  it('counts every item in the filtered orders and updates when the result changes', () => {
+    const orders = store.overrideSelector(selectAdminFilteredOrders, [
+      { id: 'order-1', items: [{}, {}] },
+      { id: 'order-2', items: [{}] },
+    ] as AdminOrder[]);
+    store.refreshState();
+    expect(component.orders().length).toBe(2);
+    expect(component.itemCount()).toBe(3);
+
+    orders.setResult([{ id: 'order-2', items: [{}] }] as AdminOrder[]);
+    store.refreshState();
+    expect(component.orders().length).toBe(1);
+    expect(component.itemCount()).toBe(1);
+
+    orders.setResult([]);
+    store.refreshState();
+    expect(component.orders().length).toBe(0);
+    expect(component.itemCount()).toBe(0);
   });
 
   it('offers all order statuses as selectable filters', () => {

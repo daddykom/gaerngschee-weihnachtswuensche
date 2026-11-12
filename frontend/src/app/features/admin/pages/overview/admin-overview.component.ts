@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, effect, inject, linkedSignal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  linkedSignal,
+} from '@angular/core';
 import { form, FormField } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
@@ -37,6 +44,9 @@ import {
 export class AdminOverviewComponent {
   private readonly store = inject(Store);
   readonly orders = this.store.selectSignal(selectAdminFilteredOrders);
+  readonly itemCount = computed(() =>
+    this.orders().reduce((total, order) => total + order.items.length, 0),
+  );
   readonly searchFormValue = this.store.selectSignal(selectAdminOrderSearchForm);
   readonly searchModel = linkedSignal(() => this.searchFormValue());
   readonly searchForm = form(this.searchModel);
