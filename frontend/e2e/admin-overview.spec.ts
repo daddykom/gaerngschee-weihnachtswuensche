@@ -3,6 +3,71 @@ import { expectTranslatedText } from './support/assertions';
 import { expect, test } from './support/test';
 
 test.describe('Admin order overview route', () => {
+  for (const width of [320, 390, 768, 1040, 1280]) {
+    test(`keeps filters, order details and actions inside the content at ${width}px`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await loginAsAdmin(page);
+      const email = 'charley+fair1+very-long-registration-address@example.collins.ch';
+      await mockOrders(page, { ...orderFixture(), requesterEmail: email });
+      await page.goto('/admin/overview');
+      const table = page.getByRole('table');
+      await expect(table).toContainText(email);
+      const action = table.locator('a[href="/admin/orders/order-1/edit"]');
+      await expect(action).toBeVisible();
+      const summary = page.getByRole('status');
+      await expectTranslatedText(summary, 'app.admin.overview.filteredOrderCount');
+      const searchBounds = await page.locator('mat-form-field').first().boundingBox();
+      const summaryBounds = await summary.boundingBox();
+      expect(searchBounds).not.toBeNull();
+      expect(summaryBounds).not.toBeNull();
+      if (width < 768) {
+        expect(summaryBounds!.y).toBeGreaterThanOrEqual(searchBounds!.y + searchBounds!.height);
+      } else {
+        expect(summaryBounds!.x).toBeGreaterThanOrEqual(searchBounds!.x + searchBounds!.width);
+      }
+
+      const overflow = await page.evaluate(() => {
+        const content = document.querySelector('app-admin-overview');
+        const bounds = content?.getBoundingClientRect();
+        if (!bounds) throw new Error('Overview content not found');
+        return {
+          page: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+          elements: Array.from(
+            content.querySelectorAll(
+              'mat-form-field, [role="status"], .order-list, .order-list__row, .order-list__cell, .order-list__cell a',
+            ),
+          )
+            .filter((element) => {
+              const rect = element.getBoundingClientRect();
+              return (
+                rect.width > 0 &&
+                (rect.left < bounds.left - 1 ||
+                  rect.right > bounds.right + 1 ||
+                  element.scrollWidth > element.clientWidth + 1)
+              );
+            })
+            .map((element) => element.className),
+        };
+      });
+      expect(overflow).toEqual({ page: false, elements: [] });
+
+      const rows = table.getByRole('row');
+      if (width >= 1040) {
+        const headerCells = rows.first().getByRole('columnheader');
+        const cells = rows.last().getByRole('cell');
+        for (let index = 0; index < 5; index++) {
+          const header = await headerCells.nth(index).boundingBox();
+          const cell = await cells.nth(index).boundingBox();
+          expect(header).not.toBeNull();
+          expect(cell).not.toBeNull();
+          expect(Math.abs(header!.x - cell!.x)).toBeLessThanOrEqual(1);
+        }
+      }
+    });
+  }
+
   test('offers and submits every order status including draft', async ({ page }) => {
     await loginAsAdmin(page);
     const statuses = [
@@ -68,7 +133,11 @@ test.describe('Admin order overview route', () => {
       await route.fulfill({
         json: {
           orders: [
-            { ...orderFixture(), requesterEmail: 'Anna@Example.ch' },
+            {
+              ...orderFixture(),
+              requesterEmail: 'Anna@Example.ch',
+              items: [{ id: 'item-1' }, { id: 'item-2' }],
+            },
             { ...orderFixture(), id: 'order-2', requesterEmail: 'other@example.org' },
           ],
           statuses: ['released', 'in_review'],
@@ -83,9 +152,19 @@ test.describe('Admin order overview route', () => {
       'app.admin.overview.filters.email',
     );
     await expect(page.getByRole('table').getByRole('row')).toHaveCount(3);
+    const summary = page.getByRole('status');
+    await expectTranslatedText(
+      summary.locator('span').first(),
+      'app.admin.overview.filteredOrderCount',
+    );
+    await expectTranslatedText(summary.locator('span').last(), 'app.admin.overview.itemCount');
+    await expect(summary).toContainText('2');
+    await expect(summary.locator('span').last()).toContainText('3');
     const requestsBeforeSearch = listRequests;
     await search.fill('NA@EXAMPLE');
     await expect(page.getByRole('table').getByRole('row')).toHaveCount(2);
+    await expect(summary.locator('span').first()).toContainText('1');
+    await expect(summary.locator('span').last()).toContainText('2');
     await expect(page.getByRole('table')).toContainText('Anna@Example.ch');
     await expect(page.getByRole('table')).not.toContainText('other@example.org');
     expect(listRequests).toBe(requestsBeforeSearch);
@@ -96,6 +175,8 @@ test.describe('Admin order overview route', () => {
     await expect(page.getByRole('table').getByRole('row')).toHaveCount(2);
     await search.fill('missing');
     await expect(page.getByRole('table').getByRole('row')).toHaveCount(1);
+    await expect(summary.locator('span').first()).toContainText('0');
+    await expect(summary.locator('span').last()).toContainText('0');
     await expectTranslatedText(page.getByRole('table').locator('p'), 'app.admin.overview.empty');
     await search.clear();
     await expect(page.getByRole('table').getByRole('row')).toHaveCount(3);

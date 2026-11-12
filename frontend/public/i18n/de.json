@@ -739,6 +739,7 @@
         "wishNumber": "Wunschnummer",
         "status": "Status",
         "itemCountHeader": "Anzahl Wünsche",
+        "filteredOrderCount": "{{ count }} Wunschzettel",
         "actions": "Aktionen",
         "itemCountSingular": "{{ count }} Wunsch",
         "itemCount": "{{ count }} Wünsche",
