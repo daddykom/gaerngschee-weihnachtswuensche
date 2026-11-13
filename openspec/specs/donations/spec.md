@@ -13,6 +13,15 @@ E-Mail bestätigt und bleibt bis zur Bestätigung zehn Minuten vorläufig.
 - Erfüller sieht öffentliche Wünsche aus definitiven Bestellungen ohne Login
 - Die Wünsche werden nach Bestellung gruppiert angezeigt
 - Anonymisierte, korrigierte Familien- und Wunschtexte werden angezeigt
+- Wunschliste und Reservationsdialog zeigen den bearbeiteten Wunschtitel,
+  die bearbeitete Wunschbeschreibung und den optionalen Geschenklink.
+- Originaltitel und Originalbeschreibung bleiben ausschliesslich im Admin
+  sichtbar und werden dort getrennt von ihren bearbeitbaren Fassungen beschriftet.
+- Persönliche Nachrichten sind ausschliesslich für das Gärngschee-Team bestimmt.
+  Das optionale Formularfeld und sein Hilfetext weisen ausdrücklich darauf hin.
+  Weder API-Antworten an Erfüller noch die öffentliche Suche geben diese
+  Nachrichten preis; dies gilt auch für die bisherigen Begründungsfelder
+  `original_reason` und `current_reason`.
 - Die Wunschnummer wird im Format `<Bestellnummer>-<Wunschnummer>` angezeigt
 - Die Liste kann nach Kategorie und korrigierten Texten durchsucht werden
 - Erfüller wählt genau einen Weihnachtswunsch aus
@@ -22,6 +31,12 @@ E-Mail bestätigt und bleibt bis zur Bestätigung zehn Minuten vorläufig.
 - E-Mail-Adresse, Datenschutzzustimmung und verbindliche Übergabezusage erfassen
 - Vorläufige Reservierung bis zur Token-Bestätigung halten
 - Bestätigungslink ist zehn Minuten gültig und macht die Reservierung definitiv
+- Die Reservations-E-Mail enthält Wunschnummer, bearbeiteten Wunschtitel und
+  bearbeitete Beschreibung in HTML und Klartext; Originalwerte bleiben intern.
+- `fulfiller_handover_date` ist ein frei formulierbarer Abgabetermin oder
+  Abgabezeitraum, etwa „17.–19. Dezember 2026“. Bestehende Werte bleiben erhalten.
+  Der Text wird unverändert im Reservationsdialog und in der Bestätigungsmail
+  angezeigt. Die Start-/Enddaten der Erfüller-Aktion bleiben Datumswerte.
 - Abgelaufene oder nicht bestätigte Vorreservierungen werden wieder verfügbar
 
 ### F3: Wunsch-Status

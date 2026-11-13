@@ -23,6 +23,7 @@ final class EmailTestAction
         'fulfiller-reservation' => ['fields' => [
             ['key' => 'loginUrl', 'type' => 'url', 'required' => true],
             ['key' => 'wishNumber', 'type' => 'text', 'required' => true],
+            ['key' => 'wishTitle', 'type' => 'text', 'required' => true],
             ['key' => 'wishDescription', 'type' => 'textarea', 'required' => true],
         ]],
         'fairgate-registration-required' => ['fields' => [

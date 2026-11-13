@@ -63,6 +63,7 @@ final class FulfillerReservationService
                 'wish' => [
                     'id' => $wish['id'],
                     'wishNumber' => $wish['wishNumber'],
+                    'title' => $wish['title'],
                     'currentDescription' => $wish['currentDescription'],
                 ],
             ];

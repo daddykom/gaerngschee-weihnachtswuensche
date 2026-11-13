@@ -21,9 +21,10 @@ test.describe('Fulfillment route', () => {
                   id: 'item-1',
                   itemNumber: 1,
                   wishNumber: '12-1',
+                  title: 'Bauklötze',
                   category: 'gift',
-                  currentDescription: 'Bauklötze',
-                  currentReason: 'Zum gemeinsamen Spielen',
+                  currentDescription: 'Bunte Holzbausteine zum Bauen',
+                  giftLink: 'https://example.com/building-blocks',
                   fulfillmentStatus: 'available',
                   reservedAt: null,
                   reservationExpiresAt: null,
@@ -82,7 +83,12 @@ test.describe('Fulfillment route', () => {
       })
       .toBeLessThan(2);
     await expectTranslatedText(page.locator('h1'), 'app.fulfiller.pageTitle');
-    await expect(page.getByRole('heading', { name: '12-1' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Bauklötze' })).toBeVisible();
+    await expect(page.locator('.wish-entry')).toContainText('Bunte Holzbausteine zum Bauen');
+    await expect(page.locator('.wish-entry a')).toHaveAttribute(
+      'href',
+      'https://example.com/building-blocks',
+    );
     await expect(
       page
         .locator('mat-card-content > div.gl-stack > p.gl-text--multiline')
@@ -91,6 +97,10 @@ test.describe('Fulfillment route', () => {
 
     await page.getByRole('button', { name: 'Diesen Wunsch erfüllen' }).click();
     await expect(page.getByRole('dialog')).toBeVisible();
+    await expect(page.getByRole('dialog')).toContainText('Bunte Holzbausteine zum Bauen');
+    await expect(
+      page.getByRole('dialog').locator('.reservation-dialog__details a'),
+    ).toHaveAttribute('href', 'https://example.com/building-blocks');
     await page.getByRole('dialog').getByLabel('Deine E-Mail-Adresse').fill('fulfiller@example.com');
     await page.getByRole('dialog').getByRole('checkbox').check();
     await page.getByRole('dialog').getByRole('button', { name: 'Bestätigungslink senden' }).click();

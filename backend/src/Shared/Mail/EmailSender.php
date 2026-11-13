@@ -251,6 +251,7 @@ final class EmailSender implements EmailSenderInterface
             'client-order' => $this->renderAnmeldungTest($recipient, AnmeldungMailVariant::ClientOrder, (string) $parameters['loginUrl'], null, (int) $parameters['campaignYear']),
             'fulfiller-reservation' => $this->renderAnmeldungTest($recipient, AnmeldungMailVariant::FulfillerReservation, (string) $parameters['loginUrl'], [
                 'wishNumber' => (string) $parameters['wishNumber'],
+                'title' => (string) $parameters['wishTitle'],
                 'currentDescription' => (string) $parameters['wishDescription'],
             ]),
             'fairgate-registration-required' => $this->renderAnmeldungTest($recipient, AnmeldungMailVariant::FairgateRegistrationRequired, (string) $parameters['fairgateUrl']),

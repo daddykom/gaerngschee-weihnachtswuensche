@@ -3,6 +3,45 @@ import { expectTranslatedText } from './support/assertions';
 import { expect, test } from './support/test';
 
 test.describe('Admin order item edit route', () => {
+  test('shows original and edited title and description separately and retains the internal message', async ({
+    page,
+  }) => {
+    await loginAsAdmin(page);
+    const order = orderFixture();
+    const item = (order['items'] as Record<string, unknown>[])[0];
+    await mockOrders(page, {
+      ...order,
+      items: [
+        {
+          ...item,
+          originalTitle: 'Original title',
+          currentTitle: 'Edited title',
+          personalMessage: 'Internal team note',
+        },
+      ],
+    });
+    await page.goto('/admin/overview');
+    await page.locator('a[href="/admin/orders/order-1/edit"]').click();
+    await page.getByRole('link', { name: 'Ändern' }).first().click();
+
+    await expect(page.locator('.original-text').nth(0)).toHaveText('Original title');
+    await expect(page.locator('.original-text').nth(1)).toHaveText('Originalbeschreibung');
+    await expect(page.getByRole('textbox', { name: 'Aktueller Wunschtitel' })).toHaveValue(
+      'Edited title',
+    );
+    await expect(page.getByRole('textbox', { name: 'Aktuelle Wunschbeschreibung' })).toHaveValue(
+      'Aktuelle Beschreibung',
+    );
+    const message = page.getByRole('textbox', {
+      name: /Persönliche Nachricht an das Gärngschee-Team/,
+    });
+    await expect(message).toHaveValue('Internal team note');
+    await expectTranslatedText(
+      message.locator('xpath=ancestor::mat-form-field').locator('mat-hint'),
+      'app.order.items.personalMessageHint',
+    );
+  });
+
   for (const numbers of [
     { orderNumber: 12, itemNumber: 3, expected: '12-3' },
     { orderNumber: null, itemNumber: 3, expected: '—' },

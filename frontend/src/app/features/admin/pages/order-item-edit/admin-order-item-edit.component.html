@@ -83,15 +83,19 @@
           </mat-form-field>
         </div>
         <p>
-          <strong>{{ 'app.order.items.wishTitle' | translate }}</strong>
+          <strong>{{ 'app.admin.overview.originalTitle' | translate }}</strong>
         </p>
         <p class="original-text">
-          {{ currentItem.originalTitle || currentItem.originalDescription }}
+          {{ currentItem.originalTitle || '—' }}
         </p>
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>{{ 'app.order.items.wishTitle' | translate }}</mat-label>
+          <mat-label>{{ 'app.admin.overview.currentTitle' | translate }}</mat-label>
           <input matInput [formField]="itemForm.currentTitle" />
         </mat-form-field>
+        <p>
+          <strong>{{ 'app.admin.overview.originalDescription' | translate }}</strong>
+        </p>
+        <p class="original-text gl-text--multiline">{{ currentItem.originalDescription }}</p>
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>{{ 'app.admin.overview.currentDescription' | translate }}</mat-label>
           <textarea matInput rows="4" [formField]="itemForm.currentDescription"></textarea>
@@ -108,6 +112,7 @@
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>{{ 'app.order.items.personalMessage' | translate }}</mat-label>
           <textarea matInput rows="3" [formField]="itemForm.personalMessage"></textarea>
+          <mat-hint>{{ 'app.order.items.personalMessageHint' | translate }}</mat-hint>
           <app-control-error
             matError
             [control]="itemForm.personalMessage()"

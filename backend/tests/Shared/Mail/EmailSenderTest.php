@@ -12,6 +12,41 @@ use Symfony\Component\Mime\Email;
 
 final class EmailSenderTest extends TestCase
 {
+    public function testReservationMailUsesTheEditedTitleAndDescriptionInHtmlAndPlainText(): void
+    {
+        $mailer = $this->createMock(MailerInterface::class);
+        $mailer->expects(self::once())->method('send')->with(self::callback(static function (Email $email): bool {
+            foreach ([$email->getHtmlBody(), $email->getTextBody()] as $body) {
+                self::assertStringContainsString('12-1', $body);
+                self::assertStringContainsString('Edited wish title', $body);
+                self::assertStringContainsString('Edited wish description', $body);
+                self::assertStringNotContainsString('Private original', $body);
+                self::assertStringNotContainsString('Private team message', $body);
+            }
+            return true;
+        }));
+        $sender = new EmailSender($mailer, 'noreply@example.com', 'Gärngschee');
+        $sender->sendAnmeldung('person@example.com', AnmeldungMailVariant::FulfillerReservation, 'de', 'https://example.com/confirm', [
+            'wishNumber' => '12-1', 'title' => 'Edited wish title', 'currentDescription' => 'Edited wish description',
+            'originalTitle' => 'Private original title', 'originalDescription' => 'Private original description',
+            'personalMessage' => 'Private team message',
+        ]);
+    }
+
+    public function testReservationTestMailIncludesTheConfiguredWishTitle(): void
+    {
+        $mailer = $this->createMock(MailerInterface::class);
+        $mailer->expects(self::once())->method('send')->with(self::callback(static function (Email $email): bool {
+            self::assertStringContainsString('Edited test title', $email->getHtmlBody());
+            self::assertStringContainsString('Edited test title', $email->getTextBody());
+            return true;
+        }));
+        (new EmailSender($mailer, 'noreply@example.com', 'Gärngschee'))->sendTestEmail('test@example.com', 'fulfiller-reservation', [
+            'loginUrl' => 'https://example.com/confirm', 'wishNumber' => '12-1',
+            'wishTitle' => 'Edited test title', 'wishDescription' => 'Edited description',
+        ]);
+    }
+
     public function testSendAnmeldungRendersClientOrderVariant(): void
     {
         $variant = AnmeldungMailVariant::ClientOrder;
@@ -187,11 +222,13 @@ final class EmailSenderTest extends TestCase
 
         $message = $sender->renderFulfillerReservationConfirmation(
             ['wishNumber' => '12-1', 'currentDescription' => 'Bauklötze'],
-            ['date' => '2026-12-19', 'time' => '10:00–12:00 Uhr', 'location' => 'Clarastrasse 10, 4058 Basel'],
+            ['date' => '17.–19. Dezember 2026', 'time' => '10:00–12:00 Uhr', 'location' => 'Clarastrasse 10, 4058 Basel'],
         );
 
         self::assertSame('Deine Wunschreservierung ist bestätigt', $message['subject']);
         self::assertStringContainsString('Bauklötze', $message['html']);
+        self::assertStringContainsString('17.–19. Dezember 2026', $message['html']);
+        self::assertStringContainsString('17.–19. Dezember 2026', $message['text']);
         self::assertStringContainsString('Clarastrasse 10, 4058 Basel', $message['html']);
         self::assertStringNotContainsString('http://localhost:4200', $message['html']);
         self::assertStringContainsString('Danke, dass du diesen Weihnachtswunsch erfüllst.', $message['text']);

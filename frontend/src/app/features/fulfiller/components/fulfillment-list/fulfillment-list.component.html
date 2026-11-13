@@ -63,6 +63,7 @@
                   <li class="wish-entry gl-stack">
                     <div class="wish-entry__content gl-stack">
                       <h3>{{ wish.title || wish.wishNumber }}</h3>
+                      <p class="gl-text--multiline">{{ wish.currentDescription }}</p>
                       @if (wish.personType && wish.personIndex) {
                         <p>
                           {{
@@ -83,11 +84,6 @@
                         <a [href]="wish.giftLink" target="_blank" rel="noopener noreferrer">
                           {{ 'app.order.items.giftLink' | translate }}
                         </a>
-                      }
-                      @if (wish.currentReason) {
-                        <p class="gl-text--multiline wish-entry__reason">
-                          {{ wish.currentReason }}
-                        </p>
                       }
                     </div>
                     @if (wish.fulfillmentStatus === 'pending_confirmation') {

@@ -3,6 +3,59 @@ import { expectTranslatedText } from './support/assertions';
 import { expect, test } from './support/test';
 
 test.describe('Admin email test route', () => {
+  test('requires and sends the edited wish title for a fulfiller reservation email', async ({
+    page,
+  }) => {
+    await loginAsAdmin(page);
+    let sent: unknown;
+    await page.route('http://localhost:8083/admin/email-test', async (route) => {
+      if (route.request().method() === 'GET') {
+        await route.fulfill({
+          json: {
+            templates: [
+              {
+                id: 'fulfiller-reservation',
+                fields: [
+                  { key: 'loginUrl', type: 'url', required: true },
+                  { key: 'wishNumber', type: 'text', required: true },
+                  { key: 'wishTitle', type: 'text', required: true },
+                  { key: 'wishDescription', type: 'textarea', required: true },
+                ],
+              },
+            ],
+          },
+        });
+      } else {
+        sent = route.request().postDataJSON();
+        await route.fulfill({ json: { emailSentTo: 'reservation@example.com' } });
+      }
+    });
+    await page.goto('/admin/email-test');
+    await page.getByRole('textbox', { name: 'Empfänger-Adresse' }).fill('reservation@example.com');
+    await page
+      .getByRole('textbox', { name: 'Login-URL', exact: true })
+      .fill('https://example.com/confirm');
+    await page.getByRole('textbox', { name: 'Wunschnummer', exact: true }).fill('12-1');
+    await page
+      .getByRole('textbox', { name: 'Bearbeiteter Wunschtitel', exact: true })
+      .fill('Edited title');
+    await page
+      .getByRole('textbox', { name: 'Wunschbeschreibung', exact: true })
+      .fill('Edited description');
+    await page.getByRole('button', { name: 'Senden', exact: true }).click();
+    await expectTranslatedText(page.getByRole('alert'), 'app.admin.emailTest.sent');
+    expect(sent).toEqual({
+      recipient: 'reservation@example.com',
+      template: 'fulfiller-reservation',
+      parameters: {
+        loginUrl: 'https://example.com/confirm',
+        wishNumber: '12-1',
+        wishTitle: 'Edited title',
+        wishDescription: 'Edited description',
+      },
+    });
+  });
+
   test('offers the pickup notification and submits its order number and year', async ({ page }) => {
     await loginAsAdmin(page);
     let sent: unknown;

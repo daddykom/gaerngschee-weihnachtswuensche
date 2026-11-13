@@ -29,6 +29,8 @@ final class EmailTestActionTest extends TestCase
         $pickup = array_values(array_filter($body['templates'], static fn (array $template): bool => $template['id'] === 'order-ready-for-pickup'));
         self::assertCount(1, $pickup);
         self::assertSame(['year', 'orderNumber'], array_column($pickup[0]['fields'], 'key'));
+        $reservation = array_values(array_filter($body['templates'], static fn (array $template): bool => $template['id'] === 'fulfiller-reservation'))[0];
+        self::assertSame(['loginUrl', 'wishNumber', 'wishTitle', 'wishDescription'], array_column($reservation['fields'], 'key'));
     }
 
     public function testRejectsInvalidEmailTestDataBeforeSending(): void

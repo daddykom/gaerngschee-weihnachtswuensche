@@ -15,7 +15,6 @@ describe('fulfillerOrdersFeature', () => {
         wishNumber: '12-1',
         category: 'gift' as const,
         currentDescription: 'Bauklötze',
-        currentReason: null,
         fulfillmentStatus: 'available' as const,
         reservedAt: null,
         reservationExpiresAt: null,
