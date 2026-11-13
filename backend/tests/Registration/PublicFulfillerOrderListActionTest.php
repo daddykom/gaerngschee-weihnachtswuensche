@@ -6,6 +6,7 @@ namespace Tests\Registration;
 
 use App\Configuration\Data\FrontendConfigRepository;
 use App\Registration\Actions\PublicFulfillerOrderListAction;
+use App\Registration\Data\FulfillerReservationRepository;
 use App\Registration\Services\FulfillerAvailabilityService;
 use DateTimeImmutable;
 use DateTimeZone;
@@ -16,7 +17,7 @@ use Tests\Support\TestDatabase;
 
 final class PublicFulfillerOrderListActionTest extends TestCase
 {
-    public function testRejectsThePublicWishListWhenTheOrderItemLimitIsExceeded(): void
+    public function testServesThePublicWishListEvenWhenTheOrderItemLimitIsExceeded(): void
     {
         $pdo = TestDatabase::create();
         $this->addConfiguration($pdo);
@@ -29,7 +30,7 @@ final class PublicFulfillerOrderListActionTest extends TestCase
         );
         $configs = new FrontendConfigRepository($pdo);
         $action = new PublicFulfillerOrderListAction(
-            null,
+            new FulfillerReservationRepository($pdo),
             $configs,
             new DateTimeImmutable('2026-08-31 12:00:00', new DateTimeZone('UTC')),
             new FulfillerAvailabilityService($pdo, $configs),
@@ -40,8 +41,10 @@ final class PublicFulfillerOrderListActionTest extends TestCase
             new Response(),
         );
 
-        self::assertSame(403, $response->getStatusCode());
-        self::assertSame('FULFILLER_ENDED', json_decode((string) $response->getBody(), true)['error']['code']);
+        self::assertSame(200, $response->getStatusCode());
+        $body = json_decode((string) $response->getBody(), true);
+        self::assertCount(1, $body['orders']);
+        self::assertCount(2, $body['orders'][0]['items']);
     }
 
     private function addConfiguration(\PDO $pdo): void

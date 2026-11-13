@@ -1,4 +1,4 @@
-import { createActionGroup, emptyProps, props } from '@ngrx/store';
+import { createActionGroup, props } from '@ngrx/store';
 import { StartForm } from './start.state';
 
 export const StartActions = createActionGroup({
@@ -7,6 +7,6 @@ export const StartActions = createActionGroup({
     'Form Changed': props<{ changes: Partial<StartForm> }>(),
     Submit: props<{ email: string; language: string }>(),
     'Submit Success': props<{ sent: boolean }>(),
-    'Submit Failure': emptyProps(),
+    'Submit Failure': props<{ errorCode: string }>(),
   },
 });

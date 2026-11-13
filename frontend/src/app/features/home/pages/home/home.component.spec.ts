@@ -80,6 +80,42 @@ describe('HomeComponent', () => {
     expect(fixture.componentInstance.campaignStatus()).toBe('not_started');
   });
 
+  it('prefers the backend campaign availability status over the date range', () => {
+    const store = TestBed.inject(MockStore);
+    store.setState({
+      frontendConfig: {
+        publicConfigs: [
+          { variableName: 'campaign_year', value: '2026' },
+          { variableName: 'campaign_start_date', value: '2000-01-01' },
+          { variableName: 'campaign_end_date', value: '2999-01-01' },
+          { variableName: 'campaign_availability_status', value: 'capacity_reached' },
+        ],
+      },
+    });
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.campaignStatus()).toBe('capacity_reached');
+  });
+
+  it('hides the submission link when the campaign capacity is reached', () => {
+    const store = TestBed.inject(MockStore);
+    store.setState({
+      frontendConfig: {
+        publicConfigs: [
+          { variableName: 'campaign_year', value: '2026' },
+          { variableName: 'campaign_start_date', value: '2000-01-01' },
+          { variableName: 'campaign_end_date', value: '2999-01-01' },
+          { variableName: 'campaign_availability_status', value: 'capacity_reached' },
+        ],
+      },
+    });
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('a[routerlink="/start"]')).toBeNull();
+    expect(compiled.textContent).toContain('app.home.submit.capacityReached');
+  });
+
   it('dispatches logout for an authenticated user', () => {
     const store = TestBed.inject(MockStore);
     store.setState({

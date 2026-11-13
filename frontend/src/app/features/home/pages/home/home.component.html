@@ -23,6 +23,8 @@
             <p role="status">
               {{ 'app.home.submit.notStarted' | translate: { date: formattedCampaignStartDate() } }}
             </p>
+          } @else if (campaignStatus() === 'capacity_reached') {
+            <p role="status">{{ 'app.home.submit.capacityReached' | translate }}</p>
           } @else if (campaignStatus() === 'ended') {
             <p role="status">{{ 'app.home.submit.ended' | translate }}</p>
           } @else {

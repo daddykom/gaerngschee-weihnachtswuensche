@@ -8,6 +8,7 @@ use App\Configuration\Data\FrontendConfigRepository;
 use App\Auth\Services\PasswordPolicy;
 use App\Auth\Services\SessionService;
 use App\Registration\Data\OrderRepository;
+use App\Registration\Services\CampaignAvailabilityService;
 use App\Registration\Services\OrderStatus;
 use App\Shared\Database\Database;
 use App\Shared\Http\JsonRequest;
@@ -28,6 +29,7 @@ final class SaveOrderAction
         private readonly ?UserRepository $users = null,
         private readonly ?EmailSenderInterface $emails = null,
         private readonly ?EmailQueueRepository $emailQueue = null,
+        private readonly ?CampaignAvailabilityService $campaignAvailability = null,
     ) {
     }
 
@@ -70,6 +72,9 @@ final class SaveOrderAction
         $existingOrder = $orders->findForYear($user['id'], $year);
         if ($existingOrder !== null && !OrderStatus::canClientEdit((string) $existingOrder['status'])) {
             return JsonResponse::error($response, 'ORDER_NOT_EDITABLE', 409);
+        }
+        if ($existingOrder === null && $this->isCampaignCapacityReached($config)) {
+            return JsonResponse::error($response, 'CAMPAIGN_CAPACITY_REACHED', 403);
         }
         if ($existingOrder === null
             && (!is_string($password)
@@ -167,6 +172,22 @@ final class SaveOrderAction
     /** @param mixed $value
      *  @return list<array{id?: string, category: string, personType: ?string, personIndex: ?int, title: string, description: string, giftLink: ?string, personalMessage: string}>|null
      */
+    /**
+     * Only a determinable capacity limit blocks new orders; an incomplete or
+     * invalid campaign configuration must not break saving existing orders.
+     */
+    private function isCampaignCapacityReached(FrontendConfigRepository $config): bool
+    {
+        try {
+            return ($this->campaignAvailability ?? new CampaignAvailabilityService(
+                Database::getConnection(),
+                $config,
+            ))->isCapacityReached();
+        } catch (\RuntimeException) {
+            return false;
+        }
+    }
+
     private function items(mixed $value): ?array
     {
         if (!is_array($value)) {

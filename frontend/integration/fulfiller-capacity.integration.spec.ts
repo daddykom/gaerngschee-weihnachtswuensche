@@ -7,7 +7,7 @@ import { seedFulfillerCapacityFixture } from './support/fulfiller-capacity';
 const API_URL = 'http://localhost:8082';
 
 test.describe('Integration fulfiller capacity', () => {
-  test('switches the public fulfiller access off when either yearly limit is exceeded', async ({
+  test('keeps the fulfiller access open beyond the yearly limits and blocks new registrations instead', async ({
     page,
   }) => {
     await loginAsAdmin(page);
@@ -50,53 +50,58 @@ test.describe('Integration fulfiller capacity', () => {
             configuration.variableName === 'fulfiller_availability_status',
         ).value,
       ).toBe('open');
+      expect(
+        openConfiguration.find(
+          (configuration: { variableName: string }) =>
+            configuration.variableName === 'campaign_availability_status',
+        ).value,
+      ).toBe('open');
       expect((await page.request.get(`${API_URL}/public/fulfiller/orders`)).status()).toBe(200);
 
       await update(ordersLimit.id, '1');
-      await expectFulfillerAccessClosed(page, 'app.home.fulfill.ended');
-
-      await update(ordersLimit.id, '999999');
       await update(itemsLimit.id, '1');
-      await expectFulfillerAccessClosed(page, 'app.home.fulfill.ended');
+
+      const closedConfiguration = await (
+        await page.request.get(`${API_URL}/public/configuration`)
+      ).json();
+      expect(
+        closedConfiguration.find(
+          (configuration: { variableName: string }) =>
+            configuration.variableName === 'fulfiller_availability_status',
+        ).value,
+      ).toBe('open');
+      expect(
+        closedConfiguration.find(
+          (configuration: { variableName: string }) =>
+            configuration.variableName === 'campaign_availability_status',
+        ).value,
+      ).toBe('capacity_reached');
+
+      const ordersResponse = await page.request.get(`${API_URL}/public/fulfiller/orders`);
+      expect(ordersResponse.status()).toBe(200);
+      const orders = (await ordersResponse.json()).orders as Array<{
+        id: string;
+        items: Array<{ id: string }>;
+      }>;
+      const capacityOrder = orders.find((order) => order.id === 'integration-capacity-order-1');
+      expect(capacityOrder?.items.some((item) => item.id === 'integration-capacity-item-1')).toBe(
+        true,
+      );
+
+      const registrationResponse = await page.request.post(`${API_URL}/public/start`, {
+        headers: await authHeaders(page),
+        data: { email: 'capacity-registration@example.com', language: 'de' },
+      });
+      expect(registrationResponse.status()).toBe(403);
+      expect((await registrationResponse.json()).error.code).toBe('CAMPAIGN_CAPACITY_REACHED');
+
+      await page.goto('/');
+      await expectTranslatedText(page.locator('main'), 'app.home.submit.capacityReached');
+      await expect(page.locator('a[href="/start"]')).toHaveCount(0);
+      await expectTranslatedText(page.locator('a[href="/erfuellen"]'), 'app.home.fulfill.action');
     } finally {
       await update(ordersLimit.id, '999999');
       await update(itemsLimit.id, '600');
     }
   });
 });
-
-async function expectFulfillerAccessClosed(
-  page: import('@playwright/test').Page,
-  translationKey: string,
-): Promise<void> {
-  const configurationResponse = await page.request.get(`${API_URL}/public/configuration`);
-  const configuration = await configurationResponse.json();
-  expect(
-    configuration.find(
-      (entry: { variableName: string }) => entry.variableName === 'fulfiller_availability_status',
-    ).value,
-  ).toBe('ended');
-
-  const ordersResponse = await page.request.get(`${API_URL}/public/fulfiller/orders`);
-  expect(ordersResponse.status()).toBe(403);
-  expect((await ordersResponse.json()).error.code).toBe('FULFILLER_ENDED');
-
-  const reservationResponse = await page.request.post(
-    `${API_URL}/public/fulfiller-reservation-start`,
-    {
-      headers: await authHeaders(page),
-      data: {
-        itemId: 'integration-capacity-item-1',
-        email: 'fulfiller@example.com',
-        language: 'de',
-        privacyAccepted: true,
-      },
-    },
-  );
-  expect(reservationResponse.status()).toBe(403);
-  expect((await reservationResponse.json()).error.code).toBe('FULFILLER_ENDED');
-
-  await page.goto('/');
-  await expectTranslatedText(page.locator('main'), translationKey);
-  await expect(page.locator('a[href="/erfuellen"]')).toHaveCount(0);
-}

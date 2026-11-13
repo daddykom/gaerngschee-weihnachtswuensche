@@ -35,6 +35,16 @@ export class HomeComponent {
   readonly fulfillerStartDate = computed(() => this.configValue('fulfiller_start_date'));
   readonly fulfillerEndDate = computed(() => this.configValue('fulfiller_end_date'));
   readonly campaignStatus = computed(() => {
+    const availabilityStatus = this.configValue('campaign_availability_status');
+    if (
+      availabilityStatus === 'open' ||
+      availabilityStatus === 'not_started' ||
+      availabilityStatus === 'ended' ||
+      availabilityStatus === 'capacity_reached'
+    ) {
+      return availabilityStatus;
+    }
+
     const startDate = this.campaignStartDate();
     const endDate = this.campaignEndDate();
     if (

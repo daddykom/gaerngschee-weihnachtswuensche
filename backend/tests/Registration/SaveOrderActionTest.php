@@ -8,6 +8,7 @@ use App\Configuration\Data\FrontendConfigRepository;
 use App\Auth\Services\SessionService;
 use App\Registration\Actions\SaveOrderAction;
 use App\Registration\Data\OrderRepository;
+use App\Registration\Services\CampaignAvailabilityService;
 use App\Shared\Mail\EmailSenderInterface;
 use App\Users\Data\UserRepository;
 use PHPUnit\Framework\TestCase;
@@ -183,6 +184,97 @@ final class SaveOrderActionTest extends TestCase
         self::assertSame($fairgateStatus === 'valid' && $fairgateAdults !== null && $fairgateChildren !== null, $data['fairgateUserExists']);
         self::assertSame($fairgateStatus === 'valid' && $fairgateChildren !== null ? $fairgateAdults : null, $data['order']['fairgateAdultsCount']);
         self::assertSame($fairgateStatus === 'valid' && $fairgateAdults !== null ? $fairgateChildren : null, $data['order']['fairgateChildrenCount']);
+    }
+
+    public function testNewOrderIsRejectedWhenTheCampaignCapacityIsReached(): void
+    {
+        $pdo = TestDatabase::create();
+        $this->addCampaignConfiguration($pdo);
+        $pdo->exec("INSERT INTO orders (id, user_id, year, status) VALUES ('order-1', 'other-user', 2026, 'draft')");
+        $users = new UserRepository($pdo);
+        $user = $users->createUser('capacity@example.com', 'old-password', 'wunschbesteller');
+        $session = new SessionService();
+        $session->setUser($user['id'], 'wunschbesteller');
+        $session->setFairgateOrderData(2026, 'valid', 1, 0);
+        $emails = $this->createMock(EmailSenderInterface::class);
+        $emails->expects(self::never())->method('renderOrderConfirmation');
+        $emails->expects(self::never())->method('sendStoredEmail');
+        $orders = new OrderRepository($pdo);
+        $action = new SaveOrderAction(
+            $orders,
+            new FrontendConfigRepository($pdo),
+            $session,
+            users: $users,
+            emails: $emails,
+            campaignAvailability: new CampaignAvailabilityService($pdo, new FrontendConfigRepository($pdo)),
+        );
+        $request = (new ServerRequestFactory())->createServerRequest('POST', '/client/order')->withAttribute('user', $user);
+        $request->getBody()->write(json_encode([
+            'mode' => 'submit',
+            'adultsCount' => 1, 'childrenCount' => 0, 'text' => 'Situation',
+            'password' => 'long-enough-password', 'passwordConfirmation' => 'long-enough-password',
+            'items' => [['category' => 'gift', 'personType' => 'adult', 'personIndex' => 1, 'title' => 'Coat', 'description' => 'A warm coat']],
+        ], JSON_THROW_ON_ERROR));
+
+        $response = $action($request, new Response());
+
+        self::assertSame(403, $response->getStatusCode());
+        self::assertSame('CAMPAIGN_CAPACITY_REACHED', json_decode((string) $response->getBody(), true)['error']['code']);
+        self::assertNull($orders->findForYear($user['id'], 2026));
+    }
+
+    public function testExistingOrderCanBeSavedWhenTheCampaignCapacityIsReached(): void
+    {
+        $pdo = TestDatabase::create();
+        $this->addCampaignConfiguration($pdo);
+        $users = new UserRepository($pdo);
+        $user = $users->createUser('existing-capacity@example.com', 'secret', 'wunschbesteller');
+        $orders = new OrderRepository($pdo);
+        $orders->saveForYear($user['id'], 2026, 'draft', 1, 0, [], 'valid', 'Situation', 1, 0);
+        $emails = $this->createMock(EmailSenderInterface::class);
+        $emails->expects(self::never())->method('renderOrderConfirmation');
+        $emails->expects(self::never())->method('sendStoredEmail');
+        $action = new SaveOrderAction(
+            $orders,
+            new FrontendConfigRepository($pdo),
+            users: $users,
+            emails: $emails,
+            campaignAvailability: new CampaignAvailabilityService($pdo, new FrontendConfigRepository($pdo)),
+        );
+        $request = (new ServerRequestFactory())->createServerRequest('POST', '/client/order')->withAttribute('user', $user);
+        $request->getBody()->write(json_encode([
+            'mode' => 'draft',
+            'adultsCount' => 1, 'childrenCount' => 0, 'text' => 'Situation',
+            'items' => [['category' => 'gift', 'personType' => 'adult', 'personIndex' => 1, 'title' => 'Coat', 'description' => 'A warm coat']],
+        ], JSON_THROW_ON_ERROR));
+
+        $response = $action($request, new Response());
+
+        self::assertSame(200, $response->getStatusCode());
+        self::assertSame('draft', $orders->findForYear($user['id'], 2026)['status']);
+    }
+
+    private function addCampaignConfiguration(\PDO $pdo): void
+    {
+        foreach ([
+            ['year', 'campaign_year', '2026'],
+            ['campaign-start', 'campaign_start_date', '2026-01-01'],
+            ['campaign-end', 'campaign_end_date', '2026-12-31'],
+            ['maximum-orders', 'maximum_orders_per_year', '1'],
+            ['maximum-items', 'maximum_order_items_per_year', '1'],
+        ] as [$id, $variableName, $value]) {
+            $pdo->prepare(
+                'INSERT INTO frontend_config (id, variable_name, value, access_group, update_group, label)
+                 VALUES (?, ?, ?, ?, ?, ?)',
+            )->execute([
+                $id,
+                $variableName,
+                json_encode($value, JSON_THROW_ON_ERROR),
+                json_encode(['admin', 'wunschbesteller'], JSON_THROW_ON_ERROR),
+                json_encode(['admin'], JSON_THROW_ON_ERROR),
+                $variableName,
+            ]);
+        }
     }
 
     public static function storedFairgateData(): array

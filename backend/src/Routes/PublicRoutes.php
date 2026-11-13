@@ -16,6 +16,7 @@ use App\Registration\Data\OrderRepository;
 use App\Registration\Data\FairgateRegistrationRequestRepository;
 use App\Fairgate\Services\FairgateContactProvider;
 use App\Registration\Services\AnmeldungService;
+use App\Registration\Services\CampaignAvailabilityService;
 use App\Registration\Services\FulfillerAvailabilityService;
 use App\Registration\Services\FulfillerReservationService;
 use App\Registration\Services\RegistrationTokenService;
@@ -39,6 +40,7 @@ final class PublicRoutes
         ?FulfillerAvailabilityService $fulfillerAvailability = null,
         ?FairgateContactProvider $fairgate = null,
         ?FairgateRegistrationRequestRepository $fairgateRequests = null,
+        ?CampaignAvailabilityService $campaignAvailability = null,
     ): void {
         $app->get('/public/php-test', static function (ServerRequestInterface $request, ResponseInterface $response): ResponseInterface {
             $response->getBody()->write('PHP backend is reachable.');
@@ -46,7 +48,7 @@ final class PublicRoutes
             return $response->withHeader('Content-Type', 'text/plain; charset=utf-8');
         });
 
-        $app->group('/public', function (RouteCollectorProxy $group) use ($anmeldungService, $registrationTokens, $configRepository, $rateLimitService, $fulfillerReservations, $fulfillerAvailability, $fairgate, $fairgateRequests): void {
+        $app->group('/public', function (RouteCollectorProxy $group) use ($anmeldungService, $registrationTokens, $configRepository, $rateLimitService, $fulfillerReservations, $fulfillerAvailability, $fairgate, $fairgateRequests, $campaignAvailability): void {
             $pickupQr = $group->get('/pickup-qr-code/{token}', new PickupQrCodeAction());
             if ($rateLimitService !== null) {
                 $pickupQr->add(new RateLimitMiddleware(60, 60, static fn ($request): string => 'pickup-qr|' . RateLimitMiddleware::ip($request), $rateLimitService));
@@ -58,6 +60,7 @@ final class PublicRoutes
                 null,
                 $fairgate,
                 $fairgateRequests,
+                $campaignAvailability,
             ));
             $fulfillerStart = $group->post('/fulfiller-reservation-start', new StartFulfillerReservationAction($anmeldungService, $fulfillerReservations, $configRepository, null, $fulfillerAvailability));
             $group->get('/fulfiller/orders', new PublicFulfillerOrderListAction(null, $configRepository, null, $fulfillerAvailability));
@@ -69,7 +72,7 @@ final class PublicRoutes
                 $fulfillerStart->add(new RateLimitMiddleware(10, 60, static fn ($request): string => RateLimitMiddleware::ipAndEmail($request), $rateLimitService));
                 $fulfillerStart->add(new RateLimitMiddleware(10, 60, static fn ($request): string => RateLimitMiddleware::ip($request), $rateLimitService));
             }
-            $group->get('/configuration', new ListPublicConfigurationAction($configRepository, $fulfillerAvailability));
+            $group->get('/configuration', new ListPublicConfigurationAction($configRepository, $fulfillerAvailability, $campaignAvailability));
         });
     }
 }

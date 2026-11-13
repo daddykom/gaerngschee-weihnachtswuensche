@@ -10,6 +10,7 @@ use App\Registration\Data\FairgateRegistrationRequestRepository;
 use App\Registration\Data\OrderRepository;
 use App\Routes\PublicRoutes;
 use App\Registration\Services\AnmeldungService;
+use App\Registration\Services\CampaignAvailabilityService;
 use App\Registration\Services\FulfillerAvailabilityService;
 use App\Registration\Services\RegistrationTokenService;
 use App\Shared\Mail\EmailSenderInterface;
@@ -76,13 +77,16 @@ final class PublicStartRoutesTest extends TestCase
             null,
             null,
             new FulfillerAvailabilityService($pdo, new FrontendConfigRepository($pdo)),
+            null,
+            null,
+            new CampaignAvailabilityService($pdo, new FrontendConfigRepository($pdo)),
         );
 
         $response = $app->handle((new ServerRequestFactory())->createServerRequest('GET', '/public/configuration'));
 
         self::assertSame(200, $response->getStatusCode());
         self::assertSame(
-            '[{"variableName":"campaign_end_date","value":"2026-12-31"},{"variableName":"campaign_start_date","value":"2026-01-01"},{"variableName":"campaign_year","value":"2026"},{"variableName":"client_message","value":"Message"},{"variableName":"fairgate_url","value":"https:\/\/fairgate.example"},{"variableName":"fulfiller_end_date","value":"2026-12-31"},{"variableName":"fulfiller_start_date","value":"2026-01-01"},{"variableName":"maximum_order_items_per_year","value":"600"},{"variableName":"maximum_orders_per_year","value":"999999"},{"variableName":"fulfiller_availability_status","value":"open"}]',
+            '[{"variableName":"campaign_end_date","value":"2026-12-31"},{"variableName":"campaign_start_date","value":"2026-01-01"},{"variableName":"campaign_year","value":"2026"},{"variableName":"client_message","value":"Message"},{"variableName":"fairgate_url","value":"https:\/\/fairgate.example"},{"variableName":"fulfiller_end_date","value":"2026-12-31"},{"variableName":"fulfiller_start_date","value":"2026-01-01"},{"variableName":"maximum_order_items_per_year","value":"600"},{"variableName":"maximum_orders_per_year","value":"999999"},{"variableName":"fulfiller_availability_status","value":"open"},{"variableName":"campaign_availability_status","value":"open"}]',
             (string) $response->getBody(),
         );
     }
@@ -118,6 +122,7 @@ final class PublicStartRoutesTest extends TestCase
             null,
             new FakeFairgateClient(),
             new FairgateRegistrationRequestRepository($pdo),
+            new CampaignAvailabilityService($pdo, new FrontendConfigRepository($pdo)),
         );
 
         $response = $app->handle($this->request('person+fair1@example.com'));
@@ -160,6 +165,7 @@ final class PublicStartRoutesTest extends TestCase
             null,
             new FakeFairgateClient(),
             new FairgateRegistrationRequestRepository($pdo),
+            new CampaignAvailabilityService($pdo, new FrontendConfigRepository($pdo)),
         );
 
         $response = $app->handle($this->request('person@example.com'));
@@ -282,14 +288,14 @@ final class PublicStartRoutesTest extends TestCase
             'INSERT INTO frontend_config (id, variable_name, value, description, access_group, update_group, label)
              VALUES (:id, :variable_name, :value, :description, :access_group, :update_group, :label)',
         )->execute([
-            'id' => 'campaign-start-date',
-            'variable_name' => 'campaign_start_date',
-            'value' => json_encode($startDate, JSON_THROW_ON_ERROR),
-            'description' => '',
-            'access_group' => json_encode(['admin', 'wunschbesteller'], JSON_THROW_ON_ERROR),
-            'update_group' => json_encode(['admin'], JSON_THROW_ON_ERROR),
-            'label' => '',
-        ]);
+                'id' => 'campaign-start-date',
+                'variable_name' => 'campaign_start_date',
+                'value' => json_encode($startDate, JSON_THROW_ON_ERROR),
+                'description' => '',
+                'access_group' => json_encode(['admin', 'wunschbesteller'], JSON_THROW_ON_ERROR),
+                'update_group' => json_encode(['admin'], JSON_THROW_ON_ERROR),
+                'label' => '',
+            ]);
 
         $pdo->prepare(
             'INSERT INTO frontend_config (id, variable_name, value, description, access_group, update_group, label)
@@ -329,6 +335,24 @@ final class PublicStartRoutesTest extends TestCase
             'update_group' => json_encode(['admin'], JSON_THROW_ON_ERROR),
             'label' => '',
         ]);
+
+        foreach ([
+            ['maximum-orders', 'maximum_orders_per_year', '999999'],
+            ['maximum-order-items', 'maximum_order_items_per_year', '600'],
+        ] as [$id, $variableName, $value]) {
+            $pdo->prepare(
+                'INSERT INTO frontend_config (id, variable_name, value, description, access_group, update_group, label)
+                 VALUES (:id, :variable_name, :value, :description, :access_group, :update_group, :label)',
+            )->execute([
+                'id' => $id,
+                'variable_name' => $variableName,
+                'value' => json_encode($value, JSON_THROW_ON_ERROR),
+                'description' => '',
+                'access_group' => json_encode(['admin', 'wunschbesteller'], JSON_THROW_ON_ERROR),
+                'update_group' => json_encode(['admin'], JSON_THROW_ON_ERROR),
+                'label' => '',
+            ]);
+        }
 
         return new FrontendConfigRepository($pdo);
     }
