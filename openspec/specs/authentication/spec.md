@@ -75,6 +75,7 @@ Implemented routes:
 | `POST` | `/public/start` | Request a client registration link |
 | `POST` | `/public/fulfiller-start` | Request a fulfiller registration link after required privacy opt-in |
 | `GET` | `/admin/users` | List users for administrators |
+| `GET` | `/user/gift-receipts/{giftNumber}` | Read a gift and its complete order in the configured campaign year; groups `user` and `admin` |
 
 ### User administration list
 

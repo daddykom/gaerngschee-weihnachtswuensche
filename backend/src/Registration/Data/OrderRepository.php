@@ -143,7 +143,7 @@ final class OrderRepository
                       )
                       AND (
                         LOWER(COALESCE(search_items.current_description, '')) LIKE :search_description
-                        OR LOWER(COALESCE(search_items.current_reason, '')) LIKE :search_reason
+                         OR LOWER(COALESCE(search_items.current_title, '')) LIKE :search_title
                       )
                 )
             )";
@@ -151,7 +151,7 @@ final class OrderRepository
             $parameters['search_order'] = $term;
             $parameters['search_fulfiller_email'] = strtolower(trim($email));
             $parameters['search_description'] = $term;
-            $parameters['search_reason'] = $term;
+            $parameters['search_title'] = $term;
         }
 
         $statement = $this->pdo->prepare(
@@ -172,7 +172,7 @@ final class OrderRepository
             if ($search !== null && trim($search) !== '' && !self::contains($orderText, $search)) {
                 $items = array_values(array_filter($items, static fn (array $item): bool =>
                     self::contains($item['currentDescription'] ?? null, $search)
-                    || self::contains($item['currentReason'] ?? null, $search)));
+                    || self::contains($item['title'] ?? null, $search)));
             }
             if ($items === []) {
                 continue;
@@ -206,7 +206,7 @@ final class OrderRepository
             $parameters['category'] = $category;
         }
         $statement = $this->pdo->prepare(
-            'SELECT id, item_number, category, person_type, person_index, current_title, current_description, gift_link, current_reason, personal_message, fulfillment_status, reserved_at
+            'SELECT id, item_number, category, person_type, person_index, current_title, current_description, gift_link, fulfillment_status, reserved_at
              FROM order_items WHERE ' . implode(' AND ', $conditions) . ' ORDER BY item_number ASC, id ASC',
         );
         $statement->execute($parameters);
@@ -221,7 +221,6 @@ final class OrderRepository
             'title' => (string) ($item['current_title'] ?? $item['current_description']),
             'currentDescription' => (string) $item['current_description'],
             'giftLink' => $item['gift_link'] ?? null,
-            'currentReason' => $item['personal_message'] ?? $item['current_reason'],
             'fulfillmentStatus' => (string) $item['fulfillment_status'],
             'reservedAt' => $item['reserved_at'],
         ], $statement->fetchAll());

@@ -1,0 +1,90 @@
+<div class="gl-stack gl-stack--section">
+  <form class="gl-stack" novalidate (submit)="submit($event)">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>{{ 'app.giftReceipts.giftNumber' | translate }}</mat-label>
+      <input
+        #numberInput
+        matInput
+        type="text"
+        autocomplete="off"
+        [readOnly]="busy()"
+        [formField]="searchForm().giftNumber"
+      />
+      <mat-hint>{{ 'app.giftReceipts.numberHint' | translate }}</mat-hint>
+      <app-control-error
+        matError
+        [control]="searchForm().giftNumber()"
+        translationPrefix="app.giftReceipts.validation.giftNumber"
+      />
+    </mat-form-field>
+    <div class="gl-cluster">
+      <button mat-flat-button type="submit" [disabled]="lookup().status === 'loading' || busy()">
+        {{ 'app.giftReceipts.search' | translate }}
+      </button>
+    </div>
+  </form>
+
+  @let currentLookup = lookup();
+  @if (currentLookup.status === 'loading') {
+    <p role="status">{{ 'app.giftReceipts.loading' | translate }}</p>
+  }
+  @if (receiptStatus() === 'saving') {
+    <p role="status">{{ 'app.giftReceipts.saving' | translate }}</p>
+  }
+  @if (currentLookup.status === 'loaded') {
+    <section class="gl-stack gl-stack--group" aria-labelledby="gift-receipt-order-heading">
+      <h2 id="gift-receipt-order-heading">
+        {{
+          'app.giftReceipts.orderHeading'
+            | translate: { number: currentLookup.result.order.orderNumber }
+        }}
+      </h2>
+      <p>
+        {{
+          'app.giftReceipts.campaignYear' | translate: { year: currentLookup.result.campaignYear }
+        }}
+      </p>
+      <ul class="list-as-form gl-stack">
+        @for (item of currentLookup.result.order.items; track item.id) {
+          <li>
+            <article
+              class="gift-receipt-item gl-stack"
+              [class.gift-receipt-item--selected]="item.id === currentLookup.result.selectedItemId"
+              [attr.aria-current]="item.id === currentLookup.result.selectedItemId ? 'true' : null"
+              [attr.aria-labelledby]="'receipt-item-' + item.id"
+            >
+              @if (item.id === currentLookup.result.selectedItemId) {
+                <strong class="gift-receipt-item__selection">{{
+                  'app.giftReceipts.selectedWish' | translate
+                }}</strong>
+              }
+              <h3 [id]="'receipt-item-' + item.id">
+                {{ item.giftNumber ?? '—' }} · {{ item.currentTitle }}
+              </h3>
+              <p class="gl-text--multiline">{{ item.currentDescription }}</p>
+              <p>
+                {{ 'app.giftReceipts.fulfillmentStatus' | translate }}:
+                {{ 'app.order.items.statuses.' + item.fulfillmentStatus | translate }}
+              </p>
+              @if (item.receivedAt) {
+                <p>{{ 'app.giftReceipts.receivedAt' | translate }}: {{ item.receivedAt }}</p>
+              }
+              @if (item.id === currentLookup.result.selectedItemId && canReceive()) {
+                <div class="gl-cluster">
+                  <button
+                    mat-flat-button
+                    type="button"
+                    [disabled]="receiptStatus() === 'saving'"
+                    (click)="receiptRequested.emit()"
+                  >
+                    {{ 'app.giftReceipts.receive' | translate }}
+                  </button>
+                </div>
+              }
+            </article>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+</div>

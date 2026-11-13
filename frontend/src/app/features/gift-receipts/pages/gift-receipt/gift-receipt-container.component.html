@@ -1,0 +1,7 @@
+<app-gift-receipt-view
+  [searchForm]="searchForm"
+  [lookup]="lookup()"
+  [receiptStatus]="receipt().status"
+  (searchSubmitted)="search()"
+  (receiptRequested)="receive()"
+/>

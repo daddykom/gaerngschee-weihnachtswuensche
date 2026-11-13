@@ -93,6 +93,8 @@ final class TestDatabase
                   fairgate_children_count INTEGER NULL,
                   processing_year INTEGER NULL,
                   order_number INTEGER NULL,
+                  pickup_token_hash TEXT NULL UNIQUE,
+                  pickup_notification_sent_at TEXT NULL,
                   released_at TEXT NULL,
                   definitive_at TEXT NULL,
                   fairgate_status TEXT NULL,

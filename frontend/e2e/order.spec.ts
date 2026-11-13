@@ -97,8 +97,15 @@ test.describe('Bestellung route', () => {
       .getByRole('textbox', { name: /Link zum gewünschten Geschenk/ })
       .fill('https://example.com/winterjacke');
     await page
-      .getByRole('textbox', { name: /Persönliche Nachricht zum Wunsch/ })
+      .getByRole('textbox', { name: /Persönliche Nachricht an das Gärngschee-Team/ })
       .fill('Das würde mir Freude machen.');
+    await expectTranslatedText(
+      page
+        .getByRole('textbox', { name: /Persönliche Nachricht an das Gärngschee-Team/ })
+        .locator('xpath=ancestor::mat-form-field')
+        .locator('mat-hint'),
+      'app.order.items.personalMessageHint',
+    );
     await page.getByRole('button', { name: 'Weiter' }).click();
     await page.waitForURL('**/bestellung');
     await page.getByRole('button', { name: 'Einreichen' }).click();

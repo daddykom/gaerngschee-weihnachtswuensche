@@ -120,7 +120,7 @@ final class FulfillerReservationRepository
     {
         $statement = $this->pdo->prepare(
             "SELECT items.id, items.item_number, items.category, items.current_title, items.current_description,
-                    items.gift_link, items.current_reason, items.personal_message,
+                     items.gift_link,
                     items.fulfillment_status, items.reserved_at, items.reservation_expires_at,
                     orders.id AS order_id, orders.year, orders.order_number
              FROM order_items items
@@ -152,19 +152,17 @@ final class FulfillerReservationRepository
                 LOWER(COALESCE(orders.current_text, \'\')) LIKE :search_order
                 OR LOWER(COALESCE(items.current_title, \'\')) LIKE :search_title
                 OR LOWER(COALESCE(items.current_description, \'\')) LIKE :search_description
-                OR LOWER(COALESCE(items.personal_message, items.current_reason, \'\')) LIKE :search_message
             )';
             $term = '%' . strtolower(trim($search)) . '%';
             $parameters['search_order'] = $term;
             $parameters['search_title'] = $term;
             $parameters['search_description'] = $term;
-            $parameters['search_message'] = $term;
         }
 
         $statement = $this->pdo->prepare(
             'SELECT orders.id, orders.year, orders.order_number, orders.current_text,
                     items.id AS item_id, items.item_number, items.category, items.current_title, items.current_description,
-                    items.gift_link, items.current_reason, items.personal_message,
+                     items.gift_link,
                     items.fulfillment_status, items.reserved_at, items.reservation_expires_at
              FROM orders
              INNER JOIN order_items items ON items.order_id = orders.id
@@ -227,7 +225,6 @@ final class FulfillerReservationRepository
             'title' => (string) ($item['current_title'] ?? $item['current_description']),
             'currentDescription' => (string) $item['current_description'],
             'giftLink' => $item['gift_link'] ?? null,
-            'currentReason' => $item['personal_message'] ?? $item['current_reason'],
             'fulfillmentStatus' => (string) $item['fulfillment_status'],
             'reservedAt' => $item['reserved_at'],
             'reservationExpiresAt' => $item['reservation_expires_at'] ?? null,

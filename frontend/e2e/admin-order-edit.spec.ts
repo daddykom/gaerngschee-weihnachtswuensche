@@ -3,6 +3,32 @@ import { expectTranslatedText } from './support/assertions';
 import { expect, test } from './support/test';
 
 test.describe('Admin order edit route', () => {
+  for (const numbers of [
+    { orderNumber: 12, itemNumber: 3, expected: '12-3' },
+    { orderNumber: null, itemNumber: 3, expected: '—' },
+    { orderNumber: 12, itemNumber: null, expected: '—' },
+  ]) {
+    test(`shows the wish number ${numbers.orderNumber}-${numbers.itemNumber} when editing the order`, async ({
+      page,
+    }) => {
+      await loginAsAdmin(page);
+      const order = orderFixture();
+      const item = (order['items'] as Record<string, unknown>[])[0];
+      await mockOrders(page, {
+        ...order,
+        orderNumber: numbers.orderNumber,
+        items: [{ ...item, itemNumber: numbers.itemNumber }],
+      });
+      await page.goto('/admin/overview');
+      await page.locator('a[href="/admin/orders/order-1/edit"]').click();
+
+      const number = page.locator('.item-editor__category > span').first();
+      await expectTranslatedText(number, 'app.admin.overview.wishNumber');
+      await expect(number).toContainText(numbers.expected);
+      await expect(number).not.toContainText('null');
+    });
+  }
+
   test('uses browser back on cancel', async ({ page }) => {
     await loginAsAdmin(page);
     await mockOrders(page, orderFixture());

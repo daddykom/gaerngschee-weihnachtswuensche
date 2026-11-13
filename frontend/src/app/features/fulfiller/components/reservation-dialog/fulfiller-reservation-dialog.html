@@ -22,10 +22,18 @@
           <dt>{{ 'app.order.items.wishTitle' | translate }}</dt>
           <dd>{{ wish.title || wish.wishNumber }}</dd>
         </div>
-        @if (wish.currentReason) {
         <div>
-          <dt>{{ 'app.order.items.personalMessage' | translate }}</dt>
-          <dd class="gl-text--multiline">{{ wish.currentReason }}</dd>
+          <dt>{{ 'app.order.items.description' | translate }}</dt>
+          <dd class="gl-text--multiline">{{ wish.currentDescription }}</dd>
+        </div>
+        @if (wish.giftLink) {
+        <div>
+          <dt>{{ 'app.order.items.giftLink' | translate }}</dt>
+          <dd>
+            <a [href]="wish.giftLink" target="_blank" rel="noopener noreferrer">
+              {{ 'app.order.items.giftLink' | translate }}
+            </a>
+          </dd>
         </div>
         }
       </dl>

@@ -6,6 +6,8 @@ namespace App\Routes;
 
 use App\Middleware\AuthMiddleware;
 use App\Middleware\GroupMiddleware;
+use App\Registration\Actions\GiftReceiptLookupAction;
+use App\Registration\Actions\ReceiveGiftAction;
 use App\Users\Actions\GetUserAction;
 use App\Users\Actions\UpdateUserAction;
 use App\Users\Data\UserRepository;
@@ -19,8 +21,15 @@ final class UserRoutes
         App $app,
         ?UserRepository $userRepository = null,
         ?EmailSenderInterface $emailSender = null,
+        ?GiftReceiptLookupAction $giftReceiptLookup = null,
+        ?ReceiveGiftAction $receiveGift = null,
     ): void {
-        $app->group('/user', function (RouteCollectorProxy $group) use ($userRepository, $emailSender): void {
+        $app->group('/user', function (RouteCollectorProxy $group) use ($userRepository, $emailSender, $giftReceiptLookup, $receiveGift): void {
+            $gift = $group->get('/gift-receipts/{giftNumber}', $giftReceiptLookup ?? new GiftReceiptLookupAction());
+            $gift->add(new GroupMiddleware(['user', 'admin'], $userRepository))->add(new AuthMiddleware());
+            $received = $group->post('/gift-receipts/{giftNumber}', $receiveGift ?? new ReceiveGiftAction());
+            $received->add(new GroupMiddleware(['user', 'admin'], $userRepository))->add(new AuthMiddleware());
+
             $profile = $group->get('/profile', new GetUserAction($userRepository));
             $profile->add(new GroupMiddleware(['user', 'admin'], $userRepository))->add(new AuthMiddleware());
 

@@ -39,6 +39,7 @@ gaerngschee/
 - [openspec/specs/authentication/spec.md](./openspec/specs/authentication/spec.md) - User authentication & roles
 - [openspec/specs/registrations/spec.md](./openspec/specs/registrations/spec.md) - Anmeldungen
 - [openspec/specs/donations/spec.md](./openspec/specs/donations/spec.md) - Erfüllung einzelner Weihnachtswünsche
+- [openspec/specs/gift-receipts/spec.md](./openspec/specs/gift-receipts/spec.md) - Geschenkeingang und Vorbereitung der Abholfreigabe
 - [openspec/specs/platform/spec.md](./openspec/specs/platform/spec.md) - PWA, i18n, a11y
 - [documents/frontend-conventions.md](./documents/frontend-conventions.md) - Angular-Konventionen
 - [documents/ui-design.md](./documents/ui-design.md) - UI- und Layout-Regeln
@@ -178,7 +179,7 @@ src/
 | Template | Zweck | Parameter |
 |---|---|---|
 | `anmeldung/client-order.html.twig` | Registrierungs-Link für Wunschbesteller | `LOGIN_URL`, `CAMPAIGN_YEAR` |
-| `anmeldung/fulfiller-reservation.html.twig` | Reservations-Link für Erfüller | `LOGIN_URL`, `WISH.wishNumber`, `WISH.currentDescription` |
+| `anmeldung/fulfiller-reservation.html.twig` | Reservations-Link für Erfüller mit bearbeitetem Wunschtitel und bearbeiteter Beschreibung, auch in Klartext | `LOGIN_URL`, `WISH.wishNumber`, `WISH.title` (bearbeiteter Titel), `WISH.currentDescription` |
 | `anmeldung/fairgate-registration-required.html.twig` | Hinweis auf erforderliche Fairgate-Registrierung | `LOGIN_URL` |
 | `anmeldung/fairgate-registration-available.html.twig` | Hinweis auf verfügbare Fairgate-Registrierung | `LOGIN_URL` |
 | `user-created.html.twig` | Zugangsdaten für neu erstellten Benutzer | `LOGIN_URL`, `TEMPORARY_PASSWORD` |
@@ -186,6 +187,7 @@ src/
 | `password-reset.html.twig` | Passwort-Reset | `RESET_URL` |
 | `order-confirmation-saved.html.twig` | Bestätigung einer gespeicherten Bestellung | `ORDER.year`, `ORDER.loginUrl` |
 | `order-confirmation-changes_requested.html.twig` | Aufforderung zur Anpassung einer Bestellung | `ORDER.year`, `ORDER.loginUrl` |
+| `order-ready-for-pickup.html.twig` | Abholbenachrichtigung im Layout der Registrierungs-E-Mail, mit eingebettetem QR-PNG und Link auf dasselbe PNG | `ORDER.year`, `ORDER.orderNumber`, `QR_DATA_URI`, `QR_IMAGE_URL`, `LOGO_CID` (Farben über das globale `EMAIL_THEME`) |
 
 Neue E-Mail-Vorlagen dürfen nicht nur im Template-Verzeichnis angelegt werden:
 Die Versandlogik, Übersetzungen, die Admin-E-Mail-Testauswahl und die
@@ -369,7 +371,7 @@ Konkrete Regeln:
 
 Für alle Datenbank-Migrationen SOLL zwingend [Phinx](https://phinx.org/) verwendet werden. Niemals manuell SQL schreiben oder die DB-Struktur direkt ändern.
 
-Wenn ein Agent eine Migration ausführt, darf ausschließlich die Developer-Datenbank (`development`) betroffen sein. Die Pre-Production- und Produktionsdatenbanken dürfen durch Agenten weder migriert noch zurückgerollt oder anderweitig strukturell verändert werden.
+Agenten dürfen Migrationen auf der Developer-Datenbank (`development`) und der Integrationsdatenbank (`test`) ausführen. Dafür sind die vorhandenen Projekt-Skripte zu verwenden (`npm run db:migrate` beziehungsweise `npm run integration:migrate` im Verzeichnis `frontend/`). Die Pre-Production- und Produktionsdatenbanken dürfen durch Agenten weder migriert noch zurückgerollt oder anderweitig strukturell verändert werden.
 
 Siehe: [database-conventions.md](./documents/database-conventions.md)
 

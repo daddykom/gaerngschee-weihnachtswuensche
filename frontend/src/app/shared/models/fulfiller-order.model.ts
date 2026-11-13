@@ -13,7 +13,6 @@ export interface FulfillerWish {
   title?: string;
   currentDescription: string;
   giftLink?: string | null;
-  currentReason: string | null;
   fulfillmentStatus: FulfillerWishStatus;
   reservedAt: string | null;
   reservationExpiresAt: string | null;

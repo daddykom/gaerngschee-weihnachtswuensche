@@ -9,6 +9,7 @@ use App\Registration\Data\OrderRepository;
 use App\Registration\Data\RegistrationTokenRepository;
 use App\Registration\Services\OrderBatchService;
 use App\Shared\Mail\EmailQueueRepository;
+use App\Shared\Logging\ExternalErrorLogRepository;
 use App\Users\Data\UserRepository;
 use PHPUnit\Framework\TestCase;
 use Tests\Support\RecordingEmailSender;
@@ -16,6 +17,25 @@ use Tests\Support\TestDatabase;
 
 final class OrderBatchServiceTest extends TestCase
 {
+    public function testPrunesExternalErrorsInTheSameTestDatabase(): void
+    {
+        $pdo = TestDatabase::create();
+        $this->addRetention($pdo);
+        $errors = new ExternalErrorLogRepository($pdo);
+        $errors->create('email', 'smtp_send', 'First failure');
+        $errors->create('email', 'smtp_send', 'Second failure');
+        $previousLimit = getenv('EXTERNAL_ERROR_LOG_MAX_ENTRIES');
+        putenv('EXTERNAL_ERROR_LOG_MAX_ENTRIES=1');
+
+        try {
+            $this->service($pdo, new RecordingEmailSender())->run();
+
+            self::assertSame(1, (int) $pdo->query('SELECT COUNT(*) FROM external_error_logs')->fetchColumn());
+        } finally {
+            putenv($previousLimit === false ? 'EXTERNAL_ERROR_LOG_MAX_ENTRIES' : 'EXTERNAL_ERROR_LOG_MAX_ENTRIES=' . $previousLimit);
+        }
+    }
+
     public function testFailedQueuedOrderEmailRemainsQueued(): void
     {
         $pdo = TestDatabase::create();
@@ -71,6 +91,7 @@ final class OrderBatchServiceTest extends TestCase
             new FrontendConfigRepository($pdo),
             $emails,
             new RegistrationTokenRepository($pdo),
+            externalErrors: new ExternalErrorLogRepository($pdo),
         );
     }
 

@@ -18,7 +18,12 @@ describe('FulfillerReservationDialog', () => {
       providers: [
         provideMockStore({
           initialState: {
-            frontendConfig: frontendConfigState,
+            frontendConfig: {
+              ...frontendConfigState,
+              publicConfigs: [
+                { variableName: 'fulfiller_handover_date', value: '17.–19. Dezember 2026' },
+              ],
+            },
             fulfillerOrders: fulfillerOrdersState,
           },
         }),
@@ -29,8 +34,11 @@ describe('FulfillerReservationDialog', () => {
           useValue: {
             id: 'item-1',
             wishNumber: '12-1',
+            title: 'Edited title',
             currentDescription: 'Bauklötze',
-            currentReason: null,
+            giftLink: 'https://example.com/gift',
+            personalMessage: 'Private team message',
+            currentReason: 'Private legacy message',
             fulfillmentStatus: 'available',
             reservedAt: null,
             reservationExpiresAt: null,
@@ -48,6 +56,15 @@ describe('FulfillerReservationDialog', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('shows the public wish details without private messages', () => {
+    const details = fixture.nativeElement.querySelector('.reservation-dialog__details');
+    expect(details.textContent).toContain('Edited title');
+    expect(details.textContent).toContain('Bauklötze');
+    expect(details.querySelector('a').getAttribute('href')).toBe('https://example.com/gift');
+    expect(fixture.nativeElement.textContent).not.toContain('Private');
+    expect(fixture.nativeElement.textContent).toContain('17.–19. Dezember 2026');
   });
 
   it('shows reservation errors inside the dialog', async () => {

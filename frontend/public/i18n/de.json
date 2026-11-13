@@ -230,8 +230,8 @@
         "description": "Wunschbeschreibung",
         "giftLink": "Link zum gewünschten Geschenk (freiwillig)",
         "giftLinkHint": "Als Orientierung kannst du hier einen Beispiel-Link einfügen.",
-        "personalMessage": "Persönliche Nachricht zum Wunsch",
-        "personalMessageHint": "Wenn du möchtest, erzähle uns kurz, weshalb du dir das wünschst.",
+        "personalMessage": "Persönliche Nachricht an das Gärngschee-Team (optional)",
+        "personalMessageHint": "Hier kannst du uns Fragen oder Hinweise zu deinem Wunsch mitteilen. Diese Nachricht ist nur für das Gärngschee-Team sichtbar und wird den Wunscherfüllern nicht angezeigt. Angaben zum Geschenk gehören in die Wunschbeschreibung.",
         "person": "Für wen ist der Wunsch?",
         "adult": "Erwachsener",
         "child": "Kind",
@@ -676,6 +676,7 @@
           "user-created": "Benutzer erstellt",
           "user-email-changed": "E-Mail-Adresse geändert",
           "password-reset": "Passwort zurücksetzen",
+          "order-ready-for-pickup": "Abholbenachrichtigung mit QR-Code",
           "order-confirmation-saved": "Bestellbestätigung: Gespeichert",
           "order-confirmation-changes_requested": "Bestellbestätigung: Änderungen verlangt"
         },
@@ -684,11 +685,13 @@
           "campaignYear": "Kampagnenjahr",
           "wishNumber": "Wunschnummer",
           "wishDescription": "Wunschbeschreibung",
+          "wishTitle": "Bearbeiteter Wunschtitel",
           "fairgateUrl": "Fairgate-URL",
           "startUrl": "Start-URL",
           "temporaryPassword": "Temporäres Passwort",
           "resetUrl": "Passwort-Reset-URL",
-          "year": "Jahr"
+          "year": "Jahr",
+          "orderNumber": "Zettelnummer"
         }
       },
       "overview": {
@@ -696,6 +699,7 @@
         "filters": {
           "title": "Filter",
           "email": "E-Mail durchsuchen",
+          "orderNumber": "Zettelnummer suchen",
           "status": "Status",
           "category": "Kategorie",
           "active": "Aktive Filter",
@@ -712,7 +716,7 @@
           "completed": "Abgeschlossen",
           "unchanged": "Nicht verändern"
         },
-        "ordersTitle": "Wunschzettelen",
+        "ordersTitle": "Wunschzettel",
         "orderNotFound": "Die Wunschzettel wurde nicht gefunden.",
         "back": "Zurück zur Übersicht",
         "change": "Ändern",
@@ -748,6 +752,8 @@
         "itemEditTitle": "Wunsch bearbeiten",
         "currentText": "Aktueller Order-Text",
         "currentDescription": "Aktuelle Wunschbeschreibung",
+        "currentTitle": "Aktueller Wunschtitel",
+        "originalTitle": "Ursprünglicher Wunschtitel",
         "originalText": "Ursprünglicher Order-Text",
         "adminNotes": "Interne Bemerkung oder Begründung der Order-Zurückweisung",
         "itemsTitle": "Wünsche",
@@ -924,7 +930,50 @@
       "undoTitle": "Auslieferung rückgängig machen",
       "undoQuestion": "Bist du sicher, dass du die Auslieferung rückgängig machen willst?"
     },
+    "giftReceipts": {
+      "title": "Geschenkeingang",
+      "giftNumber": "Geschenknummer",
+      "numberHint": "Format: Zettelnummer-Wunschnummer, zum Beispiel 12-3",
+      "search": "Suchen",
+      "loading": "Geschenk wird gesucht …",
+      "orderHeading": "Wunschzettel {{ number }}",
+      "campaignYear": "Kampagnenjahr: {{ year }}",
+      "selectedWish": "Gesuchter Wunsch",
+      "receive": "Einliefern",
+      "saving": "Einlieferung wird gespeichert …",
+      "receiveAnyway": "Trotzdem einliefern",
+      "receiveAndRelease": "Einliefern und freigeben",
+      "cancel": "Abbrechen",
+      "confirmUnreservedTitle": "Nicht reserviertes Geschenk",
+      "confirmUnreserved": "Dieses Geschenk ist nicht reserviert. Trotzdem einliefern?",
+      "confirmPickupTitle": "Wunschzettel zur Abholung freigeben?",
+      "confirmPickup": "Mit diesem Geschenk sind alle Wünsche dieses Wunschzettels eingetroffen. Beim Bestätigen wird der QR-Code zur Abholung versandt.",
+      "confirmBoth": "Dieses Geschenk ist nicht reserviert. Mit diesem Geschenk sind alle Wünsche dieses Wunschzettels eingetroffen. Beim Bestätigen wird der QR-Code zur Abholung versandt.",
+      "receiptTitle": "Geschenkeingang",
+      "received": "Das Geschenk wurde als eingeliefert verbucht.",
+      "released": "Das Geschenk wurde eingeliefert und der Wunschzettel zur Abholung freigegeben. Die QR-E-Mail wurde versandt.",
+      "alreadyReceived": "Dieses Geschenk war bereits eingeliefert. Es wurde nicht erneut verbucht.",
+      "mailPending": "Das Geschenk wurde eingeliefert und der Wunschzettel zur Abholung freigegeben. Die QR-E-Mail konnte noch nicht versandt werden und bleibt für den erneuten Versand vorgemerkt.",
+      "fulfillmentStatus": "Erfüllungsstatus",
+      "receivedAt": "Eingegangen am",
+      "errorTitle": "Geschenksuche",
+      "validation": {
+        "giftNumber": {
+          "required": "Bitte gib eine Geschenknummer ein.",
+          "format": "Bitte verwende das Format Zettelnummer-Wunschnummer, zum Beispiel 12-3."
+        }
+      },
+      "errors": {
+        "GIFT_NOT_FOUND": "Im aktuellen Kampagnenjahr wurde kein Geschenk mit dieser Nummer gefunden.",
+        "GIFT_NOT_RECEIVABLE": "Dieses Geschenk kann im aktuellen Status nicht eingeliefert werden. Bitte lade den Wunschzettel erneut.",
+        "RECEIPT_CONFIRMATION_REQUIRED": "Der Stand des Wunschzettels hat sich geändert. Bitte prüfe die angezeigten Wünsche und bestätige die Einlieferung erneut.",
+        "RECEIPT_FAILED": "Die Einlieferung konnte nicht abgeschlossen werden. Bitte lade den Wunschzettel erneut und prüfe den Stand vor einem weiteren Versuch.",
+        "INVALID_GIFT_NUMBER": "Die Geschenknummer ist ungültig. Bitte prüfe die Eingabe.",
+        "REQUEST_FAILED": "Das Geschenk konnte nicht geladen werden. Bitte versuche es erneut."
+      }
+    },
     "navigation": {
+      "giftReceipts": "Geschenkeingang",
       "loading": "Die Anmeldung wird bei Fairgate geprüft ...",
       "menuLabel": "Administrationsmenü",
       "openMenu": "Administrationsmenü öffnen",
@@ -945,6 +994,18 @@
       "logout": "Abmelden"
     },
     "mail": {
+      "pickup": {
+        "subject": "Deine Weihnachtswünsche sind bereit zur Abholung",
+        "title": "Deine Geschenke sind eingetroffen",
+        "highlight": "Dein Wunschzettel ist vollständig.",
+        "instructionTitle": "Wichtig",
+        "button": "QR-Code als PNG öffnen",
+        "body": "Alle Geschenke deines Wunschzettels {{number}} für die Weihnachtsaktion {{year}} sind eingetroffen und zur Abholung bereit.",
+        "instruction": "Bitte zeige diesen QR-Code bei der Abholung deiner Geschenke vor.",
+        "qrAlt": "Persönlicher QR-Code zur Abholung",
+        "fallback": "Wird das Bild nicht angezeigt? Über diesen Link kannst du denselben QR-Code als PNG öffnen:",
+        "keepPrivate": "Bewahre diese E-Mail auf und gib den QR-Code und den Link nur an eine Person weiter, die deine Geschenke für dich abholen darf."
+      },
       "order": {
         "confirmation": {
           "saved": {

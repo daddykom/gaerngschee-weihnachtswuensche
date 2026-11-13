@@ -1,0 +1,19 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.gift-receipt-item {
+  border: 1px solid #8c7b85;
+  padding: var(--gl-space-md);
+  overflow-wrap: anywhere;
+}
+
+.gift-receipt-item--selected {
+  border-color: var(--gl-info);
+  background: var(--gl-info-container);
+}
+
+.gift-receipt-item__selection {
+  color: var(--gl-info);
+}

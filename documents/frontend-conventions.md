@@ -115,6 +115,18 @@ store/
 
 ## Functional Effects Pattern
 
+Feature-Routen werden über `loadChildren` aus fachlich zugehörigen
+`*.routes.ts`-Dateien nachgeladen. Ihre Store-Provider, Effects und Resolver
+werden ausschliesslich dort importiert, nicht statisch in `app.routes.ts`.
+`loadComponent` allein verschiebt diese Abhängigkeiten nicht aus dem initialen
+Bundle. Gemeinsam benötigte Resolver und Provider bleiben auf der gemeinsamen
+Parent-Route, damit Child-Navigationen keinen erneuten Datenabruf auslösen.
+
+Die NgRx-Devtools-Provider werden über die Environment-Dateien bereitgestellt.
+Das Production-Environment exportiert eine leere Provider-Liste und importiert
+die Devtools nicht. Eine reine Laufzeitbedingung verhindert zwar ihre
+Aktivierung, entfernt den statischen Import aber nicht zuverlässig aus dem Bundle.
+
 ```typescript
 export const loadRegistrationsEffect = createEffect(
     (actions$ = inject(Actions), store = inject(Store), registrationService = inject(RegistrationService)) => {

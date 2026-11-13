@@ -10,6 +10,29 @@ use Tests\Support\TestDatabase;
 
 final class FulfillerOrderRepositoryTest extends TestCase
 {
+    public function testFulfillerContentAndSearchExcludePrivateMessagesAndOriginalValues(): void
+    {
+        $pdo = TestDatabase::create();
+        $this->insertOrder($pdo, 'order-1', 'definitive', 12, 'Family information');
+        $this->insertItem($pdo, 'item-1', 'order-1', 1, 'gift', 'Edited description', 'Private legacy message');
+        $pdo->exec("UPDATE order_items SET original_title = 'Private original title', current_title = 'Edited title',
+            original_description = 'Private original description', personal_message = 'Private team message'");
+        $repository = new OrderRepository($pdo);
+        $wish = $repository->findForFulfiller('fulfiller@example.com')[0]['items'][0];
+
+        self::assertSame('Edited title', $wish['title']);
+        self::assertSame('Edited description', $wish['currentDescription']);
+        foreach (['originalTitle', 'originalDescription', 'originalReason', 'currentReason', 'personalMessage'] as $field) {
+            self::assertArrayNotHasKey($field, $wish);
+        }
+        self::assertStringNotContainsString('Private', json_encode($wish, JSON_THROW_ON_ERROR));
+        foreach (['Private original', 'Private legacy message', 'Private team message'] as $search) {
+            self::assertSame([], $repository->findForFulfiller('fulfiller@example.com', $search));
+        }
+        self::assertCount(1, $repository->findForFulfiller('fulfiller@example.com', 'Edited title'));
+        self::assertCount(1, $repository->findForFulfiller('fulfiller@example.com', 'Edited description'));
+    }
+
     public function testFindsDefinitiveOrdersGroupedWithWishNumbersAndSearchesCorrectedTexts(): void
     {
         $pdo = TestDatabase::create();

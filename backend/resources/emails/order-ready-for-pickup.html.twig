@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ 'app.mail.pickup.title'|trans }}</title>
+</head>
+<body style="margin:0; padding:0; background-color:{{ EMAIL_THEME.pageBackground }}; font-family:Arial,Helvetica,sans-serif; color:{{ EMAIL_THEME.text }};">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%; background-color:{{ EMAIL_THEME.pageBackground }};">
+    <tr>
+      <td align="center" style="padding:24px 12px;">
+        <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="width:100%; max-width:600px; table-layout:fixed; background-color:{{ EMAIL_THEME.surface }}; border:1px solid {{ EMAIL_THEME.outline }}; border-radius:20px;">
+          <tr>
+            <td style="padding:32px 32px 18px 32px; text-align:center; background-color:{{ EMAIL_THEME.primaryContainer }};">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin:0 auto 22px auto;">
+                <tr>
+                  <td align="center">
+                    <img src="{{ LOGO_CID }}" width="210" alt="Gärngschee" style="display:block; width:210px; max-width:100%; height:auto;">
+                  </td>
+                </tr>
+              </table>
+              <h1 style="margin:0; font-size:28px; line-height:1.2; font-weight:700; color:{{ EMAIL_THEME.text }};">{{ 'app.mail.pickup.title'|trans }}</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0 32px 8px 32px; text-align:center;">
+              <p style="margin:0 0 14px 0; font-size:18px; line-height:1.5; color:{{ EMAIL_THEME.text }};">
+                <strong style="color:{{ EMAIL_THEME.success }};">{{ 'app.mail.pickup.highlight'|trans }}</strong>
+              </p>
+              <p style="margin:0; font-size:17px; line-height:1.55; color:{{ EMAIL_THEME.mutedText }};">{{ 'app.mail.pickup.body'|trans({'%number%': ORDER.orderNumber, '%year%': ORDER.year}) }}</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:24px 32px 8px 32px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%; background-color:{{ EMAIL_THEME.successContainer }}; border:1px solid {{ EMAIL_THEME.outline }}; border-radius:14px;">
+                <tr>
+                  <td width="52" valign="top" style="padding:18px 0 18px 18px; font-size:28px; line-height:1;">🔐</td>
+                  <td style="padding:16px 18px 16px 8px;">
+                    <p style="margin:0 0 4px 0; font-size:16px; line-height:1.4; font-weight:700; color:{{ EMAIL_THEME.text }};">{{ 'app.mail.pickup.instructionTitle'|trans }}</p>
+                    <p style="margin:0; font-size:16px; line-height:1.5; color:{{ EMAIL_THEME.mutedText }};">{{ 'app.mail.pickup.instruction'|trans }}</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding:22px 32px 8px 32px;">
+              <img id="pickup-qr-code" src="{{ QR_DATA_URI }}" width="300" alt="{{ 'app.mail.pickup.qrAlt'|trans }}" style="display:block; width:300px; max-width:100%; height:auto;">
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding:14px 32px 34px 32px;">
+              <p style="margin:0 0 18px 0; font-size:16px; line-height:1.5; color:{{ EMAIL_THEME.mutedText }};">{{ 'app.mail.pickup.fallback'|trans }}</p>
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                <tr>
+                  <td align="center" bgcolor="{{ EMAIL_THEME.primary }}" style="border-radius:999px;">
+                    <a href="{{ QR_IMAGE_URL }}" style="display:inline-block; padding:14px 26px; font-size:17px; line-height:1.3; font-weight:700; color:{{ EMAIL_THEME.onPrimary }}; text-decoration:none; border-radius:999px;">{{ 'app.mail.pickup.button'|trans }}</a>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin:18px 0 0 0; font-size:13px; line-height:1.5; overflow-wrap:anywhere; word-break:break-all;"><a href="{{ QR_IMAGE_URL }}" style="color:{{ EMAIL_THEME.primary }};">{{ QR_IMAGE_URL }}</a></p>
+              <p style="margin:18px 0 0 0; font-size:13px; line-height:1.5; color:{{ EMAIL_THEME.mutedText }};">{{ 'app.mail.pickup.keepPrivate'|trans }}</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

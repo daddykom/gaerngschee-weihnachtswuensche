@@ -58,9 +58,17 @@ export class AdminOverviewComponent {
 
   constructor() {
     effect(() => {
-      const email = this.searchModel().email;
-      if (email !== this.searchFormValue().email) {
-        this.store.dispatch(AdminOrdersActions.searchFormChanged({ changes: { email } }));
+      const { email, orderNumber } = this.searchModel();
+      const previous = this.searchFormValue();
+      if (email !== previous.email || orderNumber !== previous.orderNumber) {
+        this.store.dispatch(
+          AdminOrdersActions.searchFormChanged({
+            changes: {
+              ...(email !== previous.email ? { email } : {}),
+              ...(orderNumber !== previous.orderNumber ? { orderNumber } : {}),
+            },
+          }),
+        );
       }
     });
   }

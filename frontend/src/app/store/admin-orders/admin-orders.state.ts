@@ -5,6 +5,7 @@ export type AdminOrdersSaveStatus = 'initial' | 'loading' | 'success' | 'error';
 
 export interface AdminOrderSearchForm {
   email: string;
+  orderNumber: string;
 }
 
 export interface AdminOrdersState {
@@ -23,7 +24,7 @@ export const initialState: AdminOrdersState = {
   orders: [],
   statuses: ['released', 'in_review'],
   categories: [],
-  searchForm: { email: '' },
+  searchForm: { email: '', orderNumber: '' },
   loadStatus: 'initial',
   saveStatus: 'initial',
   errorCode: null,

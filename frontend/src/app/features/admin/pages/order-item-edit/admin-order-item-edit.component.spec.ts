@@ -29,6 +29,8 @@ describe('AdminOrderItemEditComponent', () => {
         orderId: 'order-1',
         category: 'gift',
         itemNumber: null,
+        originalTitle: 'Original title',
+        currentTitle: 'Edited title',
         originalDescription: 'Originaler Wunsch',
         currentDescription: 'Aktueller Wunsch',
         originalReason: 'Originaler Grund',
@@ -88,6 +90,21 @@ describe('AdminOrderItemEditComponent', () => {
       expect.objectContaining({ type: AdminOrdersActions.draftChanged.type }),
     );
     expect(dispatch).toHaveBeenNthCalledWith(2, NavigationActions.navigate({ target: 'back' }));
+  });
+
+  it('distinguishes original title and description from their editable values', () => {
+    const originals = Array.from(
+      fixture.nativeElement.querySelectorAll('.original-text'),
+    ) as HTMLElement[];
+    expect(originals.map((element) => element.textContent?.trim())).toEqual([
+      'Original title',
+      'Originaler Wunsch',
+    ]);
+    expect(fixture.nativeElement.querySelector('input[matInput]').value).toBe('Edited title');
+    expect(fixture.nativeElement.querySelector('textarea').value).toBe('Aktueller Wunsch');
+    expect(fixture.nativeElement.textContent).toContain('app.admin.overview.originalTitle');
+    expect(fixture.nativeElement.textContent).toContain('app.admin.overview.currentTitle');
+    expect(fixture.nativeElement.textContent).toContain('app.admin.overview.originalDescription');
   });
 
   it('does not navigate or update the draft when a rejection reason is empty', () => {

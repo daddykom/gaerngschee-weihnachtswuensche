@@ -35,4 +35,9 @@ final class Database
     {
         self::$pdo = null;
     }
+
+    public static function setConnection(PDO $pdo): void
+    {
+        self::$pdo = $pdo;
+    }
 }

@@ -23,6 +23,7 @@ final class EmailTestAction
         'fulfiller-reservation' => ['fields' => [
             ['key' => 'loginUrl', 'type' => 'url', 'required' => true],
             ['key' => 'wishNumber', 'type' => 'text', 'required' => true],
+            ['key' => 'wishTitle', 'type' => 'text', 'required' => true],
             ['key' => 'wishDescription', 'type' => 'textarea', 'required' => true],
         ]],
         'fairgate-registration-required' => ['fields' => [
@@ -40,6 +41,10 @@ final class EmailTestAction
         ]],
         'password-reset' => ['fields' => [
             ['key' => 'resetUrl', 'type' => 'url', 'required' => true],
+        ]],
+        'order-ready-for-pickup' => ['fields' => [
+            ['key' => 'year', 'type' => 'number', 'required' => true],
+            ['key' => 'orderNumber', 'type' => 'number', 'required' => true],
         ]],
         'order-confirmation-saved' => ['fields' => [
             ['key' => 'year', 'type' => 'number', 'required' => true],
@@ -99,6 +104,16 @@ final class EmailTestAction
     /** @param array<string, mixed> $parameters */
     private function validateParameters(string $template, array $parameters): void
     {
+        if ($template === 'order-ready-for-pickup') {
+            foreach (['year', 'orderNumber'] as $key) {
+                $value = $parameters[$key] ?? null;
+                if ((!is_string($value) && !is_int($value))
+                    || preg_match('/^[1-9][0-9]{0,9}$/D', (string) $value) !== 1
+                    || (int) $value > 2147483647) {
+                    throw new \InvalidArgumentException('Invalid pickup test parameter.');
+                }
+            }
+        }
         foreach (self::TEMPLATES[$template]['fields'] as $field) {
             $value = $parameters[$field['key']] ?? null;
             if ($field['required'] && (!is_scalar($value) || trim((string) $value) === '')) {
