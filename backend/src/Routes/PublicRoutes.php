@@ -7,6 +7,7 @@ namespace App\Routes;
 use App\Configuration\Actions\ListPublicConfigurationAction;
 use App\Configuration\Data\FrontendConfigRepository;
 use App\Registration\Actions\PublicFulfillerOrderListAction;
+use App\Registration\Actions\PickupQrCodeAction;
 use App\Registration\Actions\PublicFulfillerAvailabilityVersionAction;
 use App\Registration\Actions\PublicFulfillerWishStatusesAction;
 use App\Registration\Actions\StartRegistrationAction;
@@ -46,6 +47,10 @@ final class PublicRoutes
         });
 
         $app->group('/public', function (RouteCollectorProxy $group) use ($anmeldungService, $registrationTokens, $configRepository, $rateLimitService, $fulfillerReservations, $fulfillerAvailability, $fairgate, $fairgateRequests): void {
+            $pickupQr = $group->get('/pickup-qr-code/{token}', new PickupQrCodeAction());
+            if ($rateLimitService !== null) {
+                $pickupQr->add(new RateLimitMiddleware(60, 60, static fn ($request): string => 'pickup-qr|' . RateLimitMiddleware::ip($request), $rateLimitService));
+            }
             $start = $group->post('/start', new StartRegistrationAction(
                 $anmeldungService,
                 $registrationTokens,

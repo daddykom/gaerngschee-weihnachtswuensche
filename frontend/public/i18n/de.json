@@ -676,6 +676,7 @@
           "user-created": "Benutzer erstellt",
           "user-email-changed": "E-Mail-Adresse geändert",
           "password-reset": "Passwort zurücksetzen",
+          "order-ready-for-pickup": "Abholbenachrichtigung mit QR-Code",
           "order-confirmation-saved": "Bestellbestätigung: Gespeichert",
           "order-confirmation-changes_requested": "Bestellbestätigung: Änderungen verlangt"
         },
@@ -688,7 +689,8 @@
           "startUrl": "Start-URL",
           "temporaryPassword": "Temporäres Passwort",
           "resetUrl": "Passwort-Reset-URL",
-          "year": "Jahr"
+          "year": "Jahr",
+          "orderNumber": "Zettelnummer"
         }
       },
       "overview": {
@@ -971,6 +973,18 @@
       "logout": "Abmelden"
     },
     "mail": {
+      "pickup": {
+        "subject": "Deine Weihnachtswünsche sind bereit zur Abholung",
+        "title": "Deine Geschenke sind eingetroffen",
+        "highlight": "Dein Wunschzettel ist vollständig.",
+        "instructionTitle": "Wichtig",
+        "button": "QR-Code als PNG öffnen",
+        "body": "Alle Geschenke deines Wunschzettels {{number}} für die Weihnachtsaktion {{year}} sind eingetroffen und zur Abholung bereit.",
+        "instruction": "Bitte zeige diesen QR-Code bei der Abholung deiner Geschenke vor.",
+        "qrAlt": "Persönlicher QR-Code zur Abholung",
+        "fallback": "Wird das Bild nicht angezeigt? Über diesen Link kannst du denselben QR-Code als PNG öffnen:",
+        "keepPrivate": "Bewahre diese E-Mail auf und gib den QR-Code und den Link nur an eine Person weiter, die deine Geschenke für dich abholen darf."
+      },
       "order": {
         "confirmation": {
           "saved": {

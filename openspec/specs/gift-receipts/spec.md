@@ -37,8 +37,24 @@ anfangs `NULL`. Die Suchschnittstelle benötigt diese Felder nicht.
 
 Der spätere QR-Code enthält die URL
 `<FRONTEND_BASE_URL>/abholung/<zufälliger-Token>`, keine persönlichen Daten.
-Der Token wird erst in der QR-/E-Mail-Etappe erzeugt. Die Auflösung dieser
-URL und die eigentliche Abholung werden hier nicht implementiert.
+Die Auflösung dieser URL und die eigentliche Abholung werden hier nicht implementiert.
+
+## QR-Code und Abhol-E-Mail (implementiert, noch nicht an Einlieferung angeschlossen)
+
+- Lokal erzeugtes PNG mit `endroid/qr-code` 6.1, hoher Fehlerkorrektur und
+  weissem Hintergrund. Tokens werden zufällig mit 256 Bit erzeugt.
+- Die Nachricht enthält das eingebettete Bild und einen sichtbaren Link
+  auf `<PUBLIC_API_BASE_URL>/public/pickup-qr-code/<token>`.
+  Dieser öffentliche, separat limitierte Bildabruf rendert dasselbe PNG,
+  erfordert keinen Login und verändert keinen Zustand.
+- Derselbe Bildlink steht in der Klartextversion. Der QR-Code selbst enthält
+  weiterhin die Abhol-URL, nicht den Bildlink.
+- Die Abhol-E-Mail ist unter `/admin/email-test` mit Jahr und Zettelnummer
+  testbar. Testversand ordnet keinen Token einer echten Bestellung zu und
+  ändert keine Statuswerte.
+- Die Nachricht kann einschliesslich Bild in der vorhandenen Mail-Queue
+  gespeichert und erneut versandt werden. Automatisches Auslösen und
+  Versandstatus-Verarbeitung folgen in der Einlieferungs-Etappe.
 
 ## Suchseite (implementiert)
 
@@ -61,7 +77,6 @@ URL und die eigentliche Abholung werden hier nicht implementiert.
 
 ## Folgende Etappen (noch nicht implementiert)
 
-- QR-Code und Abhol-E-Mail einschliesslich `/admin/email-test`.
 - Einlieferung setzt `fulfillment_status = received` und `received_at`.
   Nicht reservierte Geschenke lösen eine Warnung aus.
 - Beim letzten fehlenden Geschenk erscheint vor der Speicherung:

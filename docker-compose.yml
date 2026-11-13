@@ -12,6 +12,7 @@ services:
     environment:
       - PHP_DISPLAY_ERRORS=1
       - APP_ENV=test
+      - PUBLIC_API_BASE_URL=http://localhost:8083
       - DB_HOST=host.docker.internal
       - DB_PORT=3306
       - DB_NAME=gaerngschee_weihnachtswuensche

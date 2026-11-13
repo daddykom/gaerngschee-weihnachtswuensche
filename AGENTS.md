@@ -187,6 +187,7 @@ src/
 | `password-reset.html.twig` | Passwort-Reset | `RESET_URL` |
 | `order-confirmation-saved.html.twig` | Bestätigung einer gespeicherten Bestellung | `ORDER.year`, `ORDER.loginUrl` |
 | `order-confirmation-changes_requested.html.twig` | Aufforderung zur Anpassung einer Bestellung | `ORDER.year`, `ORDER.loginUrl` |
+| `order-ready-for-pickup.html.twig` | Abholbenachrichtigung im Layout der Registrierungs-E-Mail, mit eingebettetem QR-PNG und Link auf dasselbe PNG | `ORDER.year`, `ORDER.orderNumber`, `QR_DATA_URI`, `QR_IMAGE_URL`, `LOGO_CID` (Farben über das globale `EMAIL_THEME`) |
 
 Neue E-Mail-Vorlagen dürfen nicht nur im Template-Verzeichnis angelegt werden:
 Die Versandlogik, Übersetzungen, die Admin-E-Mail-Testauswahl und die

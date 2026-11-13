@@ -352,3 +352,28 @@ $emails = array_map(
 ## Database
 
 See [database-conventions.md](./database-conventions.md) for MariaDB/Phinx setup and migration guidelines.
+
+## Abhol-QR und Test-E-Mail
+
+- Das Backend benötigt PHP 8.4 und `ext-gd`. `endroid/qr-code` 6.1 erzeugt
+  PNGs lokal; es werden keine externen QR-Dienste verwendet.
+- `PickupCodeService` erstellt zufällige 256-Bit-Tokens und den SHA-256-Hash
+  für die spätere Speicherung. Der QR-Inhalt ist
+  `<FRONTEND_BASE_URL>/abholung/<token>`. Die Abholseite ist noch nicht implementiert.
+- `PUBLIC_API_BASE_URL` bestimmt die von aussen erreichbare API-Basis für
+  den Bildlink. Ohne Angabe gilt `<FRONTEND_BASE_URL>/api`. Lokal wird
+  `http://localhost:8083`, in Integration `http://localhost:8082` verwendet.
+- `GET /public/pickup-qr-code/{token}` liefert dasselbe PNG wie die E-Mail,
+  ohne Anmeldung und ohne Zustandsänderung. Die Route akzeptiert nur 64
+  hexadezimale Tokenzeichen, keine frei übergebenen QR-Inhalte, und ist
+  separat auf 60 Anfragen pro Minute und IP begrenzt.
+- Der Bildendpunkt bestätigt nicht die Existenz oder Berechtigung eines
+  Tokens: Er rendert ausschliesslich die feste Abhol-URL. Auch die Test-E-Mail
+  verwendet einen zufälligen Token ohne Zuordnung zu einer echten Bestellung.
+- `EmailSender::renderPickupNotification()` erzeugt die speicherbare
+  Nachricht. `sendStoredEmail()` bettet ihr PNG als CID-Bild ein, auch nach
+  einem erneuten Versand aus der bestehenden Mail-Queue. Der Bildlink steht
+  sowohl im HTML als auch im Klartext. Ein reiner Bildabruf löst keine
+  Abholung, Freigabe oder Benachrichtigung aus.
+- `/admin/email-test` bietet `order-ready-for-pickup` mit `year` und
+  `orderNumber` an. Beide Parameter müssen positive Ganzzahlen sein.

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Shared\Mail;
 
 use App\Registration\Services\AnmeldungMailVariant;
+use App\Registration\Services\PickupCodeService;
+use App\Registration\Services\QrCodeGenerator;
 use App\Shared\Logging\ExternalErrorLogger;
 use App\Shared\Translation\SharedJsonFileLoader;
 use Symfony\Bridge\Twig\Extension\TranslationExtension;
@@ -14,6 +16,7 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mailer\Transport;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
+use Symfony\Component\Mime\Part\DataPart;
 use Symfony\Component\Translation\Loader\ArrayLoader;
 use Symfony\Component\Translation\Translator;
 use Symfony\Contracts\Translation\LocaleAwareInterface;
@@ -24,6 +27,7 @@ use Twig\Loader\FilesystemLoader;
 final class EmailSender implements EmailSenderInterface
 {
     private const LOGO_CID = 'gaerngschee-logo';
+    private const PICKUP_QR_CID = 'pickup-qr-code';
     private const EMAIL_THEME = [
         'pageBackground' => '#fff7fb',
         'surface' => '#fff8fc',
@@ -216,6 +220,30 @@ final class EmailSender implements EmailSenderInterface
         $this->sendUserEmail($recipient, $subject, $html, $text);
     }
 
+    /** @param array{year: int, orderNumber: int} $order @return array{subject: string, html: string, text: string} */
+    public function renderPickupNotification(array $order, string $token): array
+    {
+        if ($this->translator instanceof LocaleAwareInterface) {
+            $this->translator->setLocale('de');
+        }
+        if ($order['year'] < 1 || $order['orderNumber'] < 1) {
+            throw new \InvalidArgumentException('Invalid pickup order data.');
+        }
+        $code = (new PickupCodeService())->forToken($token);
+        $html = $this->twig->render('order-ready-for-pickup.html.twig', [
+            'ORDER' => $order,
+            'QR_DATA_URI' => (new QrCodeGenerator())->generateDataUri($code['pickupUrl']),
+            'QR_IMAGE_URL' => $code['imageUrl'],
+            'LOGO_CID' => 'cid:' . self::LOGO_CID,
+        ]);
+
+        return [
+            'subject' => $this->translator->trans('app.mail.pickup.subject', [], null, 'de'),
+            'html' => $html,
+            'text' => $this->plainText($html),
+        ];
+    }
+
     /** @param array<string, mixed> $parameters */
     public function sendTestEmail(string $recipient, string $template, array $parameters): void
     {
@@ -230,6 +258,10 @@ final class EmailSender implements EmailSenderInterface
             'user-created' => $this->renderUserCreatedTest((string) $parameters['loginUrl'], (string) $parameters['temporaryPassword']),
             'user-email-changed' => $this->renderUserEmailChangedTest((string) $parameters['loginUrl']),
             'password-reset' => $this->renderPasswordResetTest((string) $parameters['resetUrl']),
+            'order-ready-for-pickup' => $this->renderPickupNotification([
+                'year' => (int) $parameters['year'],
+                'orderNumber' => (int) $parameters['orderNumber'],
+            ], (new PickupCodeService())->create()['token']),
             default => $this->renderOrderTest($template, $parameters),
         };
 
@@ -308,6 +340,16 @@ final class EmailSender implements EmailSenderInterface
                 self::LOGO_CID,
                 'image/png',
             );
+
+        // Keep the PNG in stored HTML so retries do not depend on files or external image downloads.
+        if (preg_match('/<img\s+id="pickup-qr-code"\s+src="data:image\/png;base64,([A-Za-z0-9+\/=]+)"/', $html, $qr) === 1) {
+            $png = base64_decode($qr[1], true);
+            if ($png === false || !str_starts_with($png, "\x89PNG\r\n\x1a\n")) {
+                throw new \InvalidArgumentException('Invalid stored pickup QR image.');
+            }
+            $message->addPart((new DataPart($png, self::PICKUP_QR_CID, 'image/png'))->asInline());
+            $message->html(str_replace('data:image/png;base64,' . $qr[1], 'cid:' . self::PICKUP_QR_CID, $html));
+        }
 
         try {
             $this->mailer->send($message);
