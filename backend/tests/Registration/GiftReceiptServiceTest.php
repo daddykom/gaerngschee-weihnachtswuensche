@@ -12,6 +12,7 @@ use App\Registration\Services\GiftReceiptException;
 use App\Registration\Services\GiftReceiptService;
 use App\Registration\Services\OrderBatchService;
 use App\Shared\Mail\EmailQueueRepository;
+use App\Shared\Logging\ExternalErrorLogRepository;
 use App\Users\Data\UserRepository;
 use PDO;
 use PHPUnit\Framework\TestCase;
@@ -96,7 +97,7 @@ final class GiftReceiptServiceTest extends TestCase
         self::assertCount(1, $pending);
         $this->pdo->exec("INSERT INTO frontend_config (id, variable_name, value, access_group, update_group, label) VALUES ('retention', 'registration_token_retention_days', '\"365\"', '[]', '[]', 'Retention')");
         $this->emails->failStoredEmail = false;
-        $batch = new OrderBatchService(new OrderRepository($this->pdo), new EmailQueueRepository($this->pdo), new FrontendConfigRepository($this->pdo), $this->emails, new RegistrationTokenRepository($this->pdo), giftReceipts: new GiftReceiptRepository($this->pdo));
+        $batch = new OrderBatchService(new OrderRepository($this->pdo), new EmailQueueRepository($this->pdo), new FrontendConfigRepository($this->pdo), $this->emails, new RegistrationTokenRepository($this->pdo), externalErrors: new ExternalErrorLogRepository($this->pdo), giftReceipts: new GiftReceiptRepository($this->pdo));
         self::assertSame(1, $batch->run()['sent']);
         self::assertSame($pending[0]['html_body'], $this->emails->orderConfirmations[0]['order']['html']);
         self::assertSame(0, $batch->run()['sent']);

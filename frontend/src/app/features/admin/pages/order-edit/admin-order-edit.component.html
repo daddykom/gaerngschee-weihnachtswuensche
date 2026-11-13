@@ -62,7 +62,12 @@
           <div class="item-editor__category">
             <span>
               {{ 'app.admin.overview.wishNumber' | translate }}:
-              @if (currentOrder.orderNumber != null && item.itemNumber != null) {
+              @if (
+                currentOrder.orderNumber !== null &&
+                currentOrder.orderNumber !== undefined &&
+                item.itemNumber !== null &&
+                item.itemNumber !== undefined
+              ) {
                 {{ currentOrder.orderNumber }}-{{ item.itemNumber }}
               } @else {
                 —

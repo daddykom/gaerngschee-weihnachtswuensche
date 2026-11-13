@@ -5,7 +5,12 @@
         <p>{{ currentOrder.requesterEmail }}</p>
         <p>
           <strong>{{ 'app.admin.overview.wishNumber' | translate }}:</strong>
-          @if (currentOrder.orderNumber != null && currentItem.itemNumber != null) {
+          @if (
+            currentOrder.orderNumber !== null &&
+            currentOrder.orderNumber !== undefined &&
+            currentItem.itemNumber !== null &&
+            currentItem.itemNumber !== undefined
+          ) {
             {{ currentOrder.orderNumber }}-{{ currentItem.itemNumber }}
           } @else {
             —
