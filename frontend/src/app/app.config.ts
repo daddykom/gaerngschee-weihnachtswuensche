@@ -1,12 +1,11 @@
 import { provideHttpClient, withInterceptors, withXhr } from '@angular/common/http';
-import { ApplicationConfig, isDevMode, provideBrowserGlobalErrorListeners } from '@angular/core';
-import { provideAnimations } from '@angular/platform-browser/animations';
+import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideEffects } from '@ngrx/effects';
 import { provideState, provideStore } from '@ngrx/store';
-import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { provideTranslateService } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
+import { storeDevtoolsProviders } from '../environments/environment';
 import { appRoutes } from './app.routes';
 import { authSessionInterceptor } from './shared/interceptors/auth-session.interceptor';
 import { authTokenInterceptor } from './shared/interceptors/auth-token.interceptor';
@@ -41,8 +40,7 @@ export const appConfig: ApplicationConfig = {
       notificationEffects,
       sessionEffects,
     ),
-    ...(isDevMode() ? [provideStoreDevtools()] : []),
-    provideAnimations(),
+    ...storeDevtoolsProviders,
     provideTranslateService({
       fallbackLang: 'de',
       lang: 'de',
