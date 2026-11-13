@@ -78,7 +78,7 @@ describe('adminOrdersFeature', () => {
       initialState,
       AdminOrdersActions.searchFormChanged({ changes: { email: 'Example' } }),
     );
-    expect(state.searchForm).toEqual({ email: 'Example' });
+    expect(state.searchForm).toEqual({ email: 'Example', orderNumber: '' });
     expect(state.loadStatus).toBe('initial');
     const filtered = adminOrdersFeature.reducer(
       state,
@@ -88,8 +88,8 @@ describe('adminOrdersFeature', () => {
       filtered,
       AdminOrdersActions.loadSuccess({ orders: [] }),
     );
-    expect(loaded.searchForm).toEqual({ email: 'Example' });
-    expect(initialState.searchForm).toEqual({ email: '' });
+    expect(loaded.searchForm).toEqual({ email: 'Example', orderNumber: '' });
+    expect(initialState.searchForm).toEqual({ email: '', orderNumber: '' });
   });
 
   it('matches email substrings without case sensitivity and ignores surrounding whitespace', () => {
@@ -98,14 +98,67 @@ describe('adminOrdersFeature', () => {
       { ...order, id: 'order-2', requesterEmail: 'other@example.org' },
     ] as AdminOrder[];
     expect(
-      adminOrdersFeature.selectFilteredOrders.projector(orders, { email: ' NA@EXAMPLE ' }),
+      adminOrdersFeature.selectFilteredOrders.projector(orders, {
+        email: ' NA@EXAMPLE ',
+        orderNumber: '',
+      }),
     ).toEqual([orders[0]]);
-    expect(adminOrdersFeature.selectFilteredOrders.projector(orders, { email: '' })).toEqual(
-      orders,
+    expect(
+      adminOrdersFeature.selectFilteredOrders.projector(orders, { email: '', orderNumber: '' }),
+    ).toEqual(orders);
+    expect(
+      adminOrdersFeature.selectFilteredOrders.projector(orders, {
+        email: 'missing',
+        orderNumber: '',
+      }),
+    ).toEqual([]);
+  });
+
+  it('matches the exact order number and combines it with the email filter', () => {
+    const orders = [
+      { ...order, orderNumber: 12 },
+      { ...order, id: 'order-2', orderNumber: 123 },
+      { ...order, id: 'order-3', orderNumber: null },
+    ];
+    for (const number of ['12', ' 12 ', '012']) {
+      expect(
+        adminOrdersFeature.selectFilteredOrders.projector(orders, {
+          email: '',
+          orderNumber: number,
+        }),
+      ).toEqual([orders[0]]);
+    }
+    for (const number of ['1', '0', '-12', '12-1', 'invalid', '12.0']) {
+      expect(
+        adminOrdersFeature.selectFilteredOrders.projector(orders, {
+          email: '',
+          orderNumber: number,
+        }),
+      ).toEqual([]);
+    }
+    expect(
+      adminOrdersFeature.selectFilteredOrders.projector(orders, {
+        email: 'missing',
+        orderNumber: '12',
+      }),
+    ).toEqual([]);
+  });
+
+  it('preserves the order number when only the email or list filters change', () => {
+    const state = adminOrdersFeature.reducer(
+      initialState,
+      AdminOrdersActions.searchFormChanged({ changes: { orderNumber: '12' } }),
     );
-    expect(adminOrdersFeature.selectFilteredOrders.projector(orders, { email: 'missing' })).toEqual(
-      [],
+    const changed = adminOrdersFeature.reducer(
+      state,
+      AdminOrdersActions.searchFormChanged({ changes: { email: 'Example' } }),
     );
+    const filtered = adminOrdersFeature.reducer(
+      changed,
+      AdminOrdersActions.filtersChanged({ statuses: [], categories: [] }),
+    );
+    expect(filtered.searchForm).toEqual({ email: 'Example', orderNumber: '12' });
+    expect(initialState.searchForm).toEqual({ email: '', orderNumber: '' });
   });
 
   it('tracks save success and failure without changing the draft on save start', () => {

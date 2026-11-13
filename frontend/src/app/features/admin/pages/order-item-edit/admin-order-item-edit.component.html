@@ -4,6 +4,14 @@
       <section class="gl-stack gl-stack--group">
         <p>{{ currentOrder.requesterEmail }}</p>
         <p>
+          <strong>{{ 'app.admin.overview.wishNumber' | translate }}:</strong>
+          @if (currentOrder.orderNumber != null && currentItem.itemNumber != null) {
+            {{ currentOrder.orderNumber }}-{{ currentItem.itemNumber }}
+          } @else {
+            —
+          }
+        </p>
+        <p>
           <strong>{{ 'app.order.items.status' | translate }}:</strong>
           {{ 'app.order.items.statuses.' + currentItem.publicationStatus | translate }}
           <br />

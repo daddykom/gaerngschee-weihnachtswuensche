@@ -22,7 +22,7 @@ describe('AdminOverviewComponent', () => {
               orders: [],
               statuses: ['definitive'],
               categories: ['gift'],
-              searchForm: { email: '' },
+              searchForm: { email: '', orderNumber: '' },
               loadStatus: 'loaded',
               saveStatus: 'initial',
               errorCode: null,
@@ -98,6 +98,20 @@ describe('AdminOverviewComponent', () => {
 
     expect(dispatch).toHaveBeenCalledWith(
       AdminOrdersActions.searchFormChanged({ changes: { email: 'EXAMPLE' } }),
+    );
+  });
+
+  it('dispatches only the changed order number search field', () => {
+    const dispatch = vi.spyOn(store, 'dispatch');
+    const input = fixture.nativeElement.querySelector(
+      'input[inputmode="numeric"]',
+    ) as HTMLInputElement;
+    input.value = '12';
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    expect(dispatch).toHaveBeenCalledWith(
+      AdminOrdersActions.searchFormChanged({ changes: { orderNumber: '12' } }),
     );
   });
 });

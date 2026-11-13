@@ -60,6 +60,14 @@
       @for (item of formModel().items; track item.id) {
         <article class="item-editor">
           <div class="item-editor__category">
+            <span>
+              {{ 'app.admin.overview.wishNumber' | translate }}:
+              @if (currentOrder.orderNumber != null && item.itemNumber != null) {
+                {{ currentOrder.orderNumber }}-{{ item.itemNumber }}
+              } @else {
+                —
+              }
+            </span>
             @if (item.personType && item.personIndex) {
               <span
                 >{{

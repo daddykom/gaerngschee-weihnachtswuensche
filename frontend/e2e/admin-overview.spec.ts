@@ -10,10 +10,17 @@ test.describe('Admin order overview route', () => {
       await page.setViewportSize({ width, height: 900 });
       await loginAsAdmin(page);
       const email = 'charley+fair1+very-long-registration-address@example.collins.ch';
-      await mockOrders(page, { ...orderFixture(), requesterEmail: email });
+      const order = orderFixture();
+      await mockOrders(page, {
+        ...order,
+        requesterEmail: email,
+        orderNumber: 123456,
+        items: [{ ...(order['items'] as Record<string, unknown>[])[0], itemNumber: 12 }],
+      });
       await page.goto('/admin/overview');
       const table = page.getByRole('table');
       await expect(table).toContainText(email);
+      await expect(table).not.toContainText('123456-12');
       const action = table.locator('a[href="/admin/orders/order-1/edit"]');
       await expect(action).toBeVisible();
       const summary = page.getByRole('status');
@@ -106,6 +113,67 @@ test.describe('Admin order overview route', () => {
     await page.keyboard.press('Escape');
     await expect.poll(() => requestedStatuses).toEqual(statuses);
     await expect(page.locator('mat-chip-row')).toHaveCount(statuses.length);
+  });
+
+  test('finds an exact order number while retaining the search after editing without showing item numbers', async ({
+    page,
+  }) => {
+    await loginAsAdmin(page);
+    const base = orderFixture();
+    const item = (base['items'] as Record<string, unknown>[])[0];
+    let listRequests = 0;
+    await page.route('http://localhost:8083/admin/orders**', async (route) => {
+      listRequests++;
+      await route.fulfill({
+        json: {
+          orders: [
+            {
+              ...base,
+              orderNumber: 12,
+              items: [
+                { ...item, itemNumber: 1 },
+                { ...item, id: 'item-2', itemNumber: 2 },
+              ],
+            },
+            { ...base, id: 'order-2', orderNumber: 123, requesterEmail: 'other@example.com' },
+            { ...base, id: 'order-3', orderNumber: null },
+          ],
+          statuses: ['released'],
+          categories: [],
+        },
+      });
+    });
+    await page.goto('/admin/overview');
+    await expectTranslatedText(page.locator('#orders-heading'), 'app.admin.overview.ordersTitle');
+    const table = page.getByRole('table');
+    await expect(table.getByRole('row')).toHaveCount(4);
+    await expect(table).not.toContainText('12-1');
+    await expect(table).not.toContainText('12-2');
+    await expect(table).not.toContainText('null-');
+    const number = page.getByRole('textbox', { name: 'Zettelnummer suchen', exact: true });
+    await expectTranslatedText(
+      page.locator('mat-label').filter({ hasText: 'Zettelnummer suchen' }),
+      'app.admin.overview.filters.orderNumber',
+    );
+    const requestsBeforeSearch = listRequests;
+    await number.fill('12');
+    await expect(table.getByRole('row')).toHaveCount(2);
+    await expect(table).not.toContainText('other@example.com');
+    await expect(page.getByRole('status').locator('span').first()).toContainText('1');
+    await expect(page.getByRole('status').locator('span').last()).toContainText('2');
+    expect(listRequests).toBe(requestsBeforeSearch);
+
+    await page.getByRole('searchbox').fill('missing');
+    await expect(table.getByRole('row')).toHaveCount(1);
+    await page.getByRole('searchbox').clear();
+    await expect(table.getByRole('row')).toHaveCount(2);
+    await page.locator('a[href="/admin/orders/order-1/edit"]').click();
+    await page.getByRole('button', { name: 'Abbrechen' }).first().click();
+    await expect(page).toHaveURL(/\/admin\/overview$/);
+    await expect(number).toHaveValue('12');
+    await expect(table.getByRole('row')).toHaveCount(2);
+    await number.clear();
+    await expect(table.getByRole('row')).toHaveCount(4);
   });
 
   test('opens an order for processing', async ({ page }) => {

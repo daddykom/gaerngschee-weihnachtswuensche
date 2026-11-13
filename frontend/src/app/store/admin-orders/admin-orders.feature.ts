@@ -60,7 +60,13 @@ export const adminOrdersFeature = createFeature({
   extraSelectors: ({ selectOrders, selectSearchForm }) => ({
     selectFilteredOrders: createSelector(selectOrders, selectSearchForm, (orders, searchForm) => {
       const search = searchForm.email.trim().toLowerCase();
-      return orders.filter((order) => order.requesterEmail.toLowerCase().includes(search));
+      const orderNumber = searchForm.orderNumber.trim();
+      return orders.filter(
+        (order) =>
+          order.requesterEmail.toLowerCase().includes(search) &&
+          (orderNumber === '' ||
+            (/^\d+$/.test(orderNumber) && order.orderNumber === Number(orderNumber))),
+      );
     }),
   }),
 });

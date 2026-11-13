@@ -696,6 +696,7 @@
         "filters": {
           "title": "Filter",
           "email": "E-Mail durchsuchen",
+          "orderNumber": "Zettelnummer suchen",
           "status": "Status",
           "category": "Kategorie",
           "active": "Aktive Filter",
@@ -712,7 +713,7 @@
           "completed": "Abgeschlossen",
           "unchanged": "Nicht verändern"
         },
-        "ordersTitle": "Wunschzettelen",
+        "ordersTitle": "Wunschzettel",
         "orderNotFound": "Die Wunschzettel wurde nicht gefunden.",
         "back": "Zurück zur Übersicht",
         "change": "Ändern",
