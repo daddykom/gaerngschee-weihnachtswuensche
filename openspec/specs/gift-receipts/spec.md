@@ -40,10 +40,27 @@ Der spätere QR-Code enthält die URL
 Der Token wird erst in der QR-/E-Mail-Etappe erzeugt. Die Auflösung dieser
 URL und die eigentliche Abholung werden hier nicht implementiert.
 
+## Suchseite (implementiert)
+
+- `/user/gift-receipts` ist für `user` und `admin` zugänglich. Administratoren
+  finden den Eintrag im Admin-Menü, Mitarbeitende im Konto-Menü auf Mobil
+  und Desktop. Andere administrative Berechtigungen bleiben unverändert.
+- Die Seite startet ohne Datenabruf. Erst „Suchen“ lädt Daten; ein Resolver
+  für initiale Seitendaten ist deshalb nicht erforderlich.
+- Signal Forms validiert das Format. Fehler erscheinen erst bei berührtem
+  Feld; ungültiges Absenden fokussiert das Eingabefeld und scrollt es ins Bild.
+- Formularinhalt und Suchzustand liegen im zuständigen NgRx-Store. Änderungen
+  der Nummer entfernen alte Ergebnisse und brechen laufende Abfragen ab.
+- Alle Wünsche sind mit Nummer, Titel, Beschreibung und Erfüllungsstatus
+  sichtbar. Bereits eingegangene Wünsche zeigen ihren Eingangszeitpunkt.
+  Der gesuchte Wunsch ist durch Farbe und „Gesuchter Wunsch“ gekennzeichnet.
+- Suchfehler erscheinen über den globalen Notification-Store in der zentralen
+  Informationszone. Die Seite bleibt für einen erneuten Versuch erreichbar.
+- Die Seite ist in dieser Etappe ausschliesslich lesend: kein Einliefern,
+  keine Abholfreigabe und kein Versand.
+
 ## Folgende Etappen (noch nicht implementiert)
 
-- Seite mit Signal-Forms-Suche, Store, vollständigem Wunschzettel und
-  Hervorhebung des gesuchten Wunsches.
 - QR-Code und Abhol-E-Mail einschliesslich `/admin/email-test`.
 - Einlieferung setzt `fulfillment_status = received` und `received_at`.
   Nicht reservierte Geschenke lösen eine Warnung aus.

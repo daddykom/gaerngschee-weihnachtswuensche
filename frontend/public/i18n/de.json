@@ -925,7 +925,32 @@
       "undoTitle": "Auslieferung rückgängig machen",
       "undoQuestion": "Bist du sicher, dass du die Auslieferung rückgängig machen willst?"
     },
+    "giftReceipts": {
+      "title": "Geschenkeingang",
+      "giftNumber": "Geschenknummer",
+      "numberHint": "Format: Zettelnummer-Wunschnummer, zum Beispiel 12-3",
+      "search": "Suchen",
+      "loading": "Geschenk wird gesucht …",
+      "orderHeading": "Wunschzettel {{ number }}",
+      "campaignYear": "Kampagnenjahr: {{ year }}",
+      "selectedWish": "Gesuchter Wunsch",
+      "fulfillmentStatus": "Erfüllungsstatus",
+      "receivedAt": "Eingegangen am",
+      "errorTitle": "Geschenksuche",
+      "validation": {
+        "giftNumber": {
+          "required": "Bitte gib eine Geschenknummer ein.",
+          "format": "Bitte verwende das Format Zettelnummer-Wunschnummer, zum Beispiel 12-3."
+        }
+      },
+      "errors": {
+        "GIFT_NOT_FOUND": "Im aktuellen Kampagnenjahr wurde kein Geschenk mit dieser Nummer gefunden.",
+        "INVALID_GIFT_NUMBER": "Die Geschenknummer ist ungültig. Bitte prüfe die Eingabe.",
+        "REQUEST_FAILED": "Das Geschenk konnte nicht geladen werden. Bitte versuche es erneut."
+      }
+    },
     "navigation": {
+      "giftReceipts": "Geschenkeingang",
       "loading": "Die Anmeldung wird bei Fairgate geprüft ...",
       "menuLabel": "Administrationsmenü",
       "openMenu": "Administrationsmenü öffnen",

@@ -24,6 +24,8 @@ import { fairgateTestEffects } from './store/fairgate-test/fairgate-test.effects
 import { fairgateTestFeature } from './store/fairgate-test/fairgate-test.feature';
 import { fulfillerOrdersEffects } from './store/fulfiller-orders/fulfiller-orders.effects';
 import { fulfillerOrdersFeature } from './store/fulfiller-orders/fulfiller-orders.feature';
+import { giftReceiptsEffects } from './store/gift-receipts/gift-receipts.effects';
+import { giftReceiptsFeature } from './store/gift-receipts/gift-receipts.feature';
 import { orderEffects } from './store/order/order.effects';
 import { orderFeature } from './store/order/order.feature';
 import { passwordResetFeature } from './store/password-reset/password-reset.feature';
@@ -68,6 +70,16 @@ export const appRoutes: Routes = [
         data: { pageTitle: 'app.login.pageTitle' },
         loadComponent: () =>
           import('./features/auth/pages/login/login.component').then((m) => m.Login),
+      },
+      {
+        path: 'user/gift-receipts',
+        canActivate: [groupGuard(['user', 'admin'])],
+        providers: [provideState(giftReceiptsFeature), provideEffects(giftReceiptsEffects)],
+        data: { pageTitle: 'app.giftReceipts.title' },
+        loadComponent: () =>
+          import(
+            './features/gift-receipts/pages/gift-receipt/gift-receipt-container.component'
+          ).then((m) => m.GiftReceiptContainerComponent),
       },
       {
         path: 'user/profile',

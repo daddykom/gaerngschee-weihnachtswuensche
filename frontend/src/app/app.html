@@ -16,6 +16,7 @@
         mat-icon-button
         type="button"
         class="app-header__account-button"
+        [class.app-header__account-button--user]="authGroup() === 'user'"
         [attr.aria-label]="'app.navigation.openAccountMenu' | translate"
         [matMenuTriggerFor]="accountMenu"
       >
@@ -28,6 +29,10 @@
         </div>
         @if (isFulfiller()) {
         <a mat-menu-item routerLink="/erfuellen">{{ 'app.navigation.fulfillment' | translate }}</a>
+        } @if (authGroup() === 'user') {
+        <a mat-menu-item routerLink="/user/gift-receipts"
+          >{{ 'app.navigation.giftReceipts' | translate }}</a
+        >
         }
       </mat-menu>
       } @if (isAdmin()) { @defer (when isAdmin()) {

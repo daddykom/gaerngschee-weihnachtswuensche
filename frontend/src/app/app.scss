@@ -31,6 +31,10 @@
   display: none;
 }
 
+.app-header__account-button--user {
+  display: inline-flex;
+}
+
 .app-header__account-entry {
   display: flex;
   align-items: center;

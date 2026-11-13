@@ -1,9 +1,27 @@
 import { expect, test } from '@playwright/test';
+import { expectTranslatedText } from '../e2e/support/assertions';
 import { loginAsAdmin } from './support/admin-login';
 import { authHeaders, resetIntegrationRateLimits } from './support/auth-header';
 import { issueRegistrationToken } from './support/registration-token';
+import { loginAsUser } from './support/user-login';
 
 const API_URL = 'http://localhost:8082';
+
+test('lets a normal user open gift receipts from the account menu and search the real backend', async ({
+  page,
+}) => {
+  await loginAsUser(page);
+  await page.locator('.app-header__account-button').click();
+  await page.getByRole('menuitem').filter({ hasText: 'Geschenkeingang' }).click();
+  await expect(page).toHaveURL(/\/user\/gift-receipts$/);
+  await page.getByRole('textbox', { name: 'Geschenknummer' }).fill('2147483647-2147483647');
+  const response = page.waitForResponse((response) =>
+    response.url().endsWith('/user/gift-receipts/2147483647-2147483647'),
+  );
+  await page.getByRole('button', { name: 'Suchen', exact: true }).click();
+  expect((await response).status()).toBe(404);
+  await expectTranslatedText(page.getByRole('alert'), 'app.giftReceipts.errors.GIFT_NOT_FOUND');
+});
 
 test('looks up a numbered gift and its complete order for admin and user without changing it', async ({
   page,
@@ -78,6 +96,16 @@ test('looks up a numbered gift and its complete order for admin and user without
     );
     expect(result.order).not.toHaveProperty('requesterEmail');
     expect(result.order).not.toHaveProperty('pickupTokenHash');
+    await page.locator('.admin-menu-button').click();
+    await page.getByRole('menuitem').filter({ hasText: 'Geschenkeingang' }).click();
+    await expect(page).toHaveURL(/\/user\/gift-receipts$/);
+    await page.getByRole('textbox', { name: 'Geschenknummer' }).fill(number);
+    await page.getByRole('button', { name: 'Suchen', exact: true }).click();
+    await expect(page.getByRole('article')).toHaveCount(2);
+    const selected = page.locator('article[aria-current="true"]');
+    await expect(selected).toHaveCount(1);
+    await expect(selected.getByRole('heading')).toContainText(number);
+    await expectTranslatedText(selected.locator('strong'), 'app.giftReceipts.selectedWish');
     expect((await request.get(`${API_URL}/user/gift-receipts/${number}`)).status()).toBe(404);
 
     const userLogin = await request.post(`${API_URL}/auth/login`, {
