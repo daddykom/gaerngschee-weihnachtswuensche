@@ -6,6 +6,7 @@ namespace App\Registration\Services;
 
 use App\Configuration\Data\FrontendConfigRepository;
 use App\Registration\Data\OrderRepository;
+use App\Registration\Data\GiftReceiptRepository;
 use App\Registration\Data\RegistrationTokenRepository;
 use App\Shared\Database\Database;
 use App\Shared\Logging\ExternalErrorLogRepository;
@@ -26,6 +27,7 @@ final class OrderBatchService
         private readonly EmailSenderInterface $emails,
         private readonly RegistrationTokenRepository $tokens,
         private readonly ?ExternalErrorLogRepository $externalErrors = null,
+        private readonly ?GiftReceiptRepository $giftReceipts = null,
     ) {
     }
 
@@ -49,6 +51,11 @@ final class OrderBatchService
 
         foreach ($this->queue->pending() as $email) {
             try {
+                if ($email['email_type'] === 'pickup_notification') {
+                    $status = ($this->giftReceipts ?? new GiftReceiptRepository(Database::getConnection()))->deliverPickupNotification($email['reference_id'], fn (array $pending) => $this->emails->sendStoredEmail($pending['recipient'], $pending['subject'], $pending['html_body'], $pending['text_body']));
+                    $result[$status === 'pending' ? 'failed' : 'sent']++;
+                    continue;
+                }
                 $this->emails->sendStoredEmail($email['recipient'], $email['subject'], $email['html_body'], $email['text_body']);
                 $this->queue->remove($email['id']);
                 if ($email['email_type'] === 'order_confirmation') {

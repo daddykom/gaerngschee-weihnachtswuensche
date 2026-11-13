@@ -13,9 +13,13 @@ export type GiftReceiptLookup =
 export interface GiftReceiptsState {
   form: GiftReceiptForm;
   lookup: GiftReceiptLookup;
+  receipt:
+    | { status: 'initial' | 'confirming' | 'saving' | 'saved' }
+    | { status: 'error'; errorCode: string };
 }
 
 export const initialState: GiftReceiptsState = {
   form: { giftNumber: '' },
   lookup: { status: 'initial' },
+  receipt: { status: 'initial' },
 };

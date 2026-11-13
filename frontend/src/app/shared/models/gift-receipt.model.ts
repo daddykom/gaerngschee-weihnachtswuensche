@@ -24,3 +24,8 @@ export interface GiftReceiptResult {
     items: GiftReceiptItem[];
   };
 }
+
+export interface GiftReceiptResponse extends GiftReceiptResult {
+  alreadyReceived: boolean;
+  mailStatus: 'not_required' | 'sent' | 'pending';
+}

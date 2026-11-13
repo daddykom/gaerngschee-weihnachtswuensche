@@ -23,7 +23,7 @@ test('lets a normal user open gift receipts from the account menu and search the
   await expectTranslatedText(page.getByRole('alert'), 'app.giftReceipts.errors.GIFT_NOT_FOUND');
 });
 
-test('looks up a numbered gift and its complete order for admin and user without changing it', async ({
+test('looks up gifts for both staff roles, safely receives parallel gifts and releases the final one once', async ({
   page,
   request,
 }) => {
@@ -138,6 +138,91 @@ test('looks up a numbered gift and its complete order for admin and user without
           item.receivedAt === null && item.fulfillmentStatus === 'available',
       ),
     ).toBe(true);
+
+    const userCsrf = (await request.storageState()).cookies.find(
+      ({ name }) => name === 'XSRF-TOKEN',
+    )!.value;
+    const giftNumbers = order.items.map(
+      (item: { itemNumber: number }) => `${order.orderNumber}-${item.itemNumber}`,
+    );
+    const parallel = await Promise.all([
+      page.request.post(`${API_URL}/user/gift-receipts/${giftNumbers[0]}`, {
+        headers,
+        data: { confirmUnreserved: true, confirmPickup: false },
+      }),
+      request.post(`${API_URL}/user/gift-receipts/${giftNumbers[1]}`, {
+        headers: { 'X-CSRF-Token': userCsrf },
+        data: { confirmUnreserved: true, confirmPickup: false },
+      }),
+    ]);
+    expect(parallel.map((response) => response.status()).sort()).toEqual([200, 409]);
+    const conflict = await parallel.find((response) => response.status() === 409)!.json();
+    expect(conflict.error.code).toBe('RECEIPT_CONFIRMATION_REQUIRED');
+    const latest = conflict.error.details.result;
+    const lastNumber = latest.order.items.find(
+      (item: { id: string }) => item.id === latest.selectedItemId,
+    ).giftNumber;
+    await page.getByRole('textbox', { name: 'Geschenknummer' }).fill(lastNumber);
+    await page.getByRole('button', { name: 'Suchen', exact: true }).click();
+    await page.getByRole('button', { name: 'Einliefern', exact: true }).click();
+    await expectTranslatedText(page.getByRole('dialog'), 'app.giftReceipts.confirmBoth');
+    await page.getByRole('dialog').getByRole('button', { name: 'Abbrechen', exact: true }).click();
+    const cancelled = await (
+      await page.request.get(`${API_URL}/user/gift-receipts/${lastNumber}`)
+    ).json();
+    expect(cancelled.order.status).toBe('definitive');
+    expect(
+      cancelled.order.items.find((item: { id: string }) => item.id === latest.selectedItemId)
+        .receivedAt,
+    ).toBeNull();
+
+    await page.getByRole('button', { name: 'Einliefern', exact: true }).click();
+    const received = page.waitForResponse(
+      (response) =>
+        response.url().endsWith(`/user/gift-receipts/${lastNumber}`) &&
+        response.request().method() === 'POST',
+    );
+    await page
+      .getByRole('dialog')
+      .getByRole('button', { name: 'Einliefern und freigeben', exact: true })
+      .click();
+    const completed = await received;
+    expect(completed.status()).toBe(200);
+    expect(await completed.json()).toMatchObject({
+      mailStatus: 'sent',
+      alreadyReceived: false,
+      order: { status: 'ready_for_pickup' },
+    });
+    await expectTranslatedText(page.getByRole('alert'), 'app.giftReceipts.released');
+    await expect(page.getByRole('button', { name: 'Einliefern', exact: true })).toHaveCount(0);
+    const duplicates = await Promise.all(
+      [0, 1].map(() =>
+        page.request.post(`${API_URL}/user/gift-receipts/${lastNumber}`, {
+          headers,
+          data: { confirmUnreserved: true, confirmPickup: true },
+        }),
+      ),
+    );
+    for (const duplicate of duplicates) {
+      expect(duplicate.status()).toBe(200);
+      expect(await duplicate.json()).toMatchObject({ alreadyReceived: true, mailStatus: 'sent' });
+    }
+    await expect
+      .poll(async () => {
+        const messages = (
+          await (await page.request.get('http://localhost:8025/api/v1/messages')).json()
+        ).messages;
+        const matching = messages.filter((message: { To: Array<{ Address: string }> }) =>
+          message.To.some((to) => to.Address === order.requesterEmail),
+        );
+        const details = await Promise.all(
+          matching.map(async (message: { ID: string }) =>
+            (await page.request.get(`http://localhost:8025/api/v1/message/${message.ID}`)).json(),
+          ),
+        );
+        return details.filter((detail) => detail.HTML.includes('id="pickup-qr-code"')).length;
+      })
+      .toBe(1);
   } finally {
     const deleted = await page.request.delete(`${API_URL}/admin/users/${draft.userId}`, {
       headers,

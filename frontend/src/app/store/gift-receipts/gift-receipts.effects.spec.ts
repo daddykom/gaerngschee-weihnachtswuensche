@@ -3,23 +3,26 @@ import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { Action } from '@ngrx/store';
 import { firstValueFrom, of, Subject, throwError } from 'rxjs';
-import { GiftReceiptResult } from '../../shared/models/gift-receipt.model';
+import { GiftReceiptResponse, GiftReceiptResult } from '../../shared/models/gift-receipt.model';
 import { GiftReceiptService } from '../../shared/services/gift-receipt.service';
 import { NotificationActions } from '../notification/notification.actions';
 import { GiftReceiptsActions } from './gift-receipts.actions';
 import {
   clearGiftSearchNotificationEffect,
+  receiptNotificationEffect,
+  receiveGiftEffect,
   searchGiftsEffect,
   showGiftSearchErrorEffect,
 } from './gift-receipts.effects';
 
 describe('gift receipt effects', () => {
   let actions$: Subject<Action>;
-  const service = { lookup: vi.fn() };
+  const service = { lookup: vi.fn(), receive: vi.fn() };
 
   beforeEach(() => {
     actions$ = new Subject<Action>();
     service.lookup.mockReset();
+    service.receive.mockReset();
     TestBed.configureTestingModule({
       providers: [
         provideMockActions(() => actions$),
@@ -37,6 +40,62 @@ describe('gift receipt effects', () => {
     actions$.next(GiftReceiptsActions.searchSubmitted({ giftNumber: '12-3' }));
     await expect(output).resolves.toEqual(GiftReceiptsActions.searchSucceeded({ result }));
     expect(service.lookup).toHaveBeenCalledWith('12-3');
+  });
+
+  it('ignores repeated confirmations while the receipt request is in flight', () => {
+    const pending = new Subject<GiftReceiptResponse>();
+    service.receive.mockReturnValue(pending);
+    const output = vi.fn();
+    const subscription = TestBed.runInInjectionContext(() => receiveGiftEffect()).subscribe(output);
+    const action = GiftReceiptsActions.receiptConfirmed({
+      giftNumber: '12-3',
+      confirmUnreserved: true,
+      confirmPickup: true,
+    });
+    actions$.next(action);
+    actions$.next(action);
+    expect(service.receive).toHaveBeenCalledTimes(1);
+    const response = { mailStatus: 'sent' } as GiftReceiptResponse;
+    pending.next(response);
+    expect(output).toHaveBeenCalledWith(GiftReceiptsActions.receiptSucceeded({ response }));
+    subscription.unsubscribe();
+  });
+
+  it('retains a fresh order snapshot when the backend requires renewed confirmation', async () => {
+    const result = { selectedItemId: 'one' } as GiftReceiptResult;
+    service.receive.mockReturnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 409,
+            error: { error: { code: 'RECEIPT_CONFIRMATION_REQUIRED', details: { result } } },
+          }),
+      ),
+    );
+    const output = firstValueFrom(TestBed.runInInjectionContext(() => receiveGiftEffect()));
+    actions$.next(
+      GiftReceiptsActions.receiptConfirmed({
+        giftNumber: '12-3',
+        confirmUnreserved: false,
+        confirmPickup: false,
+      }),
+    );
+    await expect(output).resolves.toEqual(
+      GiftReceiptsActions.receiptFailed({ errorCode: 'RECEIPT_CONFIRMATION_REQUIRED', result }),
+    );
+  });
+
+  it('distinguishes pending email from successful sending', async () => {
+    const output = firstValueFrom(TestBed.runInInjectionContext(() => receiptNotificationEffect()));
+    actions$.next(
+      GiftReceiptsActions.receiptSucceeded({
+        response: { mailStatus: 'pending', alreadyReceived: false } as GiftReceiptResponse,
+      }),
+    );
+    await expect(output).resolves.toMatchObject({
+      variant: 'warning',
+      messageKey: 'app.giftReceipts.mailPending',
+    });
   });
 
   it('maps network failures to a translated fallback', async () => {

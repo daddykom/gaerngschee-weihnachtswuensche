@@ -20,6 +20,17 @@ describe('GiftReceiptService', () => {
 
   afterEach(() => TestBed.inject(HttpTestingController).verify());
 
+  it('posts explicit receipt confirmations with credentials', () => {
+    service.receive('12-3', true, true).subscribe();
+    const request = TestBed.inject(HttpTestingController).expectOne(
+      `${environment.apiUrl}/user/gift-receipts/12-3`,
+    );
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual({ confirmUnreserved: true, confirmPickup: true });
+    expect(request.request.withCredentials).toBe(true);
+    request.flush({});
+  });
+
   it('looks up the encoded number using a credentialed GET request', () => {
     service.lookup('12-3').subscribe();
     const request = TestBed.inject(HttpTestingController).expectOne(

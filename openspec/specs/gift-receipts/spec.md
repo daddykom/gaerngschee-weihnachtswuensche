@@ -39,7 +39,7 @@ Der spätere QR-Code enthält die URL
 `<FRONTEND_BASE_URL>/abholung/<zufälliger-Token>`, keine persönlichen Daten.
 Die Auflösung dieser URL und die eigentliche Abholung werden hier nicht implementiert.
 
-## QR-Code und Abhol-E-Mail (implementiert, noch nicht an Einlieferung angeschlossen)
+## QR-Code und Abhol-E-Mail
 
 - Lokal erzeugtes PNG mit `endroid/qr-code` 6.1, hoher Fehlerkorrektur und
   weissem Hintergrund. Tokens werden zufällig mit 256 Bit erzeugt.
@@ -53,8 +53,8 @@ Die Auflösung dieser URL und die eigentliche Abholung werden hier nicht impleme
   testbar. Testversand ordnet keinen Token einer echten Bestellung zu und
   ändert keine Statuswerte.
 - Die Nachricht kann einschliesslich Bild in der vorhandenen Mail-Queue
-  gespeichert und erneut versandt werden. Automatisches Auslösen und
-  Versandstatus-Verarbeitung folgen in der Einlieferungs-Etappe.
+  gespeichert und erneut versandt werden. Die letzte bestätigte Einlieferung
+  löst die Abholbenachrichtigung aus.
 
 ## Suchseite (implementiert)
 
@@ -72,16 +72,41 @@ Die Auflösung dieser URL und die eigentliche Abholung werden hier nicht impleme
   Der gesuchte Wunsch ist durch Farbe und „Gesuchter Wunsch“ gekennzeichnet.
 - Suchfehler erscheinen über den globalen Notification-Store in der zentralen
   Informationszone. Die Seite bleibt für einen erneuten Versuch erreichbar.
-- Die Seite ist in dieser Etappe ausschliesslich lesend: kein Einliefern,
-  keine Abholfreigabe und kein Versand.
+- Einliefern ist nur für den gesuchten Wunsch möglich. Alle übrigen Wünsche
+  bleiben sichtbar. Während der Speicherung sind Nummer und Suche gesperrt.
 
-## Folgende Etappen (noch nicht implementiert)
+## Einlieferung und Abholfreigabe
 
+- `POST /user/gift-receipts/{giftNumber}` erlaubt `user` und `admin`.
+  Nur genehmigte Wünsche definitiver Bestellungen können erstmals eingeliefert
+  werden. Das konfigurierte Kampagnenjahr ist serverseitig verbindlich.
 - Einlieferung setzt `fulfillment_status = received` und `received_at`.
-  Nicht reservierte Geschenke lösen eine Warnung aus.
-- Beim letzten fehlenden Geschenk erscheint vor der Speicherung:
+  Bereits eingelieferte Wünsche werden unverändert zurückgegeben.
+- Nicht definitiv reservierte Geschenke (`available`, `pending_confirmation`)
+  benötigen eine ausdrückliche Warnungsbestätigung (`confirmUnreserved: true`).
+- Beim letzten fehlenden genehmigten Geschenk erscheint vor der Speicherung:
   „Mit diesem Geschenk sind alle Wünsche dieses Wunschzettels eingetroffen.
   Beim Bestätigen wird der QR-Code zur Abholung versandt.“
-- Bestätigung verbucht den Eingang, setzt `ready_for_pickup` und veranlasst
-  den Versand. Abbrechen verändert nichts. Parallele Anfragen und erneutes
-  Absenden dürfen keine doppelte Freigabe oder Benachrichtigung erzeugen.
+- Die Bestätigung übermittelt `confirmPickup: true`. Ohne erforderliche
+  Bestätigung liefert das Backend HTTP 409 `RECEIPT_CONFIRMATION_REQUIRED`
+  mit dem aktualisierten Suchergebnis unter `error.details.result`.
+  Die Oberfläche zeigt diesen Stand und verlangt erneute Bestätigung.
+- Eine Transaktion mit Bestell- und Wunsch-Sperren verbucht Eingang,
+  `ready_for_pickup`, Token-Hash und den gerenderten Versandauftrag gemeinsam.
+  Abbrechen löst keinen Schreibzugriff aus. Verfügbarkeit und Bestellstatus
+  aktualisieren die bestehenden Event-Zähler.
+- Danach wird die E-Mail unmittelbar versucht. Die Antwort unterscheidet
+  `mailStatus: not_required`, `sent` und `pending` und enthält `alreadyReceived`.
+  Ein SMTP-Fehler verliert weder Eingang noch Freigabe oder den bestehenden QR-Code.
+- Der Batch verarbeitet `pickup_notification` über dieselbe Bestellsperre
+  wie der unmittelbare Versand. Nach Erfolg wird `pickup_notification_sent_at`
+  gespeichert und der Versandauftrag entfernt. Doppelklicks und parallele
+  reguläre Anfragen erzeugen keine neue Freigabe oder einen neuen Token.
+  Bei einem Prozessabbruch zwischen SMTP-Annahme und DB-Bestätigung ist wie
+  bei jedem SMTP-Wiederholungsversand eine erneute Zustellung möglich.
+
+## Noch offen
+
+- Abschliessende Gesamtabnahme und Deployment; Migration
+  `20261113083756_add_order_pickup_fields.php` muss in der jeweiligen Umgebung
+  vor dem ersten Schreibzugriff ausgeführt sein.

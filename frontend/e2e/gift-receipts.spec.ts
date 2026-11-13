@@ -16,6 +16,7 @@ const result = {
         currentTitle: 'Coat',
         currentDescription: 'A warm coat',
         fulfillmentStatus: 'reserved',
+        publicationStatus: 'approved',
         receivedAt: null,
       },
       {
@@ -24,6 +25,7 @@ const result = {
         currentTitle: 'Book',
         currentDescription: 'A picture book',
         fulfillmentStatus: 'received',
+        publicationStatus: 'approved',
         receivedAt: '2026-11-13 10:00:00',
       },
       {
@@ -32,6 +34,7 @@ const result = {
         currentTitle: 'Toy',
         currentDescription: 'A toy with a long description '.repeat(12),
         fulfillmentStatus: 'available',
+        publicationStatus: 'approved',
         receivedAt: null,
       },
     ],
@@ -58,6 +61,157 @@ async function persistRole(page: import('@playwright/test').Page, group: string)
 }
 
 test.describe('Gift receipts route', () => {
+  for (const scenario of [
+    { name: 'reserved gift', unreserved: false, last: false, mailStatus: 'not_required' },
+    { name: 'unreserved gift', unreserved: true, last: false, mailStatus: 'not_required' },
+    { name: 'last reserved gift', unreserved: false, last: true, mailStatus: 'sent' },
+    {
+      name: 'last unreserved gift with pending mail',
+      unreserved: true,
+      last: true,
+      mailStatus: 'pending',
+    },
+  ]) {
+    test(`receives ${scenario.name} only after required confirmation`, async ({ page }) => {
+      await persistRole(page, 'user');
+      const initial = {
+        ...result,
+        order: {
+          ...result.order,
+          items: result.order.items.map((item) =>
+            item.id === 'item-3'
+              ? { ...item, fulfillmentStatus: scenario.unreserved ? 'available' : 'reserved' }
+              : scenario.last
+                ? { ...item, fulfillmentStatus: 'received', receivedAt: '2026-11-13 10:00:00' }
+                : item,
+          ),
+        },
+      };
+      let posts = 0;
+      let release!: () => void;
+      const gate = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      await page.route('http://localhost:8083/user/gift-receipts/12-3', async (route) => {
+        if (route.request().method() === 'GET') {
+          await route.fulfill({ json: initial });
+          return;
+        }
+        posts++;
+        expect(route.request().postDataJSON()).toEqual({
+          confirmUnreserved: scenario.unreserved,
+          confirmPickup: scenario.last,
+        });
+        await gate;
+        await route.fulfill({
+          json: {
+            ...initial,
+            alreadyReceived: false,
+            mailStatus: scenario.mailStatus,
+            order: {
+              ...initial.order,
+              status: scenario.last ? 'ready_for_pickup' : 'definitive',
+              items: initial.order.items.map((item) =>
+                item.id === 'item-3'
+                  ? { ...item, fulfillmentStatus: 'received', receivedAt: '2026-11-13 12:00:00' }
+                  : item,
+              ),
+            },
+          },
+        });
+      });
+      try {
+        await page.goto('/user/gift-receipts');
+        await page.getByRole('textbox', { name: 'Geschenknummer' }).fill('12-3');
+        await page.getByRole('button', { name: 'Suchen', exact: true }).click();
+        const receive = page.getByRole('button', { name: 'Einliefern', exact: true });
+        await receive.click();
+        if (scenario.unreserved || scenario.last) {
+          const dialog = page.getByRole('dialog');
+          await expectTranslatedText(
+            dialog,
+            scenario.last ? 'app.giftReceipts.confirmPickup' : 'app.giftReceipts.confirmUnreserved',
+          );
+          expect(posts).toBe(0);
+          await dialog.getByRole('button', { name: 'Abbrechen', exact: true }).click();
+          expect(posts).toBe(0);
+          await receive.click();
+          await dialog
+            .getByRole('button', {
+              name: scenario.last ? 'Einliefern und freigeben' : 'Trotzdem einliefern',
+              exact: true,
+            })
+            .click();
+        }
+        await expect(receive).toBeDisabled();
+        await expect(page.getByRole('textbox', { name: 'Geschenknummer' })).toHaveAttribute(
+          'readonly',
+        );
+        release();
+        await expect(receive).toHaveCount(0);
+        await expect(page.getByRole('article')).toHaveCount(3);
+        await expect(page.locator('article[aria-current="true"]')).toContainText(
+          '2026-11-13 12:00:00',
+        );
+        await expectTranslatedText(
+          page.getByRole('alert'),
+          `app.giftReceipts.${scenario.mailStatus === 'pending' ? 'mailPending' : scenario.last ? 'released' : 'received'}`,
+        );
+        expect(posts).toBe(1);
+      } finally {
+        release();
+      }
+    });
+  }
+
+  test('refreshes the displayed order when a parallel receipt makes confirmation necessary', async ({
+    page,
+  }) => {
+    await persistRole(page, 'admin');
+    const initial = {
+      ...result,
+      order: {
+        ...result.order,
+        items: result.order.items.map((item) => ({ ...item, fulfillmentStatus: 'reserved' })),
+      },
+    };
+    const fresh = {
+      ...initial,
+      order: {
+        ...initial.order,
+        items: initial.order.items.map((item) =>
+          item.id === 'item-3'
+            ? item
+            : { ...item, fulfillmentStatus: 'received', receivedAt: '2026-11-13 10:00:00' },
+        ),
+      },
+    };
+    let posts = 0;
+    await page.route('http://localhost:8083/user/gift-receipts/12-3', async (route) => {
+      if (route.request().method() === 'GET') {
+        await route.fulfill({ json: initial });
+        return;
+      }
+      posts++;
+      await route.fulfill({
+        status: 409,
+        json: { error: { code: 'RECEIPT_CONFIRMATION_REQUIRED', details: { result: fresh } } },
+      });
+    });
+    await page.goto('/user/gift-receipts');
+    await page.getByRole('textbox', { name: 'Geschenknummer' }).fill('12-3');
+    await page.getByRole('button', { name: 'Suchen', exact: true }).click();
+    await page.getByRole('button', { name: 'Einliefern', exact: true }).click();
+    await expectTranslatedText(
+      page.getByRole('alert'),
+      'app.giftReceipts.errors.RECEIPT_CONFIRMATION_REQUIRED',
+    );
+    await page.getByRole('button', { name: 'Einliefern', exact: true }).click();
+    await expectTranslatedText(page.getByRole('dialog'), 'app.giftReceipts.confirmPickup');
+    await page.getByRole('dialog').getByRole('button', { name: 'Abbrechen' }).click();
+    expect(posts).toBe(1);
+  });
+
   for (const group of ['admin', 'user']) {
     for (const width of [390, 1280]) {
       test(`offers read-only search and all wishes to ${group} at ${width}px`, async ({ page }) => {
@@ -86,7 +240,7 @@ test.describe('Gift receipts route', () => {
         );
         await expect(page.getByRole('article').nth(1)).toContainText('2026-11-13 10:00:00');
         expect(requests).toEqual(['GET']);
-        await expect(page.getByRole('button', { name: /Einliefern/ })).toHaveCount(0);
+        await expect(page.getByRole('button', { name: 'Einliefern', exact: true })).toHaveCount(1);
         expect(
           await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
         ).toBe(true);

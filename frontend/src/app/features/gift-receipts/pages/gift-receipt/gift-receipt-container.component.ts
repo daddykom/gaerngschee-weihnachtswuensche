@@ -16,6 +16,7 @@ export class GiftReceiptContainerComponent {
   private readonly store = inject(Store);
   readonly storeForm = this.store.selectSignal(giftReceiptsFeature.selectForm);
   readonly lookup = this.store.selectSignal(giftReceiptsFeature.selectLookup);
+  readonly receipt = this.store.selectSignal(giftReceiptsFeature.selectReceipt);
   readonly formModel = linkedSignal(() => this.storeForm());
   readonly searchForm = form(this.formModel, (schema) => {
     required(schema.giftNumber);
@@ -45,5 +46,9 @@ export class GiftReceiptContainerComponent {
         GiftReceiptsActions.searchSubmitted({ giftNumber: this.formModel().giftNumber.trim() }),
       );
     }
+  }
+
+  receive(): void {
+    this.store.dispatch(GiftReceiptsActions.receiptRequested());
   }
 }

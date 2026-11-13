@@ -4,6 +4,18 @@ import { giftReceiptsFeature } from './gift-receipts.feature';
 import { initialState } from './gift-receipts.state';
 
 describe('giftReceiptsFeature', () => {
+  it('keeps the refreshed result available after a receipt conflict', () => {
+    const result = { selectedItemId: 'one' } as GiftReceiptResult;
+    const failed = giftReceiptsFeature.reducer(
+      initialState,
+      GiftReceiptsActions.receiptFailed({ errorCode: 'RECEIPT_CONFIRMATION_REQUIRED', result }),
+    );
+    expect(failed.lookup).toEqual({ status: 'loaded', result });
+    expect(failed.receipt).toEqual({ status: 'error', errorCode: 'RECEIPT_CONFIRMATION_REQUIRED' });
+    expect(
+      giftReceiptsFeature.reducer(failed, GiftReceiptsActions.receiptCancelled()).receipt.status,
+    ).toBe('initial');
+  });
   it('stores form changes immutably and removes stale results', () => {
     const result = { selectedItemId: 'item-3' } as GiftReceiptResult;
     const loaded = giftReceiptsFeature.reducer(
