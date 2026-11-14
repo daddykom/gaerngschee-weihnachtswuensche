@@ -10,6 +10,7 @@ use App\Fairgate\Services\FairgateContactProviderFactory;
 use App\Registration\Data\FairgateRegistrationRequestRepository;
 use App\Registration\Services\ClientRegistrationLoginService;
 use App\Registration\Services\AnmeldungService;
+use App\Registration\Services\CampaignAvailabilityService;
 use App\Registration\Services\RegistrationTokenService;
 use DateTimeImmutable;
 use App\Shared\Database\Database;
@@ -32,6 +33,7 @@ final class StartRegistrationAction
         private readonly ?DateTimeImmutable $now = null,
         private readonly ?FairgateContactProvider $fairgate = null,
         private readonly ?FairgateRegistrationRequestRepository $fairgateRequests = null,
+        private readonly ?CampaignAvailabilityService $campaignAvailability = null,
     ) {
     }
 
@@ -46,13 +48,17 @@ final class StartRegistrationAction
         if (!in_array($locale, self::SUPPORTED_LOCALES, true)) {
             return JsonResponse::error($response, 'UNSUPPORTED_LANGUAGE', 422);
         }
-        $campaignStatus = ($this->configs ?? new FrontendConfigRepository(Database::getConnection()))->campaignStatus($this->now);
+        $configs = $this->configs ?? new FrontendConfigRepository(Database::getConnection());
+        $campaignStatus = ($this->campaignAvailability ?? new CampaignAvailabilityService(
+            Database::getConnection(),
+            $configs,
+        ))->status($this->now);
         if ($campaignStatus !== 'open') {
-            return JsonResponse::error(
-                $response,
-                $campaignStatus === 'ended' ? 'CAMPAIGN_ENDED' : 'CAMPAIGN_NOT_STARTED',
-                403,
-            );
+            return JsonResponse::error($response, match ($campaignStatus) {
+                'ended' => 'CAMPAIGN_ENDED',
+                'capacity_reached' => 'CAMPAIGN_CAPACITY_REACHED',
+                default => 'CAMPAIGN_NOT_STARTED',
+            }, 403);
         }
 
         try {

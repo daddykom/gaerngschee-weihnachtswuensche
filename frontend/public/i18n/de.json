@@ -34,7 +34,8 @@
         "text": "Reiche einen Wunsch für dich oder deine Familie ein.",
         "action": "Wunsch einreichen",
         "notStarted": "Die nächste Weihnachtswünsche-Aktion beginnt am {{date}}.",
-        "ended": "Wegen zu grosser Nachfrage sind leider keine Neuanmeldungen mehr möglich.",
+        "capacityReached": "Wegen zu grosser Nachfrage sind leider keine Neuanmeldungen mehr möglich.",
+        "ended": "Die Weihnachtswünsche-Aktion ist bereits beendet.",
         "unavailable": "Die Weihnachtswünsche-Aktion ist momentan nicht verfügbar."
       },
       "fulfill": {
@@ -396,6 +397,7 @@
           "INVALID_ORDER": "Bitte prüfe deine Angaben.",
           "INVALID_ORDER_ITEMS": "Bitte prüfe die Wünsche und ihre Zuordnung zu den Personen.",
           "ORDER_NOT_EDITABLE": "Dieser Wunschzettel kann in seinem aktuellen Status nicht mehr geändert werden.",
+          "CAMPAIGN_CAPACITY_REACHED": "Für dieses Jahr können leider keine neuen Wunschzettel mehr erfasst werden.",
           "SESSION_EXPIRED": "Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.",
           "WEAK_PASSWORD": "Das Passwort erfüllt die Anforderungen nicht.",
           "FAIRGATE_LOOKUP_FAILED": "Die Fairgate-Daten konnten nicht geprüft werden.",
@@ -504,6 +506,7 @@
         "PRIVACY_CONSENT_REQUIRED": "Bitte akzeptiere die Datenschutzerklärung.",
         "CAMPAIGN_NOT_STARTED": "Die Aktion hat noch nicht begonnen.",
         "CAMPAIGN_ENDED": "Die Aktion ist bereits beendet.",
+        "CAMPAIGN_CAPACITY_REACHED": "Für dieses Jahr sind leider bereits alle Wünsche vergeben.",
         "FULFILLER_NOT_STARTED": "Die Möglichkeit, Wünsche zu erfüllen, hat noch nicht begonnen.",
         "FULFILLER_ENDED": "Die Möglichkeit, Wünsche zu erfüllen, ist bereits beendet.",
         "REQUEST_FAILED": "Der Anmeldelink konnte nicht gesendet werden. Bitte versuche es später erneut."

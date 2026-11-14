@@ -21,10 +21,11 @@ export const startFeature = createFeature({
       status: 'success',
       sent,
     })),
-    on(StartActions.submitFailure, (state) => ({
+    on(StartActions.submitFailure, (state, { errorCode }) => ({
       ...state,
       status: 'error',
       sent: false,
+      errorCode,
     })),
   ),
 });

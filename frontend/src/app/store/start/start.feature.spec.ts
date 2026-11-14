@@ -12,6 +12,7 @@ describe('startReducer', () => {
     expect(state).toEqual({
       status: 'loading',
       sent: null,
+      errorCode: null,
       form: { email: 'person@example.com', privacyAccepted: false, language: 'de' },
     });
   });
@@ -21,6 +22,7 @@ describe('startReducer', () => {
       {
         status: 'loading',
         sent: null,
+        errorCode: null,
         form: { email: '', privacyAccepted: false, language: 'de' },
       },
       StartActions.submitSuccess({ sent: true }),
@@ -29,23 +31,26 @@ describe('startReducer', () => {
     expect(state).toEqual({
       status: 'success',
       sent: true,
+      errorCode: null,
       form: { email: '', privacyAccepted: false, language: 'de' },
     });
   });
 
-  it('stores a failed response', () => {
+  it('stores a failed response with its error code', () => {
     const state = startReducer(
       {
         status: 'loading',
         sent: null,
+        errorCode: null,
         form: { email: '', privacyAccepted: false, language: 'de' },
       },
-      StartActions.submitFailure(),
+      StartActions.submitFailure({ errorCode: 'CAMPAIGN_CAPACITY_REACHED' }),
     );
 
     expect(state).toEqual({
       status: 'error',
       sent: false,
+      errorCode: 'CAMPAIGN_CAPACITY_REACHED',
       form: { email: '', privacyAccepted: false, language: 'de' },
     });
   });

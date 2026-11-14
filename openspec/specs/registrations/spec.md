@@ -74,6 +74,24 @@ interface Child {
 - Anmeldungen können jederzeit angepasst werden
 - Anmeldung wird über Fairgate geprüft
 
+### Kampagnenkapazität
+
+- `maximum_orders_per_year` und `maximum_order_items_per_year` begrenzen nur
+  Neuanlagen. Gezählt werden alle Bestellungen und Wünsche des Kampagnenjahres,
+  Entwürfe eingeschlossen.
+- Sobald ein Limit erreicht ist, liefern `POST /public/start` und
+  `POST /client/order` für neue Bestellungen den Fehler
+  `CAMPAIGN_CAPACITY_REACHED` (HTTP 403). Der Anmeldelink auf der Startseite
+  wird durch einen Kapazitätshinweis ersetzt.
+- Bestehende Bestellungen bleiben jederzeit editierbar und dürfen Wünsche für
+  noch wunschlose Familienmitglieder erfassen, auch wenn das globale Limit
+  dadurch überschritten wird.
+- Der berechnete Status wird über `GET /public/configuration` als
+  `campaign_availability_status` ausgeliefert (`open`, `not_started`, `ended`,
+  `capacity_reached`).
+- Der Erfüllerzugriff (`fulfiller_availability_status`) wird ausschliesslich
+  über das Erfüller-Datumsfenster gesteuert, nicht über Kapazität.
+
 ## Implementation Status
 
 | Component | Status |

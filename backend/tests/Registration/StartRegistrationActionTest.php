@@ -9,6 +9,7 @@ use App\Fairgate\Services\FakeFairgateClient;
 use App\Registration\Data\FairgateRegistrationRequestRepository;
 use App\Registration\Actions\StartRegistrationAction;
 use App\Registration\Services\AnmeldungService;
+use App\Registration\Services\CampaignAvailabilityService;
 use App\Registration\Services\RegistrationTokenService;
 use App\Shared\Mail\EmailSenderInterface;
 use Tests\Support\TestDatabase;
@@ -91,6 +92,27 @@ final class StartRegistrationActionTest extends TestCase
         self::assertSame('https://www.fairgate.ch', $sender->loginUrls[0]);
     }
 
+    public function testRejectsRegistrationWhenTheOrderLimitIsReached(): void
+    {
+        $pdo = TestDatabase::create();
+        $this->config($pdo, '2026-08-01', maximumOrders: '1', maximumItems: '999999');
+        $pdo->exec("INSERT INTO orders (id, user_id, year, status) VALUES ('order-1', 'user-1', 2026, 'definitive')");
+        $pdo->exec("INSERT INTO orders (id, user_id, year, status) VALUES ('order-2', 'user-2', 2026, 'definitive')");
+        $action = new StartRegistrationAction(
+            $this->service(),
+            new RegistrationTokenService($pdo),
+            new FrontendConfigRepository($pdo),
+            new DateTimeImmutable('2026-08-25 12:00:00', new DateTimeZone('UTC')),
+            new FakeFairgateClient(),
+            campaignAvailability: new CampaignAvailabilityService($pdo, new FrontendConfigRepository($pdo)),
+        );
+
+        $response = ($action)($this->request('person@example.com', 'de'), new Response());
+
+        self::assertSame(403, $response->getStatusCode());
+        self::assertSame('CAMPAIGN_CAPACITY_REACHED', json_decode((string) $response->getBody(), true)['error']['code']);
+    }
+
     private function service(): AnmeldungService
     {
         return new AnmeldungService(
@@ -132,7 +154,7 @@ final class StartRegistrationActionTest extends TestCase
         );
     }
 
-    private function config(\PDO $pdo, string $startDate, string $endDate = '2026-12-31'): FrontendConfigRepository
+    private function config(\PDO $pdo, string $startDate, string $endDate = '2026-12-31', string $maximumOrders = '999999', string $maximumItems = '600'): FrontendConfigRepository
     {
         $pdo->prepare(
             'INSERT INTO frontend_config (id, variable_name, value, description, access_group, update_group, label)
@@ -186,7 +208,29 @@ final class StartRegistrationActionTest extends TestCase
             'label' => '',
         ]);
 
+        $this->addConfiguration($pdo, $maximumOrders, $maximumItems);
+
         return new FrontendConfigRepository($pdo);
+    }
+
+    private function addConfiguration(\PDO $pdo, string $maximumOrders, string $maximumItems): void
+    {
+        foreach ([
+            ['maximum-orders', 'maximum_orders_per_year', $maximumOrders],
+            ['maximum-items', 'maximum_order_items_per_year', $maximumItems],
+        ] as [$id, $variableName, $value]) {
+            $pdo->prepare(
+                'INSERT INTO frontend_config (id, variable_name, value, access_group, update_group, label)
+                 VALUES (?, ?, ?, ?, ?, ?)',
+            )->execute([
+                $id,
+                $variableName,
+                json_encode($value, JSON_THROW_ON_ERROR),
+                json_encode(['admin', 'wunschbesteller'], JSON_THROW_ON_ERROR),
+                json_encode(['admin'], JSON_THROW_ON_ERROR),
+                $variableName,
+            ]);
+        }
     }
 
     private function request(string $email, string $language): \Psr\Http\Message\ServerRequestInterface

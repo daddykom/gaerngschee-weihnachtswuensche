@@ -65,6 +65,31 @@ test.describe('Root route', () => {
     await expect(page.locator('a[href="/start"]')).toHaveCount(0);
   });
 
+  test('replaces the submission link with a capacity notice when the backend reports exhausted capacity', async ({
+    page,
+  }) => {
+    await page.route('http://localhost:8083/public/configuration', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          { variableName: 'campaign_year', value: '2026' },
+          { variableName: 'campaign_start_date', value: '2000-01-01' },
+          { variableName: 'campaign_end_date', value: '2999-01-01' },
+          { variableName: 'campaign_availability_status', value: 'capacity_reached' },
+          { variableName: 'fulfiller_start_date', value: '2000-01-01' },
+          { variableName: 'fulfiller_end_date', value: '2999-01-01' },
+          { variableName: 'fulfiller_availability_status', value: 'open' },
+        ]),
+      });
+    });
+
+    await page.goto('/');
+    await expectTranslatedText(page.locator('main'), 'app.home.submit.capacityReached');
+    await expect(page.locator('a[href="/start"]')).toHaveCount(0);
+    await expectTranslatedText(page.locator('a[href="/erfuellen"]'), 'app.home.fulfill.action');
+  });
+
   test('shows logout for an authenticated user and returns home after logout', async ({ page }) => {
     await page.addInitScript(() => {
       localStorage.setItem(
