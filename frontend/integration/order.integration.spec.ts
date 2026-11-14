@@ -229,6 +229,33 @@ test('returns order and wish feedback to the requester after an admin review', a
       await expect(notification).toContainText('Please review the family text');
       await current.fill('Requester-approved family text');
       await expect(original.locator('p')).toHaveText('Original family text');
+
+      const wish = requesterPage.getByRole('row').filter({ hasText: 'Edited wish title' });
+      await expectTranslatedText(wish.locator('app-info-box'), 'app.order.items.feedback');
+      await expect(wish.locator('app-info-box')).toContainText('Please review the wish text');
+      await wish.getByRole('button', { name: 'Ändern' }).click();
+      await requesterPage.waitForURL(`**/bestellung/wunsch/${draft.items[0].id}`);
+      const originalTitle = requesterPage.locator(
+        '[aria-labelledby="original-wish-title-heading"] p',
+      );
+      const originalDescription = requesterPage.locator(
+        '[aria-labelledby="original-wish-description-heading"] p',
+      );
+      await expect(originalTitle).toHaveText('Original wish title');
+      await expect(originalDescription).toHaveText('Original wish text');
+      const editedTitle = requesterPage.getByRole('textbox', { name: 'Aktueller Wunschtitel' });
+      const editedDescription = requesterPage.getByRole('textbox', {
+        name: 'Aktuelle Wunschbeschreibung',
+      });
+      await expect(editedTitle).toHaveValue('Edited wish title');
+      await expect(editedDescription).toHaveValue('Edited wish text');
+      await expect(requesterPage.locator('app-item-editor app-info-box')).toContainText(
+        'Please review the wish text',
+      );
+      await editedTitle.fill('Requester-approved wish title');
+      await editedDescription.fill('Requester-approved wish text');
+      await expect(originalTitle).toHaveText('Original wish title');
+      await expect(originalDescription).toHaveText('Original wish text');
     } finally {
       await requesterContext.close();
     }

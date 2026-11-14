@@ -1,6 +1,6 @@
 import { Order } from '../../shared/models/order.model';
 import { OrderActions } from './order.actions';
-import { orderFeature } from './order.feature';
+import { orderFeature, selectOrderItemFeedback } from './order.feature';
 import { initialState } from './order.state';
 
 describe('orderFeature', () => {
@@ -190,4 +190,44 @@ describe('orderFeature', () => {
 
     expect(result.form.items[0].description).toBe('Alter Wunsch');
   });
+});
+
+describe('selectOrderItemFeedback', () => {
+  it('returns no feedback when no order exists', () => {
+    expect(selectOrderItemFeedback.projector(null)).toEqual({});
+  });
+
+  it.each(['draft', 'changes_requested'] as const)(
+    'selects only active wish feedback for %s',
+    (status) => {
+      const order = {
+        status,
+        items: [
+          { id: 'rejected', status: 'rejected', adminNotes: 'Please review\nthe text' },
+          { id: 'draft', status: 'draft', adminNotes: 'Retained feedback' },
+          { id: 'approved', status: 'approved', adminNotes: 'Old feedback' },
+          { id: 'submitted', status: 'submitted', adminNotes: 'Old feedback' },
+          { id: 'empty', status: 'rejected', adminNotes: '   ' },
+          { id: 'missing', status: 'draft', adminNotes: null },
+        ],
+      } as Order;
+
+      expect(selectOrderItemFeedback.projector(order)).toEqual({
+        rejected: 'Please review\nthe text',
+        draft: 'Retained feedback',
+      });
+    },
+  );
+
+  it.each(['released', 'in_review', 'definitive', 'ready_for_pickup', 'completed'] as const)(
+    'does not select old feedback for %s',
+    (status) => {
+      const order = {
+        status,
+        items: [{ id: 'item-1', status: 'rejected', adminNotes: 'Old feedback' }],
+      } as Order;
+
+      expect(selectOrderItemFeedback.projector(order)).toEqual({});
+    },
+  );
 });

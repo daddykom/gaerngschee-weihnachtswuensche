@@ -361,6 +361,37 @@ test.describe('Bestellung route', () => {
     });
   }
 
+  test('shows feedback only beside the corresponding returned wish', async ({ page }) => {
+    const feedback = 'Please review <b>the coat size</b>.\nPlease check the description.';
+    await mockClientLogin(page, {
+      order: {
+        ...orderWithItems('changes_requested', [
+          {
+            ...orderItem('item-1', 'gift', 'Winter coat', 'A warm coat'),
+            status: 'rejected',
+            adminNotes: feedback,
+          },
+          {
+            ...orderItem('item-2', 'gift', 'Shoes', 'Warm shoes'),
+            status: 'approved',
+            adminNotes: 'Old shoe feedback',
+          },
+        ]),
+        adminNotes: null,
+      },
+    });
+
+    const coat = page.getByRole('row').filter({ hasText: 'Winter coat' });
+    const note = coat.locator('app-info-box');
+    await expectTranslatedText(note, 'app.order.items.feedback');
+    await expect(note).toContainText(feedback);
+    await expect(note.locator('b')).toHaveCount(0);
+    await expect(note.locator('p')).toHaveCSS('white-space', 'pre-line');
+    const shoes = page.getByRole('row').filter({ hasText: 'Shoes' });
+    await expect(shoes.locator('app-info-box')).toHaveCount(0);
+    await expect(page.locator('.app-notification')).not.toContainText(feedback);
+  });
+
   test('shows a general review notice when only wishes have feedback', async ({ page }) => {
     await mockClientLogin(page, {
       order: {

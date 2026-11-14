@@ -25,6 +25,7 @@ import { Store } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog';
 import { ControlErrorComponent } from '../../../../shared/components/control-error/control-error';
+import { InfoBoxComponent } from '../../../../shared/components/info-box/info-box';
 import {
   OrderFormValue,
   OrderItemStatus,
@@ -38,6 +39,7 @@ import {
   selectOrderChildrenCount,
   selectOrderFairgateUserExists,
   selectOrderForm,
+  selectOrderItemFeedback,
   selectOrderSaveStatus,
   selectOrderStatus,
 } from '../../../../store/order/order.feature';
@@ -51,6 +53,7 @@ import {
     MatFormFieldModule,
     MatInputModule,
     ControlErrorComponent,
+    InfoBoxComponent,
   ],
   templateUrl: './order.component.html',
   styleUrl: './order.component.scss',
@@ -63,6 +66,7 @@ export class OrderComponent {
   readonly status = this.store.selectSignal(selectOrderStatus);
   readonly saving = this.store.selectSignal(selectOrderSaveStatus);
   readonly order = this.store.selectSignal(selectOrder);
+  readonly itemFeedback = this.store.selectSignal(selectOrderItemFeedback);
   readonly fairgateUserExists = this.store.selectSignal(selectOrderFairgateUserExists);
   readonly fairgateAdultsCount = this.store.selectSignal(selectOrderAdultsCount);
   readonly fairgateChildrenCount = this.store.selectSignal(selectOrderChildrenCount);

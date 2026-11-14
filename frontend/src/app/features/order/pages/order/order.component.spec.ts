@@ -74,6 +74,28 @@ describe('OrderComponent', () => {
     store.resetSelectors();
   });
 
+  it('shows wish feedback next to the corresponding wish title as text', () => {
+    store.overrideSelector(selectOrder, {
+      ...component.order()!,
+      status: 'changes_requested',
+      items: component.order()!.items.map((item) => ({
+        ...item,
+        status: 'rejected' as const,
+        adminNotes: 'Please review <b>the wish</b>.\nPlease specify the size.',
+      })),
+    });
+    store.refreshState();
+    fixture.detectChanges();
+    const feedback = fixture.nativeElement.querySelector('tbody app-info-box') as HTMLElement;
+
+    expect(feedback.closest('td')?.textContent).toContain('Winterjacke');
+    expect(feedback.textContent).toContain('app.order.items.feedback');
+    expect(feedback.querySelector('p')?.textContent).toBe(
+      'Please review <b>the wish</b>.\nPlease specify the size.',
+    );
+    expect(feedback.querySelector('b')).toBeNull();
+  });
+
   it('shows the original text separately from the editable current version', () => {
     const original = fixture.nativeElement.querySelector(
       '[aria-labelledby="original-order-text-heading"]',

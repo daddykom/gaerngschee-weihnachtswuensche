@@ -92,6 +92,24 @@ interface Child {
   späteren Statuswerten wird keine alte Rückmeldung als aktueller
   Prüfauftrag angezeigt.
 
+### Rückmeldung und Textprüfung beim einzelnen Wunsch
+
+- In `/bestellung/wunsch/:itemId` werden Originaltitel und
+  Originalbeschreibung eines gespeicherten Wunsches schreibgeschützt
+  getrennt von den bearbeitbaren aktuellen Fassungen angezeigt.
+  Ungespeicherte Wünsche zeigen keine leeren Originalbereiche.
+- Wunschbezogene Rückmeldungen werden sowohl beim betreffenden Wunsch
+  in der Übersicht als auch in seiner Bearbeitung angezeigt. Sie sind
+  keine Formularvalidierungsfehler und benötigen kein berührtes Feld.
+- Die gemeinsame Store-Auswahl berücksichtigt nur nicht leere
+  Rückmeldungen an Wünschen mit Status `rejected` oder `draft` in
+  zurückgegebenen oder als Entwurf gespeicherten Wunschzetteln.
+  Bereits akzeptierte Wünsche und erneut eingereichte Wunschzettel
+  zeigen keine alten Rückmeldungen als aktuellen Prüfauftrag.
+- Originale und Rückmeldungen bleiben ausserhalb der bearbeitbaren
+  Formularwerte. Alle Freitexte werden als Text mit Zeilenumbrüchen
+  dargestellt, nicht als HTML.
+
 ### Kampagnenkapazität
 
 - `maximum_orders_per_year` und `maximum_order_items_per_year` begrenzen nur

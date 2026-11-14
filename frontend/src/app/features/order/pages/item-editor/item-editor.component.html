@@ -5,6 +5,12 @@
     </h1>
     <p>{{ 'app.order.itemEditor.description' | translate }}</p>
 
+    @if (feedback(); as feedback) {
+      <app-info-box variant="warning" [title]="'app.order.items.feedback' | translate">
+        <p class="gl-text--multiline">{{ feedback }}</p>
+      </app-info-box>
+    }
+
     <mat-form-field appearance="outline" subscriptSizing="dynamic">
       <mat-label>{{ 'app.order.items.person' | translate }}</mat-label>
       <mat-select
@@ -26,8 +32,16 @@
       />
     </mat-form-field>
 
+    @if (originalItem()?.originalTitle; as originalTitle) {
+      <section class="gl-stack gl-stack--group" aria-labelledby="original-wish-title-heading">
+        <h2 id="original-wish-title-heading">{{ 'app.order.items.originalTitle' | translate }}</h2>
+        <p class="gl-text--multiline">{{ originalTitle }}</p>
+      </section>
+    }
     <mat-form-field appearance="outline" subscriptSizing="dynamic">
-      <mat-label>{{ 'app.order.items.wishTitle' | translate }}</mat-label>
+      <mat-label>{{
+        (originalItem() ? 'app.order.items.currentTitle' : 'app.order.items.wishTitle') | translate
+      }}</mat-label>
       <input matInput [formField]="itemForm.title" />
       <app-control-error
         matError
@@ -36,8 +50,19 @@
       />
     </mat-form-field>
 
+    @if (originalItem()?.originalDescription; as originalDescription) {
+      <section class="gl-stack gl-stack--group" aria-labelledby="original-wish-description-heading">
+        <h2 id="original-wish-description-heading">
+          {{ 'app.order.items.originalDescription' | translate }}
+        </h2>
+        <p class="gl-text--multiline">{{ originalDescription }}</p>
+      </section>
+    }
     <mat-form-field appearance="outline" subscriptSizing="dynamic">
-      <mat-label>{{ 'app.order.items.description' | translate }}</mat-label>
+      <mat-label>{{
+        (originalItem() ? 'app.order.items.currentDescription' : 'app.order.items.description')
+          | translate
+      }}</mat-label>
       <textarea matInput rows="4" [formField]="itemForm.description"></textarea>
       <app-control-error
         matError

@@ -15,9 +15,14 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ControlErrorComponent } from '../../../../shared/components/control-error/control-error';
+import { InfoBoxComponent } from '../../../../shared/components/info-box/info-box';
 import { OrderItemFormValue, OrderItemPersonType } from '../../../../shared/models/order.model';
 import { OrderActions } from '../../../../store/order/order.actions';
-import { selectOrderForm } from '../../../../store/order/order.feature';
+import {
+  selectOrder,
+  selectOrderForm,
+  selectOrderItemFeedback,
+} from '../../../../store/order/order.feature';
 
 @Component({
   selector: 'app-item-editor',
@@ -29,6 +34,7 @@ import { selectOrderForm } from '../../../../store/order/order.feature';
     MatInputModule,
     MatSelectModule,
     ControlErrorComponent,
+    InfoBoxComponent,
   ],
   templateUrl: './item-editor.component.html',
   styleUrl: './item-editor.component.scss',
@@ -40,6 +46,12 @@ export class ItemEditorComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly orderFormState = this.store.selectSignal(selectOrderForm);
   private readonly itemId = this.route.snapshot.paramMap.get('itemId') ?? crypto.randomUUID();
+  private readonly order = this.store.selectSignal(selectOrder);
+  private readonly itemFeedback = this.store.selectSignal(selectOrderItemFeedback);
+  readonly originalItem = computed(() =>
+    this.order()?.items.find((item) => item.id === this.itemId),
+  );
+  readonly feedback = computed(() => this.itemFeedback()[this.itemId]);
   readonly personOptions = computed(() => {
     const currentForm = this.orderFormState();
     const current = currentForm.items.find((item) => item.id === this.itemId);

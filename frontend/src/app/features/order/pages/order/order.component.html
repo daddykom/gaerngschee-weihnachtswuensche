@@ -162,7 +162,19 @@
                     {{ 'app.order.items.unassigned' | translate }}
                   }
                 </td>
-                <td>{{ item.title }}</td>
+                <td>
+                  <div class="gl-stack gl-stack--group">
+                    <span>{{ item.title }}</span>
+                    @if (itemFeedback()[item.id]; as feedback) {
+                      <app-info-box
+                        variant="warning"
+                        [title]="'app.order.items.feedback' | translate"
+                      >
+                        <p class="gl-text--multiline">{{ feedback }}</p>
+                      </app-info-box>
+                    }
+                  </div>
+                </td>
                 <td>{{ 'app.order.items.categories.' + item.category | translate }}</td>
                 <td>{{ item.personalMessage }}</td>
                 <td>{{ 'app.order.items.statuses.' + itemStatus(item.id) | translate }}</td>
