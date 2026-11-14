@@ -74,6 +74,24 @@ interface Child {
 - Anmeldungen können jederzeit angepasst werden
 - Anmeldung wird über Fairgate geprüft
 
+### Rückmeldung und Textprüfung auf dem Wunschzettel
+
+- Bei bestehenden Wunschzetteln zeigt `/bestellung` den ursprünglichen
+  Order-Text schreibgeschützt und getrennt von der aktuellen Fassung.
+  Die aktuelle Fassung bleibt gemäss Bestellstatus bearbeitbar; der
+  ursprüngliche Text ist kein Formularwert und wird nicht mitgeändert.
+- Für neue Wunschzettel und Bestandsdaten ohne Originaltext wird kein
+  leerer Originaltext-Bereich angezeigt.
+- Bei `changes_requested` hat ein Prüfhinweis in der zentralen
+  Informationszone Vorrang vor dem Fairgate-Hinweis. Die allgemeine
+  Rückmeldung (`adminNotes`) wird dort als Text mit erhaltenen
+  Zeilenumbrüchen ausgegeben, niemals als HTML.
+- Fehlt eine allgemeine Rückmeldung, erscheint nur der Prüfauftrag.
+  Ein Entwurf mit gespeicherter allgemeiner Rückmeldung zeigt den Hinweis
+  beim erneuten Laden weiterhin. Nach erneutem Einreichen sowie in
+  späteren Statuswerten wird keine alte Rückmeldung als aktueller
+  Prüfauftrag angezeigt.
+
 ### Kampagnenkapazität
 
 - `maximum_orders_per_year` und `maximum_order_items_per_year` begrenzen nur

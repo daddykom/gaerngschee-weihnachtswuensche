@@ -99,8 +99,20 @@
         }
       </div>
 
+      @if (order()?.originalText; as originalText) {
+        <section class="gl-stack gl-stack--group" aria-labelledby="original-order-text-heading">
+          <h3 id="original-order-text-heading">
+            {{ 'app.order.publicText.originalLabel' | translate }}
+          </h3>
+          <p class="gl-text--multiline">{{ originalText }}</p>
+        </section>
+      }
+
       <mat-form-field appearance="outline" subscriptSizing="dynamic">
-        <mat-label>{{ 'app.order.publicText.label' | translate }}</mat-label>
+        <mat-label>{{
+          (firstAccess() ? 'app.order.publicText.label' : 'app.order.publicText.currentLabel')
+            | translate
+        }}</mat-label>
         @if (canEdit()) {
           <textarea matInput rows="6" [formField]="orderForm.text"></textarea>
         } @else {

@@ -79,6 +79,19 @@ export const orderFairgateNotificationEffect = createEffect(
       ofType(OrderActions.loadSuccess),
       map(({ overview }) => {
         const status = overview.order?.status;
+        const feedback = overview.order?.adminNotes ?? '';
+        if (status === 'changes_requested' || (status === 'draft' && feedback.trim() !== '')) {
+          return NotificationActions.show({
+            variant: 'warning',
+            titleKey: 'app.order.status.changes_requested.title',
+            messageKey:
+              feedback.trim() !== ''
+                ? 'app.order.status.changes_requested.messageWithFeedback'
+                : 'app.order.status.changes_requested.message',
+            params: { feedback },
+            preserveOnRoutes: ['/bestellung'],
+          });
+        }
         const canEdit =
           status === undefined || ['draft', 'changes_requested'].includes(status as OrderStatus);
         if (status !== undefined && !canEdit) {

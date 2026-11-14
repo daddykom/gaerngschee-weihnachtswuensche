@@ -222,6 +222,8 @@
       },
       "publicText": {
         "label": "Erzähl uns kurz von deiner aktuellen Lebenssituation",
+        "originalLabel": "Dein ursprünglicher Text",
+        "currentLabel": "Aktuelle Fassung deines Textes",
         "hint": "Was ist gerade schwierig für dich? Wie ist es dazu gekommen?\n\nWichtig: Dein Text wird öffentlich auf der Website angezeigt. Schreibe deshalb keine Namen oder persönlichen Daten hinein."
       },
       "items": {
@@ -292,6 +294,11 @@
         "login": "Zur Login-Seite"
       },
       "status": {
+        "changes_requested": {
+          "title": "Bitte prüfe deinen Wunschzettel",
+          "message": "Das Gärngschee-Team hat deinen Wunschzettel zur Prüfung zurückgegeben. Bitte prüfe die aktuelle Fassung und reiche deinen Wunschzettel erneut ein.",
+          "messageWithFeedback": "Das Gärngschee-Team hat deinen Wunschzettel zur Prüfung zurückgegeben. Bitte prüfe die aktuelle Fassung und reiche deinen Wunschzettel erneut ein.\n\nRückmeldung des Gärngschee-Teams:\n{{feedback}}"
+        },
         "released": {
           "title": "Zur Prüfung freigegeben",
           "message": "Deine Anmeldung wurde zur administrativen Prüfung freigegeben. Darum kann sie gerade nicht verändert werden."

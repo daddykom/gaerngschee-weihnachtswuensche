@@ -121,6 +121,8 @@ test('does not create an order when the client leaves without saving', async ({ 
 test('returns order and wish feedback to the requester after an admin review', async ({
   page,
   request,
+  browser,
+  baseURL,
 }) => {
   const apiUrl = 'http://localhost:8082';
   const email = `feedback+fair1-${Date.now()}@example.com`;
@@ -203,6 +205,33 @@ test('returns order and wish feedback to the requester after an admin review', a
         ],
       },
     });
+
+    const requesterContext = await browser.newContext({ baseURL });
+    try {
+      const requesterPage = await requesterContext.newPage();
+      await requesterPage.goto(
+        `/client-login?token=${encodeURIComponent(issueRegistrationToken(email))}`,
+      );
+      await requesterPage.waitForURL('**/bestellung');
+      const original = requesterPage.locator('[aria-labelledby="original-order-text-heading"]');
+      await expectTranslatedText(
+        original.getByRole('heading'),
+        'app.order.publicText.originalLabel',
+      );
+      await expect(original.locator('p')).toHaveText('Original family text');
+      const current = requesterPage.getByRole('textbox', {
+        name: 'Aktuelle Fassung deines Textes',
+      });
+      await expect(current).toHaveValue('Edited family text');
+      await expect(current).toBeEditable();
+      const notification = requesterPage.locator('.app-notification');
+      await expectTranslatedText(notification, 'app.order.status.changes_requested.title');
+      await expect(notification).toContainText('Please review the family text');
+      await current.fill('Requester-approved family text');
+      await expect(original.locator('p')).toHaveText('Original family text');
+    } finally {
+      await requesterContext.close();
+    }
   } finally {
     const deleted = await page.request.delete(`${apiUrl}/admin/users/${draft.userId}`, {
       headers,
