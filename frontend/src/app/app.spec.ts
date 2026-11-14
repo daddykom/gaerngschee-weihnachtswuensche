@@ -15,7 +15,13 @@ import { initialState as frontendConfigInitialState } from './store/frontend-con
 class TestPage {}
 
 describe('App', () => {
+  let originalScrollIntoView: PropertyDescriptor | undefined;
+
   beforeEach(async () => {
+    originalScrollIntoView = Object.getOwnPropertyDescriptor(
+      HTMLElement.prototype,
+      'scrollIntoView',
+    );
     await TestBed.configureTestingModule({
       imports: [App, RouterTestingModule],
       providers: [
@@ -29,6 +35,15 @@ describe('App', () => {
         }),
       ],
     }).compileComponents();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    if (originalScrollIntoView) {
+      Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', originalScrollIntoView);
+    } else {
+      Reflect.deleteProperty(HTMLElement.prototype, 'scrollIntoView');
+    }
   });
 
   it('should render router outlet', async () => {
@@ -122,6 +137,7 @@ describe('App', () => {
     const scrollIntoView = vi.fn();
     Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
       configurable: true,
+      writable: true,
       value: scrollIntoView,
     });
     vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({
@@ -179,6 +195,7 @@ describe('App', () => {
     const scrollIntoView = vi.fn();
     Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
       configurable: true,
+      writable: true,
       value: scrollIntoView,
     });
 

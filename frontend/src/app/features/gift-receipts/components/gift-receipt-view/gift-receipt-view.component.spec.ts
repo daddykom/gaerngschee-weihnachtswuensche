@@ -31,7 +31,11 @@ describe('GiftReceiptViewComponent', () => {
   it('shows no validation errors until submission and then focuses the invalid field', async () => {
     const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
     const scroll = vi.fn();
-    input.scrollIntoView = scroll;
+    Object.defineProperty(input, 'scrollIntoView', {
+      configurable: true,
+      writable: true,
+      value: scroll,
+    });
     expect(component.searchForm().giftNumber().touched()).toBe(false);
     const emitted = vi.spyOn(component.searchSubmitted, 'emit');
     component.submit(new Event('submit'));
