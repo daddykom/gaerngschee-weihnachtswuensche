@@ -36,6 +36,8 @@ export interface OrderItem {
   originalReason: string | null;
   currentReason: string | null;
   personalMessage: string | null;
+  /** Feedback for the wish requester, not an internal note. */
+  adminNotes: string | null;
   status: OrderItemStatus;
   fulfillerEmail: string | null;
   reservedAt: string | null;
@@ -74,6 +76,8 @@ export interface Order {
   childrenCount: number;
   originalText: string | null;
   currentText: string | null;
+  /** Feedback for the wish requester, not an internal note. */
+  adminNotes: string | null;
   items: OrderItem[];
   fairgateStatus: string | null;
   confirmationEmailSentAt: string | null;

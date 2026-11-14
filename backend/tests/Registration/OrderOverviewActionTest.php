@@ -99,6 +99,61 @@ final class OrderOverviewActionTest extends TestCase
         self::assertFalse($data['canEdit']);
     }
 
+    public function testReturnsAdminFeedbackAndBothTextVersionsForTheOwnOrder(): void
+    {
+        $order = $this->orders->saveForYear($this->user['id'], 2026, 'released', 1, 0, [[
+            'category' => 'gift',
+            'personType' => 'adult',
+            'personIndex' => 1,
+            'title' => 'Original wish title',
+            'description' => 'Original wish text',
+        ]], 'valid', 'Original family text', 1, 0);
+        $this->orders->saveAdministration(
+            [...$order,
+                'status' => 'changes_requested',
+                'currentText' => 'Edited family text',
+                'adminNotes' => 'Please review the family text',
+            ],
+            [[...$order['items'][0],
+                'publicationStatus' => 'rejected',
+                'currentTitle' => 'Edited wish title',
+                'currentDescription' => 'Edited wish text',
+                'adminNotes' => 'Please review the wish text',
+            ]],
+        );
+
+        $response = $this->load();
+        $data = $this->payload($response);
+
+        self::assertSame(200, $response->getStatusCode());
+        self::assertTrue($data['canEdit']);
+        self::assertSame('changes_requested', $data['order']['status']);
+        self::assertSame('Please review the family text', $data['order']['adminNotes']);
+        self::assertSame('Original family text', $data['order']['originalText']);
+        self::assertSame('Edited family text', $data['order']['currentText']);
+        self::assertSame('Please review the wish text', $data['order']['items'][0]['adminNotes']);
+        self::assertSame('Original wish title', $data['order']['items'][0]['originalTitle']);
+        self::assertSame('Edited wish title', $data['order']['items'][0]['currentTitle']);
+        self::assertSame('Original wish text', $data['order']['items'][0]['originalDescription']);
+        self::assertSame('Edited wish text', $data['order']['items'][0]['currentDescription']);
+    }
+
+    public function testReturnsNullFeedbackWhenNoAdminFeedbackHasBeenSaved(): void
+    {
+        $this->orders->saveForYear($this->user['id'], 2026, 'draft', 1, 0, [[
+            'category' => 'gift',
+            'title' => 'Wish title',
+            'description' => 'Wish text',
+        ]], 'valid', 'Family text', 1, 0);
+
+        $data = $this->payload($this->load());
+
+        self::assertArrayHasKey('adminNotes', $data['order']);
+        self::assertNull($data['order']['adminNotes']);
+        self::assertArrayHasKey('adminNotes', $data['order']['items'][0]);
+        self::assertNull($data['order']['items'][0]['adminNotes']);
+    }
+
     public function testStoredOrderDoesNotUseMoreRecentSessionData(): void
     {
         $this->orders->saveForYear($this->user['id'], 2026, 'draft', 2, 1, [], 'not_found');

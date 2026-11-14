@@ -143,7 +143,9 @@ test.describe('Admin order edit route', () => {
     await page.locator('a[href="/admin/orders/order-1/edit"]').click();
     await page.getByRole('combobox', { name: 'Neuer Status' }).click();
     await page.getByRole('option', { name: 'Änderungen verlangt' }).click();
-    await page.getByRole('textbox', { name: /Interne Bemerkung/ }).fill('Bitte nochmals prüfen');
+    await page
+      .getByRole('textbox', { name: /Rückmeldung zum Wunschzettel/ })
+      .fill('Bitte nochmals prüfen');
     await page.getByRole('button', { name: 'Speichern' }).click();
 
     await expect(page).toHaveURL(/\/admin\/overview$/);

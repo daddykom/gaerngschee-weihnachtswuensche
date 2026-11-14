@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { expectTranslatedText } from '../e2e/support/assertions';
+import { loginAsAdmin } from './support/admin-login';
 import { authHeaders, resetIntegrationRateLimits } from './support/auth-header';
 import { issueRegistrationToken } from './support/registration-token';
 
@@ -114,5 +115,98 @@ test('does not create an order when the client leaves without saving', async ({ 
       headers: await authHeaders(page),
     });
     expect(logout.status()).toBe(204);
+  }
+});
+
+test('returns order and wish feedback to the requester after an admin review', async ({
+  page,
+  request,
+}) => {
+  const apiUrl = 'http://localhost:8082';
+  const email = `feedback+fair1-${Date.now()}@example.com`;
+  const login = await request.post(`${apiUrl}/auth/registration-login`, {
+    data: { token: issueRegistrationToken(email) },
+  });
+  expect(login.status()).toBe(200);
+  const csrf = (await request.storageState()).cookies.find(
+    ({ name }) => name === 'XSRF-TOKEN',
+  )!.value;
+  const saved = await request.post(`${apiUrl}/client/order`, {
+    headers: { 'X-CSRF-Token': csrf },
+    data: {
+      mode: 'draft',
+      text: 'Original family text',
+      adultsCount: 2,
+      childrenCount: 3,
+      password: 'long-enough-password',
+      passwordConfirmation: 'long-enough-password',
+      items: [
+        {
+          category: 'gift',
+          personType: 'adult',
+          personIndex: 1,
+          title: 'Original wish title',
+          description: 'Original wish text',
+        },
+      ],
+    },
+  });
+  expect(saved.status()).toBe(200);
+  const draft = (await saved.json()).order;
+  expect(draft.adminNotes).toBeNull();
+  expect(draft.items[0].adminNotes).toBeNull();
+
+  await loginAsAdmin(page);
+  const headers = await authHeaders(page);
+  try {
+    const reviewed = await page.request.patch(`${apiUrl}/admin/orders/${draft.id}`, {
+      headers,
+      data: {
+        action: 'rejectOrder',
+        order: {
+          ...draft,
+          currentText: 'Edited family text',
+          adminNotes: 'Please review the family text',
+        },
+        items: [
+          {
+            ...draft.items[0],
+            publicationStatus: 'rejected',
+            currentTitle: 'Edited wish title',
+            currentDescription: 'Edited wish text',
+            adminNotes: 'Please review the wish text',
+          },
+        ],
+      },
+    });
+    expect(reviewed.status()).toBe(200);
+
+    const overview = await request.get(`${apiUrl}/client/order`);
+    expect(overview.status()).toBe(200);
+    expect(await overview.json()).toMatchObject({
+      canEdit: true,
+      order: {
+        id: draft.id,
+        status: 'changes_requested',
+        originalText: 'Original family text',
+        currentText: 'Edited family text',
+        adminNotes: 'Please review the family text',
+        items: [
+          {
+            id: draft.items[0].id,
+            originalTitle: 'Original wish title',
+            currentTitle: 'Edited wish title',
+            originalDescription: 'Original wish text',
+            currentDescription: 'Edited wish text',
+            adminNotes: 'Please review the wish text',
+          },
+        ],
+      },
+    });
+  } finally {
+    const deleted = await page.request.delete(`${apiUrl}/admin/users/${draft.userId}`, {
+      headers,
+    });
+    expect(deleted.status()).toBe(200);
   }
 });
