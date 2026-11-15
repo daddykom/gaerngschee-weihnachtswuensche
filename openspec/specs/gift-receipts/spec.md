@@ -91,6 +91,13 @@ Die Auflösung dieser URL und die eigentliche Abholung werden hier nicht impleme
   Strings gepflegt. Das Abholdatum ist Freitext ohne Datums-/Formatvalidierung;
   der Abholort wird als mehrzeilige Textarea bearbeitet. Beide Einträge starten
   leer und müssen vor dem produktiven Versand durch den Betreiber befüllt werden.
+- Die Eingabedarstellung wird durch die Metadaten `frontend_config.input_type`
+  beziehungsweise `inputType` in der Admin-API bestimmt (`text` oder `textarea`),
+  nicht durch den Konfigurationsschlüssel. Der Standard für bestehende und neue
+  Einträge ist `text`; die Migration setzt den Abholort auf `textarea`. Der Typ
+  gilt für einzelne Werte und Listeneinträge, auch ohne Schreibberechtigung.
+  Beim Speichern wird nur der Wert geändert; Typ, Rechte und Validierungsmuster
+  bleiben erhalten. Die öffentliche Konfigurations-API bleibt unverändert.
 - Die Abhol-E-Mail übernimmt beide Werte beim Erstellen der Nachricht aus der
   Konfiguration. Beim Admin-Testversand können die optionalen Parameter
   `pickupDate` (Text) und `pickupLocation` (Textarea) diese Werte nur für die

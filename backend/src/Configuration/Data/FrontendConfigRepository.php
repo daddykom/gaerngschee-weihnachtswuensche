@@ -17,7 +17,7 @@ final class FrontendConfigRepository
     public function findVisibleForGroup(string $group): array
     {
         $stmt = $this->pdo->query(
-            'SELECT id, variable_name, value, description, access_group, update_group, label, pattern, placeholder, created_at, updated_at
+            'SELECT id, variable_name, value, description, access_group, update_group, label, pattern, placeholder, input_type, created_at, updated_at
              FROM frontend_config
              ORDER BY sort_order, variable_name',
         );
@@ -62,7 +62,7 @@ final class FrontendConfigRepository
     public function update(string $id, string $group, string|array $value): array|false|null
     {
         $stmt = $this->pdo->prepare(
-            'SELECT id, variable_name, value, description, access_group, update_group, label, pattern, placeholder, created_at, updated_at
+            'SELECT id, variable_name, value, description, access_group, update_group, label, pattern, placeholder, input_type, created_at, updated_at
              FROM frontend_config
              WHERE id = :id',
         );
@@ -175,6 +175,7 @@ final class FrontendConfigRepository
             'label' => $row['label'],
             'pattern' => $row['pattern'],
             'placeholder' => $row['placeholder'],
+            'inputType' => $row['input_type'],
             'canUpdate' => $canUpdate,
             'createdAt' => $row['created_at'],
             'updatedAt' => $row['updated_at'],

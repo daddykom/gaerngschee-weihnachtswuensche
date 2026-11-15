@@ -501,6 +501,26 @@ Als Leitlinie gilt:
 
 > **Design for change, but do not implement the future in advance.**
 
+### Einfachheit bedeutet geringe Komplexität, nicht wenige Änderungen
+
+- Eine einfache Lösung passt zur bestehenden Architektur, hat wenige Sonderfälle
+  und einen nachvollziehbaren Datenfluss. Die Anzahl geänderter Dateien oder
+  Zeilen ist kein Qualitätskriterium.
+- Vor Änderungen den betroffenen Datenfluss über alle relevanten Schichten
+  verstehen, einschliesslich bestehender Erweiterungspunkte und abhängiger Tests.
+- Generische Komponenten dürfen ihre Darstellung oder ihr Verhalten nicht anhand
+  einzelner fachlicher Schlüssel, IDs oder Namen bestimmen. Dafür sind explizite
+  Eigenschaften im zuständigen Datenmodell zu verwenden.
+- Eine konkrete Anforderung rechtfertigt die dafür notwendigen Modell-, API- und
+  Datenbankänderungen. Diese sind keine unnötige Abstraktion.
+- Bei mehreren plausiblen Lösungen die Entscheidung kurz anhand von
+  Verständlichkeit, Sonderfällen, Kopplung und Testbarkeit begründen – nicht
+  anhand des kleinsten Diffs.
+- Keine zusätzliche Abstraktion ohne konkreten Nutzen; keine Abkürzung, die
+  vorhandene Verantwortungsgrenzen verletzt.
+- Vor der Umsetzung kurz prüfen und erläutern: Warum passt die Lösung zur
+  Architektur, und welchen Sonderfall vermeidet sie?
+
 ## Coding Rules
 
 ### 4a. Prettier-Formatierung

@@ -1,3 +1,4 @@
+import { FrontendConfig } from '../../shared/models/frontend-config.model';
 import { FrontendConfigActions } from './frontend-config.actions';
 import {
   frontendConfigFeature,
@@ -8,6 +9,36 @@ import {
 import { initialState } from './frontend-config.state';
 
 describe('frontendConfigFeature', () => {
+  it('retains input metadata on load and save while keeping only values in the form', () => {
+    const config: FrontendConfig = {
+      id: 'notes',
+      variableName: 'NOTES',
+      value: 'First\nSecond',
+      inputType: 'textarea',
+      description: '',
+      accessGroup: ['admin'],
+      updateGroup: ['admin'],
+      label: 'Notes',
+      pattern: null,
+      placeholder: null,
+      canUpdate: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    const loaded = frontendConfigFeature.reducer(
+      initialState,
+      FrontendConfigActions.loadSuccess({ configs: [config] }),
+    );
+    expect(loaded.configs).toEqual([config]);
+    expect(loaded.form).toEqual({ notes: 'First\nSecond' });
+    const saved = frontendConfigFeature.reducer(
+      loaded,
+      FrontendConfigActions.saveSuccess({ configs: [config] }),
+    );
+    expect(saved.configs).toEqual([config]);
+    expect(saved.form).toEqual({ notes: 'First\nSecond' });
+  });
+
   it('has the expected initial state and selectors', () => {
     expect(frontendConfigFeature.reducer(undefined, { type: '@@init' })).toEqual(initialState);
     const state = {
