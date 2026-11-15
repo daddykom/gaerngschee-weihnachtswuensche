@@ -203,8 +203,7 @@ final class FairgateClient implements FairgateContactProvider
                 $tokens->rejectAccessToken($token);
             }
             if ($response->getStatusCode() === 429) {
-                $listQuota = $contactList && trim($response->getHeaderLine('X-RateLimit-Limit')) === '1';
-                $tokens->deferDataRequests($this->retryAfter($response, $listQuota ? 86400 : 300), $listQuota);
+                $tokens->deferDataRequests($this->retryAfter($response, 300));
             }
             return $this->decodeResponse($operation, $response);
         }
@@ -256,9 +255,7 @@ final class FairgateClient implements FairgateContactProvider
         if ($statusCode < 200 || $statusCode >= 300) {
             $message = sprintf('FSA returned HTTP status %d.', $statusCode);
             ExternalErrorLogger::log('fairgate', $operation, $message, $details, $statusCode);
-            $fallback = $operation === 'contact_lookup' && trim($response->getHeaderLine('X-RateLimit-Limit')) === '1'
-                ? 86400
-                : ($details === null ? 900 : 300);
+            $fallback = $details === null ? 900 : 300;
             throw new FairgateException($message, $statusCode, retryAfter: $statusCode === 429 ? $this->retryAfter($response, $fallback) : null);
         }
 

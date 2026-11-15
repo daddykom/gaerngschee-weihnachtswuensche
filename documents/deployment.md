@@ -104,11 +104,11 @@ Veröffentlichung in das Deployment-Script eingebunden.
 ### Gemeinsamer Runner
 
 Die drei Backend-Batches werden im Regelbetrieb über den gemeinsamen Runner
-`process-all-batches.php` mindestens einmal innerhalb von zwölf Stunden
-ausgeführt. Empfohlen ist ein einziger Cron-Eintrag:
+`process-all-batches.php` stündlich ausgeführt. Dafür wird ein einziger
+Cron-Eintrag auf dem Server eingerichtet:
 
 ```cron
-0 */12 * * * cd /home/<user>/public_html/gaerngschee/weihnachtswuensche/prod/backend && php bin/process-all-batches.php >> /var/log/gaerngschee-batches.log 2>&1
+0 * * * * cd /home/<user>/public_html/gaerngschee/weihnachtswuensche/prod/backend && php bin/process-all-batches.php >> /var/log/gaerngschee-batches.log 2>&1
 ```
 
 Die einzelnen Prozesse verwenden die konfigurierte `backend/.env`. Die
