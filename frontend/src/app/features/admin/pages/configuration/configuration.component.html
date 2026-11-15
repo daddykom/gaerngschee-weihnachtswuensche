@@ -21,7 +21,19 @@
               @for (value of values(config); track $index) {
                 <mat-form-field appearance="outline">
                   <mat-label>{{ config.variableName }} {{ $index + 1 }}</mat-label>
-                  @if (config.canUpdate) {
+                  @if (config.inputType === 'textarea') {
+                    @if (config.canUpdate) {
+                      <textarea
+                        matInput
+                        rows="4"
+                        [placeholder]="config.placeholder || ''"
+                        [formField]="arrayField(config, $index)"
+                        (blur)="arrayField(config, $index)().markAsTouched()"
+                      ></textarea>
+                    } @else {
+                      <textarea matInput rows="4" [value]="value" disabled></textarea>
+                    }
+                  } @else if (config.canUpdate) {
                     <input
                       matInput
                       type="text"
@@ -63,7 +75,7 @@
           } @else {
             <mat-form-field appearance="outline">
               <mat-label>{{ config.variableName }}</mat-label>
-              @if (config.variableName === 'pickup_location') {
+              @if (config.inputType === 'textarea') {
                 @if (config.canUpdate) {
                   <textarea
                     matInput

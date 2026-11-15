@@ -74,6 +74,7 @@ final class TestDatabase
                 label TEXT NOT NULL,
                 pattern TEXT NULL,
                 placeholder TEXT NULL,
+                input_type TEXT NOT NULL DEFAULT \'text\',
                 created_at TEXT,
                 updated_at TEXT
             )',

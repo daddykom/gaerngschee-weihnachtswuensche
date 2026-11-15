@@ -10,6 +10,7 @@ export interface FrontendConfig {
   label: string;
   pattern: string | null;
   placeholder: string | null;
+  inputType: 'text' | 'textarea';
   canUpdate: boolean;
   createdAt: Date;
   updatedAt: Date;

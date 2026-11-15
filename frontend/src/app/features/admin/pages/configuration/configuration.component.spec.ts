@@ -22,6 +22,7 @@ describe('ConfigurationComponent', () => {
       label: 'Einzelwert',
       pattern: '^\\d+$',
       placeholder: 'z. B. 120',
+      inputType: 'text',
       canUpdate: true,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -36,6 +37,7 @@ describe('ConfigurationComponent', () => {
       label: 'Mehrere Werte',
       pattern: null,
       placeholder: null,
+      inputType: 'text',
       canUpdate: true,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -50,6 +52,7 @@ describe('ConfigurationComponent', () => {
       label: 'Nur lesen',
       pattern: null,
       placeholder: null,
+      inputType: 'text',
       canUpdate: false,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -82,6 +85,8 @@ describe('ConfigurationComponent', () => {
     await fixture.whenStable();
   });
 
+  afterEach(() => store.resetSelectors());
+
   it('loads and displays scalar and array configuration values', () => {
     expect(fixture.nativeElement.textContent).toContain('SCALAR_CONFIG');
     expect(fixture.nativeElement.textContent).toContain('ARRAY_CONFIG');
@@ -96,6 +101,7 @@ describe('ConfigurationComponent', () => {
         ...configs[0],
         id: 'pickup-location',
         variableName: 'pickup_location',
+        inputType: 'textarea',
         value: '',
         pattern: null,
       },
@@ -119,6 +125,76 @@ describe('ConfigurationComponent', () => {
       }),
     );
     store.resetSelectors();
+  });
+
+  it('chooses the editor by metadata rather than the configuration key', async () => {
+    store.overrideSelector(selectFrontendConfigs, [
+      {
+        ...configs[0],
+        id: 'plain',
+        variableName: 'pickup_location',
+        value: 'Single line',
+        pattern: null,
+        inputType: 'text',
+      },
+      {
+        ...configs[0],
+        id: 'multiline',
+        variableName: 'ANY_SETTING',
+        value: 'First\nSecond',
+        pattern: null,
+        inputType: 'textarea',
+      },
+      {
+        ...configs[0],
+        id: 'readonly-multiline',
+        variableName: 'READONLY_NOTES',
+        value: 'Read\nOnly',
+        pattern: null,
+        inputType: 'textarea',
+        canUpdate: false,
+      },
+    ]);
+    store.refreshState();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+    const textareas = fixture.nativeElement.querySelectorAll(
+      'textarea',
+    ) as NodeListOf<HTMLTextAreaElement>;
+    expect(input.value).toBe('Single line');
+    expect(textareas).toHaveLength(2);
+    expect(textareas[0].value).toBe('First\nSecond');
+    expect(textareas[1].value).toBe('Read\nOnly');
+    expect(textareas[1].disabled).toBe(true);
+  });
+
+  it('uses textarea metadata for editable and readonly list entries', async () => {
+    store.overrideSelector(selectFrontendConfigs, [
+      { ...configs[1], inputType: 'textarea' },
+      { ...configs[1], id: 'readonly-list', inputType: 'textarea', canUpdate: false },
+    ]);
+    store.refreshState();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const textareas = fixture.nativeElement.querySelectorAll(
+      'textarea',
+    ) as NodeListOf<HTMLTextAreaElement>;
+    expect(textareas).toHaveLength(4);
+    expect(Array.from(textareas).map((field) => field.value)).toEqual(['A', 'B', 'A', 'B']);
+    expect(Array.from(textareas).map((field) => field.disabled)).toEqual([
+      false,
+      false,
+      true,
+      true,
+    ]);
+    component.model.update((model) => ({ ...model, [configs[1].id]: ['First\nSecond', 'B'] }));
+    component.onSubmit();
+    expect(store.dispatch).toHaveBeenCalledWith(
+      FrontendConfigActions.save({
+        configs: [{ id: configs[1].id, value: ['First\nSecond', 'B'] }],
+      }),
+    );
   });
 
   it('disables fields without update permission', () => {

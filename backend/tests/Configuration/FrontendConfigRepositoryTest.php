@@ -12,6 +12,24 @@ use Tests\Support\TestDatabase;
 
 final class FrontendConfigRepositoryTest extends TestCase
 {
+    public function testReturnsDisplayMetadataForAnyKeyAndPreservesItWhenUpdatingValues(): void
+    {
+        $pdo = TestDatabase::create();
+        $this->insertConfig($pdo, 'plain-setting', null, null);
+        $this->insertConfig($pdo, 'multiline-setting', null, null);
+        $pdo->exec("UPDATE frontend_config SET input_type = 'textarea' WHERE id = 'multiline-setting'");
+        $repository = new FrontendConfigRepository($pdo);
+        $configs = array_column($repository->findVisibleForGroup('admin'), null, 'id');
+        self::assertSame('text', $configs['plain-setting']['inputType']);
+        self::assertSame('textarea', $configs['multiline-setting']['inputType']);
+        $updated = $repository->update('multiline-setting', 'admin', "Line one\nLine two");
+        self::assertSame('textarea', $updated['inputType']);
+        self::assertSame("Line one\nLine two", $updated['value']);
+        foreach ($repository->findValuesForGroup('admin') as $publicValue) {
+            self::assertSame(['variableName', 'value'], array_keys($publicValue));
+        }
+    }
+
     public function testPickupDetailsKeepFreeTextAndLineBreaksWithoutDateValidation(): void
     {
         $pdo = TestDatabase::create();
