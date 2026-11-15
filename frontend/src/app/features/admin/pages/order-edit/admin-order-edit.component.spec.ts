@@ -4,6 +4,10 @@ import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { provideTranslateService } from '@ngx-translate/core';
 import { AdminOrder } from '../../../../shared/models/admin-order.model';
 import { AdminOrdersActions } from '../../../../store/admin-orders/admin-orders.actions';
+import {
+  selectAdminOrdersActiveOrderId,
+  selectAdminOrdersForm,
+} from '../../../../store/admin-orders/admin-orders.feature';
 import { NavigationActions } from '../../../../store/navigation/navigation.actions';
 import { NotificationActions } from '../../../../store/notification/notification.actions';
 import { AdminOrderEditComponent } from './admin-order-edit.component';
@@ -83,6 +87,80 @@ describe('AdminOrderEditComponent', () => {
     component = fixture.componentInstance;
     fixture.detectChanges();
     await fixture.whenStable();
+  });
+
+  afterEach(() => store.resetSelectors());
+
+  it('restores the active form without replacing its feedback, text, status or wish edits', () => {
+    const form = {
+      ...component.formModel(),
+      status: 'changes_requested' as const,
+      currentText: 'Unsaved family text',
+      adminNotes: 'Unsaved family feedback',
+      items: component.formModel().items.map((item) => ({
+        ...item,
+        currentTitle: 'Unsaved wish title',
+        adminNotes: 'Unsaved wish feedback',
+        publicationStatus: 'rejected' as const,
+      })),
+    };
+    store.overrideSelector(selectAdminOrdersActiveOrderId, order.id);
+    store.overrideSelector(selectAdminOrdersForm, form);
+    const dispatch = vi.spyOn(store, 'dispatch');
+    fixture.destroy();
+    fixture = TestBed.createComponent(AdminOrderEditComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+
+    expect(component.formModel()).toMatchObject({
+      status: 'changes_requested',
+      currentText: 'Unsaved family text',
+      adminNotes: 'Unsaved family feedback',
+      items: [
+        expect.objectContaining({
+          currentTitle: 'Unsaved wish title',
+          adminNotes: 'Unsaved wish feedback',
+        }),
+      ],
+    });
+    expect(dispatch).not.toHaveBeenCalledWith(
+      expect.objectContaining({ type: AdminOrdersActions.formLoaded.type }),
+    );
+    component.save();
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: AdminOrdersActions.save.type,
+        order: expect.objectContaining({
+          adminNotes: 'Unsaved family feedback',
+          currentText: 'Unsaved family text',
+          status: 'changes_requested',
+          items: expect.arrayContaining([
+            expect.objectContaining({
+              currentTitle: 'Unsaved wish title',
+              adminNotes: 'Unsaved wish feedback',
+            }),
+          ]),
+        }),
+      }),
+    );
+  });
+
+  it('does not reuse a form belonging to another order', () => {
+    store.overrideSelector(selectAdminOrdersActiveOrderId, 'another-order');
+    store.overrideSelector(selectAdminOrdersForm, {
+      ...component.formModel(),
+      adminNotes: 'Another order feedback',
+    });
+    const dispatch = vi.spyOn(store, 'dispatch');
+    fixture.destroy();
+    fixture = TestBed.createComponent(AdminOrderEditComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+
+    expect(component.formModel().adminNotes).toBe('');
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({ type: AdminOrdersActions.formLoaded.type, orderId: order.id }),
+    );
   });
 
   it('dispatches browser back when cancelling', () => {

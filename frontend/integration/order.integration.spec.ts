@@ -161,28 +161,45 @@ test('returns order and wish feedback to the requester after an admin review', a
   await loginAsAdmin(page);
   const headers = await authHeaders(page);
   try {
-    const reviewed = await page.request.patch(`${apiUrl}/admin/orders/${draft.id}`, {
-      headers,
-      data: {
-        action: 'rejectOrder',
-        order: {
-          ...draft,
-          currentText: 'Edited family text',
-          adminNotes: 'Please review the family text',
-        },
-        items: [
-          {
-            ...draft.items[0],
-            publicationStatus: 'rejected',
-            currentTitle: 'Edited wish title',
-            currentDescription: 'Edited wish text',
-            adminNotes: 'Please review the wish text',
-          },
-        ],
-      },
-    });
+    await page.getByRole('combobox', { name: 'Status', exact: true }).click();
+    await page.getByRole('option', { name: 'Entwurf', exact: true }).click();
+    await page.keyboard.press('Escape');
+    await page.locator(`a[href="/admin/orders/${draft.id}/edit"]`).click();
+    await page
+      .getByRole('textbox', { name: 'Aktueller Order-Text', exact: true })
+      .fill('Edited family text');
+    await page
+      .getByRole('textbox', { name: /Rückmeldung zum Wunschzettel/ })
+      .fill('Please review the family text');
+    await page.getByRole('combobox', { name: 'Neuer Status', exact: true }).click();
+    await page.getByRole('option', { name: 'Änderungen verlangt' }).click();
+    await page.getByRole('link', { name: 'Ändern', exact: true }).click();
+    await page
+      .getByRole('textbox', { name: 'Aktueller Wunschtitel', exact: true })
+      .fill('Edited wish title');
+    await page
+      .getByRole('textbox', { name: 'Aktuelle Wunschbeschreibung', exact: true })
+      .fill('Edited wish text');
+    await page
+      .getByRole('textbox', { name: /Begründung der Zurückweisung/ })
+      .fill('Please review the wish text');
+    await page.getByRole('combobox', { name: 'Neuer Status', exact: true }).click();
+    await page.getByRole('option', { name: 'Änderung erforderlich' }).click();
+    await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+    await page.waitForURL(`**/admin/orders/${draft.id}/edit`);
+    await expect(page.getByRole('textbox', { name: /Rückmeldung zum Wunschzettel/ })).toHaveValue(
+      'Please review the family text',
+    );
+    const reviewResponse = page.waitForResponse(
+      (response) =>
+        response.url().endsWith(`/admin/orders/${draft.id}`) &&
+        response.request().method() === 'PATCH',
+    );
+    await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+    const reviewed = await reviewResponse;
     expect(reviewed.status()).toBe(200);
     expect((await reviewed.json()).mailSent).toBe(true);
+    await page.waitForURL('**/admin/overview');
 
     let messageId: string | undefined;
     await expect

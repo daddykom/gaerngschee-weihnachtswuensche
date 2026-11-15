@@ -25,6 +25,7 @@ import { OrderItemCategory, OrderItemPersonType } from '../../../../shared/model
 import { AdminOrdersActions } from '../../../../store/admin-orders/admin-orders.actions';
 import {
   selectAdminOrders,
+  selectAdminOrdersActiveOrderId,
   selectAdminOrdersForm,
 } from '../../../../store/admin-orders/admin-orders.feature';
 import { NavigationActions } from '../../../../store/navigation/navigation.actions';
@@ -61,6 +62,7 @@ export class AdminOrderItemEditComponent {
   private readonly route = inject(ActivatedRoute);
   readonly orders = this.store.selectSignal(selectAdminOrders);
   readonly storeForm = this.store.selectSignal(selectAdminOrdersForm);
+  private readonly activeOrderId = this.store.selectSignal(selectAdminOrdersActiveOrderId);
   readonly order = signal<AdminOrder | null>(null);
   readonly item = signal<AdminOrderItem | null>(null);
   readonly publicationStatusOptions: AdminPublicationStatus[] = [
@@ -89,10 +91,13 @@ export class AdminOrderItemEditComponent {
         : undefined,
     );
   });
-  readonly personOptions = computed(() => [
-    ...this.persons('adult', this.order()?.adultsCount ?? 0),
-    ...this.persons('child', this.order()?.childrenCount ?? 0),
-  ]);
+  readonly personOptions = computed(() => {
+    const currentForm = this.activeOrderId() === this.order()?.id ? this.storeForm() : null;
+    return [
+      ...this.persons('adult', currentForm?.adultsCount ?? this.order()?.adultsCount ?? 0),
+      ...this.persons('child', currentForm?.childrenCount ?? this.order()?.childrenCount ?? 0),
+    ];
+  });
 
   cancel(): void {
     this.store.dispatch(NavigationActions.navigate({ target: 'back' }));
@@ -107,60 +112,43 @@ export class AdminOrderItemEditComponent {
       if (currentOrder !== undefined && currentItem !== undefined && this.item() === null) {
         this.order.set(currentOrder);
         this.item.set(currentItem);
+        const existingForm = this.activeOrderId() === currentOrder.id ? this.storeForm() : null;
+        const editableItem = existingForm?.items.find((item) => item.id === itemId) ?? currentItem;
         const formValue: ItemFormValue = {
-          category: currentItem.category,
-          personType: currentItem.personType ?? null,
-          personIndex: currentItem.personIndex ?? null,
-          currentTitle: currentItem.currentTitle ?? currentItem.currentDescription,
-          currentDescription: currentItem.currentDescription,
-          giftLink: currentItem.giftLink ?? '',
-          personalMessage: currentItem.personalMessage ?? currentItem.currentReason ?? '',
-          adminNotes: currentItem.adminNotes ?? '',
-          publicationStatus: currentItem.publicationStatus,
+          category: editableItem.category,
+          personType: editableItem.personType ?? null,
+          personIndex: editableItem.personIndex ?? null,
+          currentTitle: editableItem.currentTitle ?? editableItem.currentDescription,
+          currentDescription: editableItem.currentDescription,
+          giftLink: editableItem.giftLink ?? '',
+          personalMessage: editableItem.personalMessage ?? editableItem.currentReason ?? '',
+          adminNotes: editableItem.adminNotes ?? '',
+          publicationStatus: editableItem.publicationStatus,
         };
         this.formModel.set(formValue);
         this.previousItem = { ...formValue };
-        const orderForm: AdminOrderFormValue = {
-          status: currentOrder.status,
-          currentText: currentOrder.currentText ?? '',
-          adminNotes: currentOrder.adminNotes ?? '',
-          adultsCount: currentOrder.adultsCount,
-          childrenCount: currentOrder.childrenCount,
-          items: currentOrder.items.map((item) => ({
-            ...item,
-            currentTitle: item.currentTitle ?? item.currentDescription,
-            currentReason: item.currentReason ?? '',
-            adminNotes: item.adminNotes ?? '',
-          })),
-        };
-        this.store.dispatch(
-          AdminOrdersActions.formLoaded({ orderId: currentOrder.id, form: orderForm }),
-        );
+        if (!existingForm) {
+          const orderForm: AdminOrderFormValue = {
+            status: currentOrder.status,
+            currentText: currentOrder.currentText ?? '',
+            adminNotes: currentOrder.adminNotes ?? '',
+            adultsCount: currentOrder.adultsCount,
+            childrenCount: currentOrder.childrenCount,
+            items: currentOrder.items.map((item) => ({
+              ...item,
+              currentTitle: item.currentTitle ?? item.currentDescription,
+              currentReason: item.currentReason ?? '',
+              adminNotes: item.adminNotes ?? '',
+            })),
+          };
+          this.store.dispatch(
+            AdminOrdersActions.formLoaded({ orderId: currentOrder.id, form: orderForm }),
+          );
+        }
       }
     });
 
-    effect(() => {
-      const currentItem = this.formModel();
-      const orderId = this.order()?.id;
-      const itemId = this.item()?.id;
-      const changes = this.itemChanges(this.previousItem, currentItem);
-      if (orderId !== undefined && itemId !== undefined && Object.keys(changes).length > 0) {
-        const currentForm = this.storeForm();
-        if (currentForm !== undefined && currentForm !== null) {
-          this.store.dispatch(
-            AdminOrdersActions.formChanged({
-              orderId,
-              changes: {
-                items: currentForm.items.map((item) =>
-                  item.id === itemId ? { ...item, ...changes } : item,
-                ),
-              },
-            }),
-          );
-        }
-        this.previousItem = { ...currentItem };
-      }
-    });
+    effect(() => this.syncItem());
   }
 
   save(): void {
@@ -171,18 +159,36 @@ export class AdminOrderItemEditComponent {
       this.itemForm().markAsTouched();
       return;
     }
+    this.syncItem();
+    this.store.dispatch(NavigationActions.navigate({ target: 'back' }));
+  }
+
+  private syncItem(): void {
+    const currentItem = this.formModel();
+    const orderId = this.order()?.id;
+    const itemId = this.item()?.id;
+    const currentForm = this.storeForm();
+    const changes = this.itemChanges(this.previousItem, currentItem);
+    if (
+      !currentForm ||
+      orderId === undefined ||
+      itemId === undefined ||
+      this.activeOrderId() !== orderId ||
+      Object.keys(changes).length === 0
+    ) {
+      return;
+    }
     this.store.dispatch(
-      AdminOrdersActions.draftChanged({
-        order: {
-          ...order,
-          status: order.status,
-          items: order.items.map((current) =>
-            current.id === item.id ? { ...current, ...model } : { ...current },
+      AdminOrdersActions.formChanged({
+        orderId,
+        changes: {
+          items: currentForm.items.map((item) =>
+            item.id === itemId ? { ...item, ...changes } : item,
           ),
         },
       }),
     );
-    this.store.dispatch(NavigationActions.navigate({ target: 'back' }));
+    this.previousItem = { ...currentItem };
   }
 
   private itemChanges(

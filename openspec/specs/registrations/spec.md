@@ -120,6 +120,12 @@ interface Child {
 
 ### E-Mail zur Prüfung der aktuellen Texte
 
+- Während der Admin-Bearbeitung liegen ungespeicherte Änderungen nur im
+  aktiven Wunschzettel-Formular. Der Wechsel zur Wunschbearbeitung und zurück
+  erhält allgemeine Rückmeldung, Status, Familienangaben und alle Wunschänderungen.
+  Ein Editor übernimmt nur das Formular des passenden Wunschzettels; ein neuer
+  Listenabruf oder erfolgreiches Gesamtspeichern beendet diesen Bearbeitungsstand.
+
 - Beim Übergang zu `changes_requested` wird die bestehende E-Mail versandt.
   Weiteres Speichern im gleichen Status löst keinen erneuten Versand aus.
 - Die E-Mail enthält die allgemeine Rückmeldung sowie pro zurückgewiesenem

@@ -3,6 +3,73 @@ import { expectTranslatedText } from './support/assertions';
 import { expect, test } from './support/test';
 
 test.describe('Admin order edit route', () => {
+  test('preserves general feedback, status and all edited wishes across editor navigation', async ({
+    page,
+  }) => {
+    await loginAsAdmin(page);
+    const order = orderFixture();
+    const first = (order['items'] as Record<string, unknown>[])[0];
+    await mockOrders(page, { ...order, items: [first, { ...first, id: 'item-2' }] });
+    let saved: Record<string, unknown> | undefined;
+    await page.route('http://localhost:8083/admin/orders/order-1', async (route) => {
+      saved = route.request().postDataJSON();
+      await route.fulfill({ json: { order: orderFixture(), mailSent: true } });
+    });
+    await page.goto('/admin/overview');
+    await page.locator('a[href="/admin/orders/order-1/edit"]').click();
+    await page
+      .getByRole('textbox', { name: 'Aktueller Order-Text', exact: true })
+      .fill('Edited family text');
+    await page
+      .getByRole('textbox', { name: /Rückmeldung zum Wunschzettel/ })
+      .fill('Please review the family text');
+    await page.getByRole('combobox', { name: 'Neuer Status', exact: true }).click();
+    await page.getByRole('option', { name: 'Änderungen verlangt' }).click();
+    await page.getByRole('link', { name: 'Ändern', exact: true }).first().click();
+    await page
+      .getByRole('textbox', { name: 'Aktueller Wunschtitel', exact: true })
+      .fill('Edited first title');
+    await page
+      .getByRole('textbox', { name: /Begründung der Zurückweisung/ })
+      .fill('Please review the first wish');
+    await page.getByRole('combobox', { name: 'Neuer Status', exact: true }).click();
+    await page.getByRole('option', { name: 'Änderung erforderlich' }).click();
+    await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+    await page.waitForURL('**/admin/orders/order-1/edit');
+    await expect(page.getByRole('textbox', { name: /Rückmeldung zum Wunschzettel/ })).toHaveValue(
+      'Please review the family text',
+    );
+    await expect(
+      page.getByRole('textbox', { name: 'Aktueller Order-Text', exact: true }),
+    ).toHaveValue('Edited family text');
+
+    await page.getByRole('link', { name: 'Ändern', exact: true }).nth(1).click();
+    await page
+      .getByRole('textbox', { name: 'Aktueller Wunschtitel', exact: true })
+      .fill('Edited second title');
+    await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+    await page.waitForURL('**/admin/orders/order-1/edit');
+    expect(saved).toBeUndefined();
+    await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+    await expect(page).toHaveURL(/\/admin\/overview$/);
+    expect(saved).toMatchObject({
+      order: {
+        currentText: 'Edited family text',
+        adminNotes: 'Please review the family text',
+        status: 'changes_requested',
+      },
+      items: [
+        expect.objectContaining({
+          id: 'item-1',
+          currentTitle: 'Edited first title',
+          adminNotes: 'Please review the first wish',
+          publicationStatus: 'rejected',
+        }),
+        expect.objectContaining({ id: 'item-2', currentTitle: 'Edited second title' }),
+      ],
+    });
+  });
+
   for (const numbers of [
     { orderNumber: 12, itemNumber: 3, expected: '12-3' },
     { orderNumber: null, itemNumber: 3, expected: '—' },

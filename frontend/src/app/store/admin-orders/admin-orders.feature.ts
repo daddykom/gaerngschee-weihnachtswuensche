@@ -6,7 +6,13 @@ export const adminOrdersFeature = createFeature({
   name: 'adminOrders',
   reducer: createReducer<AdminOrdersState>(
     initialState,
-    on(AdminOrdersActions.load, (state) => ({ ...state, loadStatus: 'loading', errorCode: null })),
+    on(AdminOrdersActions.load, (state) => ({
+      ...state,
+      loadStatus: 'loading',
+      errorCode: null,
+      activeOrderId: null,
+      form: null,
+    })),
     on(AdminOrdersActions.searchFormChanged, (state, { changes }) => ({
       ...state,
       searchForm: { ...state.searchForm, ...changes },
@@ -17,6 +23,8 @@ export const adminOrdersFeature = createFeature({
       categories,
       loadStatus: 'loading',
       errorCode: null,
+      activeOrderId: null,
+      form: null,
     })),
     on(AdminOrdersActions.loadSuccess, (state, { orders }) => ({
       ...state,
@@ -29,10 +37,6 @@ export const adminOrdersFeature = createFeature({
       errorCode,
     })),
     on(AdminOrdersActions.save, (state) => ({ ...state, saveStatus: 'loading', errorCode: null })),
-    on(AdminOrdersActions.draftChanged, (state, { order }) => ({
-      ...state,
-      orders: state.orders.map((current) => (current.id === order.id ? order : current)),
-    })),
     on(AdminOrdersActions.formLoaded, (state, { orderId, form }) => ({
       ...state,
       activeOrderId: orderId,
@@ -50,6 +54,8 @@ export const adminOrdersFeature = createFeature({
       ...state,
       orders: state.orders.map((current) => (current.id === order.id ? order : current)),
       saveStatus: 'success',
+      activeOrderId: null,
+      form: null,
     })),
     on(AdminOrdersActions.saveFailure, (state, { errorCode }) => ({
       ...state,
