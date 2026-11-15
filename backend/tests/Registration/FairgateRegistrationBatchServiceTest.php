@@ -11,6 +11,7 @@ use App\Registration\Services\FairgateRegistrationBatchService;
 use DateTimeImmutable;
 use DateTimeZone;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\Support\RecordingEmailSender;
 use Tests\Support\TestDatabase;
 
@@ -47,7 +48,8 @@ final class FairgateRegistrationBatchServiceTest extends TestCase
         self::assertCount(0, $emails->variants);
     }
 
-    public function testSkipsRequestCheckedLessThanTwelveHoursAgo(): void
+    #[DataProvider('hourlyCheckTimes')]
+    public function testRechecksWaitingRequestsOnlyAfterOneHour(string $now, int $expectedChecked): void
     {
         $pdo = TestDatabase::create();
         $requests = new FairgateRegistrationRequestRepository($pdo);
@@ -55,9 +57,17 @@ final class FairgateRegistrationBatchServiceTest extends TestCase
         $id = (string) $pdo->query('SELECT id FROM fairgate_registration_requests')->fetchColumn();
         $requests->markChecked($id, $this->date('2026-11-08 06:00:00'));
 
-        $result = $this->service($pdo, new FairgateRegistrationFixedProvider(true), new RecordingEmailSender(), '2026-11-08 17:59:59')->run();
+        $emails = new RecordingEmailSender();
+        $result = $this->service($pdo, new FairgateRegistrationFixedProvider(true), $emails, $now)->run();
 
-        self::assertSame(['checked' => 0, 'notified' => 0, 'failed' => 0], $result);
+        self::assertSame(['checked' => $expectedChecked, 'notified' => $expectedChecked, 'failed' => 0], $result);
+        self::assertCount($expectedChecked, $emails->variants);
+        self::assertSame(['checked' => 0, 'notified' => 0, 'failed' => 0], $this->service($pdo, new FairgateRegistrationFixedProvider(true), $emails, $now)->run());
+    }
+
+    public static function hourlyCheckTimes(): array
+    {
+        return [['2026-11-08 06:59:59', 0], ['2026-11-08 07:00:00', 1], ['2026-11-08 07:00:01', 1]];
     }
 
     public function testContinuesWithNextRequestWhenFairgateFails(): void

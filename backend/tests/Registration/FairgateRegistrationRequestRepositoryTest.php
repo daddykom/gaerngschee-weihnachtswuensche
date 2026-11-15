@@ -52,7 +52,7 @@ final class FairgateRegistrationRequestRepositoryTest extends TestCase
         $recentId = (string) $pdo->query("SELECT id FROM fairgate_registration_requests WHERE email = 'recent@example.com'")->fetchColumn();
         $repository->markChecked($recentId, $this->date('2026-11-08 11:30:00'));
 
-        $due = $repository->findDue($this->date('2026-11-08 12:00:00'), new DateInterval('PT12H'));
+        $due = $repository->findDue($this->date('2026-11-08 12:00:00'), new DateInterval('PT1H'));
 
         self::assertCount(1, $due);
         self::assertSame('due@example.com', $due[0]['email']);
@@ -71,7 +71,7 @@ final class FairgateRegistrationRequestRepositoryTest extends TestCase
         $request = $pdo->query('SELECT * FROM fairgate_registration_requests')->fetch();
         self::assertSame('2026-11-08 12:00:00', $request['fairgate_found_at']);
         self::assertSame('2026-11-08 12:01:00', $request['notification_sent_at']);
-        self::assertCount(0, $repository->findDue($foundAt->modify('+12 hours'), new DateInterval('PT12H')));
+        self::assertCount(0, $repository->findDue($foundAt->modify('+1 hour'), new DateInterval('PT1H')));
     }
 
     private function date(string $value): DateTimeImmutable

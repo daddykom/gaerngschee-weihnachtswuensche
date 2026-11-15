@@ -68,11 +68,6 @@ final class FairgateTokenRepository
         $this->defer($scope, 'data_retry_after', $until);
     }
 
-    public function deferContactRequests(string $scope, int $until): void
-    {
-        $this->defer($scope, 'contacts_retry_after', $until);
-    }
-
     private function defer(string $scope, string $column, int $until): void
     {
         $this->pdo->prepare(

@@ -165,10 +165,15 @@ Eine bestehende Sperrfrist wird nicht verkürzt. Es wird weder sofort erneut
 angefragt noch ein Webrequest schlafend blockiert. Andere fehlgeschlagene
 Authentifizierungsversuche werden für 90 Sekunden gesperrt.
 
-Eine Kontaktlisten-Antwort mit HTTP 429 und `X-RateLimit-Limit: 1` wird als
-separate Listenquote behandelt und sperrt nur weitere Kontaktimporte, nicht
-die Extended-Data-Abfragen bei Anmeldungen. Fehlt dabei ein gültiger
-Retry-Header, beträgt die Listen-Sperrfrist vorsichtshalber 24 Stunden.
+Fairgate hat bestätigt, dass die Kontaktliste keiner Tageslimite unterliegt.
+Das allgemeine Limit beträgt 200 Anfragen pro gleitenden fünf Minuten über
+alle Datenendpunkte; die Token-Generierung ist davon ausgenommen. Auch eine
+Kontaktlisten-Antwort mit HTTP 429 und `X-RateLimit-Limit: 1` verwendet daher
+die gemeinsame Datensperre und ohne gültigen Retry-Header 300 Sekunden.
+Der Limit-Header allein beschreibt keinen Zeitraum und begründet keine
+24-Stunden-Sperre. Alte gespeicherte `contacts_retry_after`-Fristen werden nur
+noch bis zu ihrem Ablauf berücksichtigt, nicht erneut geschrieben oder
+automatisch verkürzt.
 
 Nach HTTP 401 wird höchstens einmal erneuert und die Datenanfrage wiederholt.
 Ein zwischenzeitlich von einem anderen Prozess erneuertes Token wird übernommen.

@@ -374,24 +374,28 @@ final class FairgateClientTest extends TestCase
     }
 
     #[DataProvider('contactListRetryHeaders')]
-    public function testDailyContactListQuotaDoesNotBlockExtendedDataRequests(array $headers, int $expectedWait): void
+    public function testContactList429UsesTheSharedDataCooldownWithoutAssumingADailyQuota(array $headers, int $expectedWait): void
     {
         $history = [];
         try {
             $this->client([$this->authentication(), new Response(429, ['X-RateLimit-Limit' => '1', ...$headers])], $history)
                 ->fetchAllClientContacts();
-            self::fail('The list quota must stop the import.');
+            self::fail('The rate limit must stop the import.');
         } catch (FairgateException $exception) {
             self::assertSame($expectedWait, $exception->retryAfter);
         }
         $dataHistory = [];
-        self::assertSame(42, $this->client([new Response(200, [], '{"data":{"contactId":42}}')], $dataHistory)
-            ->findContactDataById('42')['data']['contactId']);
-        self::assertCount(1, $dataHistory);
+        try {
+            $this->client([], $dataHistory)->findContactDataById('42');
+            self::fail('The same rate limit must apply to extended data.');
+        } catch (FairgateException $exception) {
+            self::assertSame(429, $exception->getCode());
+            self::assertSame([], $dataHistory);
+        }
         $nextHistory = [];
         try {
             $this->client([], $nextHistory)->fetchAllClientContacts();
-            self::fail('The list quota must still be active.');
+            self::fail('The shared data cooldown must still be active.');
         } catch (FairgateException $exception) {
             self::assertSame(429, $exception->getCode());
             self::assertSame([], $nextHistory);
@@ -400,7 +404,13 @@ final class FairgateClientTest extends TestCase
 
     public static function contactListRetryHeaders(): array
     {
-        return [[['X-RateLimit-Retry-After' => '36000'], 36000], [[], 86400]];
+        return [
+            [['X-RateLimit-Retry-After' => '36000'], 36000],
+            [['X-RateLimit-Retry-After' => '120'], 120],
+            [['Retry-After' => '60'], 60],
+            [['X-RateLimit-Retry-After' => 'invalid'], 300],
+            [[], 300],
+        ];
     }
 
     private function client(array $responses, array &$history, ?FairgateContactRepository $contacts = null): FairgateClient

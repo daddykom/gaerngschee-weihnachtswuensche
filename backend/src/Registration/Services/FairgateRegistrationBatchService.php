@@ -13,7 +13,7 @@ use Throwable;
 
 final class FairgateRegistrationBatchService
 {
-    private const CHECK_INTERVAL = 'PT12H';
+    private const CHECK_INTERVAL = 'PT1H';
 
     public function __construct(
         private readonly FairgateRegistrationRequestRepository $requests,

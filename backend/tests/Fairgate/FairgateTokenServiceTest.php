@@ -190,6 +190,49 @@ final class FairgateTokenServiceTest extends TestCase
         self::assertSame(1, $calls);
     }
 
+    public function testSharedDataCooldownExpiresBeforeTheNextHourlyBatch(): void
+    {
+        $calls = 0;
+        $request = function () use (&$calls): array {
+            $calls++;
+            return $this->response();
+        };
+        $service = $this->service($request);
+        $service->token();
+        $service->deferDataRequests(300);
+        foreach ([false, true] as $contactList) {
+            try {
+                $this->service($request)->token(contactList: $contactList);
+                self::fail('Both data endpoints must respect the shared cooldown.');
+            } catch (FairgateException $exception) {
+                self::assertSame(300, $exception->retryAfter);
+            }
+        }
+        $this->now += 3600;
+        self::assertNotEmpty($this->service($request)->token(contactList: true));
+        self::assertSame(2, $calls);
+    }
+
+    public function testLegacyListCooldownIsPreservedUntilExpiryWithoutBlockingOtherData(): void
+    {
+        $pdo = new PDO('sqlite::memory:');
+        $this->tokens = FairgateTestTokens::repository($pdo);
+        $request = fn (): array => $this->response();
+        $token = $this->service($request)->token();
+        $deadline = $this->now + 7200;
+        $pdo->prepare('UPDATE fairgate_api_tokens SET contacts_retry_after = ? WHERE scope = ?')->execute([$deadline, 'test-scope']);
+        self::assertSame($token, $this->service($request)->token());
+        try {
+            $this->service($request)->token(contactList: true);
+            self::fail('A previously stored provider deadline must not be shortened.');
+        } catch (FairgateException $exception) {
+            self::assertSame(7200, $exception->retryAfter);
+        }
+        self::assertSame($deadline, (int) $pdo->query('SELECT contacts_retry_after FROM fairgate_api_tokens')->fetchColumn());
+        $this->now = $deadline;
+        self::assertNotEmpty($this->service($request)->token(contactList: true));
+    }
+
     public function testCooldownStartsWhenTheResponseArrivesRatherThanWhenTheRequestStarted(): void
     {
         $calls = 0;

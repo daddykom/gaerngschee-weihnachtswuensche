@@ -14,7 +14,7 @@ des E-Mail-Markers ausgewertet.
 
 Wartende Anfragen werden durch
 `backend/bin/process-fairgate-registrations.php` geprüft. Eine Anfrage ist
-frühestens zwölf Stunden nach ihrer letzten Prüfung wieder fällig. Bei einem
+frühestens eine Stunde nach ihrer letzten Prüfung wieder fällig. Bei einem
 Fairgate-Treffer wird eine E-Mail mit dem allgemeinen `/start`-Link versendet;
 auch dabei wird kein Token erzeugt. Die Person gibt ihre E-Mail-Adresse auf der
 Startseite erneut ein und erhält dann den normalen persönlichen Link.
@@ -36,8 +36,9 @@ Für eine gezielte manuelle Ausführung bleibt der Einzelaufruf möglich:
 php bin/process-fairgate-registrations.php
 ```
 
-Für eine produktive Installation wird eine Ausführung alle zwölf Stunden
-empfohlen. Ein Fehler bei einer einzelnen Fairgate-Anfrage wird protokolliert;
+Für eine produktive Installation wird der gemeinsame Runner stündlich
+ausgeführt; der Cron-Eintrag steht in `documents/deployment.md`.
+Ein Fehler bei einer einzelnen Fairgate-Anfrage wird protokolliert;
 andere fällige Anfragen werden trotzdem weiterverarbeitet. Bei Fehlern beendet
 der Prozess den Lauf mit Exit-Code `1`, damit die Prozessüberwachung dies
 erkennen kann.

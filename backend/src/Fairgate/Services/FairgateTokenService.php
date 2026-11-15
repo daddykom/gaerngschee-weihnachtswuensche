@@ -42,6 +42,7 @@ final class FairgateTokenService
                 if ((int) $state['data_retry_after'] > $now) {
                     return $this->rateLimited((int) $state['data_retry_after'] - $now);
                 }
+                // Honor legacy list-only deadlines until they expire; new data limits are shared.
                 if ($contactList && (int) $state['contacts_retry_after'] > $now) {
                     return $this->rateLimited((int) $state['contacts_retry_after'] - $now);
                 }
@@ -101,16 +102,12 @@ final class FairgateTokenService
         return $result;
     }
 
-    public function deferDataRequests(int $seconds, bool $contactListOnly = false): void
+    public function deferDataRequests(int $seconds): void
     {
         try {
-            $this->tokens->synchronized($this->scope, function () use ($seconds, $contactListOnly): void {
+            $this->tokens->synchronized($this->scope, function () use ($seconds): void {
                 $until = ($this->now)() + $seconds;
-                if ($contactListOnly) {
-                    $this->tokens->deferContactRequests($this->scope, $until);
-                } else {
-                    $this->tokens->deferDataRequests($this->scope, $until);
-                }
+                $this->tokens->deferDataRequests($this->scope, $until);
             });
         } catch (Throwable $exception) {
             throw new FairgateException('Shared Fairgate rate limit storage is unavailable.', 0, $exception);
