@@ -28,7 +28,9 @@ final class EmailTestActionTest extends TestCase
         self::assertSame('loginUrl', $body['templates'][0]['fields'][0]['key']);
         $pickup = array_values(array_filter($body['templates'], static fn (array $template): bool => $template['id'] === 'order-ready-for-pickup'));
         self::assertCount(1, $pickup);
-        self::assertSame(['year', 'orderNumber'], array_column($pickup[0]['fields'], 'key'));
+        self::assertSame(['year', 'orderNumber', 'pickupDate', 'pickupLocation'], array_column($pickup[0]['fields'], 'key'));
+        self::assertSame(['number', 'number', 'text', 'textarea'], array_column($pickup[0]['fields'], 'type'));
+        self::assertSame([true, true, false, false], array_column($pickup[0]['fields'], 'required'));
         $reservation = array_values(array_filter($body['templates'], static fn (array $template): bool => $template['id'] === 'fulfiller-reservation'))[0];
         self::assertSame(['loginUrl', 'wishNumber', 'wishTitle', 'wishDescription'], array_column($reservation['fields'], 'key'));
         $review = array_values(array_filter($body['templates'], static fn (array $template): bool => $template['id'] === 'order-confirmation-changes_requested'))[0];
@@ -69,7 +71,7 @@ final class EmailTestActionTest extends TestCase
 
     public static function invalidPickupParameters(): array
     {
-        return [[[]], [['year' => '2026']], [['year' => '2026', 'orderNumber' => '0']], [['year' => '-1', 'orderNumber' => '12']], [['year' => '2026', 'orderNumber' => '12.3']], [['year' => '2026', 'orderNumber' => str_repeat('9', 30)]], [['year' => true, 'orderNumber' => '12']]];
+        return [[[]], [['year' => '2026']], [['year' => '2026', 'orderNumber' => '0']], [['year' => '-1', 'orderNumber' => '12']], [['year' => '2026', 'orderNumber' => '12.3']], [['year' => '2026', 'orderNumber' => str_repeat('9', 30)]], [['year' => true, 'orderNumber' => '12']], [['year' => '2026', 'orderNumber' => '12', 'pickupDate' => []]], [['year' => '2026', 'orderNumber' => '12', 'pickupLocation' => []]]];
     }
 
     public function testRejectsNonScalarOptionalReviewParametersWithoutSending(): void

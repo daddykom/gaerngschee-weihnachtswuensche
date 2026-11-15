@@ -115,7 +115,9 @@ test.describe('Admin email test route', () => {
     });
   });
 
-  test('offers the pickup notification and submits its order number and year', async ({ page }) => {
+  test('offers the pickup notification with optional date and multiline location parameters', async ({
+    page,
+  }) => {
     await loginAsAdmin(page);
     let sent: unknown;
     await page.route('http://localhost:8083/admin/email-test', async (route) => {
@@ -129,6 +131,8 @@ test.describe('Admin email test route', () => {
                 fields: [
                   { key: 'year', type: 'number', required: true },
                   { key: 'orderNumber', type: 'number', required: true },
+                  { key: 'pickupDate', type: 'text', required: false },
+                  { key: 'pickupLocation', type: 'textarea', required: false },
                 ],
               },
             ],
@@ -147,12 +151,21 @@ test.describe('Admin email test route', () => {
     await page.getByRole('textbox', { name: 'Empfänger-Adresse' }).fill('pickup@example.com');
     await page.getByRole('spinbutton', { name: 'Jahr', exact: true }).fill('2026');
     await page.getByRole('spinbutton', { name: 'Zettelnummer', exact: true }).fill('12');
+    await page.getByRole('textbox', { name: /Abholdatum und Zeit/ }).fill('Samstag, nachmittags');
+    const location = page.getByRole('textbox', { name: /Abholort/ });
+    expect(await location.evaluate((element) => element.tagName)).toBe('TEXTAREA');
+    await location.fill('Testsaal\nTeststrasse 1');
     await page.getByRole('button', { name: 'Senden' }).click();
     await expectTranslatedText(page.getByRole('alert'), 'app.admin.emailTest.sent');
     expect(sent).toEqual({
       recipient: 'pickup@example.com',
       template: 'order-ready-for-pickup',
-      parameters: { year: '2026', orderNumber: '12' },
+      parameters: {
+        year: '2026',
+        orderNumber: '12',
+        pickupDate: 'Samstag, nachmittags',
+        pickupLocation: 'Testsaal\nTeststrasse 1',
+      },
     });
   });
 

@@ -44,6 +44,12 @@
             </td>
           </tr>
           <tr>
+            <td style="padding:18px 32px 8px 32px;">
+              <p style="margin:0 0 14px 0; font-size:16px; line-height:1.5; color:{{ EMAIL_THEME.text }};"><strong>{{ 'app.mail.pickup.dateLabel'|trans }}</strong><br>{{ PICKUP_DATE|e|nl2br }}</p>
+              <p style="margin:0; font-size:16px; line-height:1.5; color:{{ EMAIL_THEME.text }};"><strong>{{ 'app.mail.pickup.locationLabel'|trans }}</strong><br>{{ PICKUP_LOCATION|e|nl2br }}</p>
+            </td>
+          </tr>
+          <tr>
             <td align="center" style="padding:22px 32px 8px 32px;">
               <img id="pickup-qr-code" src="{{ QR_DATA_URI }}" width="300" alt="{{ 'app.mail.pickup.qrAlt'|trans }}" style="display:block; width:300px; max-width:100%; height:auto;">
             </td>

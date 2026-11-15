@@ -187,7 +187,7 @@ src/
 | `password-reset.html.twig` | Passwort-Reset | `RESET_URL` |
 | `order-confirmation-saved.html.twig` | Bestätigung einer gespeicherten Bestellung | `ORDER.year`, `ORDER.loginUrl` |
 | `order-confirmation-changes_requested.html.twig` | Aufforderung zur Prüfung und erneuten Einreichung der aktuellen Texte, mit allgemeinen und wunschbezogenen Rückmeldungen in HTML und Klartext | `ORDER.year`, `ORDER.loginUrl`, optional `ORDER.adminNotes`, `ORDER.orderNumber`, `ORDER.items[]` mit `publicationStatus` (Fallback `status`), `adminNotes`, `currentTitle`, optional `wishNumber` oder `itemNumber` (ohne Nummer: Position im Wunschzettel); Admin-Testparameter: `year`, `loginUrl`, optional `orderFeedback`, `wishNumber`, `wishTitle`, `wishFeedback` |
-| `order-ready-for-pickup.html.twig` | Abholbenachrichtigung im Layout der Registrierungs-E-Mail, mit eingebettetem QR-PNG und Link auf dasselbe PNG | `ORDER.year`, `ORDER.orderNumber`, `QR_DATA_URI`, `QR_IMAGE_URL`, `LOGO_CID` (Farben über das globale `EMAIL_THEME`) |
+| `order-ready-for-pickup.html.twig` | Abholbenachrichtigung im Layout der Registrierungs-E-Mail, mit Abholdatum/-zeit und mehrzeiligem Abholort aus der Konfiguration, eingebettetem QR-PNG und Link auf dasselbe PNG | `ORDER.year`, `ORDER.orderNumber`, `PICKUP_DATE` (Konfiguration `pickup_date`), `PICKUP_LOCATION` (Konfiguration `pickup_location`), `QR_DATA_URI`, `QR_IMAGE_URL`, `LOGO_CID` (Farben über das globale `EMAIL_THEME`); Admin-Testparameter: `year`, `orderNumber`, optional `pickupDate` (Text) und `pickupLocation` (Textarea); leere Testwerte verwenden die Konfiguration |
 
 Neue E-Mail-Vorlagen dürfen nicht nur im Template-Verzeichnis angelegt werden:
 Die Versandlogik, Übersetzungen, die Admin-E-Mail-Testauswahl und die

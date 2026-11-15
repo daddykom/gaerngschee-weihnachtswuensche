@@ -66,7 +66,24 @@ test('looks up gifts for both staff roles, safely receives parallel gifts and re
   const draft = (await saved.json()).order;
   await loginAsAdmin(page);
   const headers = await authHeaders(page);
+  const configs = await (await page.request.get(`${API_URL}/admin/configuration`)).json();
+  const pickupConfigs = configs.filter((config: { variableName: string }) =>
+    ['pickup_date', 'pickup_location'].includes(config.variableName),
+  );
+  expect(pickupConfigs).toHaveLength(2);
   try {
+    for (const config of pickupConfigs) {
+      const updated = await page.request.patch(`${API_URL}/admin/configuration/${config.id}`, {
+        headers,
+        data: {
+          value:
+            config.variableName === 'pickup_date'
+              ? 'Samstag, 14–17 Uhr'
+              : 'Gemeindesaal\nHauptstrasse 1',
+        },
+      });
+      expect(updated.status()).toBe(200);
+    }
     const approved = await page.request.patch(`${API_URL}/admin/orders/${draft.id}`, {
       headers,
       data: {
@@ -220,10 +237,29 @@ test('looks up gifts for both staff roles, safely receives parallel gifts and re
             (await page.request.get(`http://localhost:8025/api/v1/message/${message.ID}`)).json(),
           ),
         );
-        return details.filter((detail) => detail.HTML.includes('id="pickup-qr-code"')).length;
+        const notifications = details.filter((detail) =>
+          detail.HTML.includes('id="pickup-qr-code"'),
+        );
+        for (const notification of notifications) {
+          for (const body of [notification.HTML, notification.Text]) {
+            expect(body).toContain('Samstag, 14–17 Uhr');
+            expect(body).toContain('Hauptstrasse 1');
+          }
+          expect(notification.Text.replace(/\r\n/g, '\n')).toContain(
+            'Gemeindesaal\nHauptstrasse 1',
+          );
+        }
+        return notifications.length;
       })
       .toBe(1);
   } finally {
+    for (const config of pickupConfigs) {
+      const restored = await page.request.patch(`${API_URL}/admin/configuration/${config.id}`, {
+        headers,
+        data: { value: config.value },
+      });
+      expect(restored.status()).toBe(200);
+    }
     const deleted = await page.request.delete(`${API_URL}/admin/users/${draft.userId}`, {
       headers,
     });

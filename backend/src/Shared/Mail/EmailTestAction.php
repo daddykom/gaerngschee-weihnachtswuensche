@@ -45,6 +45,8 @@ final class EmailTestAction
         'order-ready-for-pickup' => ['fields' => [
             ['key' => 'year', 'type' => 'number', 'required' => true],
             ['key' => 'orderNumber', 'type' => 'number', 'required' => true],
+            ['key' => 'pickupDate', 'type' => 'text', 'required' => false],
+            ['key' => 'pickupLocation', 'type' => 'textarea', 'required' => false],
         ]],
         'order-confirmation-saved' => ['fields' => [
             ['key' => 'year', 'type' => 'number', 'required' => true],

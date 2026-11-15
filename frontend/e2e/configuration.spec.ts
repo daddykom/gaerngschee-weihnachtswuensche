@@ -2,6 +2,64 @@ import { expectTranslatedText } from './support/assertions';
 import { expect, test } from './support/test';
 
 test.describe('Configuration route', () => {
+  test('saves a free-text pickup date and a multiline pickup location', async ({ page }) => {
+    await page.addInitScript(() =>
+      localStorage.setItem(
+        'gaerngschee.auth',
+        JSON.stringify({
+          userId: 'admin-1',
+          group: 'admin',
+          fairgateUserExists: null,
+          childrenCount: null,
+          adultsCount: null,
+          salutation: null,
+        }),
+      ),
+    );
+    const configs = [
+      {
+        id: 'pickup-date',
+        variableName: 'pickup_date',
+        value: '',
+        label: 'Abholdatum und Zeit',
+        pattern: null,
+        canUpdate: true,
+      },
+      {
+        id: 'pickup-location',
+        variableName: 'pickup_location',
+        value: '',
+        label: 'Abholort',
+        pattern: null,
+        canUpdate: true,
+      },
+    ];
+    await page.route('http://localhost:8083/admin/configuration', (route) =>
+      route.fulfill({ json: configs }),
+    );
+    const saved: Record<string, string> = {};
+    await page.route('http://localhost:8083/admin/configuration/*', async (route) => {
+      const id = route.request().url().split('/').at(-1)!;
+      saved[id] = route.request().postDataJSON().value;
+      await route.fulfill({
+        json: { ...configs.find((config) => config.id === id), value: saved[id] },
+      });
+    });
+    await page.goto('/admin/configuration');
+    const date = page.getByRole('textbox', { name: 'pickup_date', exact: true });
+    const location = page.getByRole('textbox', { name: 'pickup_location', exact: true });
+    await expect(date).toHaveAttribute('type', 'text');
+    expect(await location.evaluate((element) => element.tagName)).toBe('TEXTAREA');
+    await date.fill('Samstag, nachmittags – bitte Zeit reservieren');
+    await location.fill('Gemeindesaal\nHauptstrasse 1\n8000 Zürich');
+    await page.getByRole('button', { name: 'Konfiguration speichern' }).click();
+    await expectTranslatedText(page.getByRole('alert'), 'app.admin.configuration.saved');
+    expect(saved).toEqual({
+      'pickup-date': 'Samstag, nachmittags – bitte Zeit reservieren',
+      'pickup-location': 'Gemeindesaal\nHauptstrasse 1\n8000 Zürich',
+    });
+  });
+
   test.beforeEach(async ({ page }) => {
     await page.route('http://localhost:8083/auth/session-status', async (route) => {
       await route.fulfill({

@@ -41,6 +41,17 @@ Die Auflösung dieser URL und die eigentliche Abholung werden hier nicht impleme
 
 ## QR-Code und Abhol-E-Mail
 
+- `pickup_date` und `pickup_location` werden in der Admin-Konfiguration als
+  Strings gepflegt. Das Abholdatum ist Freitext ohne Datums-/Formatvalidierung;
+  der Abholort wird als mehrzeilige Textarea bearbeitet. Beide Einträge starten
+  leer und müssen vor dem produktiven Versand durch den Betreiber befüllt werden.
+- Die Abhol-E-Mail übernimmt beide Werte beim Erstellen der Nachricht aus der
+  Konfiguration. Beim Admin-Testversand können die optionalen Parameter
+  `pickupDate` (Text) und `pickupLocation` (Textarea) diese Werte nur für die
+  Testnachricht überschreiben; leere Testfelder verwenden die Konfiguration.
+  HTML maskiert eingegebenes Markup;
+  Zeilenumbrüche bleiben in HTML und Klartext erhalten. Queue-Wiederholungen
+  versenden den bereits gespeicherten Nachrichteninhalt unverändert.
 - Lokal erzeugtes PNG mit `endroid/qr-code` 6.1, hoher Fehlerkorrektur und
   weissem Hintergrund. Tokens werden zufällig mit 256 Bit erzeugt.
 - Die Nachricht enthält das eingebettete Bild und einen sichtbaren Link

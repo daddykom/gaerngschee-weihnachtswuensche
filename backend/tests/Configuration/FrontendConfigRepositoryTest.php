@@ -12,6 +12,19 @@ use Tests\Support\TestDatabase;
 
 final class FrontendConfigRepositoryTest extends TestCase
 {
+    public function testPickupDetailsKeepFreeTextAndLineBreaksWithoutDateValidation(): void
+    {
+        $pdo = TestDatabase::create();
+        $repository = new FrontendConfigRepository($pdo);
+        foreach (['pickup_date' => 'Samstag, nachmittags – Zeit reservieren', 'pickup_location' => "Saal A\nHauptstrasse 1\n8000 Zürich"] as $key => $value) {
+            $this->insertConfig($pdo, $key, null, null);
+            self::assertNotFalse($repository->update($key, 'admin', $value));
+            self::assertSame($value, $repository->findValueByVariableName($key));
+            self::assertNotFalse($repository->update($key, 'admin', ''));
+            self::assertSame('', $repository->findValueByVariableName($key));
+        }
+    }
+
     public function testMapsPatternAndPlaceholderAndValidatesScalarValue(): void
     {
         $pdo = TestDatabase::create();

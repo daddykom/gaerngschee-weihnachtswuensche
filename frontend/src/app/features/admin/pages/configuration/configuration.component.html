@@ -63,7 +63,19 @@
           } @else {
             <mat-form-field appearance="outline">
               <mat-label>{{ config.variableName }}</mat-label>
-              @if (config.canUpdate) {
+              @if (config.variableName === 'pickup_location') {
+                @if (config.canUpdate) {
+                  <textarea
+                    matInput
+                    rows="4"
+                    [placeholder]="config.placeholder || ''"
+                    [formField]="field(config)"
+                    (blur)="field(config)().markAsTouched()"
+                  ></textarea>
+                } @else {
+                  <textarea matInput rows="4" [value]="model()[config.id]" disabled></textarea>
+                }
+              } @else if (config.canUpdate) {
                 <input
                   matInput
                   type="text"

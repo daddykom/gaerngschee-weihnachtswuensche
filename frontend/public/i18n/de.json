@@ -708,7 +708,9 @@
           "temporaryPassword": "Temporäres Passwort",
           "resetUrl": "Passwort-Reset-URL",
           "year": "Jahr",
-          "orderNumber": "Zettelnummer"
+          "orderNumber": "Zettelnummer",
+          "pickupDate": "Abholdatum und Zeit (optional; leer = Konfiguration)",
+          "pickupLocation": "Abholort (optional; leer = Konfiguration)"
         }
       },
       "overview": {
@@ -1012,6 +1014,8 @@
     },
     "mail": {
       "pickup": {
+        "dateLabel": "Abholdatum und Zeit",
+        "locationLabel": "Abholort",
         "subject": "Deine Weihnachtswünsche sind bereit zur Abholung",
         "title": "Deine Geschenke sind eingetroffen",
         "highlight": "Dein Wunschzettel ist vollständig.",
