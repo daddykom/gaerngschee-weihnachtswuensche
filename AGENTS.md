@@ -186,7 +186,7 @@ src/
 | `user-email-changed.html.twig` | Bestätigung einer geänderten E-Mail-Adresse | `LOGIN_URL` |
 | `password-reset.html.twig` | Passwort-Reset | `RESET_URL` |
 | `order-confirmation-saved.html.twig` | Bestätigung einer gespeicherten Bestellung | `ORDER.year`, `ORDER.loginUrl` |
-| `order-confirmation-changes_requested.html.twig` | Aufforderung zur Anpassung einer Bestellung | `ORDER.year`, `ORDER.loginUrl` |
+| `order-confirmation-changes_requested.html.twig` | Aufforderung zur Prüfung und erneuten Einreichung der aktuellen Texte, mit allgemeinen und wunschbezogenen Rückmeldungen in HTML und Klartext | `ORDER.year`, `ORDER.loginUrl`, optional `ORDER.adminNotes`, `ORDER.orderNumber`, `ORDER.items[]` mit `publicationStatus` (Fallback `status`), `adminNotes`, `currentTitle`, optional `wishNumber` oder `itemNumber` (ohne Nummer: Position im Wunschzettel); Admin-Testparameter: `year`, `loginUrl`, optional `orderFeedback`, `wishNumber`, `wishTitle`, `wishFeedback` |
 | `order-ready-for-pickup.html.twig` | Abholbenachrichtigung im Layout der Registrierungs-E-Mail, mit eingebettetem QR-PNG und Link auf dasselbe PNG | `ORDER.year`, `ORDER.orderNumber`, `QR_DATA_URI`, `QR_IMAGE_URL`, `LOGO_CID` (Farben über das globale `EMAIL_THEME`) |
 
 Neue E-Mail-Vorlagen dürfen nicht nur im Template-Verzeichnis angelegt werden:

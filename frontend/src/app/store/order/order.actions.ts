@@ -9,6 +9,7 @@ import {
 export const OrderActions = createActionGroup({
   source: 'Order',
   events: {
+    'Page Entered': emptyProps(),
     Load: emptyProps(),
     'Load Success': props<{ overview: OrderOverviewResponse }>(),
     'Load Failure': props<{ errorCode: string }>(),

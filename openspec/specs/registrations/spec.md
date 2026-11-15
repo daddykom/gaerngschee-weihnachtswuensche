@@ -74,6 +74,77 @@ interface Child {
 - Anmeldungen können jederzeit angepasst werden
 - Anmeldung wird über Fairgate geprüft
 
+### Rückmeldung und Textprüfung auf dem Wunschzettel
+
+- Bei bestehenden Wunschzetteln zeigt `/bestellung` den ursprünglichen
+  Order-Text schreibgeschützt und getrennt von der aktuellen Fassung.
+  Die aktuelle Fassung bleibt gemäss Bestellstatus bearbeitbar; der
+  ursprüngliche Text ist kein Formularwert und wird nicht mitgeändert.
+- Für neue Wunschzettel und Bestandsdaten ohne Originaltext wird kein
+  leerer Originaltext-Bereich angezeigt.
+- Bei `changes_requested` hat ein Prüfhinweis in der zentralen
+  Informationszone Vorrang vor dem Fairgate-Hinweis. Die allgemeine
+  Rückmeldung (`adminNotes`) wird dort als Text mit erhaltenen
+  Zeilenumbrüchen ausgegeben, niemals als HTML.
+- Fehlt eine allgemeine Rückmeldung, erscheint nur der Prüfauftrag.
+  Ein Entwurf mit gespeicherter allgemeiner Rückmeldung zeigt den Hinweis
+  beim erneuten Laden weiterhin. Nach erneutem Einreichen sowie in
+  späteren Statuswerten wird keine alte Rückmeldung als aktueller
+  Prüfauftrag angezeigt.
+- Beim Betreten von `/bestellung`, auch nach Rückkehr aus der Wunschbearbeitung,
+  wird der Hinweis aus dem geladenen Store wiederhergestellt. Dazu werden weder
+  Daten erneut geladen noch ungespeicherte Formularänderungen zurückgesetzt.
+  Bei fehlgeschlagenem initialem Laden bleibt die Fehlermeldung bestehen.
+- Die Wunschübersicht zeigt keine Spalte für die persönliche Nachricht.
+  Die Nachricht bleibt im Wunschformular erhalten.
+
+### Rückmeldung und Textprüfung beim einzelnen Wunsch
+
+- In `/bestellung/wunsch/:itemId` werden Originaltitel und
+  Originalbeschreibung eines gespeicherten Wunsches schreibgeschützt
+  getrennt von den bearbeitbaren aktuellen Fassungen angezeigt.
+  Ungespeicherte Wünsche zeigen keine leeren Originalbereiche.
+- Die Seitenüberschrift wird ausschliesslich durch die Page Shell angezeigt,
+  nicht zusätzlich im Wunsch-Editor.
+- Wunschbezogene Rückmeldungen werden sowohl beim betreffenden Wunsch
+  in der Übersicht als auch in seiner Bearbeitung angezeigt. Sie sind
+  keine Formularvalidierungsfehler und benötigen kein berührtes Feld.
+- Die gemeinsame Store-Auswahl berücksichtigt nur nicht leere
+  Rückmeldungen an Wünschen mit Status `rejected` oder `draft` in
+  zurückgegebenen oder als Entwurf gespeicherten Wunschzetteln.
+  Bereits akzeptierte Wünsche und erneut eingereichte Wunschzettel
+  zeigen keine alten Rückmeldungen als aktuellen Prüfauftrag.
+- Originale und Rückmeldungen bleiben ausserhalb der bearbeitbaren
+  Formularwerte. Alle Freitexte werden als Text mit Zeilenumbrüchen
+  dargestellt, nicht als HTML.
+
+### E-Mail zur Prüfung der aktuellen Texte
+
+- Während der Admin-Bearbeitung liegen ungespeicherte Änderungen nur im
+  aktiven Wunschzettel-Formular. Der Wechsel zur Wunschbearbeitung und zurück
+  erhält allgemeine Rückmeldung, Status, Familienangaben und alle Wunschänderungen.
+  Ein Editor übernimmt nur das Formular des passenden Wunschzettels; ein neuer
+  Listenabruf oder erfolgreiches Gesamtspeichern beendet diesen Bearbeitungsstand.
+
+- Beim Übergang zu `changes_requested` wird die bestehende E-Mail versandt.
+  Weiteres Speichern im gleichen Status löst keinen erneuten Versand aus.
+- Die E-Mail enthält die allgemeine Rückmeldung sowie pro zurückgewiesenem
+  Wunsch mit nicht leerer Rückmeldung dessen aktuelle Bezeichnung und
+  Rückmeldung. Bereits akzeptierte Wünsche und leere Rückmeldungen werden
+  nicht aufgeführt.
+- Vorhandene Wunschnummern erscheinen als `<Zettelnummer>-<Wunschnummer>`.
+  Vor Vergabe dieser Nummern wird die Position im Wunschzettel verwendet.
+- Der Login-Link führt zur Plattform, wo Originale und aktuelle Fassungen
+  verglichen und bei Bedarf geändert werden können. Die E-Mail fordert
+  ausdrücklich zum erneuten Einreichen auf, nicht nur zum Zwischenspeichern.
+  Vollständige Original- oder aktuelle Beschreibungen werden nicht dupliziert.
+- Rückmeldungen erscheinen sicher escaped in HTML und auch im Klartext.
+  Ein fehlgeschlagener Versand wird mit dem gerenderten Inhalt einschliesslich
+  Rückmeldungen in der bestehenden Mail-Queue gespeichert.
+- Der Admin-Testversand bietet zusätzlich zu Jahr und Login-URL optionale
+  Felder für die allgemeine Rückmeldung und einen Beispielwunsch mit Nummer,
+  bearbeitetem Titel und Rückmeldung.
+
 ### Kampagnenkapazität
 
 - `maximum_orders_per_year` und `maximum_order_items_per_year` begrenzen nur

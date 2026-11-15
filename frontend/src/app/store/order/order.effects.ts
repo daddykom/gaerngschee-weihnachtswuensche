@@ -1,12 +1,14 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { catchError, exhaustMap, filter, map, of } from 'rxjs';
+import { Store } from '@ngrx/store';
+import { catchError, exhaustMap, filter, map, of, withLatestFrom } from 'rxjs';
 import { OrderStatus } from '../../shared/models/order.model';
 import { OrderService } from '../../shared/services/order.service';
 import { AuthActions } from '../auth/auth.actions';
 import { NotificationActions } from '../notification/notification.actions';
 import { OrderActions } from './order.actions';
+import { selectOrderState } from './order.feature';
 
 export const loadOrderEffect = createEffect(
   (actions$ = inject(Actions), orderService = inject(OrderService)) =>
@@ -74,11 +76,26 @@ export const logoutAfterOrderSaveEffect = createEffect(
 );
 
 export const orderFairgateNotificationEffect = createEffect(
-  (actions$ = inject(Actions)) =>
+  (actions$ = inject(Actions), store = inject(Store)) =>
     actions$.pipe(
-      ofType(OrderActions.loadSuccess),
-      map(({ overview }) => {
+      ofType(OrderActions.pageEntered),
+      withLatestFrom(store.select(selectOrderState)),
+      filter(([, state]) => state.status === 'loaded'),
+      map(([, overview]) => {
         const status = overview.order?.status;
+        const feedback = overview.order?.adminNotes ?? '';
+        if (status === 'changes_requested' || (status === 'draft' && feedback.trim() !== '')) {
+          return NotificationActions.show({
+            variant: 'warning',
+            titleKey: 'app.order.status.changes_requested.title',
+            messageKey:
+              feedback.trim() !== ''
+                ? 'app.order.status.changes_requested.messageWithFeedback'
+                : 'app.order.status.changes_requested.message',
+            params: { feedback },
+            preserveOnRoutes: ['/bestellung'],
+          });
+        }
         const canEdit =
           status === undefined || ['draft', 'changes_requested'].includes(status as OrderStatus);
         if (status !== undefined && !canEdit) {

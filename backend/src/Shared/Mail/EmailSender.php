@@ -325,6 +325,15 @@ final class EmailSender implements EmailSenderInterface
         $status = str_starts_with($template, 'order-confirmation-') ? substr($template, strlen('order-confirmation-')) : '';
         $order = $parameters;
         $order['status'] = $status;
+        if ($status === 'changes_requested') {
+            $order['adminNotes'] = (string) ($parameters['orderFeedback'] ?? '');
+            $order['items'] = [[
+                'publicationStatus' => 'rejected',
+                'wishNumber' => (string) ($parameters['wishNumber'] ?? ''),
+                'currentTitle' => (string) ($parameters['wishTitle'] ?? ''),
+                'adminNotes' => (string) ($parameters['wishFeedback'] ?? ''),
+            ]];
+        }
         return $this->renderOrderConfirmation($order, $status);
     }
 

@@ -6,6 +6,7 @@ namespace Tests\Registration;
 
 use App\Registration\Actions\AdminOrderUpdateAction;
 use App\Registration\Data\OrderRepository;
+use App\Shared\Mail\EmailQueueRepository;
 use App\Users\Data\UserRepository;
 use PHPUnit\Framework\TestCase;
 use Slim\Psr7\Response;
@@ -138,24 +139,57 @@ final class AdminOrderUpdateActionTest extends TestCase
         self::assertSame('Neue Nachricht', $saved['items'][0]['personalMessage']);
     }
 
-    public function testSendsRejectionEmailWithoutAdminReason(): void
+    public function testSendsRejectionEmailWithOrderAndWishFeedbackOnlyOnTheStatusTransition(): void
     {
         [$pdo, $order] = $this->orderWithItems('released');
         $emails = new RecordingEmailSender();
         $action = new AdminOrderUpdateAction(new OrderRepository($pdo), $emails);
 
-        ($action)($this->request($order['id'], [
+        $payload = [
             'order' => [
                 ...$this->orderPayload($order, 'changes_requested'),
-                'adminNotes' => 'Interne Begründung',
+                'adminNotes' => 'Please review the family text',
             ],
-            'items' => [$this->itemPayload($order['items'][0], 'rejected', 'Interne Begründung')],
+            'items' => [$this->itemPayload($order['items'][0], 'rejected', 'Please review the wish text')],
+            'action' => 'rejectOrder',
+        ];
+        $response = ($action)($this->request($order['id'], $payload), new Response(), ['orderId' => $order['id']]);
+
+        self::assertSame(200, $response->getStatusCode());
+        self::assertCount(1, $emails->orderConfirmations);
+        $emailOrder = json_decode($emails->orderConfirmations[0]['order']['html'], true, 512, JSON_THROW_ON_ERROR);
+        self::assertSame('changes_requested', $emailOrder['renderedMailStatus']);
+        self::assertSame('Please review the family text', $emailOrder['adminNotes']);
+        self::assertSame('Please review the wish text', $emailOrder['items'][0]['adminNotes']);
+        self::assertStringEndsWith('/login', $emailOrder['loginUrl']);
+
+        $response = ($action)($this->request($order['id'], $payload), new Response(), ['orderId' => $order['id']]);
+        self::assertSame(200, $response->getStatusCode());
+        self::assertFalse(json_decode((string) $response->getBody(), true)['mailSent']);
+        self::assertCount(1, $emails->orderConfirmations);
+    }
+
+    public function testKeepsFeedbackInTheQueuedMessageWhenSendingFails(): void
+    {
+        [$pdo, $order] = $this->orderWithItems('released');
+        $emails = new RecordingEmailSender();
+        $emails->failStoredEmail = true;
+        $queue = new EmailQueueRepository($pdo);
+        $action = new AdminOrderUpdateAction(new OrderRepository($pdo), $emails, $queue);
+        $response = ($action)($this->request($order['id'], [
+            'order' => [...$this->orderPayload($order, 'changes_requested'), 'adminNotes' => 'Order feedback'],
+            'items' => [$this->itemPayload($order['items'][0], 'rejected', 'Wish feedback')],
             'action' => 'rejectOrder',
         ]), new Response(), ['orderId' => $order['id']]);
 
-        self::assertCount(1, $emails->orderConfirmations);
-        self::assertStringContainsString('changes_requested', $emails->orderConfirmations[0]['order']['html']);
-        self::assertStringNotContainsString('Interne Begründung', $emails->orderConfirmations[0]['order']['html']);
+        self::assertSame(200, $response->getStatusCode());
+        self::assertFalse(json_decode((string) $response->getBody(), true)['mailSent']);
+        $pending = $queue->pending();
+        self::assertCount(1, $pending);
+        self::assertSame('order_changes_requested', $pending[0]['email_type']);
+        $emailOrder = json_decode($pending[0]['html_body'], true, 512, JSON_THROW_ON_ERROR);
+        self::assertSame('Order feedback', $emailOrder['adminNotes']);
+        self::assertSame('Wish feedback', $emailOrder['items'][0]['adminNotes']);
     }
 
     public function testDoesNotSendEmailWhenOrderBecomesDefinitive(): void

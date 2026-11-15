@@ -1,4 +1,4 @@
-import { createFeature, createReducer, on } from '@ngrx/store';
+import { createFeature, createReducer, createSelector, on } from '@ngrx/store';
 import { OrderActions } from './order.actions';
 import { initialState, OrderState } from './order.state';
 
@@ -75,6 +75,7 @@ export const orderFeature = createFeature({
 export const {
   name: orderFeatureName,
   reducer: orderReducer,
+  selectOrderState,
   selectStatus: selectOrderStatus,
   selectOrder,
   selectYear: selectOrderYear,
@@ -87,3 +88,21 @@ export const {
   selectSaveStatus: selectOrderSaveStatus,
   selectSaveErrorCode: selectOrderSaveErrorCode,
 } = orderFeature;
+
+export const selectOrderItemFeedback = createSelector(
+  selectOrder,
+  (order): Record<string, string> => {
+    if (!order || !['draft', 'changes_requested'].includes(order.status)) {
+      return {};
+    }
+
+    return Object.fromEntries(
+      order.items
+        .filter(
+          (item) =>
+            ['draft', 'rejected'].includes(item.status) && (item.adminNotes ?? '').trim() !== '',
+        )
+        .map((item) => [item.id, item.adminNotes ?? '']),
+    );
+  },
+);

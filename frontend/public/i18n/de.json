@@ -222,12 +222,19 @@
       },
       "publicText": {
         "label": "Erzähl uns kurz von deiner aktuellen Lebenssituation",
+        "originalLabel": "Dein ursprünglicher Text",
+        "currentLabel": "Aktuelle Fassung deines Textes",
         "hint": "Was ist gerade schwierig für dich? Wie ist es dazu gekommen?\n\nWichtig: Dein Text wird öffentlich auf der Website angezeigt. Schreibe deshalb keine Namen oder persönlichen Daten hinein."
       },
       "items": {
         "title": "Deine Wünsche",
         "caption": "Deine Wünsche",
         "wishTitle": "Wunschtitel",
+        "originalTitle": "Dein ursprünglicher Wunschtitel",
+        "currentTitle": "Aktueller Wunschtitel",
+        "originalDescription": "Deine ursprüngliche Wunschbeschreibung",
+        "currentDescription": "Aktuelle Wunschbeschreibung",
+        "feedback": "Rückmeldung zu diesem Wunsch",
         "description": "Wunschbeschreibung",
         "giftLink": "Link zum gewünschten Geschenk (freiwillig)",
         "giftLinkHint": "Als Orientierung kannst du hier einen Beispiel-Link einfügen.",
@@ -292,6 +299,11 @@
         "login": "Zur Login-Seite"
       },
       "status": {
+        "changes_requested": {
+          "title": "Bitte prüfe deinen Wunschzettel",
+          "message": "Das Gärngschee-Team hat deinen Wunschzettel zur Prüfung zurückgegeben. Bitte prüfe die aktuelle Fassung und reiche deinen Wunschzettel erneut ein.",
+          "messageWithFeedback": "Das Gärngschee-Team hat deinen Wunschzettel zur Prüfung zurückgegeben. Bitte prüfe die aktuelle Fassung und reiche deinen Wunschzettel erneut ein.\n\nRückmeldung des Gärngschee-Teams:\n{{feedback}}"
+        },
         "released": {
           "title": "Zur Prüfung freigegeben",
           "message": "Deine Anmeldung wurde zur administrativen Prüfung freigegeben. Darum kann sie gerade nicht verändert werden."
@@ -689,6 +701,8 @@
           "wishNumber": "Wunschnummer",
           "wishDescription": "Wunschbeschreibung",
           "wishTitle": "Bearbeiteter Wunschtitel",
+          "orderFeedback": "Rückmeldung zum Wunschzettel (freiwillig)",
+          "wishFeedback": "Rückmeldung zum Wunsch (freiwillig)",
           "fairgateUrl": "Fairgate-URL",
           "startUrl": "Start-URL",
           "temporaryPassword": "Temporäres Passwort",
@@ -758,11 +772,11 @@
         "currentTitle": "Aktueller Wunschtitel",
         "originalTitle": "Ursprünglicher Wunschtitel",
         "originalText": "Ursprünglicher Order-Text",
-        "adminNotes": "Interne Bemerkung oder Begründung der Order-Zurückweisung",
+        "adminNotes": "Rückmeldung zum Wunschzettel (für den Wunschbesteller sichtbar)",
         "itemsTitle": "Wünsche",
         "originalDescription": "Ursprüngliche Wunschbeschreibung",
         "originalReason": "Ursprüngliche Begründung",
-        "rejectionReason": "Begründung der Zurückweisung",
+        "rejectionReason": "Begründung der Zurückweisung (für den Wunschbesteller sichtbar)",
         "accept": "Wunsch akzeptieren",
         "reject": "Wunsch zurückweisen",
         "rejectOrder": "Zurückweisen",
@@ -1019,11 +1033,13 @@
             "button": "Zur Anmeldung"
           },
           "changes_requested": {
-            "subject": "Bitte passe deinen Wunschzettel an",
-            "title": "Dein Wunschzettel wurde zurückgewiesen",
-            "body": "Dein Wunschzettel für {{year}} wurde zurückgewiesen.",
-            "nextText": "Bitte melde dich an und passe deine Wünsche an. Danach kannst du den Wunschzettel erneut speichern.",
-            "button": "Wunschzettel anpassen"
+            "subject": "Bitte prüfe deinen Wunschzettel",
+            "title": "Bitte prüfe deinen Wunschzettel",
+            "body": "Das Gärngschee-Team hat deinen Wunschzettel für {{year}} zur Prüfung zurückgegeben.",
+            "orderFeedback": "Rückmeldung zu deinem Wunschzettel",
+            "wishFeedback": "Rückmeldung zu Wunsch {{number}}",
+            "nextText": "Bitte melde dich an und prüfe die aktuellen Texte deines Wunschzettels und deiner Wünsche. Deine ursprünglichen Texte werden dir zum Vergleich angezeigt. Du kannst die aktuelle Fassung bei Bedarf ändern. Reiche deinen Wunschzettel danach erneut ein, um die dann angezeigten Texte freizugeben.",
+            "button": "Wunschzettel prüfen"
           }
         }
       },

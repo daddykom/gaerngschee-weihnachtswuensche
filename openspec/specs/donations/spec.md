@@ -15,8 +15,9 @@ E-Mail bestätigt und bleibt bis zur Bestätigung zehn Minuten vorläufig.
 - Anonymisierte, korrigierte Familien- und Wunschtexte werden angezeigt
 - Wunschliste und Reservationsdialog zeigen den bearbeiteten Wunschtitel,
   die bearbeitete Wunschbeschreibung und den optionalen Geschenklink.
-- Originaltitel und Originalbeschreibung bleiben ausschliesslich im Admin
-  sichtbar und werden dort getrennt von ihren bearbeitbaren Fassungen beschriftet.
+- Originaltitel und Originalbeschreibung sind im Admin und für den zugehörigen
+  Wunschbesteller getrennt von ihren bearbeitbaren Fassungen sichtbar.
+  Sie werden nicht an Erfüller ausgeliefert.
 - Persönliche Nachrichten sind ausschliesslich für das Gärngschee-Team bestimmt.
   Das optionale Formularfeld und sein Hilfetext weisen ausdrücklich darauf hin.
   Weder API-Antworten an Erfüller noch die öffentliche Suche geben diese

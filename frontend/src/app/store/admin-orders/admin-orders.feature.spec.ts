@@ -59,18 +59,63 @@ describe('adminOrdersFeature', () => {
     });
   });
 
-  it('updates only the matching order for a draft change', () => {
-    const other = { id: 'order-2', status: 'released', items: [] };
-    const state = { ...initialState, orders: [order, other] as never };
-    const changed = { ...order, status: 'changes_requested' };
-
-    const result = adminOrdersFeature.reducer(
-      state,
-      AdminOrdersActions.draftChanged({ order: changed as never }),
+  it('keeps unsaved edits only in the active form and ignores updates for another order', () => {
+    const form = {
+      status: order.status,
+      currentText: 'Edited family text',
+      adminNotes: 'Family feedback',
+      adultsCount: 1,
+      childrenCount: 0,
+      items: [],
+    };
+    const loaded = adminOrdersFeature.reducer(
+      { ...initialState, orders: [order] },
+      AdminOrdersActions.formLoaded({ orderId: order.id, form }),
     );
+    const changed = adminOrdersFeature.reducer(
+      loaded,
+      AdminOrdersActions.formChanged({
+        orderId: order.id,
+        changes: { status: 'changes_requested' },
+      }),
+    );
+    expect(changed.form).toEqual({ ...form, status: 'changes_requested' });
+    expect(changed.orders).toBe(loaded.orders);
+    expect(loaded.form).toBe(form);
+    expect(
+      adminOrdersFeature.reducer(
+        changed,
+        AdminOrdersActions.formChanged({
+          orderId: 'other-order',
+          changes: { adminNotes: 'Other feedback' },
+        }),
+      ),
+    ).toBe(changed);
+  });
 
-    expect(result.orders).toEqual([changed, other]);
-    expect(result.orders).not.toBe(state.orders);
+  it('clears the active editing form on a fresh list load or successful save, but retains it on save failure', () => {
+    const form = {
+      status: order.status,
+      currentText: 'Edited family text',
+      adminNotes: 'Family feedback',
+      adultsCount: 1,
+      childrenCount: 0,
+      items: [],
+    };
+    const state = { ...initialState, orders: [order], activeOrderId: order.id, form };
+    for (const action of [
+      AdminOrdersActions.load(),
+      AdminOrdersActions.filtersChanged({ statuses: [], categories: [] }),
+      AdminOrdersActions.saveSuccess({ order, mailSent: true }),
+    ]) {
+      const result = adminOrdersFeature.reducer(state, action);
+      expect(result.activeOrderId).toBeNull();
+      expect(result.form).toBeNull();
+    }
+    expect(
+      adminOrdersFeature.reducer(state, AdminOrdersActions.saveFailure({ errorCode: 'FAILED' }))
+        .form,
+    ).toBe(form);
   });
 
   it('keeps the search form when list filters and results change', () => {

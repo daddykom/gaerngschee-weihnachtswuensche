@@ -53,6 +53,10 @@ final class EmailTestAction
         'order-confirmation-changes_requested' => ['fields' => [
             ['key' => 'year', 'type' => 'number', 'required' => true],
             ['key' => 'loginUrl', 'type' => 'url', 'required' => true],
+            ['key' => 'orderFeedback', 'type' => 'textarea', 'required' => false],
+            ['key' => 'wishNumber', 'type' => 'text', 'required' => false],
+            ['key' => 'wishTitle', 'type' => 'text', 'required' => false],
+            ['key' => 'wishFeedback', 'type' => 'textarea', 'required' => false],
         ]],
     ];
 
@@ -116,6 +120,9 @@ final class EmailTestAction
         }
         foreach (self::TEMPLATES[$template]['fields'] as $field) {
             $value = $parameters[$field['key']] ?? null;
+            if ($value !== null && !is_scalar($value)) {
+                throw new \InvalidArgumentException('Invalid email test parameter.');
+            }
             if ($field['required'] && (!is_scalar($value) || trim((string) $value) === '')) {
                 throw new \InvalidArgumentException('Missing email test parameter.');
             }

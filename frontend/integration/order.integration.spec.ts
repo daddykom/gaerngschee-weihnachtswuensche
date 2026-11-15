@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { expectTranslatedText } from '../e2e/support/assertions';
+import { loginAsAdmin } from './support/admin-login';
 import { authHeaders, resetIntegrationRateLimits } from './support/auth-header';
 import { issueRegistrationToken } from './support/registration-token';
 
@@ -114,5 +115,212 @@ test('does not create an order when the client leaves without saving', async ({ 
       headers: await authHeaders(page),
     });
     expect(logout.status()).toBe(204);
+  }
+});
+
+test('returns order and wish feedback to the requester after an admin review', async ({
+  page,
+  request,
+  browser,
+  baseURL,
+}) => {
+  const apiUrl = 'http://localhost:8082';
+  const email = `feedback+fair1-${Date.now()}@example.com`;
+  const login = await request.post(`${apiUrl}/auth/registration-login`, {
+    data: { token: issueRegistrationToken(email) },
+  });
+  expect(login.status()).toBe(200);
+  const csrf = (await request.storageState()).cookies.find(
+    ({ name }) => name === 'XSRF-TOKEN',
+  )!.value;
+  const saved = await request.post(`${apiUrl}/client/order`, {
+    headers: { 'X-CSRF-Token': csrf },
+    data: {
+      mode: 'draft',
+      text: 'Original family text',
+      adultsCount: 2,
+      childrenCount: 3,
+      password: 'long-enough-password',
+      passwordConfirmation: 'long-enough-password',
+      items: [
+        {
+          category: 'gift',
+          personType: 'adult',
+          personIndex: 1,
+          title: 'Original wish title',
+          description: 'Original wish text',
+        },
+      ],
+    },
+  });
+  expect(saved.status()).toBe(200);
+  const draft = (await saved.json()).order;
+  expect(draft.adminNotes).toBeNull();
+  expect(draft.items[0].adminNotes).toBeNull();
+
+  await loginAsAdmin(page);
+  const headers = await authHeaders(page);
+  try {
+    await page.getByRole('combobox', { name: 'Status', exact: true }).click();
+    await page.getByRole('option', { name: 'Entwurf', exact: true }).click();
+    await page.keyboard.press('Escape');
+    await page.locator(`a[href="/admin/orders/${draft.id}/edit"]`).click();
+    await page
+      .getByRole('textbox', { name: 'Aktueller Order-Text', exact: true })
+      .fill('Edited family text');
+    await page
+      .getByRole('textbox', { name: /Rückmeldung zum Wunschzettel/ })
+      .fill('Please review the family text');
+    await page.getByRole('combobox', { name: 'Neuer Status', exact: true }).click();
+    await page.getByRole('option', { name: 'Änderungen verlangt' }).click();
+    await page.getByRole('link', { name: 'Ändern', exact: true }).click();
+    await page
+      .getByRole('textbox', { name: 'Aktueller Wunschtitel', exact: true })
+      .fill('Edited wish title');
+    await page
+      .getByRole('textbox', { name: 'Aktuelle Wunschbeschreibung', exact: true })
+      .fill('Edited wish text');
+    await page
+      .getByRole('textbox', { name: /Begründung der Zurückweisung/ })
+      .fill('Please review the wish text');
+    await page.getByRole('combobox', { name: 'Neuer Status', exact: true }).click();
+    await page.getByRole('option', { name: 'Änderung erforderlich' }).click();
+    await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+    await page.waitForURL(`**/admin/orders/${draft.id}/edit`);
+    await expect(page.getByRole('textbox', { name: /Rückmeldung zum Wunschzettel/ })).toHaveValue(
+      'Please review the family text',
+    );
+    const reviewResponse = page.waitForResponse(
+      (response) =>
+        response.url().endsWith(`/admin/orders/${draft.id}`) &&
+        response.request().method() === 'PATCH',
+    );
+    await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+    const reviewed = await reviewResponse;
+    expect(reviewed.status()).toBe(200);
+    expect((await reviewed.json()).mailSent).toBe(true);
+    await page.waitForURL('**/admin/overview');
+
+    let messageId: string | undefined;
+    await expect
+      .poll(async () => {
+        const messages = (await (await request.get('http://localhost:8025/api/v1/messages')).json())
+          .messages;
+        messageId = messages.find((message: { ID: string; To: Array<{ Address: string }> }) =>
+          message.To.some((to) => to.Address === email),
+        )?.ID;
+        return messageId !== undefined;
+      })
+      .toBe(true);
+    const message = await (
+      await request.get(`http://localhost:8025/api/v1/message/${messageId}`)
+    ).json();
+    for (const body of [message.HTML, message.Text]) {
+      expect(body).toContain('Please review the family text');
+      expect(body).toContain('Please review the wish text');
+      expect(body).toContain('Edited wish title');
+      expect(body).toContain('/login');
+      expect(body).not.toContain('Original wish title');
+      expect(body).not.toContain('Original wish text');
+      expect(body).not.toContain('Edited wish text');
+      expect(body).not.toContain('app.mail.');
+    }
+
+    const overview = await request.get(`${apiUrl}/client/order`);
+    expect(overview.status()).toBe(200);
+    expect(await overview.json()).toMatchObject({
+      canEdit: true,
+      order: {
+        id: draft.id,
+        status: 'changes_requested',
+        originalText: 'Original family text',
+        currentText: 'Edited family text',
+        adminNotes: 'Please review the family text',
+        items: [
+          {
+            id: draft.items[0].id,
+            originalTitle: 'Original wish title',
+            currentTitle: 'Edited wish title',
+            originalDescription: 'Original wish text',
+            currentDescription: 'Edited wish text',
+            adminNotes: 'Please review the wish text',
+          },
+        ],
+      },
+    });
+
+    const requesterContext = await browser.newContext({ baseURL });
+    try {
+      const requesterPage = await requesterContext.newPage();
+      let overviewLoads = 0;
+      requesterPage.on('request', (request) => {
+        if (request.method() === 'GET' && request.url().endsWith('/client/order'))
+          overviewLoads += 1;
+      });
+      await requesterPage.goto(
+        `/client-login?token=${encodeURIComponent(issueRegistrationToken(email))}`,
+      );
+      await requesterPage.waitForURL('**/bestellung');
+      await expect(requesterPage.getByRole('columnheader')).toHaveCount(5);
+      const original = requesterPage.locator('[aria-labelledby="original-order-text-heading"]');
+      await expectTranslatedText(
+        original.getByRole('heading'),
+        'app.order.publicText.originalLabel',
+      );
+      await expect(original.locator('p')).toHaveText('Original family text');
+      const current = requesterPage.getByRole('textbox', {
+        name: 'Aktuelle Fassung deines Textes',
+      });
+      await expect(current).toHaveValue('Edited family text');
+      await expect(current).toBeEditable();
+      const notification = requesterPage.locator('.app-notification');
+      await expectTranslatedText(notification, 'app.order.status.changes_requested.title');
+      await expect(notification).toContainText('Please review the family text');
+      await current.fill('Requester-approved family text');
+      await expect(original.locator('p')).toHaveText('Original family text');
+
+      const wish = requesterPage.getByRole('row').filter({ hasText: 'Edited wish title' });
+      await expectTranslatedText(wish.locator('app-info-box'), 'app.order.items.feedback');
+      await expect(wish.locator('app-info-box')).toContainText('Please review the wish text');
+      await wish.getByRole('button', { name: 'Ändern' }).click();
+      await requesterPage.waitForURL(`**/bestellung/wunsch/${draft.items[0].id}`);
+      const originalTitle = requesterPage.locator(
+        '[aria-labelledby="original-wish-title-heading"] p',
+      );
+      const originalDescription = requesterPage.locator(
+        '[aria-labelledby="original-wish-description-heading"] p',
+      );
+      await expect(originalTitle).toHaveText('Original wish title');
+      await expect(originalDescription).toHaveText('Original wish text');
+      const editedTitle = requesterPage.getByRole('textbox', { name: 'Aktueller Wunschtitel' });
+      const editedDescription = requesterPage.getByRole('textbox', {
+        name: 'Aktuelle Wunschbeschreibung',
+      });
+      await expect(editedTitle).toHaveValue('Edited wish title');
+      await expect(editedDescription).toHaveValue('Edited wish text');
+      await expect(requesterPage.locator('app-item-editor app-info-box')).toContainText(
+        'Please review the wish text',
+      );
+      await editedTitle.fill('Requester-approved wish title');
+      await editedDescription.fill('Requester-approved wish text');
+      await expect(originalTitle).toHaveText('Original wish title');
+      await expect(originalDescription).toHaveText('Original wish text');
+      await requesterPage.getByRole('button', { name: 'Zurück', exact: true }).click();
+      await requesterPage.waitForURL('**/bestellung');
+      await expect(requesterPage.locator('.app-notification')).toContainText(
+        'Please review the family text',
+      );
+      await expect(
+        requesterPage.getByRole('textbox', { name: 'Aktuelle Fassung deines Textes' }),
+      ).toHaveValue('Requester-approved family text');
+      expect(overviewLoads).toBe(1);
+    } finally {
+      await requesterContext.close();
+    }
+  } finally {
+    const deleted = await page.request.delete(`${apiUrl}/admin/users/${draft.userId}`, {
+      headers,
+    });
+    expect(deleted.status()).toBe(200);
   }
 });

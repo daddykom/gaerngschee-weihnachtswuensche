@@ -194,6 +194,52 @@ test.describe('Bestellung route', () => {
     ]);
   });
 
+  test('restores order feedback after returning from the wish editor without reloading or losing edits', async ({
+    page,
+  }) => {
+    let overviewLoads = 0;
+    const feedback = 'Please review the family text';
+    await mockClientLogin(page, {
+      order: {
+        ...orderWithItems('changes_requested', [
+          {
+            ...orderItem('item-1', 'gift', 'Winter coat', 'Private team message'),
+            status: 'rejected',
+            adminNotes: 'Please review the wish',
+          },
+        ]),
+        adminNotes: feedback,
+      },
+      onLoad: () => {
+        overviewLoads += 1;
+      },
+    });
+    await expect(page.locator('.app-notification')).toContainText(feedback);
+    await expect(page.getByRole('columnheader')).toHaveCount(5);
+    await expect(page.getByRole('columnheader', { name: /Persönliche Nachricht/ })).toHaveCount(0);
+    await expect(page.locator('table')).not.toContainText('Private team message');
+    await page
+      .getByRole('textbox', { name: 'Aktuelle Fassung deines Textes' })
+      .fill('Unsaved family text');
+
+    await page.getByRole('button', { name: 'Ändern', exact: true }).click();
+    await page.waitForURL('**/bestellung/wunsch/item-1');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
+    await expect(
+      page.getByRole('textbox', { name: /Persönliche Nachricht an das Gärngschee-Team/ }),
+    ).toHaveValue('Private team message');
+    await page.getByRole('textbox', { name: 'Aktueller Wunschtitel' }).fill('Unsaved wish title');
+    await page.getByRole('button', { name: 'Zurück', exact: true }).click();
+    await page.waitForURL('**/bestellung');
+
+    await expect(page.locator('.app-notification')).toContainText(feedback);
+    await expect(page.getByRole('textbox', { name: 'Aktuelle Fassung deines Textes' })).toHaveValue(
+      'Unsaved family text',
+    );
+    await expect(page.locator('tbody')).toContainText('Unsaved wish title');
+    expect(overviewLoads).toBe(1);
+  });
+
   test('cancels and confirms deletion of an item', async ({ page }) => {
     await mockClientLogin(page, {
       order: orderWithItems('draft', [
@@ -219,6 +265,7 @@ test.describe('Bestellung route', () => {
 
     await page.getByRole('button', { name: 'Wunsch hinzufügen' }).click();
     await page.waitForURL('**/bestellung/wunsch/neu');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
     await page.getByRole('button', { name: 'Weiter' }).click();
 
     await expect(page).toHaveURL(/\/bestellung\/wunsch\/neu$/);
@@ -314,10 +361,108 @@ test.describe('Bestellung route', () => {
     await expect(page.getByRole('button', { name: 'Speichern', exact: true })).toBeEnabled();
     await expect(page.getByRole('button', { name: 'Einreichen', exact: true })).toBeVisible();
   });
+  for (const width of [390, 1280]) {
+    test(`shows the original order text, editable current version and review feedback at ${width}px`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 900 });
+      const originalText = 'Original family text\nOriginal second paragraph';
+      const feedback = 'Please review <b>the edited text</b>.\nPlease check the second paragraph.';
+      await mockClientLogin(page, {
+        order: {
+          ...orderWithItems('changes_requested', [
+            orderItem('item-1', 'gift', 'Winter coat', 'A warm coat'),
+          ]),
+          originalText,
+          currentText: 'Edited family text',
+          adminNotes: feedback,
+        },
+      });
+
+      const original = page.locator('[aria-labelledby="original-order-text-heading"]');
+      await expectTranslatedText(
+        original.getByRole('heading'),
+        'app.order.publicText.originalLabel',
+      );
+      await expect(original.locator('p')).toHaveText(originalText);
+      await expect(original.getByRole('textbox')).toHaveCount(0);
+      const current = page.getByRole('textbox', { name: 'Aktuelle Fassung deines Textes' });
+      await expect(current).toHaveValue('Edited family text');
+      await expect(current).toBeEditable();
+      const notification = page.locator('.app-notification');
+      await expectTranslatedText(notification, 'app.order.status.changes_requested.title');
+      await expectTranslatedText(
+        notification,
+        'app.order.status.changes_requested.messageWithFeedback',
+      );
+      await expect(notification).toContainText(feedback);
+      await expect(notification.locator('b')).toHaveCount(0);
+      await expect(notification.locator('.gl-text--multiline')).toHaveCSS(
+        'white-space',
+        'pre-line',
+      );
+
+      await current.fill('Requester-approved family text');
+      await expect(original.locator('p')).toHaveText(originalText);
+      await expect(notification).toContainText(feedback);
+    });
+  }
+
+  test('shows feedback only beside the corresponding returned wish', async ({ page }) => {
+    const feedback = 'Please review <b>the coat size</b>.\nPlease check the description.';
+    await mockClientLogin(page, {
+      order: {
+        ...orderWithItems('changes_requested', [
+          {
+            ...orderItem('item-1', 'gift', 'Winter coat', 'A warm coat'),
+            status: 'rejected',
+            adminNotes: feedback,
+          },
+          {
+            ...orderItem('item-2', 'gift', 'Shoes', 'Warm shoes'),
+            status: 'approved',
+            adminNotes: 'Old shoe feedback',
+          },
+        ]),
+        adminNotes: null,
+      },
+    });
+
+    const coat = page.getByRole('row').filter({ hasText: 'Winter coat' });
+    const note = coat.locator('app-info-box');
+    await expectTranslatedText(note, 'app.order.items.feedback');
+    await expect(note).toContainText(feedback);
+    await expect(note.locator('b')).toHaveCount(0);
+    await expect(note.locator('p')).toHaveCSS('white-space', 'pre-line');
+    const shoes = page.getByRole('row').filter({ hasText: 'Shoes' });
+    await expect(shoes.locator('app-info-box')).toHaveCount(0);
+    await expect(page.locator('.app-notification')).not.toContainText(feedback);
+  });
+
+  test('shows a general review notice when only wishes have feedback', async ({ page }) => {
+    await mockClientLogin(page, {
+      order: {
+        ...orderWithItems('changes_requested', [
+          {
+            ...orderItem('item-1', 'gift', 'Winter coat', 'A warm coat'),
+            adminNotes: 'Wish feedback',
+          },
+        ]),
+        adminNotes: null,
+      },
+    });
+
+    await expectTranslatedText(
+      page.locator('.app-notification'),
+      'app.order.status.changes_requested.message',
+    );
+    await expect(page.locator('.app-notification')).not.toContainText('Wish feedback');
+  });
 });
 
 interface OrderTestOptions {
   order: Record<string, unknown> | null;
+  onLoad?: () => void;
   onSave?: (route: import('@playwright/test').Route) => Promise<void>;
 }
 
@@ -344,6 +489,7 @@ async function mockClientLogin(page: Page, options: OrderTestOptions): Promise<v
   });
   await page.route('http://localhost:8083/client/order', async (route) => {
     if (route.request().method() === 'GET') {
+      options.onLoad?.();
       await route.fulfill({
         status: 200,
         contentType: 'application/json',

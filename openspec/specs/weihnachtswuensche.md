@@ -69,7 +69,7 @@ Mindestens erforderliche Daten:
 | `status` | Status der gesamten Order |
 | `original_text` | Ursprünglicher Text der Order |
 | `current_text` | Aktuell gültiger Text der Order |
-| `admin_notes` | Interne Bemerkungen der Administration |
+| `admin_notes` | Rückmeldung der Administration an den Wunschbesteller, insbesondere zur Zurückweisung |
 | `fairgate_status` | Ergebnis der Fairgate-Prüfung |
 | `adults_count` | Im Order abgelegte Anzahl Erwachsene |
 | `children_count` | Im Order abgelegte Anzahl Kinder |
@@ -100,7 +100,7 @@ Mindestens erforderliche Daten:
 | `current_reason` | Aktuell gültige Begründung |
 | `publication_status` | Status der Veröffentlichung/Freigabe |
 | `fulfillment_status` | Status der Erfüllung |
-| `admin_notes` | Interne Bemerkungen |
+| `admin_notes` | Rückmeldung der Administration an den Wunschbesteller, insbesondere zur Zurückweisung |
 | `fulfiller_email` | E-Mail des zugeordneten Wunscherfüllers |
 | `reserved_at` | Zeitpunkt der Übernahme |
 | `due_at` | Abgabe-Endtermin |
@@ -180,7 +180,15 @@ Administratoren können:
 - den Text einzelner OrderItems korrigieren;
 - die im Order abgelegte Anzahl der Erwachsenen und Kinder korrigieren;
 - einzelne Wünsche akzeptieren oder ablehnen;
-- interne Bemerkungen zur Order oder zu einzelnen Wünschen erfassen.
+- Rückmeldungen zur Order oder zu einzelnen Wünschen für den Wunschbesteller erfassen.
+
+Die bestehenden Felder `admin_notes` (API: `adminNotes`) enthalten diese
+Rückmeldungen und sind keine ausschliesslich internen Admin-Bemerkungen.
+Sie werden für die eigene Bestellung über die Client-API ausgeliefert und
+im Client-Store getrennt von den bearbeitbaren Formularwerten gehalten.
+Wunschbesteller können die Rückmeldungen nicht ändern. Öffentliche und
+Erfüller-Ansichten erhalten sie nicht. Separate interne Admin-Bemerkungen
+sind nicht Teil dieses Funktionsumfangs.
 
 Die bisherigen Texte bleiben erhalten. Korrekturen werden als aktuelle Texte
 angezeigt und dürfen nicht die ursprüngliche Eingabe zerstören.

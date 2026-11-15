@@ -17,6 +17,7 @@ import { ORDER_STATUS_WORKFLOW } from '../../../../shared/models/order.model';
 import { AdminOrdersActions } from '../../../../store/admin-orders/admin-orders.actions';
 import {
   selectAdminOrders,
+  selectAdminOrdersActiveOrderId,
   selectAdminOrdersForm,
   selectAdminOrdersSaveStatus,
 } from '../../../../store/admin-orders/admin-orders.feature';
@@ -45,6 +46,7 @@ export class AdminOrderEditComponent {
   readonly orders = this.store.selectSignal(selectAdminOrders);
   readonly saveStatus = this.store.selectSignal(selectAdminOrdersSaveStatus);
   readonly storeForm = this.store.selectSignal(selectAdminOrdersForm);
+  private readonly activeOrderId = this.store.selectSignal(selectAdminOrdersActiveOrderId);
   readonly order = signal<AdminOrder | null>(null);
   readonly formModel = signal<AdminOrderFormValue>({
     status: 'draft',
@@ -79,7 +81,8 @@ export class AdminOrderEditComponent {
       if (currentOrder !== undefined && this.order() === null) {
         const rejectItem = this.route.snapshot.queryParamMap.get('rejectItem');
         this.order.set(currentOrder);
-        const formValue: AdminOrderFormValue = {
+        const existingForm = this.activeOrderId() === id ? this.storeForm() : null;
+        const baseForm: AdminOrderFormValue = existingForm ?? {
           status: currentOrder.status,
           currentText: currentOrder.currentText ?? '',
           adminNotes: currentOrder.adminNotes ?? '',
@@ -90,24 +93,25 @@ export class AdminOrderEditComponent {
             currentTitle: item.currentTitle ?? item.currentDescription,
             currentReason: item.currentReason ?? '',
             adminNotes: item.adminNotes ?? '',
-            publicationStatus: item.id === rejectItem ? 'rejected' : item.publicationStatus,
           })),
         };
+        const formValue: AdminOrderFormValue = rejectItem
+          ? {
+              ...baseForm,
+              items: baseForm.items.map((item) => ({
+                ...item,
+                publicationStatus: item.id === rejectItem ? 'rejected' : item.publicationStatus,
+              })),
+            }
+          : baseForm;
         this.formModel.set(this.cloneForm(formValue));
         previousForm = this.cloneForm(formValue);
         initialized = true;
-        this.store.dispatch(
-          AdminOrdersActions.formLoaded({ orderId: currentOrder.id, form: formValue }),
-        );
-      }
-    });
-
-    effect(() => {
-      const currentForm = this.storeForm();
-      if (currentForm != null && !initialized) {
-        this.formModel.set(this.cloneForm(currentForm));
-        previousForm = this.cloneForm(currentForm);
-        initialized = true;
+        if (!existingForm || rejectItem) {
+          this.store.dispatch(
+            AdminOrdersActions.formLoaded({ orderId: currentOrder.id, form: formValue }),
+          );
+        }
       }
     });
 
@@ -127,7 +131,10 @@ export class AdminOrderEditComponent {
 
   save(): void {
     const order = this.order();
-    const model = this.storeForm() ?? this.formModel();
+    const model =
+      this.activeOrderId() === order?.id
+        ? (this.storeForm() ?? this.formModel())
+        : this.formModel();
     if (order === null || !this.orderForm().valid()) {
       this.orderForm().markAsTouched();
       return;

@@ -190,11 +190,6 @@ final class AdminOrderUpdateAction
         }
         if ($mailStatus !== null && $emailType !== null && is_string($saved['requesterEmail'] ?? null)) {
             $emailOrder = $saved;
-            unset($emailOrder['adminNotes']);
-            $emailOrder['items'] = array_map(static function (array $item): array {
-                unset($item['adminNotes']);
-                return $item;
-            }, $emailOrder['items'] ?? []);
             $emailOrder['loginUrl'] = rtrim(getenv('FRONTEND_BASE_URL') ?: 'http://localhost:4200', '/') . '/login';
             $emails = $this->emails ?? new EmailSender();
             $message = $emails->renderOrderConfirmation($emailOrder, $mailStatus);

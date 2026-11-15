@@ -53,7 +53,9 @@
           [variant]="currentNotification.variant"
           [title]="currentNotification.titleKey | translate"
         >
-          <span>{{ currentNotification.messageKey | translate: currentNotification.params }}</span>
+          <span class="gl-text--multiline"
+            >{{ currentNotification.messageKey | translate: currentNotification.params }}</span
+          >
         </app-info-box>
       </div>
       } @if (publicConfigStatus() === 'loading' || publicConfigStatus() === 'initial') {

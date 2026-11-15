@@ -12,7 +12,6 @@ export const AdminOrdersActions = createActionGroup({
     'Load Success': props<{ orders: AdminOrder[] }>(),
     'Load Failure': props<{ errorCode: string }>(),
     Save: props<{ order: AdminOrder; action?: AdminOrderAction }>(),
-    'Draft Changed': props<{ order: AdminOrder }>(),
     'Form Loaded': props<{ orderId: string; form: AdminOrderFormValue }>(),
     'Form Changed': props<{ orderId: string; changes: Partial<AdminOrderFormValue> }>(),
     'Save Success': props<{ order: AdminOrder; mailSent: boolean }>(),
