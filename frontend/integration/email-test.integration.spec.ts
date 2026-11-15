@@ -2,6 +2,109 @@ import { expect, test } from '@playwright/test';
 import { expectTranslatedText } from '../e2e/support/assertions';
 import { loginAsAdmin } from './support/admin-login';
 
+test('sends and previews a review email with general and wish feedback', async ({
+  page,
+  request,
+}) => {
+  await loginAsAdmin(page);
+  const recipient = `review-test-${Date.now()}@example.com`;
+  await page.goto('/admin/email-test');
+  await page.getByRole('combobox', { name: 'E-Mail', exact: true }).click();
+  const option = page.getByRole('option').filter({ hasText: 'Änderungen verlangt' });
+  await expectTranslatedText(
+    option,
+    'app.admin.emailTest.templates.order-confirmation-changes_requested',
+  );
+  await option.click();
+  await page.getByRole('textbox', { name: 'Empfänger-Adresse' }).fill(recipient);
+  await page.getByRole('spinbutton', { name: 'Jahr', exact: true }).fill('2026');
+  await page
+    .getByRole('textbox', { name: 'Login-URL', exact: true })
+    .fill('http://localhost:4300/login');
+  await page
+    .getByRole('textbox', { name: /Rückmeldung zum Wunschzettel/ })
+    .fill('Review <b>the family text</b>.\nPlease check the details.');
+  await page.getByRole('textbox', { name: 'Wunschnummer', exact: true }).fill('12-3');
+  await page
+    .getByRole('textbox', { name: 'Bearbeiteter Wunschtitel', exact: true })
+    .fill('Edited coat title');
+  await page
+    .getByRole('textbox', { name: /Rückmeldung zum Wunsch \(/ })
+    .fill('Review <b>the coat size</b>.\nPlease check the colour.');
+  await page.getByRole('button', { name: 'Senden', exact: true }).click();
+  await expectTranslatedText(page.getByRole('alert'), 'app.admin.emailTest.sent');
+
+  let messageId: string | undefined;
+  await expect
+    .poll(async () => {
+      const messages = (await (await request.get('http://localhost:8025/api/v1/messages')).json())
+        .messages;
+      messageId = messages.find((message: { ID: string; To: Array<{ Address: string }> }) =>
+        message.To.some((to) => to.Address === recipient),
+      )?.ID;
+      return messageId !== undefined;
+    })
+    .toBe(true);
+  const message = await (
+    await request.get(`http://localhost:8025/api/v1/message/${messageId}`)
+  ).json();
+  for (const body of [message.HTML, message.Text]) {
+    for (const text of [
+      '12-3',
+      'Edited coat title',
+      'Please check the details.',
+      'Please check the colour.',
+      'http://localhost:4300/login',
+    ]) {
+      expect(body).toContain(text);
+    }
+    expect(body).not.toContain('app.mail.');
+  }
+  expect(message.HTML).toContain('&lt;b&gt;the family text&lt;/b&gt;.<br />');
+  expect(message.Text).toContain('Review <b>the coat size</b>. Please check the colour.');
+
+  let previewHtml = message.HTML as string;
+  for (const part of message.Inline as Array<{
+    ContentID: string;
+    ContentType: string;
+    PartID: string;
+  }>) {
+    const body = await (
+      await request.get(`http://localhost:8025/api/v1/message/${messageId}/part/${part.PartID}`)
+    ).body();
+    previewHtml = previewHtml.replaceAll(
+      `cid:${part.ContentID}`,
+      `data:${part.ContentType};base64,${body.toString('base64')}`,
+    );
+  }
+  const preview = await page.context().newPage();
+  try {
+    for (const width of [320, 390, 760]) {
+      await preview.setViewportSize({ width, height: 900 });
+      await preview.setContent(previewHtml);
+      await expectTranslatedText(
+        preview.getByRole('heading', { level: 1 }),
+        'app.mail.order.confirmation.changes_requested.title',
+      );
+      await expect(preview.getByRole('link')).toHaveAttribute(
+        'href',
+        'http://localhost:4300/login',
+      );
+      await expect(preview.locator('body')).toContainText('Review <b>the family text</b>.');
+      await expect(preview.locator('b')).toHaveCount(0);
+      expect(
+        await preview.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+      ).toBe(true);
+      await preview.screenshot({
+        path: test.info().outputPath(`review-email-${width}.png`),
+        fullPage: true,
+      });
+    }
+  } finally {
+    await preview.close();
+  }
+});
+
 test('sends a pickup QR email whose public fallback renders the identical PNG without a login', async ({
   page,
   request,

@@ -701,6 +701,8 @@
           "wishNumber": "Wunschnummer",
           "wishDescription": "Wunschbeschreibung",
           "wishTitle": "Bearbeiteter Wunschtitel",
+          "orderFeedback": "Rückmeldung zum Wunschzettel (freiwillig)",
+          "wishFeedback": "Rückmeldung zum Wunsch (freiwillig)",
           "fairgateUrl": "Fairgate-URL",
           "startUrl": "Start-URL",
           "temporaryPassword": "Temporäres Passwort",
@@ -1031,11 +1033,13 @@
             "button": "Zur Anmeldung"
           },
           "changes_requested": {
-            "subject": "Bitte passe deinen Wunschzettel an",
-            "title": "Dein Wunschzettel wurde zurückgewiesen",
-            "body": "Dein Wunschzettel für {{year}} wurde zurückgewiesen.",
-            "nextText": "Bitte melde dich an und passe deine Wünsche an. Danach kannst du den Wunschzettel erneut speichern.",
-            "button": "Wunschzettel anpassen"
+            "subject": "Bitte prüfe deinen Wunschzettel",
+            "title": "Bitte prüfe deinen Wunschzettel",
+            "body": "Das Gärngschee-Team hat deinen Wunschzettel für {{year}} zur Prüfung zurückgegeben.",
+            "orderFeedback": "Rückmeldung zu deinem Wunschzettel",
+            "wishFeedback": "Rückmeldung zu Wunsch {{number}}",
+            "nextText": "Bitte melde dich an und prüfe die aktuellen Texte deines Wunschzettels und deiner Wünsche. Deine ursprünglichen Texte werden dir zum Vergleich angezeigt. Du kannst die aktuelle Fassung bei Bedarf ändern. Reiche deinen Wunschzettel danach erneut ein, um die dann angezeigten Texte freizugeben.",
+            "button": "Wunschzettel prüfen"
           }
         }
       },

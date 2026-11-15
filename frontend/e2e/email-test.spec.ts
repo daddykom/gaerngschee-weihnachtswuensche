@@ -3,6 +3,65 @@ import { expectTranslatedText } from './support/assertions';
 import { expect, test } from './support/test';
 
 test.describe('Admin email test route', () => {
+  test('sends general and wish feedback with a review test email', async ({ page }) => {
+    await loginAsAdmin(page);
+    let sent: unknown;
+    await page.route('http://localhost:8083/admin/email-test', async (route) => {
+      if (route.request().method() === 'GET') {
+        await route.fulfill({
+          json: {
+            templates: [
+              {
+                id: 'order-confirmation-changes_requested',
+                fields: [
+                  { key: 'year', type: 'number', required: true },
+                  { key: 'loginUrl', type: 'url', required: true },
+                  { key: 'orderFeedback', type: 'textarea', required: false },
+                  { key: 'wishNumber', type: 'text', required: false },
+                  { key: 'wishTitle', type: 'text', required: false },
+                  { key: 'wishFeedback', type: 'textarea', required: false },
+                ],
+              },
+            ],
+          },
+        });
+      } else {
+        sent = route.request().postDataJSON();
+        await route.fulfill({ json: { emailSentTo: 'review@example.com' } });
+      }
+    });
+    await page.goto('/admin/email-test');
+    await page.getByRole('textbox', { name: 'Empfänger-Adresse' }).fill('review@example.com');
+    await page.getByRole('spinbutton', { name: 'Jahr', exact: true }).fill('2026');
+    await page
+      .getByRole('textbox', { name: 'Login-URL', exact: true })
+      .fill('https://example.com/login');
+    await page
+      .getByRole('textbox', { name: /Rückmeldung zum Wunschzettel/ })
+      .fill('Please review the family text');
+    await page.getByRole('textbox', { name: 'Wunschnummer', exact: true }).fill('12-3');
+    await page
+      .getByRole('textbox', { name: 'Bearbeiteter Wunschtitel', exact: true })
+      .fill('Edited coat title');
+    await page
+      .getByRole('textbox', { name: /Rückmeldung zum Wunsch \(/ })
+      .fill('Please review the size');
+    await page.getByRole('button', { name: 'Senden', exact: true }).click();
+    await expectTranslatedText(page.getByRole('alert'), 'app.admin.emailTest.sent');
+    expect(sent).toEqual({
+      recipient: 'review@example.com',
+      template: 'order-confirmation-changes_requested',
+      parameters: {
+        year: '2026',
+        loginUrl: 'https://example.com/login',
+        orderFeedback: 'Please review the family text',
+        wishNumber: '12-3',
+        wishTitle: 'Edited coat title',
+        wishFeedback: 'Please review the size',
+      },
+    });
+  });
+
   test('requires and sends the edited wish title for a fulfiller reservation email', async ({
     page,
   }) => {

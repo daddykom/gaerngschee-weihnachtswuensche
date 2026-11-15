@@ -110,6 +110,27 @@ interface Child {
   Formularwerte. Alle Freitexte werden als Text mit Zeilenumbrüchen
   dargestellt, nicht als HTML.
 
+### E-Mail zur Prüfung der aktuellen Texte
+
+- Beim Übergang zu `changes_requested` wird die bestehende E-Mail versandt.
+  Weiteres Speichern im gleichen Status löst keinen erneuten Versand aus.
+- Die E-Mail enthält die allgemeine Rückmeldung sowie pro zurückgewiesenem
+  Wunsch mit nicht leerer Rückmeldung dessen aktuelle Bezeichnung und
+  Rückmeldung. Bereits akzeptierte Wünsche und leere Rückmeldungen werden
+  nicht aufgeführt.
+- Vorhandene Wunschnummern erscheinen als `<Zettelnummer>-<Wunschnummer>`.
+  Vor Vergabe dieser Nummern wird die Position im Wunschzettel verwendet.
+- Der Login-Link führt zur Plattform, wo Originale und aktuelle Fassungen
+  verglichen und bei Bedarf geändert werden können. Die E-Mail fordert
+  ausdrücklich zum erneuten Einreichen auf, nicht nur zum Zwischenspeichern.
+  Vollständige Original- oder aktuelle Beschreibungen werden nicht dupliziert.
+- Rückmeldungen erscheinen sicher escaped in HTML und auch im Klartext.
+  Ein fehlgeschlagener Versand wird mit dem gerenderten Inhalt einschliesslich
+  Rückmeldungen in der bestehenden Mail-Queue gespeichert.
+- Der Admin-Testversand bietet zusätzlich zu Jahr und Login-URL optionale
+  Felder für die allgemeine Rückmeldung und einen Beispielwunsch mit Nummer,
+  bearbeitetem Titel und Rückmeldung.
+
 ### Kampagnenkapazität
 
 - `maximum_orders_per_year` und `maximum_order_items_per_year` begrenzen nur

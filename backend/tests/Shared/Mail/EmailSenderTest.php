@@ -12,6 +12,97 @@ use Symfony\Component\Mime\Email;
 
 final class EmailSenderTest extends TestCase
 {
+    public function testReviewEmailContainsOnlyRelevantFeedbackAndEditedWishTitlesInBothFormats(): void
+    {
+        $sender = new EmailSender($this->createMock(MailerInterface::class), 'noreply@example.com', 'Gärngschee');
+        $message = $sender->renderOrderConfirmation([
+            'year' => 2026,
+            'loginUrl' => 'https://example.com/login',
+            'orderNumber' => 12,
+            'originalText' => 'Private original family text',
+            'currentText' => 'Full current family text',
+            'adminNotes' => "Review <b>the family text</b>.\nPlease check the details.",
+            'items' => [
+                ['publicationStatus' => 'approved', 'adminNotes' => 'Old approved feedback', 'currentTitle' => 'Approved title'],
+                [
+                    'publicationStatus' => 'rejected', 'itemNumber' => 3,
+                    'originalTitle' => 'Private original title', 'currentTitle' => 'Edited coat title',
+                    'currentDescription' => 'Full current wish description',
+                    'adminNotes' => "Review <script>the size</script>.\nPlease check the colour.",
+                ],
+                ['publicationStatus' => 'rejected', 'adminNotes' => '   ', 'currentTitle' => 'Empty feedback title'],
+                ['publicationStatus' => 'rejected', 'itemNumber' => 5, 'currentTitle' => 'Edited shoe title', 'adminNotes' => 'Check the shoe size'],
+            ],
+        ], 'changes_requested');
+
+        self::assertSame('Bitte prüfe deinen Wunschzettel', $message['subject']);
+        foreach ([$message['html'], $message['text']] as $body) {
+            foreach (['2026', '12-3', '12-5', 'Edited coat title', 'Edited shoe title', 'Please check the details.', 'Please check the colour.', 'Check the shoe size', 'https://example.com/login'] as $expected) {
+                self::assertStringContainsString($expected, $body);
+            }
+            foreach (['Old approved feedback', 'Approved title', 'Empty feedback title', 'Private original', 'Full current family text', 'Full current wish description', 'app.mail.'] as $excluded) {
+                self::assertStringNotContainsString($excluded, $body);
+            }
+        }
+        self::assertStringContainsString('Review &lt;b&gt;the family text&lt;/b&gt;.<br />', $message['html']);
+        self::assertStringContainsString('Review &lt;script&gt;the size&lt;/script&gt;.<br />', $message['html']);
+        self::assertStringNotContainsString('<script>', $message['html']);
+        self::assertStringContainsString('Review <b>the family text</b>. Please check the details.', $message['text']);
+        self::assertStringContainsString('Wunschzettel prüfen (https://example.com/login)', $message['text']);
+    }
+
+    public function testReviewEmailUsesTheWishPositionWhenNoNumbersHaveBeenAssigned(): void
+    {
+        $sender = new EmailSender($this->createMock(MailerInterface::class), 'noreply@example.com', 'Gärngschee');
+        $message = $sender->renderOrderConfirmation([
+            'year' => 2026, 'loginUrl' => 'https://example.com/login',
+            'items' => [
+                ['status' => 'approved', 'adminNotes' => 'Old feedback'],
+                ['status' => 'rejected', 'currentTitle' => 'Second wish', 'adminNotes' => 'Please review this wish'],
+            ],
+        ], 'changes_requested');
+
+        foreach ([$message['html'], $message['text']] as $body) {
+            self::assertStringContainsString('Rückmeldung zu Wunsch 2', $body);
+            self::assertStringContainsString('Second wish', $body);
+            self::assertStringNotContainsString('Old feedback', $body);
+            self::assertStringNotContainsString('Rückmeldung zu deinem Wunschzettel', $body);
+        }
+    }
+
+    public function testReviewEmailOmitsEmptyFeedbackSections(): void
+    {
+        $sender = new EmailSender($this->createMock(MailerInterface::class), 'noreply@example.com', 'Gärngschee');
+        foreach ([[], ['adminNotes' => null], ['adminNotes' => '   ', 'items' => [['publicationStatus' => 'rejected', 'adminNotes' => null]]]] as $feedback) {
+            $message = $sender->renderOrderConfirmation([
+                'year' => 2026, 'loginUrl' => 'https://example.com/login', ...$feedback,
+            ], 'changes_requested');
+            foreach ([$message['html'], $message['text']] as $body) {
+                self::assertStringNotContainsString('Rückmeldung zu', $body);
+                self::assertStringContainsString('erneut ein', $body);
+                self::assertStringContainsString('https://example.com/login', $body);
+            }
+        }
+    }
+
+    public function testReviewTestEmailIncludesTheConfiguredOrderAndWishFeedback(): void
+    {
+        $mailer = $this->createMock(MailerInterface::class);
+        $mailer->expects(self::once())->method('send')->with(self::callback(static function (Email $email): bool {
+            foreach ([$email->getHtmlBody(), $email->getTextBody()] as $body) {
+                foreach (['Test family feedback', '12-3', 'Test edited title', 'Test wish feedback'] as $expected) {
+                    self::assertStringContainsString($expected, $body);
+                }
+            }
+            return true;
+        }));
+        (new EmailSender($mailer, 'noreply@example.com', 'Gärngschee'))->sendTestEmail('test@example.com', 'order-confirmation-changes_requested', [
+            'year' => '2026', 'loginUrl' => 'https://example.com/login',
+            'orderFeedback' => 'Test family feedback', 'wishNumber' => '12-3',
+            'wishTitle' => 'Test edited title', 'wishFeedback' => 'Test wish feedback',
+        ]);
+    }
+
     public function testReservationMailUsesTheEditedTitleAndDescriptionInHtmlAndPlainText(): void
     {
         $mailer = $this->createMock(MailerInterface::class);
@@ -251,7 +342,7 @@ final class EmailSenderTest extends TestCase
         self::assertStringContainsString('http://localhost:4200/login', $message['html']);
     }
 
-    public function testRendersChangesRequestedMailWithoutAdminReason(): void
+    public function testRendersReviewMailWithoutFeedbackWithTheExistingTheme(): void
     {
         $sender = new EmailSender(
             $this->createMock(MailerInterface::class),
@@ -264,8 +355,8 @@ final class EmailSenderTest extends TestCase
             'loginUrl' => 'http://localhost:4200/login',
         ], 'changes_requested');
 
-        self::assertSame('Bitte passe deinen Wunschzettel an', $message['subject']);
-        self::assertStringContainsString('Wunschzettel wurde zurückgewiesen', $message['html']);
+        self::assertSame('Bitte prüfe deinen Wunschzettel', $message['subject']);
+        self::assertStringContainsString('zur Prüfung zurückgegeben', $message['html']);
         self::assertStringContainsString('border:1px solid #8c7b85; border-radius:20px;', $message['html']);
         self::assertStringContainsString('http://localhost:4200/login', $message['text']);
     }

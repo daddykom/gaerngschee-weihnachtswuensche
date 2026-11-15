@@ -182,6 +182,32 @@ test('returns order and wish feedback to the requester after an admin review', a
       },
     });
     expect(reviewed.status()).toBe(200);
+    expect((await reviewed.json()).mailSent).toBe(true);
+
+    let messageId: string | undefined;
+    await expect
+      .poll(async () => {
+        const messages = (await (await request.get('http://localhost:8025/api/v1/messages')).json())
+          .messages;
+        messageId = messages.find((message: { ID: string; To: Array<{ Address: string }> }) =>
+          message.To.some((to) => to.Address === email),
+        )?.ID;
+        return messageId !== undefined;
+      })
+      .toBe(true);
+    const message = await (
+      await request.get(`http://localhost:8025/api/v1/message/${messageId}`)
+    ).json();
+    for (const body of [message.HTML, message.Text]) {
+      expect(body).toContain('Please review the family text');
+      expect(body).toContain('Please review the wish text');
+      expect(body).toContain('Edited wish title');
+      expect(body).toContain('/login');
+      expect(body).not.toContain('Original wish title');
+      expect(body).not.toContain('Original wish text');
+      expect(body).not.toContain('Edited wish text');
+      expect(body).not.toContain('app.mail.');
+    }
 
     const overview = await request.get(`${apiUrl}/client/order`);
     expect(overview.status()).toBe(200);
