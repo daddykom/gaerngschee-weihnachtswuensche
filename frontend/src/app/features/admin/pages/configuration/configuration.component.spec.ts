@@ -3,6 +3,7 @@ import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { provideTranslateService } from '@ngx-translate/core';
 import { FrontendConfig } from '../../../../shared/models/frontend-config.model';
 import { FrontendConfigActions } from '../../../../store/frontend-config/frontend-config.actions';
+import { selectFrontendConfigs } from '../../../../store/frontend-config/frontend-config.feature';
 import { ConfigurationComponent } from './configuration.component';
 
 describe('ConfigurationComponent', () => {
@@ -86,6 +87,38 @@ describe('ConfigurationComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('ARRAY_CONFIG');
     expect(component.model()[configs[0].id]).toBe('120');
     expect(component.model()[configs[1].id]).toEqual(['A', 'B']);
+  });
+
+  it('renders pickup location as a textarea and accepts a free-text pickup date', async () => {
+    store.overrideSelector(selectFrontendConfigs, [
+      { ...configs[0], id: 'pickup-date', variableName: 'pickup_date', value: '', pattern: null },
+      {
+        ...configs[0],
+        id: 'pickup-location',
+        variableName: 'pickup_location',
+        value: '',
+        pattern: null,
+      },
+    ]);
+    store.refreshState();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(fixture.nativeElement.querySelector('textarea')).toBeTruthy();
+    component.model.update((model) => ({
+      ...model,
+      'pickup-date': 'Samstag, nachmittags',
+      'pickup-location': 'Saal A\nHauptstrasse 1',
+    }));
+    component.onSubmit();
+    expect(store.dispatch).toHaveBeenCalledWith(
+      FrontendConfigActions.save({
+        configs: [
+          { id: 'pickup-date', value: 'Samstag, nachmittags' },
+          { id: 'pickup-location', value: 'Saal A\nHauptstrasse 1' },
+        ],
+      }),
+    );
+    store.resetSelectors();
   });
 
   it('disables fields without update permission', () => {

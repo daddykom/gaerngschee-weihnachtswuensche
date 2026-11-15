@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Registration\Data;
 
 use App\Shared\Events\EventRepository;
+use App\Shared\Mail\EmailQueueRepository;
 use PDO;
 
 final class OrderRepository
@@ -335,6 +336,12 @@ final class OrderRepository
     {
         $this->pdo->beginTransaction();
         try {
+            $lock = $this->pdo->prepare('SELECT status, acceptance_email_sent_at FROM orders WHERE id = ?' . $this->lockSuffix());
+            $lock->execute([$order['id']]);
+            $previous = $lock->fetch();
+            if (!is_array($previous)) {
+                throw new \RuntimeException('Order was not found.');
+            }
             $statement = $this->pdo->prepare(
                 'UPDATE orders SET current_text = :current_text, admin_notes = :admin_notes,
                  adults_count = :adults_count, children_count = :children_count,
@@ -376,6 +383,12 @@ final class OrderRepository
             }
             if ($order['status'] === 'definitive') {
                 $this->assignDefinitiveNumbers((string) $order['id']);
+                if ($previous['status'] !== 'definitive' && $previous['acceptance_email_sent_at'] === null) {
+                    $recipient = $this->pdo->prepare('SELECT users.email FROM users INNER JOIN orders ON users.id = orders.user_id WHERE orders.id = ?');
+                    $recipient->execute([$order['id']]);
+                    // Persist the intent with the status change; missing configuration can be filled before a batch retry.
+                    (new EmailQueueRepository($this->pdo))->enqueue('order', $order['id'], 'order_acceptance', (string) $recipient->fetchColumn(), ['subject' => '', 'html' => '', 'text' => ''], '');
+                }
             }
             $this->pdo->commit();
         } catch (\Throwable $exception) {
@@ -412,6 +425,105 @@ final class OrderRepository
                 $update->execute(['item_number' => $index + 1, 'id' => $row['id'], 'order_id' => $orderId]);
             }
         }
+    }
+
+    /** @param callable(array): array{subject: string, html: string, text: string} $render @param callable(array): void $send */
+    public function deliverAcceptanceNotification(string $orderId, callable $render, callable $send): string
+    {
+        $this->pdo->beginTransaction();
+        try {
+            // Immediate delivery and batch retries share the same lock and sent marker.
+            $lock = $this->pdo->prepare('SELECT status, acceptance_email_sent_at FROM orders WHERE id = ?' . $this->lockSuffix());
+            $lock->execute([$orderId]);
+            $order = $lock->fetch();
+            $pending = $this->pdo->prepare("SELECT * FROM email_queue WHERE reference_type = 'order' AND reference_id = ? AND email_type = 'order_acceptance'");
+            $pending->execute([$orderId]);
+            $email = $pending->fetch();
+            $queue = new EmailQueueRepository($this->pdo);
+            if (!is_array($order) || $order['acceptance_email_sent_at'] !== null || $order['status'] !== 'definitive') {
+                if (is_array($email)) {
+                    $queue->remove($email['id']);
+                }
+                $this->pdo->commit();
+                return is_array($order) && $order['acceptance_email_sent_at'] !== null ? 'sent' : 'not_required';
+            }
+            if (!is_array($email)) {
+                $this->pdo->commit();
+                return 'not_required';
+            }
+            try {
+                if ($email['html_body'] === '') {
+                    $message = $render($this->findById($orderId));
+                    $update = $this->pdo->prepare('UPDATE email_queue SET subject = ?, html_body = ?, text_body = ? WHERE id = ?');
+                    $update->execute([$message['subject'], $message['html'], $message['text'], $email['id']]);
+                    $email = [...$email, 'subject' => $message['subject'], 'html_body' => $message['html'], 'text_body' => $message['text']];
+                }
+                $send($email);
+            } catch (\Throwable $exception) {
+                $queue->recordFailure($email['id'], $exception->getMessage());
+                $this->pdo->commit();
+                return 'pending';
+            }
+            $this->pdo->prepare('UPDATE orders SET acceptance_email_sent_at = CURRENT_TIMESTAMP WHERE id = ?')->execute([$orderId]);
+            $queue->remove($email['id']);
+            $this->pdo->commit();
+            return 'sent';
+        } catch (\Throwable $exception) {
+            $this->pdo->rollBack();
+            throw $exception;
+        }
+    }
+
+    private function lockSuffix(): string
+    {
+        return $this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'mysql' ? ' FOR UPDATE' : '';
+    }
+
+    /** @return list<array{id: string, email: string, order_number: int}> */
+    public function findAcceptanceBackfillCandidates(int $year): array
+    {
+        $statement = $this->pdo->prepare($this->acceptanceBackfillQuery() . ' ORDER BY orders.order_number, orders.id');
+        $statement->execute(['year' => $year]);
+        return $statement->fetchAll();
+    }
+
+    public function enqueueAcceptanceBackfill(string $orderId, int $year): bool
+    {
+        $this->pdo->beginTransaction();
+        try {
+            // Recheck eligibility only after acquiring the same lock as admin saves and delivery.
+            $lock = $this->pdo->prepare('SELECT id FROM orders WHERE id = ?' . $this->lockSuffix());
+            $lock->execute([$orderId]);
+            if ($lock->fetchColumn() === false) {
+                $this->pdo->commit();
+                return false;
+            }
+            $candidate = $this->pdo->prepare($this->acceptanceBackfillQuery() . ' AND orders.id = :id');
+            $candidate->execute(['year' => $year, 'id' => $orderId]);
+            $order = $candidate->fetch();
+            if (!is_array($order)) {
+                $this->pdo->commit();
+                return false;
+            }
+            (new EmailQueueRepository($this->pdo))->enqueue('order', $orderId, 'order_acceptance', $order['email'], ['subject' => '', 'html' => '', 'text' => ''], '');
+            $this->pdo->commit();
+            return true;
+        } catch (\Throwable $exception) {
+            $this->pdo->rollBack();
+            throw $exception;
+        }
+    }
+
+    private function acceptanceBackfillQuery(): string
+    {
+        return "SELECT orders.id, users.email, orders.order_number
+                FROM orders INNER JOIN users ON users.id = orders.user_id
+                WHERE orders.year = :year AND orders.status = 'definitive'
+                  AND orders.order_number > 0 AND orders.acceptance_email_sent_at IS NULL
+                  AND EXISTS (SELECT 1 FROM order_items WHERE order_id = orders.id)
+                  AND NOT EXISTS (SELECT 1 FROM order_items WHERE order_id = orders.id AND publication_status <> 'approved')
+                  AND NOT EXISTS (SELECT 1 FROM email_queue WHERE reference_type = 'order'
+                      AND reference_id = orders.id AND email_type = 'order_acceptance')";
     }
 
     /** @return array<string, mixed>|null */

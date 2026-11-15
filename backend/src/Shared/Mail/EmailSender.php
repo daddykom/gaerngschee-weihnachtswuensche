@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Shared\Mail;
 
+use App\Configuration\Data\FrontendConfigRepository;
+use App\Shared\Database\Database;
 use App\Registration\Services\AnmeldungMailVariant;
 use App\Registration\Services\PickupCodeService;
 use App\Registration\Services\QrCodeGenerator;
@@ -60,6 +62,7 @@ final class EmailSender implements EmailSenderInterface
         ?string $mailerDsn = null,
         ?Environment $twig = null,
         ?TranslatorInterface $translator = null,
+        private readonly ?FrontendConfigRepository $frontendConfig = null,
     ) {
         $configuration = $mailer === null || $fromAddress === null || $fromName === null
             ? MailConfiguration::load()
@@ -203,16 +206,30 @@ final class EmailSender implements EmailSenderInterface
     /** @return array{subject: string, html: string, text: string} */
     public function renderOrderConfirmation(array $order, string $mailStatus): array
     {
-        if (!in_array($mailStatus, ['saved', 'changes_requested'], true)) {
+        if (!in_array($mailStatus, ['saved', 'changes_requested', 'definitive'], true)) {
             throw new \InvalidArgumentException('Invalid order confirmation mail status.');
+        }
+        $pickupDetails = [];
+        if ($mailStatus === 'definitive') {
+            if ($this->translator instanceof LocaleAwareInterface) {
+                $this->translator->setLocale('de');
+            }
+            $config = $this->frontendConfig ?? new FrontendConfigRepository(Database::getConnection());
+            $date = $order['pickupDate'] ?? $config->findValueByVariableName('pickup_date');
+            $location = $order['pickupLocation'] ?? $config->findValueByVariableName('pickup_location');
+            if (!is_string($date) || trim($date) === '' || !is_string($location) || trim($location) === '') {
+                throw new \RuntimeException('Pickup date and location must be configured before sending acceptance notifications.');
+            }
+            $pickupDetails = ['PICKUP_DATE' => $date, 'PICKUP_LOCATION' => $location];
         }
         $html = $this->twig->render('order-confirmation-' . $mailStatus . '.html.twig', [
             'LOGO_CID' => 'cid:' . self::LOGO_CID,
             'ORDER' => $order,
+            ...$pickupDetails,
         ]);
         $subject = $this->translator->trans('app.mail.order.confirmation.' . $mailStatus . '.subject', [], null, 'de');
 
-        return ['subject' => $subject, 'html' => $html, 'text' => $this->plainText($html)];
+        return ['subject' => $subject, 'html' => $html, 'text' => $this->plainText($html, $mailStatus === 'definitive')];
     }
 
     public function sendStoredEmail(string $recipient, string $subject, string $html, string $text): void
@@ -220,7 +237,7 @@ final class EmailSender implements EmailSenderInterface
         $this->sendUserEmail($recipient, $subject, $html, $text);
     }
 
-    /** @param array{year: int, orderNumber: int} $order @return array{subject: string, html: string, text: string} */
+    /** @param array{year: int, orderNumber: int, pickupDate?: string, pickupLocation?: string} $order @return array{subject: string, html: string, text: string} */
     public function renderPickupNotification(array $order, string $token): array
     {
         if ($this->translator instanceof LocaleAwareInterface) {
@@ -230,8 +247,13 @@ final class EmailSender implements EmailSenderInterface
             throw new \InvalidArgumentException('Invalid pickup order data.');
         }
         $code = (new PickupCodeService())->forToken($token);
+        $config = $this->frontendConfig ?? new FrontendConfigRepository(Database::getConnection());
+        $pickupDate = $order['pickupDate'] ?? $config->findValueByVariableName('pickup_date');
+        $pickupLocation = $order['pickupLocation'] ?? $config->findValueByVariableName('pickup_location');
         $html = $this->twig->render('order-ready-for-pickup.html.twig', [
             'ORDER' => $order,
+            'PICKUP_DATE' => is_string($pickupDate) ? $pickupDate : '',
+            'PICKUP_LOCATION' => is_string($pickupLocation) ? $pickupLocation : '',
             'QR_DATA_URI' => (new QrCodeGenerator())->generateDataUri($code['pickupUrl']),
             'QR_IMAGE_URL' => $code['imageUrl'],
             'LOGO_CID' => 'cid:' . self::LOGO_CID,
@@ -240,7 +262,7 @@ final class EmailSender implements EmailSenderInterface
         return [
             'subject' => $this->translator->trans('app.mail.pickup.subject', [], null, 'de'),
             'html' => $html,
-            'text' => $this->plainText($html),
+            'text' => $this->plainText($html, true),
         ];
     }
 
@@ -262,6 +284,10 @@ final class EmailSender implements EmailSenderInterface
             'order-ready-for-pickup' => $this->renderPickupNotification([
                 'year' => (int) $parameters['year'],
                 'orderNumber' => (int) $parameters['orderNumber'],
+                ...array_filter([
+                    'pickupDate' => (string) ($parameters['pickupDate'] ?? ''),
+                    'pickupLocation' => (string) ($parameters['pickupLocation'] ?? ''),
+                ], static fn (string $value): bool => trim($value) !== ''),
             ], (new PickupCodeService())->create()['token']),
             default => $this->renderOrderTest($template, $parameters),
         };
@@ -325,6 +351,13 @@ final class EmailSender implements EmailSenderInterface
         $status = str_starts_with($template, 'order-confirmation-') ? substr($template, strlen('order-confirmation-')) : '';
         $order = $parameters;
         $order['status'] = $status;
+        if ($status === 'definitive') {
+            foreach (['pickupDate', 'pickupLocation'] as $key) {
+                if (trim((string) ($order[$key] ?? '')) === '') {
+                    unset($order[$key]);
+                }
+            }
+        }
         if ($status === 'changes_requested') {
             $order['adminNotes'] = (string) ($parameters['orderFeedback'] ?? '');
             $order['items'] = [[
@@ -406,13 +439,19 @@ final class EmailSender implements EmailSenderInterface
         throw new \RuntimeException('Shared German translation file could not be found.');
     }
 
-    private function plainText(string $html): string
+    private function plainText(string $html, bool $preserveLineBreaks = false): string
     {
         $html = (string) preg_replace_callback(
             '/<a\b[^>]*href=["\']([^"\']+)["\'][^>]*>(.*?)<\/a>/is',
             static fn (array $match): string => $match[2] . ' (' . $match[1] . ')',
             $html,
         );
+
+        if ($preserveLineBreaks) {
+            $html = (string) preg_replace('/\s+/', ' ', $html);
+            $html = (string) preg_replace('/<br\s*\/?\s*>|<\/p>/i', "\n", $html);
+            return trim(implode("\n", array_map('trim', explode("\n", html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8')))));
+        }
 
         return trim((string) preg_replace(
             '/\s+/',

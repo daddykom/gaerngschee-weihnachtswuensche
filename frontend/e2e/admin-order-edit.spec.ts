@@ -148,7 +148,7 @@ test.describe('Admin order edit route', () => {
         contentType: 'application/json',
         body: JSON.stringify({
           order: { ...orderFixture(), status: 'definitive' },
-          mailSent: false,
+          mailSent: true,
         }),
       });
     });

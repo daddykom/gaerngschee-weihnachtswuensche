@@ -128,6 +128,9 @@ final class AdminOrderUpdateAction
         if ($action === 'rejectOrder') {
             $requestedStatus = 'changes_requested';
         }
+        if ($requestedStatus === 'definitive' && $current['status'] !== 'definitive' && !$allApproved) {
+            return JsonResponse::error($response, 'ITEMS_NOT_ACCEPTED', 422);
+        }
 
         try {
             $saved = $repository->saveAdministration([
@@ -184,6 +187,14 @@ final class AdminOrderUpdateAction
         $mailStatus = null;
         $emailType = null;
         $mailSent = false;
+        if ($requestedStatus === 'definitive' && $current['status'] !== 'definitive') {
+            $emails = $this->emails ?? new EmailSender();
+            $mailSent = $repository->deliverAcceptanceNotification(
+                $orderId,
+                fn (array $emailOrder): array => $emails->renderOrderConfirmation($emailOrder, 'definitive'),
+                fn (array $email) => $emails->sendStoredEmail($email['recipient'], $email['subject'], $email['html_body'], $email['text_body']),
+            ) === 'sent';
+        }
         if ($requestedStatus === 'changes_requested' && $current['status'] !== 'changes_requested') {
             $mailStatus = 'changes_requested';
             $emailType = 'order_changes_requested';

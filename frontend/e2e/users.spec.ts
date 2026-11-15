@@ -34,12 +34,16 @@ test.describe('User administration route', () => {
     await expect(rows).toHaveCount(4);
     await groupFilter.click();
     await page.getByRole('option', { name: 'Wunschbesteller', exact: true }).click();
+    // Let the closing animation detach the panel before this select is opened again.
+    await expect(page.getByRole('listbox', { includeHidden: true })).toHaveCount(0);
     await expect(rows).toHaveCount(1);
     await expect(rows.first()).toContainText('wunschbesteller@example.com');
     await emailFilter.fill('admin');
     await expect(rows).toHaveCount(0);
     await expectTranslatedText(page.getByRole('list'), 'app.admin.users.filters.noResults');
     await emailFilter.fill('');
+    await expect(rows).toHaveCount(1);
+    await expect(rows.first()).toContainText('wunschbesteller@example.com');
     await groupFilter.click();
     await page.getByRole('option', { name: 'Alle Gruppen', exact: true }).click();
     await expect(rows).toHaveCount(4);

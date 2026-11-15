@@ -41,6 +41,63 @@ Die Auflösung dieser URL und die eigentliche Abholung werden hier nicht impleme
 
 ## QR-Code und Abhol-E-Mail
 
+### Annahmebestätigung vor dem Geschenkeingang
+
+- Beim Wechsel auf `definitive` werden alle Wünsche als angenommen bestätigt.
+  Sowohl die Freigabeaktion als auch manuelles Setzen des Status setzen dafür
+  ausschliesslich genehmigte Wünsche voraus.
+- Die Nachricht enthält Abholdatum/-zeit und den mehrzeiligen Abholort aus der
+  Konfiguration. Sie bittet darum, die Zeit zu reservieren und auf eine weitere
+  E-Mail mit dem Abhol-QR-Code nach Eingang aller Geschenke zu warten. Sie enthält
+  selbst noch keinen QR-Code.
+- Statuswechsel und Versandauftrag (`order_acceptance`) werden gemeinsam mit
+  einer Bestellsperre gespeichert. Danach wird der unmittelbare Versand versucht.
+  Fehlende Abholdaten oder Versandfehler lassen den Auftrag für den Mail-Batch
+  ausstehend. Bereits gerenderte Nachrichten werden unverändert wiederholt.
+- `acceptance_email_sent_at` wird erst nach erfolgreichem Versand gesetzt.
+  Wiederholtes Speichern, parallele Freigaben und weitere Statuswechsel erzeugen
+  für bereits bestätigte Wunschzettel keine erneute Annahmebestätigung. Ein
+  ausstehender Auftrag wird nicht mehr versandt, wenn die Bestellung nicht mehr
+  definitiv ist. Ein SMTP-Abbruch nach Annahme der Nachricht, aber vor Speicherung
+  des Versandzeitpunkts kann wie bei der QR-E-Mail zu erneuter Zustellung führen.
+- Die Migration ergänzt nur den leeren Versandzeitpunkt. Bestehende definitive
+  Wunschzettel werden weder durch die Migration noch durch blosses erneutes
+  Speichern oder den regulären Batch automatisch nachträglich angeschrieben.
+  Der explizite Nachversand erfolgt ausschliesslich über das unten beschriebene
+  manuelle Batchscript.
+- Unter `/admin/email-test` ist `order-confirmation-definitive` mit Jahr,
+  Zettelnummer und optionalen Testwerten für Abholdatum und Abholort verfügbar.
+
+### Nachversand bestehender Annahmebestätigungen
+
+- `backend/bin/backfill-order-acceptance.php --year=2026` zeigt nur die Anzahl
+  geeigneter Wunschzettel und eindeutiger Empfänger; die Vorschau schreibt nichts
+  und versendet keine E-Mails. Das Kampagnenjahr muss ausdrücklich angegeben werden.
+- Nur definitive, nummerierte Wunschzettel mit mindestens einem Wunsch und
+  ausschliesslich genehmigten Wünschen werden berücksichtigt. Bereits versandte
+  oder als `order_acceptance` vorgemerkte Bestätigungen werden übersprungen.
+- Mit `--send` prüft das Script ausgefüllte Abholdaten und legt Versandaufträge
+  für den vorhandenen Mail-Batch an. Es versendet selbst keine E-Mails und wird
+  weder beim Deployment noch durch den gemeinsamen Cron-Runner automatisch aufgerufen.
+- Jeder Auftrag wird unter derselben Bestellsperre wie Freigabe und Versand
+  erneut geprüft. Wiederholungen, parallele Script-Aufrufe und zwischenzeitliche
+  Statuswechsel erzeugen keine doppelten Aufträge. Ein abgebrochener Lauf kann
+  erneut gestartet werden. Bestehende Nachrichten und Statuswerte bleiben erhalten.
+- Betriebsanleitung: `documents/acceptance-email-backfill.md`.
+
+### Abhol-E-Mail
+
+- `pickup_date` und `pickup_location` werden in der Admin-Konfiguration als
+  Strings gepflegt. Das Abholdatum ist Freitext ohne Datums-/Formatvalidierung;
+  der Abholort wird als mehrzeilige Textarea bearbeitet. Beide Einträge starten
+  leer und müssen vor dem produktiven Versand durch den Betreiber befüllt werden.
+- Die Abhol-E-Mail übernimmt beide Werte beim Erstellen der Nachricht aus der
+  Konfiguration. Beim Admin-Testversand können die optionalen Parameter
+  `pickupDate` (Text) und `pickupLocation` (Textarea) diese Werte nur für die
+  Testnachricht überschreiben; leere Testfelder verwenden die Konfiguration.
+  HTML maskiert eingegebenes Markup;
+  Zeilenumbrüche bleiben in HTML und Klartext erhalten. Queue-Wiederholungen
+  versenden den bereits gespeicherten Nachrichteninhalt unverändert.
 - Lokal erzeugtes PNG mit `endroid/qr-code` 6.1, hoher Fehlerkorrektur und
   weissem Hintergrund. Tokens werden zufällig mit 256 Bit erzeugt.
 - Die Nachricht enthält das eingebettete Bild und einen sichtbaren Link

@@ -192,19 +192,66 @@ final class AdminOrderUpdateActionTest extends TestCase
         self::assertSame('Wish feedback', $emailOrder['items'][0]['adminNotes']);
     }
 
-    public function testDoesNotSendEmailWhenOrderBecomesDefinitive(): void
+    public function testSendsAcceptanceForBothReleaseAndManualStatusChangeOnlyOnce(): void
+    {
+        foreach (['release', 'save'] as $actionName) {
+            [$pdo, $order] = $this->orderWithItems('released');
+            $emails = new RecordingEmailSender();
+            $action = new AdminOrderUpdateAction(new OrderRepository($pdo), $emails);
+
+            $payload = [
+                'order' => $this->orderPayload($order, 'definitive'),
+                'items' => [$this->itemPayload($order['items'][0], 'approved')],
+                'action' => $actionName,
+            ];
+            $response = ($action)($this->request($order['id'], $payload), new Response(), ['orderId' => $order['id']]);
+            self::assertSame(200, $response->getStatusCode());
+            self::assertTrue(json_decode((string) $response->getBody(), true)['mailSent']);
+            self::assertCount(1, $emails->orderConfirmations);
+            $emailOrder = json_decode($emails->orderConfirmations[0]['order']['html'], true);
+            self::assertSame('definitive', $emailOrder['renderedMailStatus']);
+            self::assertGreaterThan(0, $emailOrder['orderNumber']);
+            self::assertNotNull($pdo->query('SELECT acceptance_email_sent_at FROM orders')->fetchColumn());
+            self::assertSame([], (new EmailQueueRepository($pdo))->pending());
+
+            $again = ($action)($this->request($order['id'], $payload), new Response(), ['orderId' => $order['id']]);
+            self::assertFalse(json_decode((string) $again->getBody(), true)['mailSent']);
+            self::assertCount(1, $emails->orderConfirmations);
+        }
+    }
+
+    public function testRejectsManualDefinitiveStatusWhenWishesAreNotApproved(): void
+    {
+        [$pdo, $order] = $this->orderWithItems('released');
+        $action = new AdminOrderUpdateAction(new OrderRepository($pdo), new RecordingEmailSender());
+        $response = ($action)($this->request($order['id'], [
+            'order' => $this->orderPayload($order, 'definitive'),
+            'items' => [$this->itemPayload($order['items'][0], 'submitted')],
+            'action' => 'save',
+        ]), new Response(), ['orderId' => $order['id']]);
+        self::assertSame(422, $response->getStatusCode());
+        self::assertSame('ITEMS_NOT_ACCEPTED', $this->errorCode($response));
+        self::assertSame([], (new EmailQueueRepository($pdo))->pending());
+    }
+
+    public function testKeepsAcceptanceQueuedWhenImmediateDeliveryFails(): void
     {
         [$pdo, $order] = $this->orderWithItems('released');
         $emails = new RecordingEmailSender();
+        $emails->failStoredEmail = true;
         $action = new AdminOrderUpdateAction(new OrderRepository($pdo), $emails);
-
-        ($action)($this->request($order['id'], [
+        $response = ($action)($this->request($order['id'], [
             'order' => $this->orderPayload($order, 'definitive'),
             'items' => [$this->itemPayload($order['items'][0], 'approved')],
-            'action' => 'release',
         ]), new Response(), ['orderId' => $order['id']]);
-
-        self::assertCount(0, $emails->orderConfirmations);
+        self::assertSame(200, $response->getStatusCode());
+        self::assertFalse(json_decode((string) $response->getBody(), true)['mailSent']);
+        self::assertSame('definitive', (new OrderRepository($pdo))->findById($order['id'])['status']);
+        self::assertNull($pdo->query('SELECT acceptance_email_sent_at FROM orders')->fetchColumn());
+        $pending = (new EmailQueueRepository($pdo))->pending();
+        self::assertCount(1, $pending);
+        self::assertSame('order_acceptance', $pending[0]['email_type']);
+        self::assertSame('definitive', json_decode($pending[0]['html_body'], true)['renderedMailStatus']);
     }
 
     public function testAllowsEveryOrderStatusFromTheAdminEditor(): void
@@ -215,7 +262,7 @@ final class AdminOrderUpdateActionTest extends TestCase
 
             $response = ($action)($this->request($order['id'], [
                 'order' => $this->orderPayload($order, $status),
-                'items' => [$this->itemPayload($order['items'][0], 'submitted')],
+                'items' => [$this->itemPayload($order['items'][0], $status === 'definitive' ? 'approved' : 'submitted')],
                 'action' => 'save',
             ]), new Response(), ['orderId' => $order['id']]);
 
