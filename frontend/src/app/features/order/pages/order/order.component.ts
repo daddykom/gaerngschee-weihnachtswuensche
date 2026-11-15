@@ -130,6 +130,7 @@ export class OrderComponent {
   });
 
   constructor() {
+    this.store.dispatch(OrderActions.pageEntered());
     let initialized = false;
     let previousForm: OrderFormValue | null = null;
     effect(() => {

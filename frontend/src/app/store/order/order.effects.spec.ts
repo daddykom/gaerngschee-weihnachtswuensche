@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { Action } from '@ngrx/store';
+import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { firstValueFrom, of, Subject } from 'rxjs';
 import {
   OrderFormValue,
@@ -17,6 +18,8 @@ import {
   orderSaveSuccessNotificationEffect,
   saveOrderEffect,
 } from './order.effects';
+import { orderFeature, selectOrderState } from './order.feature';
+import { initialState } from './order.state';
 
 describe('order save effects', () => {
   let actions$: Subject<Action>;
@@ -94,6 +97,13 @@ describe('order save effects', () => {
 describe('order status notifications', () => {
   let actions$: Subject<Action>;
 
+  const enterPage = (data: OrderOverviewResponse): void => {
+    TestBed.inject(MockStore).setState({
+      order: orderFeature.reducer(initialState, OrderActions.loadSuccess({ overview: data })),
+    });
+    actions$.next(OrderActions.pageEntered());
+  };
+
   const overview = (
     status: OrderStatus | null,
     adminNotes: string | null = null,
@@ -128,7 +138,12 @@ describe('order status notifications', () => {
 
   beforeEach(() => {
     actions$ = new Subject<Action>();
-    TestBed.configureTestingModule({ providers: [provideMockActions(() => actions$)] });
+    TestBed.configureTestingModule({
+      providers: [
+        provideMockActions(() => actions$),
+        provideMockStore({ initialState: { order: initialState } }),
+      ],
+    });
   });
 
   it.each(['changes_requested', 'draft'] as const)(
@@ -138,7 +153,7 @@ describe('order status notifications', () => {
       const notification = firstValueFrom(
         TestBed.runInInjectionContext(() => orderFairgateNotificationEffect()),
       );
-      actions$.next(OrderActions.loadSuccess({ overview: overview(status, feedback) }));
+      enterPage(overview(status, feedback));
 
       await expect(notification).resolves.toEqual({
         type: '[Notification] Show',
@@ -157,9 +172,7 @@ describe('order status notifications', () => {
       const notification = firstValueFrom(
         TestBed.runInInjectionContext(() => orderFairgateNotificationEffect()),
       );
-      actions$.next(
-        OrderActions.loadSuccess({ overview: overview('changes_requested', feedback) }),
-      );
+      enterPage(overview('changes_requested', feedback));
 
       await expect(notification).resolves.toMatchObject({
         variant: 'warning',
@@ -174,7 +187,7 @@ describe('order status notifications', () => {
       const notification = firstValueFrom(
         TestBed.runInInjectionContext(() => orderFairgateNotificationEffect()),
       );
-      actions$.next(OrderActions.loadSuccess({ overview: overview(status, 'Previous feedback') }));
+      enterPage(overview(status, 'Previous feedback'));
 
       await expect(notification).resolves.toEqual({
         type: '[Notification] Show',
@@ -192,7 +205,7 @@ describe('order status notifications', () => {
       const notification = firstValueFrom(
         TestBed.runInInjectionContext(() => orderFairgateNotificationEffect()),
       );
-      actions$.next(OrderActions.loadSuccess({ overview: overview(status) }));
+      enterPage(overview(status));
 
       await expect(notification).resolves.toMatchObject({
         variant: 'info',
@@ -200,4 +213,45 @@ describe('order status notifications', () => {
       });
     },
   );
+
+  it.each(['initial', 'loading', 'error'] as const)(
+    'does not overwrite notifications while order data is %s',
+    (status) => {
+      TestBed.inject(MockStore).setState({ order: { ...initialState, status } });
+      const notification = vi.fn();
+      const subscription = TestBed.runInInjectionContext(() =>
+        orderFairgateNotificationEffect(),
+      ).subscribe(notification);
+      actions$.next(OrderActions.pageEntered());
+
+      expect(notification).not.toHaveBeenCalled();
+      subscription.unsubscribe();
+    },
+  );
+
+  it('restores the feedback when the page is entered again without resetting unsaved form values', () => {
+    const store = TestBed.inject(MockStore);
+    const notification = vi.fn();
+    const subscription = TestBed.runInInjectionContext(() =>
+      orderFairgateNotificationEffect(),
+    ).subscribe(notification);
+    enterPage(overview('changes_requested', 'Please review the family text'));
+    const state = store.selectSignal(selectOrderState)();
+    const changed = orderFeature.reducer(
+      state,
+      OrderActions.formChanged({ changes: { text: 'Unsaved requester text' } }),
+    );
+    store.setState({ order: changed });
+    actions$.next(OrderActions.pageEntered());
+
+    expect(notification).toHaveBeenCalledTimes(2);
+    expect(notification).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        messageKey: 'app.order.status.changes_requested.messageWithFeedback',
+        params: { feedback: 'Please review the family text' },
+      }),
+    );
+    expect(store.selectSignal(selectOrderState)().form.text).toBe('Unsaved requester text');
+    subscription.unsubscribe();
+  });
 });

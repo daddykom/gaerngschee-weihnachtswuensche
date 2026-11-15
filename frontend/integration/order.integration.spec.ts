@@ -235,10 +235,16 @@ test('returns order and wish feedback to the requester after an admin review', a
     const requesterContext = await browser.newContext({ baseURL });
     try {
       const requesterPage = await requesterContext.newPage();
+      let overviewLoads = 0;
+      requesterPage.on('request', (request) => {
+        if (request.method() === 'GET' && request.url().endsWith('/client/order'))
+          overviewLoads += 1;
+      });
       await requesterPage.goto(
         `/client-login?token=${encodeURIComponent(issueRegistrationToken(email))}`,
       );
       await requesterPage.waitForURL('**/bestellung');
+      await expect(requesterPage.getByRole('columnheader')).toHaveCount(5);
       const original = requesterPage.locator('[aria-labelledby="original-order-text-heading"]');
       await expectTranslatedText(
         original.getByRole('heading'),
@@ -282,6 +288,15 @@ test('returns order and wish feedback to the requester after an admin review', a
       await editedDescription.fill('Requester-approved wish text');
       await expect(originalTitle).toHaveText('Original wish title');
       await expect(originalDescription).toHaveText('Original wish text');
+      await requesterPage.getByRole('button', { name: 'Zurück', exact: true }).click();
+      await requesterPage.waitForURL('**/bestellung');
+      await expect(requesterPage.locator('.app-notification')).toContainText(
+        'Please review the family text',
+      );
+      await expect(
+        requesterPage.getByRole('textbox', { name: 'Aktuelle Fassung deines Textes' }),
+      ).toHaveValue('Requester-approved family text');
+      expect(overviewLoads).toBe(1);
     } finally {
       await requesterContext.close();
     }

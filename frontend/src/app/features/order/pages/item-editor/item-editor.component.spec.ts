@@ -119,6 +119,10 @@ describe('ItemEditorComponent', () => {
 
   afterEach(() => store.resetSelectors());
 
+  it('does not duplicate the page shell heading', () => {
+    expect(fixture.nativeElement.querySelector('h1')).toBeNull();
+  });
+
   it('shows original title and description as text alongside the editable versions', () => {
     const originalTitle = fixture.nativeElement.querySelector(
       '[aria-labelledby="original-wish-title-heading"]',

@@ -194,6 +194,52 @@ test.describe('Bestellung route', () => {
     ]);
   });
 
+  test('restores order feedback after returning from the wish editor without reloading or losing edits', async ({
+    page,
+  }) => {
+    let overviewLoads = 0;
+    const feedback = 'Please review the family text';
+    await mockClientLogin(page, {
+      order: {
+        ...orderWithItems('changes_requested', [
+          {
+            ...orderItem('item-1', 'gift', 'Winter coat', 'Private team message'),
+            status: 'rejected',
+            adminNotes: 'Please review the wish',
+          },
+        ]),
+        adminNotes: feedback,
+      },
+      onLoad: () => {
+        overviewLoads += 1;
+      },
+    });
+    await expect(page.locator('.app-notification')).toContainText(feedback);
+    await expect(page.getByRole('columnheader')).toHaveCount(5);
+    await expect(page.getByRole('columnheader', { name: /Persönliche Nachricht/ })).toHaveCount(0);
+    await expect(page.locator('table')).not.toContainText('Private team message');
+    await page
+      .getByRole('textbox', { name: 'Aktuelle Fassung deines Textes' })
+      .fill('Unsaved family text');
+
+    await page.getByRole('button', { name: 'Ändern', exact: true }).click();
+    await page.waitForURL('**/bestellung/wunsch/item-1');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
+    await expect(
+      page.getByRole('textbox', { name: /Persönliche Nachricht an das Gärngschee-Team/ }),
+    ).toHaveValue('Private team message');
+    await page.getByRole('textbox', { name: 'Aktueller Wunschtitel' }).fill('Unsaved wish title');
+    await page.getByRole('button', { name: 'Zurück', exact: true }).click();
+    await page.waitForURL('**/bestellung');
+
+    await expect(page.locator('.app-notification')).toContainText(feedback);
+    await expect(page.getByRole('textbox', { name: 'Aktuelle Fassung deines Textes' })).toHaveValue(
+      'Unsaved family text',
+    );
+    await expect(page.locator('tbody')).toContainText('Unsaved wish title');
+    expect(overviewLoads).toBe(1);
+  });
+
   test('cancels and confirms deletion of an item', async ({ page }) => {
     await mockClientLogin(page, {
       order: orderWithItems('draft', [
@@ -219,6 +265,7 @@ test.describe('Bestellung route', () => {
 
     await page.getByRole('button', { name: 'Wunsch hinzufügen' }).click();
     await page.waitForURL('**/bestellung/wunsch/neu');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
     await page.getByRole('button', { name: 'Weiter' }).click();
 
     await expect(page).toHaveURL(/\/bestellung\/wunsch\/neu$/);
@@ -415,6 +462,7 @@ test.describe('Bestellung route', () => {
 
 interface OrderTestOptions {
   order: Record<string, unknown> | null;
+  onLoad?: () => void;
   onSave?: (route: import('@playwright/test').Route) => Promise<void>;
 }
 
@@ -441,6 +489,7 @@ async function mockClientLogin(page: Page, options: OrderTestOptions): Promise<v
   });
   await page.route('http://localhost:8083/client/order', async (route) => {
     if (route.request().method() === 'GET') {
+      options.onLoad?.();
       await route.fulfill({
         status: 200,
         contentType: 'application/json',

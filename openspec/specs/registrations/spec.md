@@ -91,6 +91,12 @@ interface Child {
   beim erneuten Laden weiterhin. Nach erneutem Einreichen sowie in
   späteren Statuswerten wird keine alte Rückmeldung als aktueller
   Prüfauftrag angezeigt.
+- Beim Betreten von `/bestellung`, auch nach Rückkehr aus der Wunschbearbeitung,
+  wird der Hinweis aus dem geladenen Store wiederhergestellt. Dazu werden weder
+  Daten erneut geladen noch ungespeicherte Formularänderungen zurückgesetzt.
+  Bei fehlgeschlagenem initialem Laden bleibt die Fehlermeldung bestehen.
+- Die Wunschübersicht zeigt keine Spalte für die persönliche Nachricht.
+  Die Nachricht bleibt im Wunschformular erhalten.
 
 ### Rückmeldung und Textprüfung beim einzelnen Wunsch
 
@@ -98,6 +104,8 @@ interface Child {
   Originalbeschreibung eines gespeicherten Wunsches schreibgeschützt
   getrennt von den bearbeitbaren aktuellen Fassungen angezeigt.
   Ungespeicherte Wünsche zeigen keine leeren Originalbereiche.
+- Die Seitenüberschrift wird ausschliesslich durch die Page Shell angezeigt,
+  nicht zusätzlich im Wunsch-Editor.
 - Wunschbezogene Rückmeldungen werden sowohl beim betreffenden Wunsch
   in der Übersicht als auch in seiner Bearbeitung angezeigt. Sie sind
   keine Formularvalidierungsfehler und benötigen kein berührtes Feld.

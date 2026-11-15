@@ -75,6 +75,7 @@ export const orderFeature = createFeature({
 export const {
   name: orderFeatureName,
   reducer: orderReducer,
+  selectOrderState,
   selectStatus: selectOrderStatus,
   selectOrder,
   selectYear: selectOrderYear,

@@ -141,7 +141,6 @@
               <th scope="col">{{ 'app.order.items.person' | translate }}</th>
               <th scope="col">{{ 'app.order.items.wishTitle' | translate }}</th>
               <th scope="col">{{ 'app.order.items.category' | translate }}</th>
-              <th scope="col">{{ 'app.order.items.personalMessage' | translate }}</th>
               <th scope="col">{{ 'app.order.items.status' | translate }}</th>
               <th scope="col">{{ 'app.order.items.actions' | translate }}</th>
             </tr>
@@ -176,7 +175,6 @@
                   </div>
                 </td>
                 <td>{{ 'app.order.items.categories.' + item.category | translate }}</td>
-                <td>{{ item.personalMessage }}</td>
                 <td>{{ 'app.order.items.statuses.' + itemStatus(item.id) | translate }}</td>
                 <td>
                   @if (canEdit()) {
@@ -204,7 +202,7 @@
               </tr>
             } @empty {
               <tr>
-                <td colspan="6">{{ 'app.order.items.empty' | translate }}</td>
+                <td colspan="5">{{ 'app.order.items.empty' | translate }}</td>
               </tr>
             }
           </tbody>

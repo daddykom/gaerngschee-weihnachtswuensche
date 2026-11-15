@@ -64,6 +64,11 @@ test.describe('Existing wish editor route', () => {
       await page.waitForURL('**/bestellung');
       await page.getByRole('button', { name: 'Ändern' }).click();
       await page.waitForURL('**/bestellung/wunsch/item-1');
+      await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
+      await expectTranslatedText(
+        page.getByRole('heading', { level: 1 }),
+        'app.order.itemEditor.editTitle',
+      );
 
       const title = page.locator('[aria-labelledby="original-wish-title-heading"]');
       const description = page.locator('[aria-labelledby="original-wish-description-heading"]');

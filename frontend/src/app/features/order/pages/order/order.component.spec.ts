@@ -74,6 +74,32 @@ describe('OrderComponent', () => {
     store.resetSelectors();
   });
 
+  it('announces page entry without reloading the order', () => {
+    const dispatch = vi.spyOn(store, 'dispatch');
+    const returnedFixture = TestBed.createComponent(OrderComponent);
+
+    expect(dispatch).toHaveBeenCalledWith(OrderActions.pageEntered());
+    expect(dispatch).not.toHaveBeenCalledWith(OrderActions.load());
+    returnedFixture.destroy();
+  });
+
+  it('does not show a personal message column or its content in the wish table', () => {
+    store.overrideSelector(selectOrderForm, {
+      ...component.storeForm(),
+      items: component.storeForm().items.map((item) => ({
+        ...item,
+        personalMessage: 'Private team message',
+      })),
+    });
+    store.refreshState();
+    fixture.detectChanges();
+    const table = fixture.nativeElement.querySelector('table') as HTMLTableElement;
+
+    expect(table.querySelectorAll('th')).toHaveLength(5);
+    expect(table.textContent).not.toContain('app.order.items.personalMessage');
+    expect(table.textContent).not.toContain('Private team message');
+  });
+
   it('shows wish feedback next to the corresponding wish title as text', () => {
     store.overrideSelector(selectOrder, {
       ...component.order()!,
