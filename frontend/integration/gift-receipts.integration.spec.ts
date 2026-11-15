@@ -84,7 +84,7 @@ test('looks up gifts for both staff roles, safely receives parallel gifts and re
       });
       expect(updated.status()).toBe(200);
     }
-    const approved = await page.request.patch(`${API_URL}/admin/orders/${draft.id}`, {
+    const approval = {
       headers,
       data: {
         action: 'save',
@@ -94,9 +94,40 @@ test('looks up gifts for both staff roles, safely receives parallel gifts and re
           publicationStatus: 'approved',
         })),
       },
-    });
-    expect(approved.status()).toBe(200);
+    };
+    const approvals = await Promise.all(
+      [0, 1].map(() => page.request.patch(`${API_URL}/admin/orders/${draft.id}`, approval)),
+    );
+    for (const response of approvals) expect(response.status()).toBe(200);
+    const approved = approvals[0];
     const order = (await approved.json()).order;
+    await expect
+      .poll(async () => {
+        const messages = (
+          await (await page.request.get('http://localhost:8025/api/v1/messages')).json()
+        ).messages;
+        const matching = messages.filter((message: { To: Array<{ Address: string }> }) =>
+          message.To.some((to) => to.Address === order.requesterEmail),
+        );
+        const details = await Promise.all(
+          matching.map(async (message: { ID: string }) =>
+            (await page.request.get(`http://localhost:8025/api/v1/message/${message.ID}`)).json(),
+          ),
+        );
+        const acceptances = details.filter(
+          (detail) => detail.Subject === 'Alle deine Weihnachtswünsche wurden angenommen',
+        );
+        for (const acceptance of acceptances) {
+          for (const body of [acceptance.HTML, acceptance.Text]) {
+            expect(body).toContain('Samstag, 14–17 Uhr');
+            expect(body).toContain('Hauptstrasse 1');
+            expect(body).not.toContain('app.mail.');
+            expect(body).not.toContain('id="pickup-qr-code"');
+          }
+        }
+        return acceptances.length;
+      })
+      .toBe(1);
     const selectedItem = order.items[0];
     const number = `${order.orderNumber}-${selectedItem.itemNumber}`;
     const lookup = await page.request.get(`${API_URL}/user/gift-receipts/${number}`);

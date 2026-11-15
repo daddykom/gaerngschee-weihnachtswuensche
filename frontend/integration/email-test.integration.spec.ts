@@ -3,46 +3,55 @@ import { expectTranslatedText } from '../e2e/support/assertions';
 import { loginAsAdmin } from './support/admin-login';
 import { authHeaders } from './support/auth-header';
 
-test('sends pickup test overrides without changing configured pickup details', async ({
-  page,
-  request,
-}) => {
-  await loginAsAdmin(page);
-  const before = await (await page.request.get('http://localhost:8082/admin/configuration')).json();
-  const recipient = `pickup-overrides-${Date.now()}@example.com`;
-  await page.goto('/admin/email-test');
-  await page.getByRole('combobox', { name: 'E-Mail', exact: true }).click();
-  await page.getByRole('option').filter({ hasText: 'Abholbenachrichtigung' }).click();
-  await page.getByRole('textbox', { name: 'Empfänger-Adresse' }).fill(recipient);
-  await page.getByRole('spinbutton', { name: 'Jahr', exact: true }).fill('2026');
-  await page.getByRole('spinbutton', { name: 'Zettelnummer', exact: true }).fill('12');
-  await page
-    .getByRole('textbox', { name: /Abholdatum und Zeit/ })
-    .fill('Testtermin ohne Datumsformat');
-  const location = page.getByRole('textbox', { name: /Abholort/ });
-  expect(await location.evaluate((element) => element.tagName)).toBe('TEXTAREA');
-  await location.fill('Test <Saal>\nTeststrasse 2');
-  await page.getByRole('button', { name: 'Senden', exact: true }).click();
-  await expectTranslatedText(page.getByRole('alert'), 'app.admin.emailTest.sent');
-  let messageId: string | undefined;
-  await expect
-    .poll(async () => {
-      const data = await (await request.get('http://localhost:8025/api/v1/messages')).json();
-      messageId = data.messages.find((message: { ID: string; To: Array<{ Address: string }> }) =>
-        message.To.some((to) => to.Address === recipient),
-      )?.ID;
-      return messageId !== undefined;
-    })
-    .toBe(true);
-  const message = await (
-    await request.get(`http://localhost:8025/api/v1/message/${messageId}`)
-  ).json();
-  expect(message.HTML).toContain('Testtermin ohne Datumsformat');
-  expect(message.HTML).toContain('Test &lt;Saal&gt;<br />');
-  expect(message.Text.replace(/\r\n/g, '\n')).toContain('Test <Saal>\nTeststrasse 2');
-  const after = await (await page.request.get('http://localhost:8082/admin/configuration')).json();
-  expect(after).toEqual(before);
-});
+for (const template of [
+  { id: 'order-ready-for-pickup', name: 'Abholbenachrichtigung' },
+  { id: 'order-confirmation-definitive', name: 'Annahmebestätigung' },
+]) {
+  test(`sends ${template.id} test overrides without changing configured pickup details`, async ({
+    page,
+    request,
+  }) => {
+    await loginAsAdmin(page);
+    const before = await (
+      await page.request.get('http://localhost:8082/admin/configuration')
+    ).json();
+    const recipient = `pickup-overrides-${Date.now()}@example.com`;
+    await page.goto('/admin/email-test');
+    await page.getByRole('combobox', { name: 'E-Mail', exact: true }).click();
+    await page.getByRole('option').filter({ hasText: template.name }).click();
+    await page.getByRole('textbox', { name: 'Empfänger-Adresse' }).fill(recipient);
+    await page.getByRole('spinbutton', { name: 'Jahr', exact: true }).fill('2026');
+    await page.getByRole('spinbutton', { name: 'Zettelnummer', exact: true }).fill('12');
+    await page
+      .getByRole('textbox', { name: /Abholdatum und Zeit/ })
+      .fill('Testtermin ohne Datumsformat');
+    const location = page.getByRole('textbox', { name: /Abholort/ });
+    expect(await location.evaluate((element) => element.tagName)).toBe('TEXTAREA');
+    await location.fill('Test <Saal>\nTeststrasse 2');
+    await page.getByRole('button', { name: 'Senden', exact: true }).click();
+    await expectTranslatedText(page.getByRole('alert'), 'app.admin.emailTest.sent');
+    let messageId: string | undefined;
+    await expect
+      .poll(async () => {
+        const data = await (await request.get('http://localhost:8025/api/v1/messages')).json();
+        messageId = data.messages.find((message: { ID: string; To: Array<{ Address: string }> }) =>
+          message.To.some((to) => to.Address === recipient),
+        )?.ID;
+        return messageId !== undefined;
+      })
+      .toBe(true);
+    const message = await (
+      await request.get(`http://localhost:8025/api/v1/message/${messageId}`)
+    ).json();
+    expect(message.HTML).toContain('Testtermin ohne Datumsformat');
+    expect(message.HTML).toContain('Test &lt;Saal&gt;<br />');
+    expect(message.Text.replace(/\r\n/g, '\n')).toContain('Test <Saal>\nTeststrasse 2');
+    const after = await (
+      await page.request.get('http://localhost:8082/admin/configuration')
+    ).json();
+    expect(after).toEqual(before);
+  });
+}
 
 test('sends and previews a review email with general and wish feedback', async ({
   page,

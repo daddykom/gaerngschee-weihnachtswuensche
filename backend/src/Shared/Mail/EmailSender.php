@@ -206,16 +206,30 @@ final class EmailSender implements EmailSenderInterface
     /** @return array{subject: string, html: string, text: string} */
     public function renderOrderConfirmation(array $order, string $mailStatus): array
     {
-        if (!in_array($mailStatus, ['saved', 'changes_requested'], true)) {
+        if (!in_array($mailStatus, ['saved', 'changes_requested', 'definitive'], true)) {
             throw new \InvalidArgumentException('Invalid order confirmation mail status.');
+        }
+        $pickupDetails = [];
+        if ($mailStatus === 'definitive') {
+            if ($this->translator instanceof LocaleAwareInterface) {
+                $this->translator->setLocale('de');
+            }
+            $config = $this->frontendConfig ?? new FrontendConfigRepository(Database::getConnection());
+            $date = $order['pickupDate'] ?? $config->findValueByVariableName('pickup_date');
+            $location = $order['pickupLocation'] ?? $config->findValueByVariableName('pickup_location');
+            if (!is_string($date) || trim($date) === '' || !is_string($location) || trim($location) === '') {
+                throw new \RuntimeException('Pickup date and location must be configured before sending acceptance notifications.');
+            }
+            $pickupDetails = ['PICKUP_DATE' => $date, 'PICKUP_LOCATION' => $location];
         }
         $html = $this->twig->render('order-confirmation-' . $mailStatus . '.html.twig', [
             'LOGO_CID' => 'cid:' . self::LOGO_CID,
             'ORDER' => $order,
+            ...$pickupDetails,
         ]);
         $subject = $this->translator->trans('app.mail.order.confirmation.' . $mailStatus . '.subject', [], null, 'de');
 
-        return ['subject' => $subject, 'html' => $html, 'text' => $this->plainText($html)];
+        return ['subject' => $subject, 'html' => $html, 'text' => $this->plainText($html, $mailStatus === 'definitive')];
     }
 
     public function sendStoredEmail(string $recipient, string $subject, string $html, string $text): void
@@ -337,6 +351,13 @@ final class EmailSender implements EmailSenderInterface
         $status = str_starts_with($template, 'order-confirmation-') ? substr($template, strlen('order-confirmation-')) : '';
         $order = $parameters;
         $order['status'] = $status;
+        if ($status === 'definitive') {
+            foreach (['pickupDate', 'pickupLocation'] as $key) {
+                if (trim((string) ($order[$key] ?? '')) === '') {
+                    unset($order[$key]);
+                }
+            }
+        }
         if ($status === 'changes_requested') {
             $order['adminNotes'] = (string) ($parameters['orderFeedback'] ?? '');
             $order['items'] = [[

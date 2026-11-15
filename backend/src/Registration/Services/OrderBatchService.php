@@ -51,6 +51,17 @@ final class OrderBatchService
 
         foreach ($this->queue->pending() as $email) {
             try {
+                if ($email['email_type'] === 'order_acceptance') {
+                    $status = $this->orders->deliverAcceptanceNotification(
+                        $email['reference_id'],
+                        fn (array $order): array => $this->emails->renderOrderConfirmation($order, 'definitive'),
+                        fn (array $pending) => $this->emails->sendStoredEmail($pending['recipient'], $pending['subject'], $pending['html_body'], $pending['text_body']),
+                    );
+                    if ($status !== 'not_required') {
+                        $result[$status === 'pending' ? 'failed' : 'sent']++;
+                    }
+                    continue;
+                }
                 if ($email['email_type'] === 'pickup_notification') {
                     $status = ($this->giftReceipts ?? new GiftReceiptRepository(Database::getConnection()))->deliverPickupNotification($email['reference_id'], fn (array $pending) => $this->emails->sendStoredEmail($pending['recipient'], $pending['subject'], $pending['html_body'], $pending['text_body']));
                     $result[$status === 'pending' ? 'failed' : 'sent']++;

@@ -52,6 +52,12 @@ final class EmailTestAction
             ['key' => 'year', 'type' => 'number', 'required' => true],
             ['key' => 'loginUrl', 'type' => 'url', 'required' => true],
         ]],
+        'order-confirmation-definitive' => ['fields' => [
+            ['key' => 'year', 'type' => 'number', 'required' => true],
+            ['key' => 'orderNumber', 'type' => 'number', 'required' => true],
+            ['key' => 'pickupDate', 'type' => 'text', 'required' => false],
+            ['key' => 'pickupLocation', 'type' => 'textarea', 'required' => false],
+        ]],
         'order-confirmation-changes_requested' => ['fields' => [
             ['key' => 'year', 'type' => 'number', 'required' => true],
             ['key' => 'loginUrl', 'type' => 'url', 'required' => true],
@@ -110,7 +116,7 @@ final class EmailTestAction
     /** @param array<string, mixed> $parameters */
     private function validateParameters(string $template, array $parameters): void
     {
-        if ($template === 'order-ready-for-pickup') {
+        if (in_array($template, ['order-ready-for-pickup', 'order-confirmation-definitive'], true)) {
             foreach (['year', 'orderNumber'] as $key) {
                 $value = $parameters[$key] ?? null;
                 if ((!is_string($value) && !is_int($value))

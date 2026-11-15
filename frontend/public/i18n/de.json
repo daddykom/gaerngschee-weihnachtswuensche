@@ -693,6 +693,7 @@
           "password-reset": "Passwort zurücksetzen",
           "order-ready-for-pickup": "Abholbenachrichtigung mit QR-Code",
           "order-confirmation-saved": "Bestellbestätigung: Gespeichert",
+          "order-confirmation-definitive": "Annahmebestätigung: Alle Wünsche angenommen",
           "order-confirmation-changes_requested": "Bestellbestätigung: Änderungen verlangt"
         },
         "parameters": {
@@ -1029,6 +1030,13 @@
       },
       "order": {
         "confirmation": {
+          "definitive": {
+            "subject": "Alle deine Weihnachtswünsche wurden angenommen",
+            "title": "Deine Wünsche wurden angenommen",
+            "body": "Alle Wünsche deines Wunschzettels {{number}} für die Weihnachtsaktion {{year}} wurden angenommen.",
+            "reserveTime": "Reserviere dir bereits jetzt die Zeit für die Abholung:",
+            "nextText": "Sobald alle Geschenke deines Wunschzettels bei uns eingetroffen sind, erhältst du eine weitere E-Mail mit deinem persönlichen Abhol-QR-Code. Bitte warte auf diese Nachricht, bevor du die Geschenke abholst."
+          },
           "saved": {
             "subject": "Dein Wunschzettel wurde gespeichert",
             "title": "Dein Wunschzettel wurde gespeichert",

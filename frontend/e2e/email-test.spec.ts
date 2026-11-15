@@ -115,59 +115,64 @@ test.describe('Admin email test route', () => {
     });
   });
 
-  test('offers the pickup notification with optional date and multiline location parameters', async ({
-    page,
-  }) => {
-    await loginAsAdmin(page);
-    let sent: unknown;
-    await page.route('http://localhost:8083/admin/email-test', async (route) => {
-      if (route.request().method() === 'GET') {
-        await route.fulfill({
-          json: {
-            templates: [
-              { id: 'client-order', fields: [{ key: 'loginUrl', type: 'url', required: true }] },
-              {
-                id: 'order-ready-for-pickup',
-                fields: [
-                  { key: 'year', type: 'number', required: true },
-                  { key: 'orderNumber', type: 'number', required: true },
-                  { key: 'pickupDate', type: 'text', required: false },
-                  { key: 'pickupLocation', type: 'textarea', required: false },
-                ],
-              },
-            ],
-          },
-        });
-      } else {
-        sent = route.request().postDataJSON();
-        await route.fulfill({ json: { emailSentTo: 'pickup@example.com' } });
-      }
+  for (const template of [
+    { id: 'order-ready-for-pickup', name: 'Abholbenachrichtigung' },
+    { id: 'order-confirmation-definitive', name: 'Annahmebestätigung' },
+  ]) {
+    test(`offers ${template.id} with optional date and multiline location parameters`, async ({
+      page,
+    }) => {
+      await loginAsAdmin(page);
+      let sent: unknown;
+      await page.route('http://localhost:8083/admin/email-test', async (route) => {
+        if (route.request().method() === 'GET') {
+          await route.fulfill({
+            json: {
+              templates: [
+                { id: 'client-order', fields: [{ key: 'loginUrl', type: 'url', required: true }] },
+                {
+                  id: template.id,
+                  fields: [
+                    { key: 'year', type: 'number', required: true },
+                    { key: 'orderNumber', type: 'number', required: true },
+                    { key: 'pickupDate', type: 'text', required: false },
+                    { key: 'pickupLocation', type: 'textarea', required: false },
+                  ],
+                },
+              ],
+            },
+          });
+        } else {
+          sent = route.request().postDataJSON();
+          await route.fulfill({ json: { emailSentTo: 'pickup@example.com' } });
+        }
+      });
+      await page.goto('/admin/email-test');
+      await page.getByRole('combobox', { name: 'E-Mail', exact: true }).click();
+      const option = page.getByRole('option').filter({ hasText: template.name });
+      await expectTranslatedText(option, `app.admin.emailTest.templates.${template.id}`);
+      await option.click();
+      await page.getByRole('textbox', { name: 'Empfänger-Adresse' }).fill('pickup@example.com');
+      await page.getByRole('spinbutton', { name: 'Jahr', exact: true }).fill('2026');
+      await page.getByRole('spinbutton', { name: 'Zettelnummer', exact: true }).fill('12');
+      await page.getByRole('textbox', { name: /Abholdatum und Zeit/ }).fill('Samstag, nachmittags');
+      const location = page.getByRole('textbox', { name: /Abholort/ });
+      expect(await location.evaluate((element) => element.tagName)).toBe('TEXTAREA');
+      await location.fill('Testsaal\nTeststrasse 1');
+      await page.getByRole('button', { name: 'Senden' }).click();
+      await expectTranslatedText(page.getByRole('alert'), 'app.admin.emailTest.sent');
+      expect(sent).toEqual({
+        recipient: 'pickup@example.com',
+        template: template.id,
+        parameters: {
+          year: '2026',
+          orderNumber: '12',
+          pickupDate: 'Samstag, nachmittags',
+          pickupLocation: 'Testsaal\nTeststrasse 1',
+        },
+      });
     });
-    await page.goto('/admin/email-test');
-    await page.getByRole('combobox', { name: 'E-Mail', exact: true }).click();
-    const option = page.getByRole('option').filter({ hasText: 'Abholbenachrichtigung' });
-    await expectTranslatedText(option, 'app.admin.emailTest.templates.order-ready-for-pickup');
-    await option.click();
-    await page.getByRole('textbox', { name: 'Empfänger-Adresse' }).fill('pickup@example.com');
-    await page.getByRole('spinbutton', { name: 'Jahr', exact: true }).fill('2026');
-    await page.getByRole('spinbutton', { name: 'Zettelnummer', exact: true }).fill('12');
-    await page.getByRole('textbox', { name: /Abholdatum und Zeit/ }).fill('Samstag, nachmittags');
-    const location = page.getByRole('textbox', { name: /Abholort/ });
-    expect(await location.evaluate((element) => element.tagName)).toBe('TEXTAREA');
-    await location.fill('Testsaal\nTeststrasse 1');
-    await page.getByRole('button', { name: 'Senden' }).click();
-    await expectTranslatedText(page.getByRole('alert'), 'app.admin.emailTest.sent');
-    expect(sent).toEqual({
-      recipient: 'pickup@example.com',
-      template: 'order-ready-for-pickup',
-      parameters: {
-        year: '2026',
-        orderNumber: '12',
-        pickupDate: 'Samstag, nachmittags',
-        pickupLocation: 'Testsaal\nTeststrasse 1',
-      },
-    });
-  });
+  }
 
   test('shows template-specific parameters and sends the test email', async ({ page }) => {
     await loginAsAdmin(page);

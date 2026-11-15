@@ -41,6 +41,34 @@ Die Auflösung dieser URL und die eigentliche Abholung werden hier nicht impleme
 
 ## QR-Code und Abhol-E-Mail
 
+### Annahmebestätigung vor dem Geschenkeingang
+
+- Beim Wechsel auf `definitive` werden alle Wünsche als angenommen bestätigt.
+  Sowohl die Freigabeaktion als auch manuelles Setzen des Status setzen dafür
+  ausschliesslich genehmigte Wünsche voraus.
+- Die Nachricht enthält Abholdatum/-zeit und den mehrzeiligen Abholort aus der
+  Konfiguration. Sie bittet darum, die Zeit zu reservieren und auf eine weitere
+  E-Mail mit dem Abhol-QR-Code nach Eingang aller Geschenke zu warten. Sie enthält
+  selbst noch keinen QR-Code.
+- Statuswechsel und Versandauftrag (`order_acceptance`) werden gemeinsam mit
+  einer Bestellsperre gespeichert. Danach wird der unmittelbare Versand versucht.
+  Fehlende Abholdaten oder Versandfehler lassen den Auftrag für den Mail-Batch
+  ausstehend. Bereits gerenderte Nachrichten werden unverändert wiederholt.
+- `acceptance_email_sent_at` wird erst nach erfolgreichem Versand gesetzt.
+  Wiederholtes Speichern, parallele Freigaben und weitere Statuswechsel erzeugen
+  für bereits bestätigte Wunschzettel keine erneute Annahmebestätigung. Ein
+  ausstehender Auftrag wird nicht mehr versandt, wenn die Bestellung nicht mehr
+  definitiv ist. Ein SMTP-Abbruch nach Annahme der Nachricht, aber vor Speicherung
+  des Versandzeitpunkts kann wie bei der QR-E-Mail zu erneuter Zustellung führen.
+- Die Migration ergänzt nur den leeren Versandzeitpunkt. Bestehende definitive
+  Wunschzettel werden weder durch die Migration noch durch blosses erneutes
+  Speichern oder den regulären Batch automatisch nachträglich angeschrieben.
+  Der explizite Nachversand folgt separat.
+- Unter `/admin/email-test` ist `order-confirmation-definitive` mit Jahr,
+  Zettelnummer und optionalen Testwerten für Abholdatum und Abholort verfügbar.
+
+### Abhol-E-Mail
+
 - `pickup_date` und `pickup_location` werden in der Admin-Konfiguration als
   Strings gepflegt. Das Abholdatum ist Freitext ohne Datums-/Formatvalidierung;
   der Abholort wird als mehrzeilige Textarea bearbeitet. Beide Einträge starten
