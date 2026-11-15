@@ -479,6 +479,53 @@ final class OrderRepository
         return $this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'mysql' ? ' FOR UPDATE' : '';
     }
 
+    /** @return list<array{id: string, email: string, order_number: int}> */
+    public function findAcceptanceBackfillCandidates(int $year): array
+    {
+        $statement = $this->pdo->prepare($this->acceptanceBackfillQuery() . ' ORDER BY orders.order_number, orders.id');
+        $statement->execute(['year' => $year]);
+        return $statement->fetchAll();
+    }
+
+    public function enqueueAcceptanceBackfill(string $orderId, int $year): bool
+    {
+        $this->pdo->beginTransaction();
+        try {
+            // Recheck eligibility only after acquiring the same lock as admin saves and delivery.
+            $lock = $this->pdo->prepare('SELECT id FROM orders WHERE id = ?' . $this->lockSuffix());
+            $lock->execute([$orderId]);
+            if ($lock->fetchColumn() === false) {
+                $this->pdo->commit();
+                return false;
+            }
+            $candidate = $this->pdo->prepare($this->acceptanceBackfillQuery() . ' AND orders.id = :id');
+            $candidate->execute(['year' => $year, 'id' => $orderId]);
+            $order = $candidate->fetch();
+            if (!is_array($order)) {
+                $this->pdo->commit();
+                return false;
+            }
+            (new EmailQueueRepository($this->pdo))->enqueue('order', $orderId, 'order_acceptance', $order['email'], ['subject' => '', 'html' => '', 'text' => ''], '');
+            $this->pdo->commit();
+            return true;
+        } catch (\Throwable $exception) {
+            $this->pdo->rollBack();
+            throw $exception;
+        }
+    }
+
+    private function acceptanceBackfillQuery(): string
+    {
+        return "SELECT orders.id, users.email, orders.order_number
+                FROM orders INNER JOIN users ON users.id = orders.user_id
+                WHERE orders.year = :year AND orders.status = 'definitive'
+                  AND orders.order_number > 0 AND orders.acceptance_email_sent_at IS NULL
+                  AND EXISTS (SELECT 1 FROM order_items WHERE order_id = orders.id)
+                  AND NOT EXISTS (SELECT 1 FROM order_items WHERE order_id = orders.id AND publication_status <> 'approved')
+                  AND NOT EXISTS (SELECT 1 FROM email_queue WHERE reference_type = 'order'
+                      AND reference_id = orders.id AND email_type = 'order_acceptance')";
+    }
+
     /** @return array<string, mixed>|null */
     public function findById(string $orderId): ?array
     {

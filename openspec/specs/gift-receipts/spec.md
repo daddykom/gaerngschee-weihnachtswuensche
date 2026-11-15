@@ -63,9 +63,27 @@ Die Auflösung dieser URL und die eigentliche Abholung werden hier nicht impleme
 - Die Migration ergänzt nur den leeren Versandzeitpunkt. Bestehende definitive
   Wunschzettel werden weder durch die Migration noch durch blosses erneutes
   Speichern oder den regulären Batch automatisch nachträglich angeschrieben.
-  Der explizite Nachversand folgt separat.
+  Der explizite Nachversand erfolgt ausschliesslich über das unten beschriebene
+  manuelle Batchscript.
 - Unter `/admin/email-test` ist `order-confirmation-definitive` mit Jahr,
   Zettelnummer und optionalen Testwerten für Abholdatum und Abholort verfügbar.
+
+### Nachversand bestehender Annahmebestätigungen
+
+- `backend/bin/backfill-order-acceptance.php --year=2026` zeigt nur die Anzahl
+  geeigneter Wunschzettel und eindeutiger Empfänger; die Vorschau schreibt nichts
+  und versendet keine E-Mails. Das Kampagnenjahr muss ausdrücklich angegeben werden.
+- Nur definitive, nummerierte Wunschzettel mit mindestens einem Wunsch und
+  ausschliesslich genehmigten Wünschen werden berücksichtigt. Bereits versandte
+  oder als `order_acceptance` vorgemerkte Bestätigungen werden übersprungen.
+- Mit `--send` prüft das Script ausgefüllte Abholdaten und legt Versandaufträge
+  für den vorhandenen Mail-Batch an. Es versendet selbst keine E-Mails und wird
+  weder beim Deployment noch durch den gemeinsamen Cron-Runner automatisch aufgerufen.
+- Jeder Auftrag wird unter derselben Bestellsperre wie Freigabe und Versand
+  erneut geprüft. Wiederholungen, parallele Script-Aufrufe und zwischenzeitliche
+  Statuswechsel erzeugen keine doppelten Aufträge. Ein abgebrochener Lauf kann
+  erneut gestartet werden. Bestehende Nachrichten und Statuswerte bleiben erhalten.
+- Betriebsanleitung: `documents/acceptance-email-backfill.md`.
 
 ### Abhol-E-Mail
 
