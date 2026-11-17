@@ -8,6 +8,7 @@ use App\Configuration\Data\FrontendConfigRepository;
 use App\Registration\Data\OrderRepository;
 use App\Registration\Data\GiftReceiptRepository;
 use App\Registration\Data\RegistrationTokenRepository;
+use App\Registration\Data\FulfillerReminderRepository;
 use App\Shared\Database\Database;
 use App\Shared\Logging\ExternalErrorLogRepository;
 use App\Shared\Mail\EmailQueueRepository;
@@ -28,6 +29,7 @@ final class OrderBatchService
         private readonly RegistrationTokenRepository $tokens,
         private readonly ?ExternalErrorLogRepository $externalErrors = null,
         private readonly ?GiftReceiptRepository $giftReceipts = null,
+        private readonly ?FulfillerReminderService $fulfillerReminders = null,
     ) {
     }
 
@@ -82,6 +84,17 @@ final class OrderBatchService
                 ));
                 $result['failed']++;
             }
+        }
+
+        if ($this->config->findValueByVariableName('fulfiller_reminder_dates')) {
+            $reminders = $this->fulfillerReminders ?? new FulfillerReminderService(
+                $this->config,
+                new FulfillerReminderRepository(Database::getConnection()),
+                $this->emails,
+            );
+            $reminderResult = $reminders->run($now);
+            $result['sent'] += $reminderResult['sent'];
+            $result['failed'] += $reminderResult['failed'];
         }
 
         return $result;

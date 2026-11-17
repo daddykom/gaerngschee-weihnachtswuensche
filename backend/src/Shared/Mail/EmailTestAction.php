@@ -26,6 +26,14 @@ final class EmailTestAction
             ['key' => 'wishTitle', 'type' => 'text', 'required' => true],
             ['key' => 'wishDescription', 'type' => 'textarea', 'required' => true],
         ]],
+        'fulfiller-reminder' => ['fields' => [
+            ['key' => 'wishNumber', 'type' => 'text', 'required' => true],
+            ['key' => 'wishTitle', 'type' => 'text', 'required' => true],
+            ['key' => 'wishDescription', 'type' => 'textarea', 'required' => true],
+            ['key' => 'handoverDate', 'type' => 'text', 'required' => true],
+            ['key' => 'handoverTime', 'type' => 'text', 'required' => true],
+            ['key' => 'handoverLocation', 'type' => 'textarea', 'required' => true],
+        ]],
         'fairgate-registration-required' => ['fields' => [
             ['key' => 'fairgateUrl', 'type' => 'url', 'required' => true],
         ]],

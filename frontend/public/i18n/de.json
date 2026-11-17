@@ -718,6 +718,7 @@
         "templates": {
           "client-order": "Registrierungs-Link",
           "fulfiller-reservation": "Reservation für Erfüller",
+          "fulfiller-reminder": "Abgabeerinnerung für Erfüller",
           "fairgate-registration-required": "Fairgate-Registrierung erforderlich",
           "fairgate-registration-available": "Fairgate-Registrierung verfügbar",
           "user-created": "Benutzer erstellt",
@@ -733,6 +734,9 @@
           "campaignYear": "Kampagnenjahr",
           "wishNumber": "Wunschnummer",
           "wishDescription": "Wunschbeschreibung",
+          "handoverDate": "Abgabezeitraum",
+          "handoverTime": "Abgabezeit",
+          "handoverLocation": "Abgabeort",
           "wishTitle": "Bearbeiteter Wunschtitel",
           "orderFeedback": "Rückmeldung zum Wunschzettel (freiwillig)",
           "wishFeedback": "Rückmeldung zum Wunsch (freiwillig)",
@@ -1175,6 +1179,17 @@
           "time": "Zeitfenster",
           "location": "Ort",
           "keepMessage": "Bitte bewahre diese E-Mail auf und bringe den Wunsch zum angegebenen Zeitpunkt an den angegebenen Ort."
+        },
+        "fulfillerReminder": {
+          "subject": "Erinnerung an die Abgabe deiner Geschenke",
+          "body": "Danke, dass du Weihnachtswünsche erfüllst. Für folgende zugesagte Wünsche ist bei uns noch kein Geschenk eingegangen:",
+          "wishNumber": "Wunschnummer",
+          "handoverTitle": "Abgabe der Geschenke",
+          "date": "Abgabezeitraum",
+          "time": "Zeitfenster",
+          "location": "Abgabeort",
+          "post": "Du kannst die Geschenke auch per Post an den angegebenen Abgabeort senden. Bitte sende sie rechtzeitig, damit sie innerhalb des Abgabezeitraums bei uns eintreffen, und beschrifte jedes Geschenk mit der zugehörigen Wunschnummer.",
+          "keepMessage": "Bitte bewahre diese E-Mail mit den Wunschnummern und den Angaben zur Abgabe auf."
         },
         "common": {
           "ignore": "Falls du diese Anfrage nicht ausgelöst hast, kannst du diese E-Mail ignorieren."

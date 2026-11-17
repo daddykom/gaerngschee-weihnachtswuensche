@@ -35,6 +35,8 @@ final class EmailTestActionTest extends TestCase
         self::assertSame($pickup[0]['fields'], $acceptance['fields']);
         $reservation = array_values(array_filter($body['templates'], static fn (array $template): bool => $template['id'] === 'fulfiller-reservation'))[0];
         self::assertSame(['loginUrl', 'wishNumber', 'wishTitle', 'wishDescription'], array_column($reservation['fields'], 'key'));
+        $reminder = array_values(array_filter($body['templates'], static fn (array $template): bool => $template['id'] === 'fulfiller-reminder'))[0];
+        self::assertSame(['wishNumber', 'wishTitle', 'wishDescription', 'handoverDate', 'handoverTime', 'handoverLocation'], array_column($reminder['fields'], 'key'));
         $review = array_values(array_filter($body['templates'], static fn (array $template): bool => $template['id'] === 'order-confirmation-changes_requested'))[0];
         self::assertSame(['year', 'loginUrl', 'orderFeedback', 'wishNumber', 'wishTitle', 'wishFeedback'], array_column($review['fields'], 'key'));
         self::assertSame([true, true, false, false, false, false], array_column($review['fields'], 'required'));

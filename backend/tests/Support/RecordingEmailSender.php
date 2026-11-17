@@ -23,6 +23,14 @@ final class RecordingEmailSender implements EmailSenderInterface
     public array $orderConfirmations = [];
     public bool $failOrderConfirmation = false;
     public bool $failStoredEmail = false;
+    /** @var list<array{wishes: array, handover: array}> */
+    public array $fulfillerReminders = [];
+
+    public function renderFulfillerReminder(array $wishes, array $handover, string $locale = 'de'): array
+    {
+        $this->fulfillerReminders[] = ['wishes' => $wishes, 'handover' => $handover];
+        return ['subject' => 'reminder', 'html' => json_encode($wishes, JSON_THROW_ON_ERROR), 'text' => 'reminder'];
+    }
 
     public function sendAnmeldung(string $recipient, AnmeldungMailVariant $variant, string $locale = 'de', ?string $loginUrl = null, ?array $wish = null, ?int $campaignYear = null): void
     {

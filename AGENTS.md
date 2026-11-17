@@ -181,6 +181,7 @@ src/
 |---|---|---|
 | `anmeldung/client-order.html.twig` | Registrierungs-Link für Wunschbesteller | `LOGIN_URL`, `CAMPAIGN_YEAR` |
 | `anmeldung/fulfiller-reservation.html.twig` | Reservations-Link für Erfüller mit bearbeitetem Wunschtitel und bearbeiteter Beschreibung, auch in Klartext | `LOGIN_URL`, `WISH.wishNumber`, `WISH.title` (bearbeiteter Titel), `WISH.currentDescription` |
+| `anmeldung/fulfiller-reminder.html.twig` | Erinnerung an noch nicht eingelieferte Geschenke, mit offenen Zusagen, Abgabezeitraum/-ort und Posthinweis | `WISHES[]` mit `wishNumber`, `title`, `currentDescription`; `HANDOVER.date`, `HANDOVER.time`, `HANDOVER.location`, `LOGO_CID`; Admin-Testparameter: `wishNumber`, `wishTitle`, `wishDescription`, `handoverDate`, `handoverTime`, `handoverLocation` |
 | `anmeldung/fairgate-registration-required.html.twig` | Hinweis auf erforderliche Fairgate-Registrierung | `LOGIN_URL` |
 | `anmeldung/fairgate-registration-available.html.twig` | Hinweis auf verfügbare Fairgate-Registrierung | `LOGIN_URL` |
 | `user-created.html.twig` | Zugangsdaten für neu erstellten Benutzer | `LOGIN_URL`, `TEMPORARY_PASSWORD` |
