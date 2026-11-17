@@ -624,6 +624,19 @@ defaultIcon = computed(() => { ... });
 - User-facing text remains localized through the translation system.
 - External contract values, database fields and established domain values may retain their required spelling.
 
+### 11b. Übersetzungstexte nach Kontext trennen
+
+- Jeder fachliche Darstellungs- und Eingabekontext verwendet eigene
+  Übersetzungsschlüssel. Texte anderer Features, Seiten oder Dialoge werden
+  nicht wiederverwendet, nur weil der Wortlaut gerade übereinstimmt.
+- Ein Text muss in seinem Kontext geändert werden können, ohne dadurch Texte
+  anderer Kontexte zu verändern. Wortgleiche Übersetzungen dürfen und sollen
+  dafür bewusst unter getrennten Schlüsseln stehen.
+- Formularbeschriftungen und Eingabehinweise werden nicht als Beschriftung
+  angezeigter Daten oder Links in einem anderen Kontext verwendet.
+- Gemeinsame UI-Komponenten besitzen ihren eigenen Übersetzungskontext; sie
+  beziehen keine fachlichen Texte aus einem aufrufenden Feature.
+
 ### 12. UI-Struktur
 
 Für Page-Struktur, responsive Layouts, Formulare, Abstände, Sections, Cards, Actions und die Verwendung gemeinsamer UI-Komponenten gilt ausschliesslich [documents/ui-design.md](./documents/ui-design.md).

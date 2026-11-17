@@ -63,6 +63,10 @@ describe('FulfillerReservationDialog', () => {
     expect(details.textContent).toContain('Edited title');
     expect(details.textContent).toContain('Bauklötze');
     expect(details.querySelector('a').getAttribute('href')).toBe('https://example.com/gift');
+    expect(details.querySelector('a').textContent.trim()).toBe(
+      'app.fulfiller.reservationDialog.giftLink',
+    );
+    expect(details.textContent).not.toContain('app.order.items.');
     expect(fixture.nativeElement.textContent).not.toContain('Private');
     expect(fixture.nativeElement.textContent).toContain('17.–19. Dezember 2026');
   });

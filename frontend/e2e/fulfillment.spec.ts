@@ -89,6 +89,9 @@ test.describe('Fulfillment route', () => {
       'href',
       'https://example.com/building-blocks',
     );
+    await expectTranslatedText(page.locator('.wish-entry a'), 'app.fulfiller.wishDetails.giftLink');
+    // The exact wording is the regression target: form-only optional hints must not leak here.
+    await expect(page.locator('.wish-entry a')).toHaveText('Link zum gewünschten Geschenk');
     await expect(
       page
         .locator('mat-card-content > div.gl-stack > p.gl-text--multiline')
@@ -101,6 +104,9 @@ test.describe('Fulfillment route', () => {
     await expect(
       page.getByRole('dialog').locator('.reservation-dialog__details a'),
     ).toHaveAttribute('href', 'https://example.com/building-blocks');
+    const dialogGiftLink = page.getByRole('dialog').locator('.reservation-dialog__details a');
+    await expectTranslatedText(dialogGiftLink, 'app.fulfiller.reservationDialog.giftLink');
+    await expect(dialogGiftLink).toHaveText('Link zum gewünschten Geschenk');
     await page.getByRole('dialog').getByLabel('Deine E-Mail-Adresse').fill('fulfiller@example.com');
     await page.getByRole('dialog').getByRole('checkbox').check();
     await page.getByRole('dialog').getByRole('button', { name: 'Bestätigungslink senden' }).click();

@@ -22,7 +22,7 @@
           <mat-option value="">{{ 'app.fulfiller.filters.allCategories' | translate }}</mat-option>
           @for (option of categories; track option) {
             <mat-option [value]="option">{{
-              'app.order.items.categories.' + option | translate
+              'app.fulfiller.filters.categories.' + option | translate
             }}</mat-option>
           }
         </mat-select>
@@ -68,8 +68,8 @@
                         <p>
                           {{
                             (wish.personType === 'adult'
-                              ? 'app.order.items.adult'
-                              : 'app.order.items.child'
+                              ? 'app.fulfiller.wishDetails.adult'
+                              : 'app.fulfiller.wishDetails.child'
                             ) | translate
                           }}
                           {{ wish.personIndex }}
@@ -77,12 +77,12 @@
                       }
                       <p>
                         <strong>{{
-                          'app.order.items.categories.' + wish.category | translate
+                          'app.fulfiller.wishDetails.categories.' + wish.category | translate
                         }}</strong>
                       </p>
                       @if (wish.giftLink) {
                         <a [href]="wish.giftLink" target="_blank" rel="noopener noreferrer">
-                          {{ 'app.order.items.giftLink' | translate }}
+                          {{ 'app.fulfiller.wishDetails.giftLink' | translate }}
                         </a>
                       }
                     </div>
