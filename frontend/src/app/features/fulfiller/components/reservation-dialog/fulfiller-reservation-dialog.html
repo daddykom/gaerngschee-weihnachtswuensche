@@ -19,19 +19,19 @@
           <dd>{{ wish.wishNumber }}</dd>
         </div>
         <div>
-          <dt>{{ 'app.order.items.wishTitle' | translate }}</dt>
+          <dt>{{ 'app.fulfiller.reservationDialog.wishTitleLabel' | translate }}</dt>
           <dd>{{ wish.title || wish.wishNumber }}</dd>
         </div>
         <div>
-          <dt>{{ 'app.order.items.description' | translate }}</dt>
+          <dt>{{ 'app.fulfiller.reservationDialog.descriptionLabel' | translate }}</dt>
           <dd class="gl-text--multiline">{{ wish.currentDescription }}</dd>
         </div>
         @if (wish.giftLink) {
         <div>
-          <dt>{{ 'app.order.items.giftLink' | translate }}</dt>
+          <dt>{{ 'app.fulfiller.reservationDialog.giftLink' | translate }}</dt>
           <dd>
             <a [href]="wish.giftLink" target="_blank" rel="noopener noreferrer">
-              {{ 'app.order.items.giftLink' | translate }}
+              {{ 'app.fulfiller.reservationDialog.giftLink' | translate }}
             </a>
           </dd>
         </div>

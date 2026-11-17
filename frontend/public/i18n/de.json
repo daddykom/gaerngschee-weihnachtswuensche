@@ -419,13 +419,26 @@
     },
     "fulfiller": {
       "pageTitle": "Weihnachtswünsche erfüllen",
+      "wishDetails": {
+        "giftLink": "Link zum gewünschten Geschenk",
+        "adult": "Erwachsener",
+        "child": "Kind",
+        "categories": {
+          "gift": "Geschenk",
+          "voucher": "Gutschein"
+        }
+      },
       "filters": {
         "title": "Wünsche suchen",
         "search": "Suche",
         "searchHint": "Suche nach Familieninformationen, Wunschtitel, Wunschtext oder persönlicher Nachricht.",
         "minimumSearchLength": "Die Suche startet ab drei Zeichen.",
         "category": "Kategorie",
-        "allCategories": "Alle Kategorien"
+        "allCategories": "Alle Kategorien",
+        "categories": {
+          "gift": "Geschenk",
+          "voucher": "Gutschein"
+        }
       },
       "ordersTitle": "Wunschzettel",
       "orderTitle": "Wunschzettel {{orderNumber}}",
@@ -449,12 +462,15 @@
       "reservationDialog": {
         "title": "Wunsch erfüllen",
         "wishDetailsTitle": "Wunschdetails",
+        "wishTitleLabel": "Wunschtitel",
+        "descriptionLabel": "Wunschbeschreibung",
+        "giftLink": "Link zum gewünschten Geschenk",
         "wishNumberLabel": "Wunschnummer",
         "wishLabel": "Wunsch",
         "reasonLabel": "Persönliche Nachricht zum Wunsch",
         "commitmentTitle": "Verbindliche Zusage",
         "emailLabel": "Deine E-Mail-Adresse",
-        "commitment": "Mit der Reservierung verpflichtest du dich, den Wunsch zu beschaffen, zu verpacken und zur angegebenen Zeit am angegebenen Ort abzugeben.",
+        "commitment": "Mit der Reservierung verpflichtest du dich, den Wunsch zu beschaffen, zu verpacken und zur angegebenen Zeit am angegebenen Ort abzugeben oder per Post zuzusenden.",
         "handoverTitle": "Übergabe",
         "handoverDateLabel": "Datum",
         "handoverTimeLabel": "Zeitfenster",

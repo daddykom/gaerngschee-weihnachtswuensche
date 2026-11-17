@@ -56,6 +56,10 @@ describe('FulfillmentListComponent', () => {
     expect(fixture.nativeElement.querySelector('a').getAttribute('href')).toBe(
       'https://example.com/gift',
     );
+    expect(fixture.nativeElement.querySelector('a').textContent.trim()).toBe(
+      'app.fulfiller.wishDetails.giftLink',
+    );
+    expect(fixture.nativeElement.textContent).not.toContain('app.order.items.');
     expect(fixture.nativeElement.textContent).not.toContain('Private');
   });
 });
