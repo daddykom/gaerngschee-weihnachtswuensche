@@ -4,6 +4,8 @@ import { provideState } from '@ngrx/store';
 import { groupGuard } from '../../shared/guards/group.guard';
 import { adminOrdersEffects } from '../../store/admin-orders/admin-orders.effects';
 import { adminOrdersFeature } from '../../store/admin-orders/admin-orders.feature';
+import { adminStatisticsEffects } from '../../store/admin-statistics/admin-statistics.effects';
+import { adminStatisticsFeature } from '../../store/admin-statistics/admin-statistics.feature';
 import { adminUsersEffects } from '../../store/admin-users/admin-users.effects';
 import { adminUsersFeature } from '../../store/admin-users/admin-users.feature';
 import { emailTestEffects } from '../../store/email-test/email-test.effects';
@@ -16,6 +18,7 @@ import { configurationResolver } from './pages/configuration/configuration.resol
 import { emailTestResolver } from './pages/email-test/email-test.resolver';
 import { adminOrdersResolver } from './pages/order-edit/admin-orders.resolver';
 import { adminOverviewResolver } from './pages/overview/admin-overview.resolver';
+import { adminStatisticsResolver } from './pages/statistics/admin-statistics.resolver';
 import { userEditResolver } from './pages/users/user-edit.resolver';
 import { usersResolver } from './pages/users/users.resolver';
 
@@ -37,6 +40,17 @@ export const adminRoutes: Routes = [
       ),
     ],
     children: [
+      {
+        path: 'statistics',
+        canActivate: [groupGuard(['admin'])],
+        providers: [provideState(adminStatisticsFeature), provideEffects(adminStatisticsEffects)],
+        resolve: { statistics: adminStatisticsResolver },
+        data: { pageTitle: 'app.admin.statistics.title' },
+        loadComponent: () =>
+          import('./pages/statistics/admin-statistics.component').then(
+            (m) => m.AdminStatisticsComponent,
+          ),
+      },
       {
         path: 'overview',
         canActivate: [groupGuard(['admin'])],

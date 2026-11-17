@@ -40,6 +40,7 @@ gaerngschee/
 - [openspec/specs/registrations/spec.md](./openspec/specs/registrations/spec.md) - Anmeldungen
 - [openspec/specs/donations/spec.md](./openspec/specs/donations/spec.md) - Erfüllung einzelner Weihnachtswünsche
 - [openspec/specs/gift-receipts/spec.md](./openspec/specs/gift-receipts/spec.md) - Geschenkeingang und Vorbereitung der Abholfreigabe
+- [openspec/specs/admin-statistics/spec.md](./openspec/specs/admin-statistics/spec.md) - Aktionsweite Admin-Kennzahlen
 - [openspec/specs/platform/spec.md](./openspec/specs/platform/spec.md) - PWA, i18n, a11y
 - [documents/frontend-conventions.md](./documents/frontend-conventions.md) - Angular-Konventionen
 - [documents/ui-design.md](./documents/ui-design.md) - UI- und Layout-Regeln

@@ -1,0 +1,11 @@
+@if (statistics(); as data) {
+  <app-statistics-view [statistics]="data" />
+}
+@if (request().status === 'loading') {
+  <p role="status">{{ 'app.admin.statistics.loading' | translate }}</p>
+}
+@if (request().status === 'error') {
+  <button mat-flat-button type="button" (click)="retry()">
+    {{ 'app.admin.statistics.retry' | translate }}
+  </button>
+}

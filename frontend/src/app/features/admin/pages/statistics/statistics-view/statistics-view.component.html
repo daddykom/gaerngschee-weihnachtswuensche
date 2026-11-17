@@ -1,0 +1,38 @@
+<section class="gl-stack gl-stack--section" aria-labelledby="statistics-campaign-heading">
+  <h2 id="statistics-campaign-heading">
+    {{ 'app.admin.statistics.campaign' | translate: { year: statistics().year } }}
+  </h2>
+  <p>{{ 'app.admin.statistics.scope' | translate }}</p>
+  <dl class="gl-grid gl-grid--2">
+    <div class="gl-stack">
+      <dt>{{ 'app.admin.statistics.orderCount' | translate }}</dt>
+      <dd data-testid="statistics-order-count">{{ statistics().orderCount }}</dd>
+    </div>
+    <div class="gl-stack">
+      <dt>{{ 'app.admin.statistics.wishCount' | translate }}</dt>
+      <dd data-testid="statistics-wish-count">{{ statistics().wishCount }}</dd>
+    </div>
+    <div class="gl-stack">
+      <dt>{{ 'app.admin.statistics.availableCount' | translate }}</dt>
+      <dd data-testid="statistics-available-count">{{ statistics().availableCount }}</dd>
+    </div>
+    <div class="gl-stack">
+      <dt>{{ 'app.admin.statistics.pendingConfirmationCount' | translate }}</dt>
+      <dd data-testid="statistics-pending-confirmation-count">
+        {{ statistics().pendingConfirmationCount }}
+      </dd>
+    </div>
+    <div class="gl-stack">
+      <dt>{{ 'app.admin.statistics.reservedCount' | translate }}</dt>
+      <dd data-testid="statistics-reserved-count">{{ statistics().reservedCount }}</dd>
+    </div>
+    <div class="gl-stack">
+      <dt>{{ 'app.admin.statistics.receivedCount' | translate }}</dt>
+      <dd data-testid="statistics-received-count">{{ statistics().receivedCount }}</dd>
+    </div>
+    <div class="gl-stack">
+      <dt>{{ 'app.admin.statistics.completedCount' | translate }}</dt>
+      <dd data-testid="statistics-completed-count">{{ statistics().completedCount }}</dd>
+    </div>
+  </dl>
+</section>

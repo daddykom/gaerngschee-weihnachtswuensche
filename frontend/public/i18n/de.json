@@ -631,6 +631,22 @@
       "staySignedIn": "Angemeldet bleiben"
     },
     "admin": {
+      "statistics": {
+        "title": "Kennzahlen",
+        "campaign": "Aktionsübersicht {{year}}",
+        "scope": "Alle Wunschzettel und Wünsche des Aktionsjahrs, einschliesslich Entwürfen und zurückgewiesenen Wünschen. Die Erfüllungsstände sind Teilmengen der Gesamtzahl und unabhängig von den Filtern der Admin-Übersicht.",
+        "orderCount": "Wunschzettel insgesamt",
+        "wishCount": "Wünsche insgesamt",
+        "availableCount": "Offene Wünsche",
+        "pendingConfirmationCount": "Provisorisch reservierte Wünsche",
+        "reservedCount": "Verbindlich reservierte Wünsche",
+        "receivedCount": "Eingegangene Wünsche",
+        "completedCount": "Abgeschlossene Wünsche",
+        "loading": "Kennzahlen werden geladen …",
+        "retry": "Erneut laden",
+        "errorTitle": "Kennzahlen nicht verfügbar",
+        "loadError": "Die Kennzahlen konnten nicht geladen werden. Bitte versuche es erneut."
+      },
       "overview": {
         "stub": {
           "title": "Übersicht",
@@ -1019,6 +1035,7 @@
       "registration": "Anmeldung",
       "successNavigation": "Erfolgsnavigation",
       "adminOverview": "Admin-Übersicht",
+      "adminStatistics": "Kennzahlen",
       "delivery": "Auslieferung",
       "configuration": "Konfiguration",
       "fairgateTest": "Fairgate-Test",
