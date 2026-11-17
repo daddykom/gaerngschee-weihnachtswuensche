@@ -127,9 +127,13 @@ final class FulfillerReminderServiceTest extends TestCase
         $this->dates((new DateTimeImmutable('now', new \DateTimeZone('Europe/Zurich')))->format('Y-m-d'));
         $this->wish('open', 1, 'reserved', 'fulfiller@example.com');
         $batch = new OrderBatchService(
-            new OrderRepository($this->pdo), new EmailQueueRepository($this->pdo), $this->config,
-            $this->emails, new RegistrationTokenRepository($this->pdo),
-            externalErrors: new ExternalErrorLogRepository($this->pdo), fulfillerReminders: $this->service,
+            new OrderRepository($this->pdo),
+            new EmailQueueRepository($this->pdo),
+            $this->config,
+            $this->emails,
+            new RegistrationTokenRepository($this->pdo),
+            externalErrors: new ExternalErrorLogRepository($this->pdo),
+            fulfillerReminders: $this->service,
         );
         self::assertSame(1, $batch->run()['sent']);
         self::assertSame(0, $batch->run()['sent']);
