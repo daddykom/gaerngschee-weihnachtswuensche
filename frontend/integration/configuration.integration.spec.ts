@@ -3,6 +3,26 @@ import { loginAsAdmin } from './support/admin-login';
 import { authHeaders } from './support/auth-header';
 
 test.describe('Integration configuration', () => {
+  test('retains the donation setting and excludes the removed unused settings', async ({
+    page,
+  }) => {
+    await loginAsAdmin(page);
+    const response = await page.request.get('http://localhost:8082/admin/configuration');
+    expect(response.status()).toBe(200);
+    const keys = (await response.json()).map(
+      (config: { variableName: string }) => config.variableName,
+    );
+    expect(keys).toContain('donation_url');
+    for (const key of [
+      'fairgate_document_email',
+      'fairgate_email_interval_days',
+      'fairgate_reminder_end_date',
+      'provisional_order_recent_days',
+    ]) {
+      expect(keys).not.toContain(key);
+    }
+  });
+
   test('returns input metadata on list and update and retains the multiline editor after reload', async ({
     page,
   }) => {
