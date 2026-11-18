@@ -157,7 +157,7 @@ final class EmailSender implements EmailSenderInterface
                 $locale,
             ),
             'html' => $html,
-            'text' => $this->plainText($html),
+            'text' => $this->plainText($html, true),
         ];
     }
 

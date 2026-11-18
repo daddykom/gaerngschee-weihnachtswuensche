@@ -19,6 +19,8 @@ final class FulfillerReminderEmailTest extends TestCase
             ['wishNumber' => '180-2', 'title' => 'Buch', 'currentDescription' => "Ein Buch\nZweite Zeile"],
         ], ['date' => '17.–19. Dezember 2026', 'time' => '10–12 Uhr', 'location' => "Saal A\nMusterstrasse 1"]);
         foreach (['html', 'text'] as $format) {
+            self::assertStringContainsString('Danke, dass du Weihnachtswünsche erfüllst! Gerne erinnern wir dich an die bevorstehenden Abgabetermine für die Geschenke zu folgenden Wünschen:', $message[$format]);
+            self::assertStringNotContainsString('noch kein Geschenk eingegangen', $message[$format]);
             foreach (['179-1', '180-2', 'Ein roter Ball', 'Ein Buch', 'Zweite Zeile', '17.–19. Dezember 2026', '10–12 Uhr', 'Saal A', 'Musterstrasse 1', 'per Post', 'Wunschnummer'] as $text) {
                 self::assertStringContainsString($text, $message[$format]);
             }

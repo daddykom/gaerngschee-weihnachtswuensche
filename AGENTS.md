@@ -180,8 +180,9 @@ src/
 | Template | Zweck | Parameter |
 |---|---|---|
 | `anmeldung/client-order.html.twig` | Registrierungs-Link für Wunschbesteller | `LOGIN_URL`, `CAMPAIGN_YEAR` |
-| `anmeldung/fulfiller-reservation.html.twig` | Reservations-Link für Erfüller mit bearbeitetem Wunschtitel und bearbeiteter Beschreibung, auch in Klartext | `LOGIN_URL`, `WISH.wishNumber`, `WISH.title` (bearbeiteter Titel), `WISH.currentDescription` |
-| `anmeldung/fulfiller-reminder.html.twig` | Erinnerung an noch nicht eingelieferte Geschenke, mit offenen Zusagen, Abgabezeitraum/-ort und Posthinweis | `WISHES[]` mit `wishNumber`, `title`, `currentDescription`; `HANDOVER.date`, `HANDOVER.time`, `HANDOVER.location`, `LOGO_CID`; Admin-Testparameter: `wishNumber`, `wishTitle`, `wishDescription`, `handoverDate`, `handoverTime`, `handoverLocation` |
+| `anmeldung/fulfiller-reservation.html.twig` | Link „Wunscherfüllung bestätigen“ für Erfüller mit fett hervorgehobener Wunschnummer und bearbeitetem Wunschtitel sowie bearbeiteter Beschreibung, auch in Klartext | `LOGIN_URL`, `WISH.wishNumber`, `WISH.title` (bearbeiteter Titel), `WISH.currentDescription` |
+| `anmeldung/fulfiller-reservation-confirmation.html.twig` | Bestätigte Wunscherfüllung mit Abgabetermin, Zeitfenster und mehrzeiligem Abgabeort in HTML und Klartext | `WISH.wishNumber`, `WISH.currentDescription`, `HANDOVER.date`, `HANDOVER.time`, `HANDOVER.location`, `LOGO_CID` |
+| `anmeldung/fulfiller-reminder.html.twig` | Freundliche Erinnerung an bevorstehende Abgabetermine, mit offenen Zusagen, Abgabezeitraum/-ort und Posthinweis, ohne Hinweis auf fehlenden Geschenkeingang | `WISHES[]` mit `wishNumber`, `title`, `currentDescription`; `HANDOVER.date`, `HANDOVER.time`, `HANDOVER.location`, `LOGO_CID`; Admin-Testparameter: `wishNumber`, `wishTitle`, `wishDescription`, `handoverDate`, `handoverTime`, `handoverLocation` |
 | `anmeldung/fairgate-registration-required.html.twig` | Hinweis auf erforderliche Fairgate-Registrierung | `LOGIN_URL` |
 | `anmeldung/fairgate-registration-available.html.twig` | Hinweis auf verfügbare Fairgate-Registrierung | `LOGIN_URL` |
 | `user-created.html.twig` | Zugangsdaten für neu erstellten Benutzer | `LOGIN_URL`, `TEMPORARY_PASSWORD` |

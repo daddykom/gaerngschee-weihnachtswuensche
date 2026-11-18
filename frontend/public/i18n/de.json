@@ -1178,8 +1178,9 @@
         },
         "fulfillerReservation": {
           "title": "Deine Wunschreservierung bestätigen",
-          "intro": "Bitte bestätige, dass du den folgenden Wunsch erfüllen möchtest:",
-          "button": "Wunschreservierung bestätigen",
+          "intro": "Wie schön, dass du diesen Wunsch erfüllst, bitte bestätige das auf folgendem Link:",
+          "wishNumber": "Wunschnummer",
+          "button": "Wunscherfüllung bestätigen",
           "subject": "Bitte bestätige deine Wunschreservierung"
         },
         "fulfillerReservationConfirmation": {
@@ -1196,7 +1197,7 @@
         },
         "fulfillerReminder": {
           "subject": "Erinnerung an die Abgabe deiner Geschenke",
-          "body": "Danke, dass du Weihnachtswünsche erfüllst. Für folgende zugesagte Wünsche ist bei uns noch kein Geschenk eingegangen:",
+          "body": "Danke, dass du Weihnachtswünsche erfüllst! Gerne erinnern wir dich an die bevorstehenden Abgabetermine für die Geschenke zu folgenden Wünschen:",
           "wishNumber": "Wunschnummer",
           "handoverTitle": "Abgabe der Geschenke",
           "date": "Abgabezeitraum",

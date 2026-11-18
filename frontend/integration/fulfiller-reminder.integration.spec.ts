@@ -50,7 +50,7 @@ test('saves ISO reminder dates and sends one bundled email through concurrent ho
     const handoverValues: Record<string, string> = {
       fulfiller_handover_date: '17.–19. Dezember 2026',
       fulfiller_handover_time: '10–12 Uhr',
-      fulfiller_handover_location: 'Saal A, Musterstrasse 1',
+      fulfiller_handover_location: 'Saal A\nMusterstrasse 1',
     };
     for (const config of handover) {
       const response = await page.request.patch(`${apiUrl}/admin/configuration/${config.id}`, {
@@ -87,6 +87,10 @@ test('saves ISO reminder dates and sends one bundled email through concurrent ho
       await request.get(`http://localhost:8025/api/v1/message/${messages[0].ID}`)
     ).json();
     for (const body of [message.HTML, message.Text]) {
+      expect(body).toContain(
+        'Danke, dass du Weihnachtswünsche erfüllst! Gerne erinnern wir dich an die bevorstehenden Abgabetermine für die Geschenke zu folgenden Wünschen:',
+      );
+      expect(body).not.toContain('noch kein Geschenk eingegangen');
       expect(body).toContain(`${fixture.orderNumber}-1`);
       expect(body).toContain(`${fixture.orderNumber}-2`);
       expect(body).not.toContain(`${fixture.orderNumber}-3`);
@@ -97,6 +101,8 @@ test('saves ISO reminder dates and sends one bundled email through concurrent ho
       expect(body).toContain('per Post');
       expect(body).not.toContain('app.mail.');
     }
+    expect(message.HTML).toContain('Saal A<br />');
+    expect(message.Text).toMatch(/Saal A\r?\nMusterstrasse 1/);
     await runPhp('bin/process-orders.php');
     expect(await messagesForRecipient()).toHaveLength(1);
   } finally {

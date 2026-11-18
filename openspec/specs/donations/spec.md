@@ -38,6 +38,10 @@ E-Mail bestätigt und bleibt bis zur Bestätigung zehn Minuten vorläufig.
   Abgabezeitraum, etwa „17.–19. Dezember 2026“. Bestehende Werte bleiben erhalten.
   Der Text wird unverändert im Reservationsdialog und in der Bestätigungsmail
   angezeigt. Die Start-/Enddaten der Erfüller-Aktion bleiben Datumswerte.
+- `fulfiller_handover_location` wird als Textarea gepflegt. Mehrzeilige
+  Adressen bleiben beim Speichern, im Reservationsdialog und in den
+  Bestätigungs- und Erinnerungs-E-Mails (HTML und Klartext) erhalten.
+  Bestehende Werte und Berechtigungen bleiben unverändert.
 - Abgelaufene oder nicht bestätigte Vorreservierungen werden wieder verfügbar
 
 ### F3: Abgabeerinnerung für Erfüller

@@ -163,6 +163,11 @@ test('publishes only edited wish details and keeps the team message private acro
       await request.get(`http://localhost:8025/api/v1/message/${messageId}`)
     ).json();
     for (const body of [message.HTML, message.Text]) {
+      expect(body).toContain(
+        'Wie schön, dass du diesen Wunsch erfüllst, bitte bestätige das auf folgendem Link:',
+      );
+      expect(body).toContain('Wunschnummer');
+      expect(body).toContain('Wunscherfüllung bestätigen');
       expect(body).toContain(publishedTitle);
       expect(body).toContain(publishedDescription);
       expect(body).not.toContain(originalTitle);
