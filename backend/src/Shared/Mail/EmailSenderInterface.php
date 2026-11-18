@@ -24,6 +24,9 @@ interface EmailSenderInterface
         string $locale = 'de',
     ): array;
 
+    /** @param list<array<string, string>> $wishes @param array<string, string> $handover */
+    public function renderFulfillerReminder(array $wishes, array $handover, string $locale = 'de'): array;
+
     public function sendUserCreated(string $recipient, string $temporaryPassword): void;
 
     public function sendUserEmailChanged(string $recipient): void;

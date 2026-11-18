@@ -117,6 +117,10 @@ final class StartRegistrationActionTest extends TestCase
     {
         return new AnmeldungService(
             new class () implements EmailSenderInterface {
+                public function renderFulfillerReminder(array $wishes, array $handover, string $locale = 'de'): array
+                {
+                    return [];
+                }
                 public function sendAnmeldung(string $recipient, \App\Registration\Services\AnmeldungMailVariant $variant, string $locale = 'de', ?string $loginUrl = null, ?array $wish = null, ?int $campaignYear = null): void
                 {
                 }

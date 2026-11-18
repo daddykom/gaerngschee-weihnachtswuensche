@@ -5,6 +5,7 @@ test.describe('Configuration route', () => {
   for (const fields of [
     { singleLine: 'pickup_date', multiline: 'pickup_location' },
     { singleLine: 'pickup_location', multiline: 'OTHER_NOTES' },
+    { singleLine: 'fulfiller_handover_date', multiline: 'fulfiller_reminder_dates' },
   ]) {
     test(`uses metadata to save text ${fields.singleLine} and textarea ${fields.multiline}`, async ({
       page,
@@ -59,12 +60,16 @@ test.describe('Configuration route', () => {
       await expect(date).toHaveAttribute('type', 'text');
       expect(await location.evaluate((element) => element.tagName)).toBe('TEXTAREA');
       await date.fill('Samstag, nachmittags – bitte Zeit reservieren');
-      await location.fill('Gemeindesaal\nHauptstrasse 1\n8000 Zürich');
+      const multilineValue =
+        fields.multiline === 'fulfiller_reminder_dates'
+          ? '2026-12-01\n2026-12-10'
+          : 'Gemeindesaal\nHauptstrasse 1\n8000 Zürich';
+      await location.fill(multilineValue);
       await page.getByRole('button', { name: 'Konfiguration speichern' }).click();
       await expectTranslatedText(page.getByRole('alert'), 'app.admin.configuration.saved');
       expect(saved).toEqual({
         'pickup-date': 'Samstag, nachmittags – bitte Zeit reservieren',
-        'pickup-location': 'Gemeindesaal\nHauptstrasse 1\n8000 Zürich',
+        'pickup-location': multilineValue,
       });
     });
   }

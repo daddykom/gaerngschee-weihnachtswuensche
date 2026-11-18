@@ -40,7 +40,25 @@ E-Mail bestätigt und bleibt bis zur Bestätigung zehn Minuten vorläufig.
   angezeigt. Die Start-/Enddaten der Erfüller-Aktion bleiben Datumswerte.
 - Abgelaufene oder nicht bestätigte Vorreservierungen werden wieder verfügbar
 
-### F3: Wunsch-Status
+### F3: Abgabeerinnerung für Erfüller
+
+- Admins pflegen `fulfiller_reminder_dates` als Textarea mit einem Datum pro
+  Zeile im Format `YYYY-MM-DD`. Ein leeres Feld deaktiviert die Erinnerungen.
+- Der bestehende stündliche Batch versendet an den konfigurierten Tagen nach
+  `Europe/Zurich` je Erfüller eine E-Mail mit allen noch nicht eingelieferten,
+  bestätigten Zusagen der konfigurierten Aktion (`campaign_year`).
+- Berücksichtigt werden nur freigegebene Wünsche definitiver Bestellungen
+  mit `fulfillment_status = reserved` und ohne `received_at`.
+- Die Nachricht enthält Wunschnummer, bearbeiteten Titel und Beschreibung,
+  den konfigurierten Abgabezeitraum, die Abgabezeit, den Abgabeort und einen
+  Hinweis zum rechtzeitigen Versand per Post mit Wunschnummer.
+- Pro normalisierter E-Mail-Adresse und Schweizer Kalendertag wird höchstens
+  eine erfolgreiche Zustellung gespeichert, auch bei parallelen Batchläufen.
+- Fehlgeschlagene Zustellungen werden beim nächsten Batch am selben Tag erneut
+  versucht; dabei werden die noch offenen Zusagen erneut geladen. Es gibt keinen
+  nachträglichen Versand für vergangene Erinnerungstage.
+
+### F4: Wunsch-Status
 
 - Verfügbare Wünsche anzeigen
 - Vorläufige und definitive Reservierungen klar anzeigen

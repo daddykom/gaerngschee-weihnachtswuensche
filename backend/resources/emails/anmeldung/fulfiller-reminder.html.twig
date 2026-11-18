@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ 'app.mail.registration.fulfillerReminder.subject'|trans }}</title>
+</head>
+<body style="margin:0; padding:0; background-color:{{ EMAIL_THEME.pageBackground }}; font-family:Arial,Helvetica,sans-serif; color:{{ EMAIL_THEME.text }};">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+    <tr><td align="center" style="padding:24px 12px;">
+      <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="width:100%; max-width:600px; background-color:{{ EMAIL_THEME.surface }}; border:1px solid {{ EMAIL_THEME.outline }}; border-radius:20px;">
+        <tr><td style="padding:32px; text-align:center; background-color:{{ EMAIL_THEME.primaryContainer }}; border-radius:20px 20px 0 0;">
+          <img src="{{ LOGO_CID }}" width="210" alt="Gärngschee" style="display:block; width:210px; max-width:100%; height:auto; margin:0 auto 22px auto;">
+          <h1 style="margin:0; font-size:28px;">{{ 'app.mail.registration.fulfillerReminder.subject'|trans }}</h1>
+        </td></tr>
+        <tr><td style="padding:24px 32px 8px;">
+          <p style="font-size:17px; line-height:1.55;">{{ 'app.mail.registration.fulfillerReminder.body'|trans }}</p>
+          {% for WISH in WISHES %}
+          <p style="font-size:17px; line-height:1.55;"><strong>{{ 'app.mail.registration.fulfillerReminder.wishNumber'|trans }}:</strong> {{ WISH.wishNumber }}<br><strong>{{ WISH.title }}</strong><br>{{ WISH.currentDescription|nl2br }}</p>
+          {% endfor %}
+          <h2 style="margin:24px 0 8px; font-size:21px;">{{ 'app.mail.registration.fulfillerReminder.handoverTitle'|trans }}</h2>
+          <p style="font-size:17px; line-height:1.55;">
+            <strong>{{ 'app.mail.registration.fulfillerReminder.date'|trans }}:</strong> {{ HANDOVER.date }}<br>
+            <strong>{{ 'app.mail.registration.fulfillerReminder.time'|trans }}:</strong> {{ HANDOVER.time }}<br>
+            <strong>{{ 'app.mail.registration.fulfillerReminder.location'|trans }}:</strong> {{ HANDOVER.location|nl2br }}
+          </p>
+          <p style="font-size:17px; line-height:1.55;">{{ 'app.mail.registration.fulfillerReminder.post'|trans }}</p>
+        </td></tr>
+        <tr><td style="padding:22px 32px 34px;"><p style="margin:0; font-size:13px; color:{{ EMAIL_THEME.mutedText }};">{{ 'app.mail.registration.fulfillerReminder.keepMessage'|trans }}</p></td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>

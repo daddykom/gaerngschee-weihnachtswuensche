@@ -161,6 +161,24 @@ final class EmailSender implements EmailSenderInterface
         ];
     }
 
+    /** @param list<array<string, string>> $wishes @param array<string, string> $handover */
+    public function renderFulfillerReminder(array $wishes, array $handover, string $locale = 'de'): array
+    {
+        if ($this->translator instanceof LocaleAwareInterface) {
+            $this->translator->setLocale($locale);
+        }
+        $html = $this->twig->render('fulfiller-reminder.html.twig', [
+            'LOGO_CID' => 'cid:' . self::LOGO_CID,
+            'WISHES' => $wishes,
+            'HANDOVER' => $handover,
+        ]);
+        return [
+            'subject' => $this->translator->trans('app.mail.registration.fulfillerReminder.subject', [], null, $locale),
+            'html' => $html,
+            'text' => $this->plainText($html, true),
+        ];
+    }
+
     public function sendUserCreated(string $recipient, string $temporaryPassword): void
     {
         $frontendBaseUrl = rtrim(getenv('FRONTEND_BASE_URL') ?: 'http://localhost:4200', '/');
@@ -275,6 +293,15 @@ final class EmailSender implements EmailSenderInterface
                 'wishNumber' => (string) $parameters['wishNumber'],
                 'title' => (string) $parameters['wishTitle'],
                 'currentDescription' => (string) $parameters['wishDescription'],
+            ]),
+            'fulfiller-reminder' => $this->renderFulfillerReminder([[
+                'wishNumber' => (string) $parameters['wishNumber'],
+                'title' => (string) $parameters['wishTitle'],
+                'currentDescription' => (string) $parameters['wishDescription'],
+            ]], [
+                'date' => (string) $parameters['handoverDate'],
+                'time' => (string) $parameters['handoverTime'],
+                'location' => (string) $parameters['handoverLocation'],
             ]),
             'fairgate-registration-required' => $this->renderAnmeldungTest($recipient, AnmeldungMailVariant::FairgateRegistrationRequired, (string) $parameters['fairgateUrl']),
             'fairgate-registration-available' => $this->renderAnmeldungTest($recipient, AnmeldungMailVariant::FairgateRegistrationAvailable, (string) $parameters['startUrl']),
