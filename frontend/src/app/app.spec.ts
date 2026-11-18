@@ -6,10 +6,17 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { provideTranslateService } from '@ngx-translate/core';
 import { App } from './app';
+import { AppUpdateService } from './shared/services/app-update.service';
 import { AuthActions } from './store/auth/auth.actions';
 import { initialState as authInitialState } from './store/auth/auth.state';
 import { SessionActions } from './store/auth/session.actions';
 import { initialState as frontendConfigInitialState } from './store/frontend-config/frontend-config.state';
+
+const appUpdateStub = {
+  start: () => undefined,
+  pendingBuildId: () => null,
+  requestReload: () => undefined,
+};
 
 @Component({ changeDetection: ChangeDetectionStrategy.Eager, template: '' })
 class TestPage {}
@@ -26,6 +33,7 @@ describe('App', () => {
       imports: [App, RouterTestingModule],
       providers: [
         provideTranslateService(),
+        { provide: AppUpdateService, useValue: appUpdateStub },
         provideMockStore({
           initialState: {
             auth: authInitialState,
@@ -85,6 +93,7 @@ describe('App', () => {
         imports: [App, RouterTestingModule],
         providers: [
           provideTranslateService(),
+          { provide: AppUpdateService, useValue: appUpdateStub },
           provideMockStore({
             initialState: {
               notification: {
@@ -116,6 +125,7 @@ describe('App', () => {
         imports: [App, RouterTestingModule],
         providers: [
           provideTranslateService(),
+          { provide: AppUpdateService, useValue: appUpdateStub },
           provideMockStore({
             initialState: {
               notification: {
@@ -163,6 +173,7 @@ describe('App', () => {
         imports: [App, RouterTestingModule],
         providers: [
           provideTranslateService(),
+          { provide: AppUpdateService, useValue: appUpdateStub },
           provideMockStore({
             initialState: {
               notification: {
@@ -231,6 +242,7 @@ describe('App', () => {
         ],
         providers: [
           provideTranslateService(),
+          { provide: AppUpdateService, useValue: appUpdateStub },
           provideMockStore({
             initialState: {
               auth: { ...authInitialState, group: 'admin', email: 'admin@example.com' },

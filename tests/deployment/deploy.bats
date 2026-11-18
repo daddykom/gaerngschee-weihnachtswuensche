@@ -58,6 +58,17 @@ setup() {
   [ ! -f "$log_file" ]
 }
 
+@test 'preserves old lazy bundles when users defer updating' {
+  printf 'old lazy chunk\n' > "$target_base/pre-prod/frontend/chunk-OLD12345.js"
+  printf 'old stylesheet\n' > "$target_base/pre-prod/frontend/styles-OLD12345.css"
+  printf 'obsolete file\n' > "$target_base/pre-prod/frontend/obsolete.html"
+  run run_deploy pre-prod
+  [ "$status" -eq 0 ]
+  [ -f "$target_base/pre-prod/frontend/chunk-OLD12345.js" ]
+  [ -f "$target_base/pre-prod/frontend/styles-OLD12345.css" ]
+  [ ! -f "$target_base/pre-prod/frontend/obsolete.html" ]
+}
+
 @test 'deploys the production environment with the production migration environment' {
   run run_deploy prod 'DEPLOY PROD'
 

@@ -6,7 +6,6 @@ import {
   computed,
   ElementRef,
   inject,
-  signal,
   viewChild,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -17,8 +16,10 @@ import { ActivatedRoute, NavigationEnd, Router, RouterLink, RouterOutlet } from 
 import { Store } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
 import { filter, startWith } from 'rxjs';
+import { BUILD_INFO } from '../generated/build-info';
 import { AdminNavigationComponent } from './shared/components/admin-navigation/admin-navigation';
 import { InfoBoxComponent } from './shared/components/info-box/info-box';
+import { AppUpdateService } from './shared/services/app-update.service';
 import { AuthActions } from './store/auth/auth.actions';
 import { selectAuthEmail, selectAuthGroup } from './store/auth/auth.feature';
 import { SessionActions } from './store/auth/session.actions';
@@ -63,18 +64,12 @@ export class App {
   readonly authEmail = this.store.selectSignal(selectAuthEmail);
   readonly isAdmin = computed(() => this.authGroup() === 'admin');
   readonly isFulfiller = computed(() => this.authGroup() === 'wunscherfueller');
-  readonly version = signal('0.0.0-dev');
+  readonly appVersion = BUILD_INFO.appVersion;
+  readonly updates = inject(AppUpdateService);
   private lastScrolledNotification: unknown = null;
 
   constructor() {
-    void fetch('/version.json', { cache: 'no-store' })
-      .then((response) => (response.ok ? response.json() : null))
-      .then((payload: { version?: unknown } | null) => {
-        if (typeof payload?.version === 'string' && payload.version.length > 0) {
-          this.version.set(payload.version);
-        }
-      })
-      .catch(() => undefined);
+    this.updates.start();
 
     const isRegistrationLogin =
       this.router.parseUrl(this.location.path()).root.children['primary']?.segments[0]?.path ===

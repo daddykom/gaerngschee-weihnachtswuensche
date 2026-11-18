@@ -10,6 +10,7 @@ import { appRoutes } from './app.routes';
 import { authSessionInterceptor } from './shared/interceptors/auth-session.interceptor';
 import { authTokenInterceptor } from './shared/interceptors/auth-token.interceptor';
 import { eventInterceptor } from './shared/interceptors/event.interceptor';
+import { appUpdateFeature } from './store/app-update/app-update.feature';
 import { authEffects } from './store/auth/auth.effects';
 import { authFeature } from './store/auth/auth.feature';
 import { sessionEffects } from './store/auth/session.effects';
@@ -29,6 +30,7 @@ export const appConfig: ApplicationConfig = {
     ),
     provideRouter(appRoutes),
     provideStore(),
+    provideState(appUpdateFeature),
     provideState(authFeature),
     provideState(notificationFeature),
     provideState(frontendConfigFeature),

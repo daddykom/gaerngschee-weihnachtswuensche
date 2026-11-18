@@ -27,6 +27,7 @@ services:
     volumes:
       - ./backend:/var/www/html
       - ./db:/var/www/db
+      - ./frontend/public:/var/www/frontend/public:ro
     env_file:
       - ./backend/.env.integration
     environment:

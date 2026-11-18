@@ -8,6 +8,8 @@
   "tags": [],
   "targets": {
     "build": {
+      "dependsOn": ["build-info", "^build"],
+      "cache": false,
       "executor": "@angular/build:application",
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
@@ -70,6 +72,7 @@
       }
     },
     "serve": {
+      "dependsOn": ["build-info"],
       "continuous": true,
       "executor": "@angular/build:dev-server",
       "defaultConfiguration": "development",
@@ -86,12 +89,14 @@
       }
     },
     "lint": {
+      "dependsOn": ["build-info"],
       "executor": "@nx/eslint:lint",
       "options": {
         "lintFilePatterns": ["./src"]
       }
     },
     "test": {
+      "dependsOn": ["build-info"],
       "executor": "@angular/build:unit-test",
       "outputs": ["{workspaceRoot}/coverage/{projectName}"],
       "options": {
@@ -113,6 +118,14 @@
         "buildTarget": "frontend:build",
         "staticFilePath": "dist/frontend/browser",
         "spa": true
+      }
+    },
+    "build-info": {
+      "cache": false,
+      "executor": "nx:run-commands",
+      "outputs": [],
+      "options": {
+        "command": "node scripts/write-build-info.mjs"
       }
     }
   }
