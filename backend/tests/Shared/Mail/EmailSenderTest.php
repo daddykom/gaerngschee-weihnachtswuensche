@@ -108,12 +108,17 @@ final class EmailSenderTest extends TestCase
         $mailer = $this->createMock(MailerInterface::class);
         $mailer->expects(self::once())->method('send')->with(self::callback(static function (Email $email): bool {
             foreach ([$email->getHtmlBody(), $email->getTextBody()] as $body) {
-                self::assertStringContainsString('12-1', $body);
+                self::assertStringContainsString('Wie schön, dass du diesen Wunsch erfüllst, bitte bestätige das auf folgendem Link:', $body);
+                self::assertStringContainsString('Wunschnummer 12-1 Edited wish title', $body);
+                self::assertStringContainsString('Wunscherfüllung bestätigen', $body);
+                self::assertStringContainsString('https://example.com/confirm', $body);
+                self::assertStringNotContainsString('Bitte bestätige, dass du den folgenden Wunsch erfüllen möchtest:', $body);
                 self::assertStringContainsString('Edited wish title', $body);
                 self::assertStringContainsString('Edited wish description', $body);
                 self::assertStringNotContainsString('Private original', $body);
                 self::assertStringNotContainsString('Private team message', $body);
             }
+            self::assertStringContainsString('<strong>Wunschnummer 12-1 Edited wish title</strong>', $email->getHtmlBody());
             return true;
         }));
         $sender = new EmailSender($mailer, 'noreply@example.com', 'Gärngschee');
@@ -128,8 +133,10 @@ final class EmailSenderTest extends TestCase
     {
         $mailer = $this->createMock(MailerInterface::class);
         $mailer->expects(self::once())->method('send')->with(self::callback(static function (Email $email): bool {
-            self::assertStringContainsString('Edited test title', $email->getHtmlBody());
-            self::assertStringContainsString('Edited test title', $email->getTextBody());
+            foreach ([$email->getHtmlBody(), $email->getTextBody()] as $body) {
+                self::assertStringContainsString('Wunschnummer 12-1 Edited test title', $body);
+                self::assertStringContainsString('Wunscherfüllung bestätigen', $body);
+            }
             return true;
         }));
         (new EmailSender($mailer, 'noreply@example.com', 'Gärngschee'))->sendTestEmail('test@example.com', 'fulfiller-reservation', [

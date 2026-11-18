@@ -1178,8 +1178,9 @@
         },
         "fulfillerReservation": {
           "title": "Deine Wunschreservierung bestätigen",
-          "intro": "Bitte bestätige, dass du den folgenden Wunsch erfüllen möchtest:",
-          "button": "Wunschreservierung bestätigen",
+          "intro": "Wie schön, dass du diesen Wunsch erfüllst, bitte bestätige das auf folgendem Link:",
+          "wishNumber": "Wunschnummer",
+          "button": "Wunscherfüllung bestätigen",
           "subject": "Bitte bestätige deine Wunschreservierung"
         },
         "fulfillerReservationConfirmation": {
