@@ -87,6 +87,10 @@ test('saves ISO reminder dates and sends one bundled email through concurrent ho
       await request.get(`http://localhost:8025/api/v1/message/${messages[0].ID}`)
     ).json();
     for (const body of [message.HTML, message.Text]) {
+      expect(body).toContain(
+        'Danke, dass du Weihnachtswünsche erfüllst! Gerne erinnern wir dich an die bevorstehenden Abgabetermine für die Geschenke zu folgenden Wünschen:',
+      );
+      expect(body).not.toContain('noch kein Geschenk eingegangen');
       expect(body).toContain(`${fixture.orderNumber}-1`);
       expect(body).toContain(`${fixture.orderNumber}-2`);
       expect(body).not.toContain(`${fixture.orderNumber}-3`);
