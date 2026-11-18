@@ -15,6 +15,7 @@ use App\Auth\Services\SessionService;
 use App\Shared\Http\RateLimitService;
 use App\Shared\Http\JsonResponse;
 use App\Shared\Http\EventResponseHeaders;
+use App\Shared\Http\BuildResponseHeaders;
 use App\Shared\Events\EventRepository;
 use App\Shared\Database\Database;
 use Psr\Http\Message\ResponseInterface;
@@ -42,10 +43,11 @@ final class Application
         $app->add(function (ServerRequestInterface $request, $handler) use ($frontendOrigin): ResponseInterface {
             $addEventHeaders = static function (ResponseInterface $response): ResponseInterface {
                 try {
-                    return EventResponseHeaders::add($response, new EventRepository(Database::getConnection()));
+                    $response = EventResponseHeaders::add($response, new EventRepository(Database::getConnection()));
                 } catch (\Throwable) {
-                    return $response;
+                    // Build information does not depend on database availability.
                 }
+                return BuildResponseHeaders::add($response);
             };
             if ($request->getMethod() === 'OPTIONS') {
                 $response = new Response();

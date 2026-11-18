@@ -58,6 +58,17 @@
           >
         </app-info-box>
       </div>
+      } @if (updates.pendingBuildId()) {
+      <div class="gl-stack" role="status" aria-live="polite" data-testid="app-update-notice">
+        <app-info-box variant="info" [title]="'app.update.notice.title' | translate">
+          <span>{{ 'app.update.notice.message' | translate }}</span>
+        </app-info-box>
+        <div class="gl-cluster">
+          <button mat-button type="button" (click)="updates.requestReload()">
+            {{ 'app.update.notice.action' | translate }}
+          </button>
+        </div>
+      </div>
       } @if (publicConfigStatus() === 'loading' || publicConfigStatus() === 'initial') {
       <p role="status" aria-live="polite">{{ 'app.publicConfiguration.loading' | translate }}</p>
       } @else if (publicConfigStatus() === 'error') {
@@ -100,7 +111,7 @@
       </p>
 
       <small class="app-footer__version"
-        >{{ 'app.footer.version' | translate: { version: version() } }}</small
+        >{{ 'app.footer.version' | translate: { version: appVersion } }}</small
       >
     </div>
   </div>

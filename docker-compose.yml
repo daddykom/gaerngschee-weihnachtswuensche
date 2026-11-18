@@ -9,6 +9,7 @@ services:
     volumes:
       - ./backend:/var/www/html
       - ./db:/var/www/db
+      - ./frontend/public:/var/www/frontend/public:ro
     environment:
       - PHP_DISPLAY_ERRORS=1
       - APP_ENV=test

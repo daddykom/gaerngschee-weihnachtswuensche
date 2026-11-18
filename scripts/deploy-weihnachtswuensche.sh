@@ -94,6 +94,7 @@ phinx_environment='production'
 
 mkdir -p "$target_directory/backend" "$target_directory/frontend"
 rsync -a --delete --exclude='.env' "$temporary_directory/release/backend/" "$target_directory/backend/"
-rsync -a --delete "$temporary_directory/release/frontend/" "$target_directory/frontend/"
+# Keep old hashed bundles so users can defer reloading and still open lazy routes.
+rsync -a --delete --filter='P /*-*.js' --filter='P /*-*.css' "$temporary_directory/release/frontend/" "$target_directory/frontend/"
 
 printf 'Deployment of %s completed in %s\n' "$environment" "$target_directory"

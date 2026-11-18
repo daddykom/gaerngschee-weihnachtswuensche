@@ -3,6 +3,12 @@ LimitRequestBody 65536
 
 # Security headers for the static frontend and client-side routes.
 <IfModule mod_headers.c>
+  <FilesMatch "^(index\.html|build-info\.json)$">
+    Header always set Cache-Control "no-cache, no-store, must-revalidate"
+  </FilesMatch>
+  <FilesMatch "[-.][A-Za-z0-9_-]{8,}\.(js|css)$">
+    Header always set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
   Header always set Content-Security-Policy "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'"
   Header always set X-Content-Type-Options "nosniff"
   Header always set Referrer-Policy "strict-origin-when-cross-origin"

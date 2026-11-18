@@ -1,5 +1,19 @@
 {
   "app": {
+    "update": {
+      "notice": {
+        "title": "Eine neue Version ist verfügbar",
+        "message": "Du kannst mit der geöffneten Anwendung weiterarbeiten. Neu geladen wird nur mit deiner Zustimmung.",
+        "action": "Update prüfen"
+      },
+      "dialog": {
+        "title": "Anwendung neu laden?",
+        "message": "Eine neue Fassung der Anwendung ist verfügbar. Du entscheidest, ob du jetzt neu laden oder weiterarbeiten möchtest.",
+        "unsavedWarning": "Beim Neuladen gehen nicht gespeicherte Eingaben verloren. Wähle «Später», wenn du noch etwas speichern möchtest.",
+        "later": "Später",
+        "reload": "Neu laden"
+      }
+    },
     "common": {
       "loading": "Bitte warten ..."
     },

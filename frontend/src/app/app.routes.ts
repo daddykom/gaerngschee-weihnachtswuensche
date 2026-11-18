@@ -10,7 +10,7 @@ export const appRoutes: Routes = [
       {
         path: '',
         pathMatch: 'full',
-        data: { pageTitle: 'app.home.title' },
+        data: { pageTitle: 'app.home.title', updatePromptAllowed: true },
         loadComponent: () =>
           import('./features/home/pages/home/home.component').then((m) => m.HomeComponent),
       },
@@ -52,7 +52,7 @@ export const appRoutes: Routes = [
       },
       {
         path: 'bestellung/bestaetigung',
-        data: { pageTitle: 'app.order.confirmation.pageTitle' },
+        data: { pageTitle: 'app.order.confirmation.pageTitle', updatePromptAllowed: true },
         loadComponent: () =>
           import('./features/order/pages/order-confirmation/order-confirmation.component').then(
             (m) => m.OrderConfirmationComponent,
@@ -90,7 +90,11 @@ export const appRoutes: Routes = [
       },
       {
         path: 'impressum',
-        data: { legalPage: 'impressum', pageTitle: 'app.legal.imprintPageTitle' },
+        data: {
+          legalPage: 'impressum',
+          pageTitle: 'app.legal.imprintPageTitle',
+          updatePromptAllowed: true,
+        },
         loadComponent: () =>
           import('./features/legal/pages/legal-page/legal-page.component').then(
             (m) => m.LegalPageComponent,
@@ -98,7 +102,11 @@ export const appRoutes: Routes = [
       },
       {
         path: 'datenschutz',
-        data: { legalPage: 'datenschutz', pageTitle: 'app.legal.privacyPageTitle' },
+        data: {
+          legalPage: 'datenschutz',
+          pageTitle: 'app.legal.privacyPageTitle',
+          updatePromptAllowed: true,
+        },
         loadComponent: () =>
           import('./features/legal/pages/legal-page/legal-page.component').then(
             (m) => m.LegalPageComponent,

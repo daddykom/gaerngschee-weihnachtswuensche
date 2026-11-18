@@ -196,9 +196,31 @@ Release-Tag im Format `v<semver>+<build>`, zum Beispiel `v1.0.1+2`. Die
 SemVer-Komponente wird aus dem Conventional-Commit-Präfix des PR-Titels
 bestimmt: `feat:` erhöht Minor, ein Breaking Change erhöht Major und alle
 anderen Merges erhöhen Patch. Der globale Build-Zähler startet bei `1` und
-wird bei jedem Release erhöht. Der Frontend-Build ermittelt das erreichbare
-Release-Tag automatisch und stellt die Version als `version.json` für den
-Footer bereit. Nicht getaggte lokale Builds zeigen `0.0.0-dev` an.
+wird bei jedem Release erhöht. Die Release-Nummer ist `appVersion` und wird
+aus dem nächsten erreichbaren Release-Tag fest in den Frontend-Build eingebettet.
+Der Footer zeigt damit die Release-Version des tatsächlich geladenen Codes,
+nicht nachträglich die Version einer neueren Installation. Alle Umgebungen
+verwenden dieselbe Quelle; CI muss deshalb Tags und Historie auschecken.
+Für Quellarchive ohne Git-Metadaten ist `APP_VERSION` explizit zu übergeben.
+Ohne Release-Information bricht die Vorbereitung ab; es gibt keinen stillen
+Fallback auf `0.0.0-dev`.
+
+Unabhängig davon erzeugt jeder Build eine neue UUID als `buildId`. Nx führt
+`build-info` vor Build, Serve, Lint und Unit-Tests aus; der Produktions-Build
+wird nicht aus dem Nx-Cache wiederhergestellt. Das generierte `build-info.json`
+und die im Bundle eingebetteten Metadaten gehören zusammen und müssen zusammen
+veröffentlicht werden. `index.html` und `build-info.json` werden nicht gecacht.
+Das Backend liest die veröffentlichte Datei im benachbarten Frontend-Verzeichnis
+und liefert `X-App-Build` zusätzlich zu den fachlichen Event-Headern aus.
+Lokal und in Integration ist `frontend/public` dafür read-only eingebunden.
+
+Neue Builds lösen keinen automatischen Reload aus. Der Benutzer entscheidet in
+einem Dialog zwischen „Neu laden“ und „Später“; auf Formularseiten erscheint nur
+ein nicht-blockierender Hinweis. Alte gehashte JavaScript- und CSS-Dateien werden
+beim Deployment erhalten, damit aufgeschobene Clients weiterhin Lazy-Routen
+öffnen können. Diese Altdateien können nach einer betrieblich festgelegten
+Schonfrist bereinigt werden. Der freiwillige Reload ersetzt keine
+rückwärtskompatiblen Backend-API-Änderungen.
 
 Der lokale Bats-Test des Scripts benötigt keinen Server und keinen GitHub-Zugriff.
 Bats Core muss lokal installiert sein:

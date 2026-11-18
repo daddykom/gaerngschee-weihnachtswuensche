@@ -13,6 +13,8 @@
 /frontend/coverage
 /frontend/dist
 /frontend/public/version.json
+/frontend/public/build-info.json
+/frontend/src/generated/
 /frontend/node_modules
 /backend/.php-cs-fixer.cache
 /.codanna/index/serve.lock
