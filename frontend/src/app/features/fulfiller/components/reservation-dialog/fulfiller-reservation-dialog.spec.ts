@@ -22,6 +22,7 @@ describe('FulfillerReservationDialog', () => {
               ...frontendConfigState,
               publicConfigs: [
                 { variableName: 'fulfiller_handover_date', value: '17.–19. Dezember 2026' },
+                { variableName: 'fulfiller_handover_location', value: 'Saal A\nHauptstrasse 1' },
               ],
             },
             fulfillerOrders: fulfillerOrdersState,
@@ -84,5 +85,12 @@ describe('FulfillerReservationDialog', () => {
     await fixture.whenStable();
 
     expect(fixture.nativeElement.querySelector('[role="alert"]')).toBeTruthy();
+  });
+
+  it('preserves address line breaks in the handover details', () => {
+    const address = fixture.nativeElement.querySelector(
+      '[aria-labelledby="handover-heading"] dd.gl-text--multiline',
+    );
+    expect(address.textContent).toBe('Saal A\nHauptstrasse 1');
   });
 });

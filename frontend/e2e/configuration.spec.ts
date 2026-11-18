@@ -6,6 +6,7 @@ test.describe('Configuration route', () => {
     { singleLine: 'pickup_date', multiline: 'pickup_location' },
     { singleLine: 'pickup_location', multiline: 'OTHER_NOTES' },
     { singleLine: 'fulfiller_handover_date', multiline: 'fulfiller_reminder_dates' },
+    { singleLine: 'fulfiller_handover_time', multiline: 'fulfiller_handover_location' },
   ]) {
     test(`uses metadata to save text ${fields.singleLine} and textarea ${fields.multiline}`, async ({
       page,

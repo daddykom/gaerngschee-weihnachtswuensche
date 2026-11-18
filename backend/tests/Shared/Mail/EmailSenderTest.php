@@ -320,14 +320,15 @@ final class EmailSenderTest extends TestCase
 
         $message = $sender->renderFulfillerReservationConfirmation(
             ['wishNumber' => '12-1', 'currentDescription' => 'Bauklötze'],
-            ['date' => '17.–19. Dezember 2026', 'time' => '10:00–12:00 Uhr', 'location' => 'Clarastrasse 10, 4058 Basel'],
+            ['date' => '17.–19. Dezember 2026', 'time' => '10:00–12:00 Uhr', 'location' => "Clarastrasse 10\n4058 Basel"],
         );
 
         self::assertSame('Deine Wunschreservierung ist bestätigt', $message['subject']);
         self::assertStringContainsString('Bauklötze', $message['html']);
         self::assertStringContainsString('17.–19. Dezember 2026', $message['html']);
         self::assertStringContainsString('17.–19. Dezember 2026', $message['text']);
-        self::assertStringContainsString('Clarastrasse 10, 4058 Basel', $message['html']);
+        self::assertStringContainsString("Clarastrasse 10<br />\n4058 Basel", $message['html']);
+        self::assertStringContainsString("Clarastrasse 10\n4058 Basel", $message['text']);
         self::assertStringNotContainsString('http://localhost:4200', $message['html']);
         self::assertStringContainsString('Danke, dass du diesen Weihnachtswunsch erfüllst.', $message['text']);
     }

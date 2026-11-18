@@ -23,58 +23,59 @@ test.describe('Integration configuration', () => {
     }
   });
 
-  test('returns input metadata on list and update and retains the multiline editor after reload', async ({
-    page,
-  }) => {
-    await loginAsAdmin(page);
-    const configs = await (
-      await page.request.get('http://localhost:8082/admin/configuration')
-    ).json();
-    const location = configs.find(
-      (config: { variableName: string }) => config.variableName === 'pickup_location',
-    );
-    const date = configs.find(
-      (config: { variableName: string }) => config.variableName === 'pickup_date',
-    );
-    expect(location.inputType).toBe('textarea');
-    expect(date.inputType).toBe('text');
-    expect(
-      configs.every((config: { inputType: string }) =>
-        ['text', 'textarea'].includes(config.inputType),
-      ),
-    ).toBe(true);
-    try {
-      await page.goto('/admin/configuration');
-      const field = page.getByRole('textbox', { name: 'pickup_location', exact: true });
-      expect(await field.evaluate((element) => element.tagName)).toBe('TEXTAREA');
-      await field.fill('Saal A\nHauptstrasse 1');
-      const updated = page.waitForResponse(
-        (response) =>
-          response.url().endsWith(`/admin/configuration/${location.id}`) &&
-          response.request().method() === 'PATCH',
+  for (const configName of ['pickup_location', 'fulfiller_handover_location']) {
+    test(`returns input metadata and retains the multiline editor for ${configName} after reload`, async ({
+      page,
+    }) => {
+      await loginAsAdmin(page);
+      const configs = await (
+        await page.request.get('http://localhost:8082/admin/configuration')
+      ).json();
+      const location = configs.find(
+        (config: { variableName: string }) => config.variableName === configName,
       );
-      await page.getByRole('button', { name: 'Konfiguration speichern' }).click();
-      const response = await updated;
-      expect(response.status()).toBe(200);
-      expect(await response.json()).toMatchObject({
-        inputType: 'textarea',
-        value: 'Saal A\nHauptstrasse 1',
-      });
-      await page.reload();
-      await expect(field).toHaveValue('Saal A\nHauptstrasse 1');
-      expect(await field.evaluate((element) => element.tagName)).toBe('TEXTAREA');
-      await expect(page.getByRole('textbox', { name: 'pickup_date', exact: true })).toHaveAttribute(
-        'type',
-        'text',
+      const date = configs.find(
+        (config: { variableName: string }) => config.variableName === 'pickup_date',
       );
-    } finally {
-      const restored = await page.request.patch(
-        `http://localhost:8082/admin/configuration/${location.id}`,
-        { headers: await authHeaders(page), data: { value: location.value } },
-      );
-      expect(restored.status()).toBe(200);
-    }
-  });
+      expect(location.inputType).toBe('textarea');
+      expect(date.inputType).toBe('text');
+      expect(
+        configs.every((config: { inputType: string }) =>
+          ['text', 'textarea'].includes(config.inputType),
+        ),
+      ).toBe(true);
+      try {
+        await page.goto('/admin/configuration');
+        const field = page.getByRole('textbox', { name: configName, exact: true });
+        expect(await field.evaluate((element) => element.tagName)).toBe('TEXTAREA');
+        await field.fill('Saal A\nHauptstrasse 1');
+        const updated = page.waitForResponse(
+          (response) =>
+            response.url().endsWith(`/admin/configuration/${location.id}`) &&
+            response.request().method() === 'PATCH',
+        );
+        await page.getByRole('button', { name: 'Konfiguration speichern' }).click();
+        const response = await updated;
+        expect(response.status()).toBe(200);
+        expect(await response.json()).toMatchObject({
+          inputType: 'textarea',
+          value: 'Saal A\nHauptstrasse 1',
+        });
+        await page.reload();
+        await expect(field).toHaveValue('Saal A\nHauptstrasse 1');
+        expect(await field.evaluate((element) => element.tagName)).toBe('TEXTAREA');
+        await expect(
+          page.getByRole('textbox', { name: 'pickup_date', exact: true }),
+        ).toHaveAttribute('type', 'text');
+      } finally {
+        const restored = await page.request.patch(
+          `http://localhost:8082/admin/configuration/${location.id}`,
+          { headers: await authHeaders(page), data: { value: location.value } },
+        );
+        expect(restored.status()).toBe(200);
+      }
+    });
+  }
 
   test('saves both a handover date and a free-text date range without changing campaign date validation', async ({
     page,
