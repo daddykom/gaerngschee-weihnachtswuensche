@@ -11,8 +11,19 @@ describe('FulfillerReservationDialog', () => {
   let component: FulfillerReservationDialog;
   let fixture: ComponentFixture<FulfillerReservationDialog>;
   let store: MockStore;
+  let originalScrollIntoView: PropertyDescriptor | undefined;
+  let scrollIntoView: ReturnType<typeof vi.fn>;
 
   beforeEach(async () => {
+    originalScrollIntoView = Object.getOwnPropertyDescriptor(
+      HTMLElement.prototype,
+      'scrollIntoView',
+    );
+    scrollIntoView = vi.fn();
+    Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
+      configurable: true,
+      value: scrollIntoView,
+    });
     await TestBed.configureTestingModule({
       imports: [FulfillerReservationDialog],
       providers: [
@@ -55,6 +66,14 @@ describe('FulfillerReservationDialog', () => {
     await fixture.whenStable();
   });
 
+  afterEach(() => {
+    if (originalScrollIntoView) {
+      Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', originalScrollIntoView);
+    } else {
+      Reflect.deleteProperty(HTMLElement.prototype, 'scrollIntoView');
+    }
+  });
+
   it('should create', () => {
     expect(component).toBeTruthy();
   });
@@ -84,7 +103,39 @@ describe('FulfillerReservationDialog', () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
-    expect(fixture.nativeElement.querySelector('[role="alert"]')).toBeTruthy();
+    const alert = fixture.nativeElement.querySelector('[role="alert"]');
+    expect(alert).toBeTruthy();
+    expect(document.activeElement).toBe(alert);
+    expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' });
+  });
+
+  it('focuses and scrolls to the first invalid field without submitting', () => {
+    const dispatch = vi.spyOn(store, 'dispatch');
+    const input = fixture.nativeElement.querySelector('input[type="email"]');
+
+    component.submit();
+
+    expect(component.form.email().touched()).toBe(true);
+    expect(component.form.privacyAccepted().touched()).toBe(true);
+    expect(document.activeElement).toBe(input);
+    expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'center' });
+    expect(dispatch).not.toHaveBeenCalled();
+  });
+
+  it('focuses the privacy checkbox when only consent is invalid', async () => {
+    component.model.set({ email: 'person@example.com', privacyAccepted: false });
+    await fixture.whenStable();
+
+    component.submit();
+
+    expect(document.activeElement).toBe(
+      fixture.nativeElement.querySelector('input[type="checkbox"]'),
+    );
+    expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'center' });
+  });
+
+  it('does not scroll when the dialog is opened without errors', () => {
+    expect(scrollIntoView).not.toHaveBeenCalled();
   });
 
   it('preserves address line breaks in the handover details', () => {
