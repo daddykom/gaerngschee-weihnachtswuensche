@@ -79,6 +79,7 @@ test.describe('Admin email test route', () => {
                   { key: 'wishNumber', type: 'text', required: true },
                   { key: 'wishTitle', type: 'text', required: true },
                   { key: 'wishDescription', type: 'textarea', required: true },
+                  { key: 'wishLink', type: 'url', required: false },
                 ],
               },
             ],
@@ -101,6 +102,9 @@ test.describe('Admin email test route', () => {
     await page
       .getByRole('textbox', { name: 'Wunschbeschreibung', exact: true })
       .fill('Edited description');
+    await page
+      .getByRole('textbox', { name: 'Link zum Wunsch (freiwillig)', exact: true })
+      .fill('https://example.com/gift');
     await page.getByRole('button', { name: 'Senden', exact: true }).click();
     await expectTranslatedText(page.getByRole('alert'), 'app.admin.emailTest.sent');
     expect(sent).toEqual({
@@ -111,6 +115,7 @@ test.describe('Admin email test route', () => {
         wishNumber: '12-1',
         wishTitle: 'Edited title',
         wishDescription: 'Edited description',
+        wishLink: 'https://example.com/gift',
       },
     });
   });

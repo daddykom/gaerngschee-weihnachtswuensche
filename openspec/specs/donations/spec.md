@@ -32,8 +32,10 @@ E-Mail bestätigt und bleibt bis zur Bestätigung zehn Minuten vorläufig.
 - E-Mail-Adresse, Datenschutzzustimmung und verbindliche Übergabezusage erfassen
 - Vorläufige Reservierung bis zur Token-Bestätigung halten
 - Bestätigungslink ist zehn Minuten gültig und macht die Reservierung definitiv
-- Die Reservations-E-Mail enthält Wunschnummer, bearbeiteten Wunschtitel und
-  bearbeitete Beschreibung in HTML und Klartext; Originalwerte bleiben intern.
+- Sowohl die E-Mail mit dem Bestätigungslink als auch die anschliessende
+  Bestätigung enthalten Wunschnummer, bearbeiteten Wunschtitel, bearbeitete
+  Beschreibung und – sofern vorhanden – den Wunschlink in HTML und Klartext.
+  Ohne Wunschlink entfällt dessen Darstellung; Originalwerte bleiben intern.
 - `fulfiller_handover_date` ist ein frei formulierbarer Abgabetermin oder
   Abgabezeitraum, etwa „17.–19. Dezember 2026“. Bestehende Werte bleiben erhalten.
   Der Text wird unverändert im Reservationsdialog und in der Bestätigungsmail

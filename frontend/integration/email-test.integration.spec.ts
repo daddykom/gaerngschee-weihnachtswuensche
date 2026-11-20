@@ -4,6 +4,76 @@ import { loginAsAdmin } from './support/admin-login';
 import { authHeaders } from './support/auth-header';
 
 for (const template of [
+  { id: 'fulfiller-reservation', name: 'Reservation für Erfüller' },
+  { id: 'fulfiller-reservation-confirmation', name: 'Bestätigte Wunscherfüllung' },
+]) {
+  for (const hasLink of [true, false]) {
+    test(`sends ${template.id} with title and description ${hasLink ? 'with' : 'without'} a wish link`, async ({
+      page,
+      request,
+    }) => {
+      await loginAsAdmin(page);
+      const recipient = `fulfiller-${template.id}-${hasLink}-${Date.now()}@example.com`;
+      await page.goto('/admin/email-test');
+      await page.getByRole('combobox', { name: 'E-Mail', exact: true }).click();
+      await page.getByRole('option', { name: template.name, exact: true }).click();
+      await page.getByRole('textbox', { name: 'Empfänger-Adresse' }).fill(recipient);
+      await page.getByRole('textbox', { name: 'Wunschnummer', exact: true }).fill('12-1');
+      await page
+        .getByRole('textbox', { name: 'Bearbeiteter Wunschtitel', exact: true })
+        .fill('Edited test title');
+      await page
+        .getByRole('textbox', { name: 'Wunschbeschreibung', exact: true })
+        .fill('Edited test description\nSecond line');
+      if (hasLink) {
+        await page
+          .getByRole('textbox', { name: 'Link zum Wunsch (freiwillig)', exact: true })
+          .fill('https://example.com/gift');
+      }
+      if (template.id === 'fulfiller-reservation') {
+        await page
+          .getByRole('textbox', { name: 'Login-URL', exact: true })
+          .fill('https://example.com/confirm');
+      } else {
+        await page
+          .getByRole('textbox', { name: 'Abgabezeitraum', exact: true })
+          .fill('17.–19. Dezember 2026');
+        await page.getByRole('textbox', { name: 'Abgabezeit', exact: true }).fill('10–12 Uhr');
+        await page.getByRole('textbox', { name: 'Abgabeort', exact: true }).fill('Saal A\nBasel');
+      }
+      await page.getByRole('button', { name: 'Senden', exact: true }).click();
+      await expectTranslatedText(page.getByRole('alert'), 'app.admin.emailTest.sent');
+      let messageId: string | undefined;
+      await expect
+        .poll(async () => {
+          const data = await (await request.get('http://localhost:8025/api/v1/messages')).json();
+          messageId = data.messages.find(
+            (message: { ID: string; To: Array<{ Address: string }> }) =>
+              message.To.some((to) => to.Address === recipient),
+          )?.ID;
+          return Boolean(messageId);
+        })
+        .toBe(true);
+      const message = await (
+        await request.get(`http://localhost:8025/api/v1/message/${messageId}`)
+      ).json();
+      for (const body of [message.HTML, message.Text]) {
+        expect(body).toContain('Edited test title');
+        expect(body).toContain('Edited test description');
+        expect(body).toContain('Second line');
+        expect(body).not.toContain('app.mail.');
+        if (hasLink) {
+          expect(body).toContain('https://example.com/gift');
+        } else {
+          expect(body).not.toContain('Link zum gewünschten Geschenk');
+        }
+      }
+      expect(message.Text.replace(/\r\n/g, '\n')).toContain('Edited test description\nSecond line');
+    });
+  }
+}
+
+for (const template of [
   { id: 'order-ready-for-pickup', name: 'Abholbenachrichtigung' },
   { id: 'order-confirmation-definitive', name: 'Annahmebestätigung' },
 ]) {

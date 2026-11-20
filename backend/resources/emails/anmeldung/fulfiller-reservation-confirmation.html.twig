@@ -19,7 +19,10 @@
           <tr>
             <td style="padding:24px 32px 8px;">
               <p style="font-size:17px; line-height:1.55; color:{{ EMAIL_THEME.text }};">{{ 'app.mail.registration.fulfillerReservationConfirmation.body'|trans }}</p>
-              <p style="font-size:17px; line-height:1.55; color:{{ EMAIL_THEME.text }};"><strong>{{ 'app.mail.registration.fulfillerReservationConfirmation.wishNumber'|trans }}:</strong> {{ WISH.wishNumber }}<br><strong>{{ 'app.mail.registration.fulfillerReservationConfirmation.wish'|trans }}:</strong> {{ WISH.currentDescription }}</p>
+              <p style="font-size:17px; line-height:1.55; color:{{ EMAIL_THEME.text }};"><strong>{{ 'app.mail.registration.fulfillerReservationConfirmation.wishNumber'|trans }}:</strong> {{ WISH.wishNumber }}<br><strong>{{ WISH.title }}</strong><br>{{ WISH.currentDescription|nl2br }}</p>
+              {% if WISH.giftLink|default('') %}
+              <p style="font-size:17px; line-height:1.55;"><a href="{{ WISH.giftLink }}" style="color:{{ EMAIL_THEME.primary }};">{{ 'app.mail.registration.fulfillerReservationConfirmation.wishLink'|trans }}</a></p>
+              {% endif %}
               <h2 style="margin:24px 0 8px; font-size:21px; color:{{ EMAIL_THEME.text }};">{{ 'app.mail.registration.fulfillerReservationConfirmation.handoverTitle'|trans }}</h2>
               <p style="margin:0; font-size:17px; line-height:1.55; color:{{ EMAIL_THEME.text }};">
                 <strong>{{ 'app.mail.registration.fulfillerReservationConfirmation.date'|trans }}:</strong> {{ HANDOVER.date }}<br>

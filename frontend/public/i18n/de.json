@@ -732,6 +732,7 @@
         "templates": {
           "client-order": "Registrierungs-Link",
           "fulfiller-reservation": "Reservation für Erfüller",
+          "fulfiller-reservation-confirmation": "Bestätigte Wunscherfüllung",
           "fulfiller-reminder": "Abgabeerinnerung für Erfüller",
           "fairgate-registration-required": "Fairgate-Registrierung erforderlich",
           "fairgate-registration-available": "Fairgate-Registrierung verfügbar",
@@ -752,6 +753,7 @@
           "handoverTime": "Abgabezeit",
           "handoverLocation": "Abgabeort",
           "wishTitle": "Bearbeiteter Wunschtitel",
+          "wishLink": "Link zum Wunsch (freiwillig)",
           "orderFeedback": "Rückmeldung zum Wunschzettel (freiwillig)",
           "wishFeedback": "Rückmeldung zum Wunsch (freiwillig)",
           "fairgateUrl": "Fairgate-URL",
@@ -1179,6 +1181,7 @@
         "fulfillerReservation": {
           "title": "Deine Wunschreservierung bestätigen",
           "intro": "Wie schön, dass du diesen Wunsch erfüllst, bitte bestätige das auf folgendem Link:",
+          "wishLink": "Link zum gewünschten Geschenk",
           "wishNumber": "Wunschnummer",
           "button": "Wunscherfüllung bestätigen",
           "subject": "Bitte bestätige deine Wunschreservierung"
@@ -1187,6 +1190,7 @@
           "title": "Wunschreservierung bestätigt",
           "subject": "Deine Wunschreservierung ist bestätigt",
           "body": "Danke, dass du diesen Weihnachtswunsch erfüllst. Deine Reservierung wurde erfolgreich bestätigt.",
+          "wishLink": "Link zum gewünschten Geschenk",
           "wishNumber": "Wunschnummer",
           "wish": "Wunsch",
           "handoverTitle": "Übergabe",

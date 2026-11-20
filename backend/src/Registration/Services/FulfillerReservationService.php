@@ -65,6 +65,7 @@ final class FulfillerReservationService
                     'wishNumber' => $wish['wishNumber'],
                     'title' => $wish['title'],
                     'currentDescription' => $wish['currentDescription'],
+                    'giftLink' => $wish['giftLink'],
                 ],
             ];
         } catch (Throwable $exception) {

@@ -25,6 +25,16 @@ final class EmailTestAction
             ['key' => 'wishNumber', 'type' => 'text', 'required' => true],
             ['key' => 'wishTitle', 'type' => 'text', 'required' => true],
             ['key' => 'wishDescription', 'type' => 'textarea', 'required' => true],
+            ['key' => 'wishLink', 'type' => 'url', 'required' => false],
+        ]],
+        'fulfiller-reservation-confirmation' => ['fields' => [
+            ['key' => 'wishNumber', 'type' => 'text', 'required' => true],
+            ['key' => 'wishTitle', 'type' => 'text', 'required' => true],
+            ['key' => 'wishDescription', 'type' => 'textarea', 'required' => true],
+            ['key' => 'wishLink', 'type' => 'url', 'required' => false],
+            ['key' => 'handoverDate', 'type' => 'text', 'required' => true],
+            ['key' => 'handoverTime', 'type' => 'text', 'required' => true],
+            ['key' => 'handoverLocation', 'type' => 'textarea', 'required' => true],
         ]],
         'fulfiller-reminder' => ['fields' => [
             ['key' => 'wishNumber', 'type' => 'text', 'required' => true],

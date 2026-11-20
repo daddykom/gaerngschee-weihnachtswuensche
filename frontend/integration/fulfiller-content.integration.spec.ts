@@ -170,6 +170,39 @@ test('publishes only edited wish details and keeps the team message private acro
       expect(body).toContain('Wunscherfüllung bestätigen');
       expect(body).toContain(publishedTitle);
       expect(body).toContain(publishedDescription);
+      expect(body).toContain(giftLink);
+      expect(body).not.toContain(originalTitle);
+      expect(body).not.toContain(originalDescription);
+      expect(body).not.toContain(privateMessage);
+    }
+    const reservationUrl = message.HTML.match(
+      /href="([^"]*\/fulfiller-reservation\?token=[^"]+)"/,
+    )?.[1];
+    expect(reservationUrl).toBeTruthy();
+    const confirmation = await request.post(`${API_URL}/auth/fulfiller-reservation-confirm`, {
+      headers: { 'X-CSRF-Token': csrf },
+      data: { token: new URL(reservationUrl!).searchParams.get('token') },
+    });
+    expect(confirmation.status()).toBe(200);
+    let confirmationMessageId: string | undefined;
+    await expect
+      .poll(async () => {
+        const messages = (await (await request.get('http://localhost:8025/api/v1/messages')).json())
+          .messages;
+        confirmationMessageId = messages.find(
+          (mail: { ID: string; To: Array<{ Address: string }> }) =>
+            mail.ID !== messageId && mail.To.some((to) => to.Address === recipient),
+        )?.ID;
+        return Boolean(confirmationMessageId);
+      })
+      .toBe(true);
+    const confirmationMessage = await (
+      await request.get(`http://localhost:8025/api/v1/message/${confirmationMessageId}`)
+    ).json();
+    for (const body of [confirmationMessage.HTML, confirmationMessage.Text]) {
+      expect(body).toContain(publishedTitle);
+      expect(body).toContain(publishedDescription);
+      expect(body).toContain(giftLink);
       expect(body).not.toContain(originalTitle);
       expect(body).not.toContain(originalDescription);
       expect(body).not.toContain(privateMessage);
