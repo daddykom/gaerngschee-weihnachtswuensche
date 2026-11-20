@@ -19,7 +19,10 @@
           <tr>
             <td style="padding:24px 32px 8px;">
               <p style="font-size:17px; line-height:1.55; color:{{ EMAIL_THEME.text }};">{{ 'app.mail.registration.fulfillerReservation.intro'|trans }}</p>
-              <p style="font-size:17px; line-height:1.55; color:{{ EMAIL_THEME.text }};"><strong>{{ 'app.mail.registration.fulfillerReservation.wishNumber'|trans }} {{ WISH.wishNumber }} {{ WISH.title }}</strong><br>{{ WISH.currentDescription }}</p>
+              <p style="font-size:17px; line-height:1.55; color:{{ EMAIL_THEME.text }};"><strong>{{ 'app.mail.registration.fulfillerReservation.wishNumber'|trans }}:</strong> {{ WISH.wishNumber }}<br><strong>{{ WISH.title }}</strong><br>{{ WISH.currentDescription|nl2br }}</p>
+              {% if WISH.giftLink|default('') %}
+              <p style="font-size:17px; line-height:1.55;"><a href="{{ WISH.giftLink }}" style="color:{{ EMAIL_THEME.primary }};">{{ 'app.mail.registration.fulfillerReservation.wishLink'|trans }}</a></p>
+              {% endif %}
             </td>
           </tr>
           <tr>

@@ -114,7 +114,7 @@ final class EmailSender implements EmailSenderInterface
             ->from(new Address($this->fromAddress, $this->fromName))
             ->to($recipient)
             ->subject($this->translator->trans($subjectKey, [], null, $locale))
-            ->text($this->plainText($html))
+            ->text($this->plainText($html, $variant === AnmeldungMailVariant::FulfillerReservation))
             ->html($html)
             ->embedFromPath(
                 dirname(__DIR__, 3) . '/resources/pictures/gaerngschee-logo.png',
@@ -293,6 +293,17 @@ final class EmailSender implements EmailSenderInterface
                 'wishNumber' => (string) $parameters['wishNumber'],
                 'title' => (string) $parameters['wishTitle'],
                 'currentDescription' => (string) $parameters['wishDescription'],
+                'giftLink' => (string) ($parameters['wishLink'] ?? ''),
+            ]),
+            'fulfiller-reservation-confirmation' => $this->renderFulfillerReservationConfirmation([
+                'wishNumber' => (string) $parameters['wishNumber'],
+                'title' => (string) $parameters['wishTitle'],
+                'currentDescription' => (string) $parameters['wishDescription'],
+                'giftLink' => (string) ($parameters['wishLink'] ?? ''),
+            ], [
+                'date' => (string) $parameters['handoverDate'],
+                'time' => (string) $parameters['handoverTime'],
+                'location' => (string) $parameters['handoverLocation'],
             ]),
             'fulfiller-reminder' => $this->renderFulfillerReminder([[
                 'wishNumber' => (string) $parameters['wishNumber'],
@@ -344,7 +355,7 @@ final class EmailSender implements EmailSenderInterface
             AnmeldungMailVariant::FairgateRegistrationAvailable => 'app.mail.registration.fairgateRegistrationAvailable.subject',
         };
 
-        return ['subject' => $this->translator->trans($subjectKey, [], null, 'de'), 'html' => $html, 'text' => $this->plainText($html)];
+        return ['subject' => $this->translator->trans($subjectKey, [], null, 'de'), 'html' => $html, 'text' => $this->plainText($html, $variant === AnmeldungMailVariant::FulfillerReservation)];
     }
 
     /** @return array{subject: string, html: string, text: string} */

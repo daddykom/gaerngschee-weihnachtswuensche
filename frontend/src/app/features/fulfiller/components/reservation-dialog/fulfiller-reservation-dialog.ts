@@ -1,7 +1,17 @@
-import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
+import {
+  afterRenderEffect,
+  Component,
+  computed,
+  effect,
+  ElementRef,
+  inject,
+  signal,
+  untracked,
+  viewChild,
+} from '@angular/core';
 import { email, form, FormField, maxLength, required } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatCheckbox, MatCheckboxModule } from '@angular/material/checkbox';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -40,6 +50,10 @@ import {
 export class FulfillerReservationDialog {
   private readonly store = inject(Store);
   private readonly dialogRef = inject(MatDialogRef<FulfillerReservationDialog>);
+  private readonly errorMessage = viewChild<ElementRef<HTMLElement>>('errorMessage');
+  private readonly emailInput = viewChild<ElementRef<HTMLInputElement>>('emailInput');
+  private readonly privacyCheckbox = viewChild(MatCheckbox);
+  private readonly privacyField = viewChild<ElementRef<HTMLElement>>('privacyField');
   readonly wish = inject<FulfillerWish>(MAT_DIALOG_DATA);
   private readonly storeForm = this.store.selectSignal(selectFulfillerReservationForm);
   private readonly publicConfigs = this.store.selectSignal(selectFrontendPublicConfigs);
@@ -83,14 +97,39 @@ export class FulfillerReservationDialog {
         this.dialogRef.close();
       }
     });
+    afterRenderEffect({
+      write: () => {
+        const error = this.errorMessage()?.nativeElement;
+        if (this.status() !== 'error' || !error) return;
+
+        error.focus({ preventScroll: true });
+        error.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
+      },
+    });
   }
 
   submit(): void {
     this.form.email().markAsTouched();
     this.form.privacyAccepted().markAsTouched();
-    if (!this.form().valid() || this.status() === 'loading') return;
+    if (this.status() === 'loading') return;
+    if (!this.form().valid()) {
+      this.focusFirstInvalidField();
+      return;
+    }
 
     untracked(() => this.store.dispatch(FulfillerOrdersActions.reservationSubmitted()));
+  }
+
+  private focusFirstInvalidField(): void {
+    if (!this.form.email().valid()) {
+      const input = this.emailInput()?.nativeElement;
+      input?.focus({ preventScroll: true });
+      input?.scrollIntoView?.({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    this.privacyCheckbox()?.focus();
+    this.privacyField()?.nativeElement.scrollIntoView?.({ behavior: 'smooth', block: 'center' });
   }
 
   private configValue(variableName: string): string {

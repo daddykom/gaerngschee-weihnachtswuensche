@@ -34,7 +34,11 @@ final class EmailTestActionTest extends TestCase
         $acceptance = array_values(array_filter($body['templates'], static fn (array $template): bool => $template['id'] === 'order-confirmation-definitive'))[0];
         self::assertSame($pickup[0]['fields'], $acceptance['fields']);
         $reservation = array_values(array_filter($body['templates'], static fn (array $template): bool => $template['id'] === 'fulfiller-reservation'))[0];
-        self::assertSame(['loginUrl', 'wishNumber', 'wishTitle', 'wishDescription'], array_column($reservation['fields'], 'key'));
+        self::assertSame(['loginUrl', 'wishNumber', 'wishTitle', 'wishDescription', 'wishLink'], array_column($reservation['fields'], 'key'));
+        self::assertSame(['key' => 'wishLink', 'type' => 'url', 'required' => false], $reservation['fields'][4]);
+        $confirmation = array_values(array_filter($body['templates'], static fn (array $template): bool => $template['id'] === 'fulfiller-reservation-confirmation'))[0];
+        self::assertSame(['wishNumber', 'wishTitle', 'wishDescription', 'wishLink', 'handoverDate', 'handoverTime', 'handoverLocation'], array_column($confirmation['fields'], 'key'));
+        self::assertSame(['key' => 'wishLink', 'type' => 'url', 'required' => false], $confirmation['fields'][3]);
         $reminder = array_values(array_filter($body['templates'], static fn (array $template): bool => $template['id'] === 'fulfiller-reminder'))[0];
         self::assertSame(['wishNumber', 'wishTitle', 'wishDescription', 'handoverDate', 'handoverTime', 'handoverLocation'], array_column($reminder['fields'], 'key'));
         $review = array_values(array_filter($body['templates'], static fn (array $template): bool => $template['id'] === 'order-confirmation-changes_requested'))[0];
