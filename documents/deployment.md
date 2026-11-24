@@ -215,11 +215,8 @@ und liefert `X-App-Build` zusätzlich zu den fachlichen Event-Headern aus.
 Lokal und in Integration ist `frontend/public` dafür read-only eingebunden.
 
 Neue Builds lösen keinen automatischen Reload aus. Der Benutzer entscheidet in
-einem Dialog zwischen „Neu laden“ und „Später“. Der Dialog erscheint auf allen
-Seiten, auch auf Formularseiten, überlagert aber keine bereits offenen Dialoge.
-„Später“ erhält die Eingaben und unterdrückt weitere automatische Dialoge für
-denselben Build; der nicht-blockierende Hinweis bleibt sichtbar.
-Alte gehashte JavaScript- und CSS-Dateien werden
+einem Dialog zwischen „Neu laden“ und „Später“; auf Formularseiten erscheint nur
+ein nicht-blockierender Hinweis. Alte gehashte JavaScript- und CSS-Dateien werden
 beim Deployment erhalten, damit aufgeschobene Clients weiterhin Lazy-Routen
 öffnen können. Diese Altdateien können nach einer betrieblich festgelegten
 Schonfrist bereinigt werden. Der freiwillige Reload ersetzt keine

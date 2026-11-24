@@ -80,9 +80,9 @@ All database schema changes via Phinx migrations.
   invalid checks do not interrupt work. Only `buildId`, not `appVersion`, is
   compared. The running footer version never changes from a remote response.
 - The central information zone shows a persistent, non-blocking update notice.
-  An automatic confirmation popup is offered globally on all routes, including
-  forms and link-login/token-confirmation routes, but not while another dialog
-  is open. Users can also open it from the notice.
+  An automatic confirmation popup is allowed only on routes explicitly marked
+  `updatePromptAllowed`, not on forms or link-login/token-confirmation routes,
+  and not while another dialog is open. Users can also open it from the notice.
 - Reloading requires an explicit affirmative dialog result. Escape, backdrop
   dismissal and “Später” continue without reloading. Deferral is remembered per
   running/published build pair in the tab's session storage. The notice remains
