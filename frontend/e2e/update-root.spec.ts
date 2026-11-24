@@ -1,14 +1,28 @@
 import { expectTranslatedText } from './support/assertions';
 import { expect, test } from './support/test';
 
-test('offers an update on the safe home route, allows later and reloads only after confirmation', async ({
+test('offers an update on the home route, allows later and reloads only after confirmation', async ({
   page,
 }) => {
   const baseline = await (await page.request.get('/build-info.json')).json();
-  let changed = false;
-  await page.route('**/build-info.json?*', (route) =>
+  let changed = true;
+  const metadataRequests: string[] = [];
+  page.on('request', (request) => {
+    if (new URL(request.url()).pathname === '/build-info.json')
+      metadataRequests.push(request.url());
+  });
+  await page.clock.install();
+  await page.route('http://localhost:8083/public/configuration**', (route) =>
     route.fulfill({
-      json: changed ? { appVersion: '99.0.0+999', buildId: 'new-test-build' } : baseline,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Expose-Headers': 'X-App-Build',
+        'X-App-Build': changed ? 'new-test-build' : baseline.buildId,
+      },
+      json: [
+        { variableName: 'campaign_start_date', value: '2000-01-01' },
+        { variableName: 'campaign_end_date', value: '2999-12-31' },
+      ],
     }),
   );
   let navigations = 0;
@@ -17,8 +31,6 @@ test('offers an update on the safe home route, allows later and reloads only aft
   });
   await page.goto('/');
   await expect(page.locator('.app-footer__version')).toContainText(baseline.appVersion);
-  changed = true;
-  await page.evaluate(() => window.dispatchEvent(new Event('focus')));
   const dialog = page.getByRole('dialog');
   await expect(dialog).toBeVisible();
   await expectTranslatedText(dialog.getByRole('heading'), 'app.update.dialog.title');
@@ -27,7 +39,9 @@ test('offers an update on the safe home route, allows later and reloads only aft
   await expect(page.getByTestId('app-update-notice')).toBeVisible();
   await expect(page.locator('.app-footer__version')).toContainText(baseline.appVersion);
   await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+  await page.clock.fastForward(120_000);
   await expect(dialog).toHaveCount(0);
+  expect(metadataRequests).toEqual([]);
   expect(navigations).toBe(1);
   await page.getByTestId('app-update-notice').getByRole('button').click();
   await expect(dialog).toBeVisible();

@@ -6,17 +6,11 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { provideTranslateService } from '@ngx-translate/core';
 import { App } from './app';
-import { AppUpdateService } from './shared/services/app-update.service';
+import { AppUpdateActions, appUpdateFeature } from './store/app-update/app-update.feature';
 import { AuthActions } from './store/auth/auth.actions';
 import { initialState as authInitialState } from './store/auth/auth.state';
 import { SessionActions } from './store/auth/session.actions';
 import { initialState as frontendConfigInitialState } from './store/frontend-config/frontend-config.state';
-
-const appUpdateStub = {
-  start: () => undefined,
-  pendingBuildId: () => null,
-  requestReload: () => undefined,
-};
 
 @Component({ changeDetection: ChangeDetectionStrategy.Eager, template: '' })
 class TestPage {}
@@ -33,8 +27,8 @@ describe('App', () => {
       imports: [App, RouterTestingModule],
       providers: [
         provideTranslateService(),
-        { provide: AppUpdateService, useValue: appUpdateStub },
         provideMockStore({
+          selectors: [{ selector: appUpdateFeature.selectPendingBuildId, value: null }],
           initialState: {
             auth: authInitialState,
             frontendConfig: { ...frontendConfigInitialState, publicStatus: 'loaded' },
@@ -93,8 +87,8 @@ describe('App', () => {
         imports: [App, RouterTestingModule],
         providers: [
           provideTranslateService(),
-          { provide: AppUpdateService, useValue: appUpdateStub },
           provideMockStore({
+            selectors: [{ selector: appUpdateFeature.selectPendingBuildId, value: null }],
             initialState: {
               notification: {
                 current: {
@@ -125,8 +119,8 @@ describe('App', () => {
         imports: [App, RouterTestingModule],
         providers: [
           provideTranslateService(),
-          { provide: AppUpdateService, useValue: appUpdateStub },
           provideMockStore({
+            selectors: [{ selector: appUpdateFeature.selectPendingBuildId, value: null }],
             initialState: {
               notification: {
                 current: {
@@ -173,8 +167,8 @@ describe('App', () => {
         imports: [App, RouterTestingModule],
         providers: [
           provideTranslateService(),
-          { provide: AppUpdateService, useValue: appUpdateStub },
           provideMockStore({
+            selectors: [{ selector: appUpdateFeature.selectPendingBuildId, value: null }],
             initialState: {
               notification: {
                 current: {
@@ -226,6 +220,24 @@ describe('App', () => {
     expect(dispatch).toHaveBeenCalledWith(AuthActions.logoutRequested());
   });
 
+  it('shows the pending update and dispatches the reload click from the notice', async () => {
+    const store = TestBed.inject(MockStore);
+    store.overrideSelector(appUpdateFeature.selectPendingBuildId, 'new-build');
+    store.refreshState();
+    const dispatch = vi.spyOn(store, 'dispatch');
+    const fixture = TestBed.createComponent(App);
+    await fixture.whenStable();
+
+    const notice = fixture.nativeElement.querySelector(
+      '[data-testid="app-update-notice"]',
+    ) as HTMLElement;
+    expect(notice).toBeTruthy();
+    const button = notice.querySelector('button');
+    expect(button).toBeTruthy();
+    button?.click();
+    expect(dispatch).toHaveBeenCalledWith(AppUpdateActions.reloadClicked());
+  });
+
   it('renders route metadata and the admin menu on an admin route', async () => {
     await TestBed.resetTestingModule()
       .configureTestingModule({
@@ -242,8 +254,8 @@ describe('App', () => {
         ],
         providers: [
           provideTranslateService(),
-          { provide: AppUpdateService, useValue: appUpdateStub },
           provideMockStore({
+            selectors: [{ selector: appUpdateFeature.selectPendingBuildId, value: null }],
             initialState: {
               auth: { ...authInitialState, group: 'admin', email: 'admin@example.com' },
               notification: { current: null },

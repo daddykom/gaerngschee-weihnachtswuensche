@@ -7,17 +7,12 @@ import {
 import { inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { catchError, tap, throwError } from 'rxjs';
-import { AppUpdateActions } from '../../store/app-update/app-update.feature';
 import { EventActions } from '../../store/events/events.actions';
 import { selectEventValues } from '../../store/events/events.feature';
 
 const EVENT_HEADER_PREFIX = 'x-event-';
 
 const publishEvents = (headers: HttpResponse<unknown>['headers'], store: Store): void => {
-  const buildId = headers.get('X-App-Build');
-  if (buildId && /^[a-zA-Z0-9_-]{1,100}$/.test(buildId)) {
-    store.dispatch(AppUpdateActions.buildHintReceived({ buildId }));
-  }
   const values = store.selectSignal(selectEventValues)();
   for (const header of headers.keys()) {
     const normalizedHeader = header.toLowerCase();
