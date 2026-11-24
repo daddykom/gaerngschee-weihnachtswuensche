@@ -96,11 +96,23 @@ All database schema changes via Phinx migrations.
   still load lazy routes. These files need occasional operational cleanup;
   continued API compatibility remains a deployment responsibility.
 
+### F8: Retire previously installed Angular service workers
+
+- The application does not register new service workers. The old URL
+  `/ngsw-worker.js` permanently serves Angular's safety worker as JavaScript with
+  non-cacheable response headers, not the SPA document.
+- When an existing registration updates, the safety worker activates, unregisters
+  itself and deletes only caches prefixed with `ngsw:`. Other caches and unsaved
+  work remain untouched; no automatic page reload is forced.
+- `/ngsw.json`, including requests with query parameters, returns HTTP 404 even
+  when a stale manifest file exists. The SPA fallback must not turn it into HTML
+  with status 200. This enables the old worker's manifest fail-safe as well.
+
 ## Technical Requirements
 
 | Requirement | Implementation |
 |-------------|----------------|
-| PWA | Service Worker, manifest.json |
+| PWA | Web manifest; Angular service worker retired via safety worker |
 | i18n | @angular/localize |
 | a11y | Angular CDK a11y, semantic HTML |
 | Privacy | No third-party analytics, minimal cookies |

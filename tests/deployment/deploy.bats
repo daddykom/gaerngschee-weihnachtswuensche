@@ -69,6 +69,18 @@ setup() {
   [ ! -f "$target_base/pre-prod/frontend/obsolete.html" ]
 }
 
+@test 'replaces an installed Angular worker with the safety worker and retires its manifest' {
+  printf 'old worker\n' > "$target_base/pre-prod/frontend/ngsw-worker.js"
+  printf '{"old":true}\n' > "$target_base/pre-prod/frontend/ngsw.json"
+
+  run run_deploy pre-prod
+
+  [ "$status" -eq 0 ]
+  cmp "$project_directory/frontend/public/ngsw-worker.js" "$target_base/pre-prod/frontend/ngsw-worker.js"
+  cmp "$project_directory/frontend/public/.htaccess" "$target_base/pre-prod/frontend/.htaccess"
+  [ ! -f "$target_base/pre-prod/frontend/ngsw.json" ]
+}
+
 @test 'deploys the production environment with the production migration environment' {
   run run_deploy prod 'DEPLOY PROD'
 
