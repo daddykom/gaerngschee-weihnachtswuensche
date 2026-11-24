@@ -1,6 +1,6 @@
 import { expect, test } from './support/test';
 
-test('does not interrupt a form and retains input after declining a manual reload', async ({
+test('offers an update on a form and retains input after deferring the reload', async ({
   page,
 }) => {
   const baseline = await (await page.request.get('/build-info.json')).json();
@@ -18,11 +18,12 @@ test('does not interrupt a form and retains input after declining a manual reloa
   changed = true;
   await page.evaluate(() => window.dispatchEvent(new Event('focus')));
   await expect(page.getByTestId('app-update-notice')).toBeVisible();
-  await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect(email).toHaveValue('unsaved@example.com');
-  await page.getByTestId('app-update-notice').getByRole('button').click();
   await expect(page.getByRole('dialog')).toBeVisible();
   await page.getByRole('dialog').getByRole('button', { name: 'Später', exact: true }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+  await expect(page.getByRole('dialog')).toHaveCount(0);
   await email.fill('still-working@example.com');
   await expect(email).toHaveValue('still-working@example.com');
   expect(navigations).toBe(1);

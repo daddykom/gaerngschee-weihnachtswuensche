@@ -10,7 +10,7 @@ export const appRoutes: Routes = [
       {
         path: '',
         pathMatch: 'full',
-        data: { pageTitle: 'app.home.title', updatePromptAllowed: true },
+        data: { pageTitle: 'app.home.title' },
         loadComponent: () =>
           import('./features/home/pages/home/home.component').then((m) => m.HomeComponent),
       },
@@ -52,7 +52,7 @@ export const appRoutes: Routes = [
       },
       {
         path: 'bestellung/bestaetigung',
-        data: { pageTitle: 'app.order.confirmation.pageTitle', updatePromptAllowed: true },
+        data: { pageTitle: 'app.order.confirmation.pageTitle' },
         loadComponent: () =>
           import('./features/order/pages/order-confirmation/order-confirmation.component').then(
             (m) => m.OrderConfirmationComponent,
@@ -93,7 +93,6 @@ export const appRoutes: Routes = [
         data: {
           legalPage: 'impressum',
           pageTitle: 'app.legal.imprintPageTitle',
-          updatePromptAllowed: true,
         },
         loadComponent: () =>
           import('./features/legal/pages/legal-page/legal-page.component').then(
@@ -105,7 +104,6 @@ export const appRoutes: Routes = [
         data: {
           legalPage: 'datenschutz',
           pageTitle: 'app.legal.privacyPageTitle',
-          updatePromptAllowed: true,
         },
         loadComponent: () =>
           import('./features/legal/pages/legal-page/legal-page.component').then(
