@@ -74,12 +74,17 @@ All database schema changes via Phinx migrations.
   immutable. API responses expose the deployed frontend's ID as `X-App-Build`,
   alongside the unchanged numeric `X-Event-*` headers. Missing build metadata
   never prevents API requests.
-- The frontend checks the artifact at startup, every minute while visible, on
-  tab focus and navigation, and after a differing header hint. Headers are hints
-  only: the published frontend artifact must confirm the difference. Failed or
-  invalid checks do not interrupt work. Only `buildId`, not `appVersion`, is
-  compared. The running footer version never changes from a remote response.
+- A dedicated frontend interceptor compares `X-App-Build` on existing API
+  responses, including error responses, with the compiled `buildId`. The backend
+  reads this ID from the published frontend's `build-info.json`, so no additional
+  verification request is needed. There is no update polling or metadata request
+  on startup, tab focus or navigation. Missing, invalid or unchanged headers do
+  not trigger updates. Only `buildId`, not `appVersion`, is compared. The running
+  footer version never changes from a remote response.
 - The central information zone shows a persistent, non-blocking update notice.
+  Functional NgRx effects handle dialog decisions, session-storage persistence
+  and the confirmed reload. The application shell reads selectors and dispatches
+  the reload-click event; it does not start or orchestrate an update service.
   An automatic confirmation popup is offered globally on all routes, including
   forms and link-login/token-confirmation routes, but not while another dialog
   is open. Users can also open it from the notice.

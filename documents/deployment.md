@@ -214,6 +214,18 @@ Das Backend liest die veröffentlichte Datei im benachbarten Frontend-Verzeichni
 und liefert `X-App-Build` zusätzlich zu den fachlichen Event-Headern aus.
 Lokal und in Integration ist `frontend/public` dafür read-only eingebunden.
 
+Ein eigener Frontend-Interceptor vergleicht `X-App-Build` aus bestehenden
+API-Antworten (auch Fehlerantworten) direkt mit der eingebetteten Build-ID.
+Es gibt weder zusätzliches Update-Polling noch separate Metadaten-Requests bei
+Start, Fokus oder Navigation. Ein offener Tab erkennt einen neuen Build somit
+mit der nächsten regulären API-Antwort. Fehlende oder ungültige Header werden
+ignoriert.
+
+Die Update-Abläufe liegen in funktionalen NgRx-Effects. Diese stellen die
+gespeicherte Entscheidung beim Start der Root-Effects wieder her und übernehmen
+Dialog, Speicherung und bestätigten Reload. Die App-Shell zeigt den Store-Zustand
+an und dispatcht das Klick-Ereignis für den manuellen Update-Dialog.
+
 Neue Builds lösen keinen automatischen Reload aus. Der Benutzer entscheidet in
 einem Dialog zwischen „Neu laden“ und „Später“. Der Dialog erscheint auf allen
 Seiten, auch auf Formularseiten, überlagert aber keine bereits offenen Dialoge.
