@@ -45,7 +45,7 @@ export const adminRoutes: Routes = [
         canActivate: [groupGuard(['admin'])],
         providers: [provideState(adminStatisticsFeature), provideEffects(adminStatisticsEffects)],
         resolve: { statistics: adminStatisticsResolver },
-        data: { pageTitle: 'app.admin.statistics.title', updatePromptAllowed: true },
+        data: { pageTitle: 'app.admin.statistics.title' },
         loadComponent: () =>
           import('./pages/statistics/admin-statistics.component').then(
             (m) => m.AdminStatisticsComponent,
@@ -55,7 +55,7 @@ export const adminRoutes: Routes = [
         path: 'overview',
         canActivate: [groupGuard(['admin'])],
         resolve: { orders: adminOverviewResolver },
-        data: { pageTitle: 'app.admin.overview.title', updatePromptAllowed: true },
+        data: { pageTitle: 'app.admin.overview.title' },
         loadComponent: () =>
           import('./pages/overview/admin-overview.component').then((m) => m.AdminOverviewComponent),
       },
@@ -137,7 +137,7 @@ export const adminRoutes: Routes = [
           {
             path: '',
             canActivate: [groupGuard(['admin'])],
-            data: { pageTitle: 'app.admin.users.title', updatePromptAllowed: true },
+            data: { pageTitle: 'app.admin.users.title' },
             loadComponent: () =>
               import('./pages/users/users.component').then((m) => m.UsersComponent),
           },

@@ -76,7 +76,7 @@ export class AppUpdateService {
       .subscribe((payload) => {
         if (!isBuildInfo(payload)) return;
         this.store.dispatch(AppUpdateActions.buildDetected({ buildId: payload.buildId }));
-        this.offerAtSafeLocation();
+        this.offerPendingUpdate();
       });
 
     this.actions
@@ -93,17 +93,12 @@ export class AppUpdateService {
       )
       .subscribe(() => {
         this.checkRequested.next();
-        this.offerAtSafeLocation();
+        this.offerPendingUpdate();
       });
   }
 
-  private offerAtSafeLocation(): void {
-    let route = this.router.routerState.snapshot.root;
-    while (route.firstChild) route = route.firstChild;
-    if (
-      route.data['updatePromptAllowed'] === true &&
-      this.pendingBuildId() !== this.deferredBuildId()
-    ) {
+  private offerPendingUpdate(): void {
+    if (this.pendingBuildId() !== this.deferredBuildId()) {
       this.requestReload();
     }
   }

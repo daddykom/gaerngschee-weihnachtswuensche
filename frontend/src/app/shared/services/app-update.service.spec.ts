@@ -16,18 +16,17 @@ describe('AppUpdateService', () => {
   let result: Subject<boolean | undefined>;
   let events: Subject<NavigationEnd>;
   let actions: Subject<ReturnType<typeof AppUpdateActions.buildHintReceived>>;
-  let data: Record<string, unknown>;
+  let openDialogs: unknown[];
   let open: ReturnType<typeof vi.fn>;
   let reload: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     vi.useFakeTimers();
     sessionStorage.clear();
-    data = {};
     result = new Subject();
     events = new Subject();
     actions = new Subject();
-    const openDialogs: unknown[] = [];
+    openDialogs = [];
     open = vi.fn(() => {
       const reference = { afterClosed: () => result.pipe(tap(() => openDialogs.splice(0))) };
       openDialogs.push(reference);
@@ -41,7 +40,7 @@ describe('AppUpdateService', () => {
         provideStore({ appUpdate: appUpdateFeature.reducer }),
         provideMockActions(() => actions),
         { provide: MatDialog, useValue: { open, openDialogs } },
-        { provide: Router, useValue: { events, routerState: { snapshot: { root: { data } } } } },
+        { provide: Router, useValue: { events } },
         { provide: RELOAD_APPLICATION, useValue: reload },
       ],
     });
@@ -66,15 +65,14 @@ describe('AppUpdateService', () => {
     await vi.advanceTimersByTimeAsync(0);
     respond();
     expect(service.pendingBuildId()).toBe('new-build');
-    expect(open).not.toHaveBeenCalled();
+    expect(open).toHaveBeenCalledTimes(1);
     expect(reload).not.toHaveBeenCalled();
   });
 
-  it('offers an update only at an explicitly safe route and never reloads without consent', async () => {
+  it('offers an update without route metadata and never reloads without consent', async () => {
     service.start();
     await vi.advanceTimersByTimeAsync(0);
     respond();
-    data['updatePromptAllowed'] = true;
     events.next(new NavigationEnd(1, '/', '/'));
     expect(open).toHaveBeenCalledTimes(1);
     respond();
@@ -88,7 +86,6 @@ describe('AppUpdateService', () => {
   it.each([false, undefined])(
     'allows continuing after dismissing the dialog with %s',
     async (choice) => {
-      data['updatePromptAllowed'] = true;
       service.start();
       await vi.advanceTimersByTimeAsync(0);
       respond();
@@ -98,6 +95,9 @@ describe('AppUpdateService', () => {
       expect(open).toHaveBeenCalledTimes(1);
       expect(reload).not.toHaveBeenCalled();
       expect(service.pendingBuildId()).toBe('new-build');
+      events.next(new NavigationEnd(1, '/start', '/start'));
+      respond();
+      expect(open).toHaveBeenCalledTimes(1);
       service.requestReload();
       expect(open).toHaveBeenCalledTimes(2);
     },
@@ -105,7 +105,6 @@ describe('AppUpdateService', () => {
 
   it('remembers later for the same running build across page reloads', async () => {
     sessionStorage.setItem(`gaerngschee.update-deferred:${BUILD_INFO.buildId}`, 'new-build');
-    data['updatePromptAllowed'] = true;
     service.start();
     await vi.advanceTimersByTimeAsync(0);
     respond();
@@ -131,6 +130,33 @@ describe('AppUpdateService', () => {
     await vi.advanceTimersByTimeAsync(60_000);
     respond();
     expect(service.pendingBuildId()).toBe('new-build');
+  });
+
+  it('does not overlay another dialog and offers the update on a later check', async () => {
+    openDialogs.push({});
+    service.start();
+    await vi.advanceTimersByTimeAsync(0);
+    respond();
+    service.requestReload();
+    expect(open).not.toHaveBeenCalled();
+    expect(service.pendingBuildId()).toBe('new-build');
+    openDialogs.splice(0);
+    await vi.advanceTimersByTimeAsync(60_000);
+    respond();
+    expect(open).toHaveBeenCalledTimes(1);
+    expect(reload).not.toHaveBeenCalled();
+  });
+
+  it('offers a newer build after the previously detected build was deferred', async () => {
+    service.start();
+    await vi.advanceTimersByTimeAsync(0);
+    respond();
+    result.next(false);
+    await vi.advanceTimersByTimeAsync(60_000);
+    respond('newer-build');
+    expect(open).toHaveBeenCalledTimes(2);
+    expect(service.pendingBuildId()).toBe('newer-build');
+    expect(reload).not.toHaveBeenCalled();
   });
 
   it('verifies a backend header against the frontend artifact before offering a reload', async () => {

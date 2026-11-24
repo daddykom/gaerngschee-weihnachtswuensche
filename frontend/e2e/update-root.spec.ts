@@ -1,7 +1,7 @@
 import { expectTranslatedText } from './support/assertions';
 import { expect, test } from './support/test';
 
-test('offers an update on the safe home route, allows later and reloads only after confirmation', async ({
+test('offers an update on the home route, allows later and reloads only after confirmation', async ({
   page,
 }) => {
   const baseline = await (await page.request.get('/build-info.json')).json();

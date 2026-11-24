@@ -2,6 +2,38 @@ import { expectTranslatedText } from './support/assertions';
 import { expect, test } from './support/test';
 
 test.describe('Fulfillment route', () => {
+  test('offers an update dialog when a new build is detected', async ({ page }) => {
+    const baseline = await (await page.request.get('/build-info.json')).json();
+    let changed = false;
+    await page.route('**/build-info.json?*', (route) =>
+      route.fulfill({
+        json: changed ? { appVersion: '99.0.0+999', buildId: 'new-test-build' } : baseline,
+      }),
+    );
+    await page.route('http://localhost:8083/public/fulfiller/orders**', (route) =>
+      route.fulfill({ json: { orders: [] } }),
+    );
+    await page.route('http://localhost:8083/public/fulfiller/wish-statuses', (route) =>
+      route.fulfill({ json: { items: [] } }),
+    );
+    await page.route('http://localhost:8083/public/fulfiller/availability-version', (route) =>
+      route.fulfill({ json: { version: 0 } }),
+    );
+
+    await page.goto('/erfuellen');
+    await expectTranslatedText(page.locator('h1'), 'app.fulfiller.pageTitle');
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    changed = true;
+    await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible();
+    await expectTranslatedText(dialog.getByRole('heading'), 'app.update.dialog.title');
+    await dialog.getByRole('button', { name: 'Später', exact: true }).click();
+    await expect(dialog).toHaveCount(0);
+    await expect(page.getByTestId('app-update-notice')).toBeVisible();
+    await expect(page.locator('.app-footer__version')).toContainText(baseline.appVersion);
+  });
+
   test('shows wishes grouped by definitive order and reserves one wish', async ({ page }) => {
     const requests: URL[] = [];
     await page.route('http://localhost:8083/public/fulfiller/orders**', async (route) => {
