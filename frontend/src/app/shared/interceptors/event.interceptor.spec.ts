@@ -2,11 +2,12 @@ import { HttpHeaders, HttpRequest, HttpResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
 import { firstValueFrom, of } from 'rxjs';
+import { AppUpdateActions } from '../../store/app-update/app-update.feature';
 import { EventActions } from '../../store/events/events.actions';
 import { eventInterceptor } from './event.interceptor';
 
 describe('eventInterceptor', () => {
-  it('ignores application build headers', async () => {
+  it('publishes opaque build hints independently of numeric domain events', async () => {
     const store = { selectSignal: vi.fn(() => () => ({})), dispatch: vi.fn() };
     TestBed.configureTestingModule({ providers: [{ provide: Store, useValue: store }] });
     const response = new HttpResponse({ headers: new HttpHeaders({ 'X-App-Build': 'new-build' }) });
@@ -15,7 +16,9 @@ describe('eventInterceptor', () => {
         eventInterceptor(new HttpRequest('GET', '/public/configuration'), () => of(response)),
       ),
     );
-    expect(store.dispatch).not.toHaveBeenCalled();
+    expect(store.dispatch).toHaveBeenCalledWith(
+      AppUpdateActions.buildHintReceived({ buildId: 'new-build' }),
+    );
   });
   it('dispatches event values higher than the store value', async () => {
     const store = {

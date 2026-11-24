@@ -7,11 +7,9 @@ import { provideTranslateService } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 import { storeDevtoolsProviders } from '../environments/environment';
 import { appRoutes } from './app.routes';
-import { appUpdateInterceptor } from './shared/interceptors/app-update.interceptor';
 import { authSessionInterceptor } from './shared/interceptors/auth-session.interceptor';
 import { authTokenInterceptor } from './shared/interceptors/auth-token.interceptor';
 import { eventInterceptor } from './shared/interceptors/event.interceptor';
-import { appUpdateEffects } from './store/app-update/app-update.effects';
 import { appUpdateFeature } from './store/app-update/app-update.feature';
 import { authEffects } from './store/auth/auth.effects';
 import { authFeature } from './store/auth/auth.feature';
@@ -28,12 +26,7 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideHttpClient(
       withXhr(),
-      withInterceptors([
-        authTokenInterceptor,
-        authSessionInterceptor,
-        eventInterceptor,
-        appUpdateInterceptor,
-      ]),
+      withInterceptors([authTokenInterceptor, authSessionInterceptor, eventInterceptor]),
     ),
     provideRouter(appRoutes),
     provideStore(),
@@ -43,7 +36,6 @@ export const appConfig: ApplicationConfig = {
     provideState(frontendConfigFeature),
     provideState(eventsFeature),
     provideEffects(
-      appUpdateEffects,
       authEffects,
       frontendConfigEffects,
       navigationEffects,

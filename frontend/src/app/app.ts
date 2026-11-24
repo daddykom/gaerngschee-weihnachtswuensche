@@ -19,7 +19,7 @@ import { filter, startWith } from 'rxjs';
 import { BUILD_INFO } from '../generated/build-info';
 import { AdminNavigationComponent } from './shared/components/admin-navigation/admin-navigation';
 import { InfoBoxComponent } from './shared/components/info-box/info-box';
-import { AppUpdateActions, appUpdateFeature } from './store/app-update/app-update.feature';
+import { AppUpdateService } from './shared/services/app-update.service';
 import { AuthActions } from './store/auth/auth.actions';
 import { selectAuthEmail, selectAuthGroup } from './store/auth/auth.feature';
 import { SessionActions } from './store/auth/session.actions';
@@ -65,10 +65,12 @@ export class App {
   readonly isAdmin = computed(() => this.authGroup() === 'admin');
   readonly isFulfiller = computed(() => this.authGroup() === 'wunscherfueller');
   readonly appVersion = BUILD_INFO.appVersion;
-  readonly pendingBuildId = this.store.selectSignal(appUpdateFeature.selectPendingBuildId);
+  readonly updates = inject(AppUpdateService);
   private lastScrolledNotification: unknown = null;
 
   constructor() {
+    this.updates.start();
+
     const isRegistrationLogin =
       this.router.parseUrl(this.location.path()).root.children['primary']?.segments[0]?.path ===
       'client-login';
@@ -96,10 +98,6 @@ export class App {
 
   logout(): void {
     this.store.dispatch(AuthActions.logoutRequested());
-  }
-
-  reloadClicked(): void {
-    this.store.dispatch(AppUpdateActions.reloadClicked());
   }
 
   readonly pageTitleKey = computed(() => {
