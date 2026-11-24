@@ -244,6 +244,27 @@ Bats Core muss lokal installiert sein:
 bats tests/deployment/deploy.bats
 ```
 
+## Stillgelegten Angular Service Worker bereinigen
+
+Das Entfernen der Angular-Registrierung meldet bereits installierte Browser-Worker
+nicht automatisch ab. Deshalb wird Angulars offizieller Safety Worker dauerhaft
+unter der früheren URL `/ngsw-worker.js` ausgeliefert. Die versionierte Kopie unter
+`frontend/public/ngsw-worker.js` stammt aus
+`@angular/service-worker@22.3.0/safety-worker.js`; dafür wird keine neue Dependency
+oder Worker-Registrierung eingebaut.
+
+Der Safety Worker aktiviert sich beim nächsten erfolgreichen Worker-Update,
+meldet seine Registrierung ab und entfernt ausschliesslich Caches mit dem Präfix
+`ngsw:`. Er erzwingt keinen Seiten-Reload und lässt andere Caches unverändert.
+Bereits laufender Anwendungscode wird erst beim nächsten Seiten-Reload ersetzt.
+
+Apache liefert das Script als JavaScript mit `no-cache, no-store, must-revalidate`
+aus. `/ngsw.json` liefert auch mit Cache-Busting-Query und bei einer verbliebenen
+Manifest-Datei ausdrücklich HTTP 404, bevor der SPA-Fallback greift. Das ermöglicht
+zusätzlich Angulars Manifest-Fail-Safe. Die Worker-URL darf nicht wieder entfernt
+oder auf `index.html` umgeleitet werden, da lange nicht verwendete Browser die
+Bereinigung sonst verpassen können.
+
 ## Testumgebung
 
 Für die Integrationstests wird `backend/.env.integration` über Docker Compose

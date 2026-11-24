@@ -54,7 +54,8 @@ FAKE_SYNC
   mkdir -p "$destination/frontend/public"
   mkdir -p "$destination/frontend/public/api"
   printf '<?php\n' > "$destination/frontend/public/api/index.php"
-  printf 'RewriteEngine On\n' > "$destination/frontend/public/.htaccess"
+  cp "$project_directory/frontend/public/.htaccess" "$destination/frontend/public/.htaccess"
+  cp "$project_directory/frontend/public/ngsw-worker.js" "$destination/frontend/public/ngsw-worker.js"
   printf 'new-pre-prod-frontend\n' > "$destination/frontend/dist/frontend/browser/index.html"
 FAKE_GIT
 
@@ -96,6 +97,7 @@ printf 'npm %s NX_DAEMON=%s NX_SKIP_NATIVE_FILE_CACHE=%s\n' "$*" "${NX_DAEMON:-}
 if [[ "$*" == *'build'* ]]; then
   mkdir -p dist/frontend/browser
    printf 'new-pre-prod-frontend\n' > dist/frontend/browser/index.html
+   cp public/ngsw-worker.js dist/frontend/browser/ngsw-worker.js
 fi
 FAKE_NPM
 

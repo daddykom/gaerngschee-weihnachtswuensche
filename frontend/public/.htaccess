@@ -3,7 +3,7 @@ LimitRequestBody 65536
 
 # Security headers for the static frontend and client-side routes.
 <IfModule mod_headers.c>
-  <FilesMatch "^(index\.html|build-info\.json)$">
+  <FilesMatch "^(index\.html|build-info\.json|ngsw-worker\.js|ngsw\.json)$">
     Header always set Cache-Control "no-cache, no-store, must-revalidate"
   </FilesMatch>
   <FilesMatch "[-.][A-Za-z0-9_-]{8,}\.(js|css)$">
@@ -15,6 +15,15 @@ LimitRequestBody 65536
   Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
   Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
 </IfModule>
+
+# Existing browser registrations must receive JavaScript, not the SPA fallback.
+<Files "ngsw-worker.js">
+  ForceType application/javascript
+</Files>
+
+# A real 404 lets old Angular workers trigger their manifest fail-safe.
+# Keep this before the existing-file check, even if a stale manifest remains.
+RewriteRule ^ngsw\.json$ - [R=404,END]
 
 # Send API requests to the local PHP bridge in the document root.
 RewriteRule ^api(?:/.*)?$ api/index.php [END,QSA]
