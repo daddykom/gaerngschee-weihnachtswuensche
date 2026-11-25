@@ -76,12 +76,13 @@ Farbrollen und ihre praktische Verwendung.
 
 ### Farben der Home-Karten
 
-Die beiden Home-Karten verwenden Rosa und Mintgrün als Kategorienfarben:
+Die beiden Home-Karten verwenden unterschiedliche Rosatöne als Kategorienfarben:
 
--   Die Karte zum Erfüllen eines Weihnachtswunsches verwendet den primären Container und damit die
-    Markenfarbe Rosa.
--   Die Karte zum Erhalten von Weihnachtswünsche verwendet den sekundären Container
-    und damit Mintgrün.
+-   Die Karte zum Erfüllen eines Weihnachtswunsches verwendet die sanfte
+    Oberfläche `--gl-surface-soft` (`#fff8fc`), ebenso wie die einzelnen
+    Wunschkarten unter `/erfuellen`.
+-   Die Karte zum Erhalten von Weihnachtswünschen verwendet den primären
+    Container und damit die Markenfarbe Rosa.
 
 Diese Farben beschreiben unterschiedliche Einstiege, aber keinen Status. Sie
 stehen weder für Erfolg noch für eine abgeschlossene oder verfügbare Aktion.

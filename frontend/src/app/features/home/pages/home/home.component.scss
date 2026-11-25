@@ -22,7 +22,7 @@
   min-width: 0;
   padding: var(--gl-space-xl);
   border: 1px solid var(--mat-sys-outline-variant);
-  border-radius: 18px;
+  border-radius: 1rem;
 }
 
 .home-choice h2 {
@@ -46,15 +46,35 @@
 }
 
 .home-choice--fulfill {
-  background: var(--gl-info-container);
+  background: var(--gl-surface-soft);
 }
 
 .home-faq {
   overflow: hidden;
+  border-radius: 1rem;
+  padding: 1rem;
+
+  > mat-card-content {
+    padding: 0;
+  }
 }
 
 .home-faq__section h2 {
-  margin: 0;
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+}
+
+.home-faq__question {
+  height: auto;
+  padding: 0.5rem 1rem;
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--mat-sys-on-surface) 2%, var(--mat-sys-surface));
+}
+
+.home-faq__question-title {
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.4;
 }
 
 .home-faq__section + .home-faq__section {
@@ -62,6 +82,8 @@
 }
 
 .home-faq__answer {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 1rem;
   line-height: 1.55;
 }
 

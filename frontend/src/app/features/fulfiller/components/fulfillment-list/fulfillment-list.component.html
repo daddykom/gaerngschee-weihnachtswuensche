@@ -47,11 +47,8 @@
               <mat-card-title>
                 {{ 'app.fulfiller.orderTitle' | translate: { orderNumber: order.orderNumber } }}
               </mat-card-title>
-              <mat-card-subtitle>{{
-                'app.fulfiller.year' | translate: { year: order.year }
-              }}</mat-card-subtitle>
             </mat-card-header>
-            <mat-card-content class="gl-stack gl-stack--group">
+            <mat-card-content class="fulfillment-order__content gl-stack">
               @if (order.currentText) {
                 <div class="gl-stack">
                   <strong>{{ 'app.fulfiller.familyInformation' | translate }}</strong>

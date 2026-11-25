@@ -80,10 +80,33 @@ test.describe('Fulfillment route', () => {
       await page.goto('/erfuellen');
       const cards = page.locator('.fulfillment-order');
       await expect(cards).toHaveCount(3);
+      await expect(cards.first().locator('mat-card-content > .gl-stack > strong')).toHaveText(
+        'Familieninformation',
+      );
+      await expect(cards.first().locator('mat-card-content > .gl-stack > strong')).toHaveCSS(
+        'font-weight',
+        '500',
+      );
+      await expect(cards.first().locator('mat-card-content > .gl-stack > p')).toHaveCSS(
+        'color',
+        'rgb(119, 119, 119)',
+      );
       const radius = await page.evaluate(
         () => `${parseFloat(getComputedStyle(document.documentElement).fontSize)}px`,
       );
       await expect(cards.first()).toHaveCSS('border-radius', radius);
+      await expect(cards.locator('mat-card-subtitle')).toHaveCount(0);
+      const spacing = `${parseFloat(radius) / 2}px`;
+      await expect(cards.first().locator('mat-card-title')).toHaveCSS('margin-bottom', spacing);
+      await expect(cards.first().locator('mat-card-content')).toHaveCSS('row-gap', spacing);
+      await expect(cards.first().locator('mat-card-content > .gl-stack')).toHaveCSS(
+        'row-gap',
+        spacing,
+      );
+      await expect(cards.first().locator('mat-card-content > .gl-stack > p')).toHaveCSS(
+        'margin-top',
+        '0px',
+      );
       const padding = radius;
       for (const side of ['top', 'right', 'bottom', 'left']) {
         await expect(cards.first()).toHaveCSS(`padding-${side}`, padding);

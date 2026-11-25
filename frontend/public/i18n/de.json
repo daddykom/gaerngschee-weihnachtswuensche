@@ -457,7 +457,7 @@
       "ordersTitle": "Wunschzettel",
       "orderTitle": "Wunschzettel {{orderNumber}}",
       "year": "Aktionsjahr {{year}}",
-      "familyInformation": "Anonymisierte Familieninformation",
+      "familyInformation": "Familieninformation",
       "loading": "Wünsche werden geladen ...",
       "empty": "Es wurden keine passenden verfügbaren Wünsche gefunden.",
       "reserve": "Diesen Wunsch erfüllen",

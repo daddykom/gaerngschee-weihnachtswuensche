@@ -11,12 +11,33 @@
   > mat-card-content {
     padding: 0;
   }
+
+  mat-card-title {
+    margin-bottom: 0.5rem;
+  }
+}
+
+.fulfillment-order__content {
+  gap: var(--gl-space-sm);
+}
+
+.fulfillment-order__content > .gl-stack {
+  gap: var(--gl-space-sm);
+}
+
+.fulfillment-order__content > .gl-stack > p {
+  margin-top: 0;
+  color: #777777;
+}
+
+.fulfillment-order__content > .gl-stack > strong {
+  font-weight: 500;
 }
 
 .wish-entry {
   border: 1px solid #8c7b85;
   border-radius: 1rem;
-  background: #fff8fc;
+  background: var(--gl-surface-soft);
   overflow: hidden;
 }
 
