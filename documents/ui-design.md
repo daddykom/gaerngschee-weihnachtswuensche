@@ -20,20 +20,20 @@ räumliche Anordnung.
 
 ## Farbsystem
 
-Das Gärngschee-Farbsystem verwendet eine helle rosa Grundstimmung, einen
-dunklen Pflaumenton für Text und Aktionen sowie klar unterscheidbare
+Das Gärngschee-Farbsystem verwendet einen hellen graugrünen Seitenhintergrund,
+weisse Oberflächen, dunkelgrüne Aktionen, dunkle Texte und rosa Markenbereiche sowie klar unterscheidbare
 Statusfarben. Farben werden nach ihrer semantischen Rolle verwendet und
 nicht seiten- oder komponentenspezifisch frei gewählt.
 
 | Rolle | Farbe | Verwendung |
 |---|---|---|
-| Seitenhintergrund | `#fff7fb` | Globaler Seitenhintergrund |
-| Oberfläche | `#fff8fc` | Karten, E-Mail-Flächen und Inhaltsbereiche |
+| Seitenhintergrund | `#f3f5f0` | Globaler Seitenhintergrund ohne Farbverlauf |
+| Oberfläche | `#ffffff` | Karten, E-Mail-Flächen und Inhaltsbereiche |
 | Header / Primärcontainer | `#f5b6d3` | E-Mail-Header und hervorgehobene Markenbereiche |
-| Primärfarbe | `#8a2858` | Links, Buttons und primäre Aktionen |
-| Haupttext | `#000000` | Überschriften und normale Textinhalte |
-| Sekundärtext | `#6f6069` | Beschreibungen und ergänzende Informationen |
-| Rahmen | `#8c7b85` | Grenzen und Trennlinien |
+| Primärfarbe | `#365740` | Links, Buttons und primäre Aktionen |
+| Haupttext | `#292e29` | Überschriften und normale Textinhalte |
+| Sekundärtext | `#535e55` | Beschreibungen und ergänzende Informationen |
+| Rahmen | `#788278` | Grenzen und Trennlinien |
 | Erfolg-Hintergrund | `#dff4e8` | Erfolgs- und Bestätigungsbereiche |
 | Erfolg-Text | `#276749` | Text und Hervorhebungen in Erfolgsbereichen |
 | Warnung-Hintergrund | `#fff2b7` | Warnungen und offene Prüfungen |
@@ -44,7 +44,7 @@ nicht seiten- oder komponentenspezifisch frei gewählt.
 | Fehler-Text | `#b3261e` | Text, Rahmen und Hervorhebungen in Fehlerbereichen |
 
 Rosa ist die Marken- und Primärcontainerfarbe, nicht die Farbe für
-Informationen. Links und primäre Aktionen verwenden `#8a2858`; ein beliebiger
+Informationen. Links und primäre Aktionen verwenden `#365740`; ein beliebiger
 roter Link ist nicht Teil des Farbsystems.
 
 Die Rahmenfarbe erreicht auf den hellen Oberflächen einen ausreichenden
@@ -52,6 +52,14 @@ Kontrast für sichtbare UI-Grenzen. Frontend und E-Mail-Vorlagen verwenden für
 den Marken-Header den gemeinsamen Wert `#f5b6d3`. Die semantischen
 Statusfarben für Information, Warnung, Erfolg und Fehler sind systemweit
 einheitlich.
+
+Das Frontend definiert die Farben zentral in `frontend/src/styles.scss`.
+Komponenten verwenden die semantischen Material-Variablen `--mat-sys-*`
+und für Statusbereiche die Variablen `--gl-success*`, `--gl-warning*`,
+`--gl-info*` und `--gl-error*` statt direkter Hex-Werte.
+E-Mails verwenden die zentrale `EMAIL_THEME`-Palette in
+`backend/src/Shared/Mail/EmailSender.php`; die Farben werden für
+E-Mail-Clients als Inline-Werte ausgegeben.
 
 Für ausreichende Lesbarkeit werden Text und Hintergrund immer als Paar
 verwendet. Eine Information darf nicht ausschließlich durch Farbe vermittelt

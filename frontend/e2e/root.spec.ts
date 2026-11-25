@@ -20,6 +20,14 @@ test.describe('Root route', () => {
 
     await page.goto('/');
     await expect(page.locator('app-root')).toBeVisible();
+    await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(243, 245, 240)');
+    await expect(page.locator('body')).toHaveCSS('color', 'rgb(41, 46, 41)');
+    await expect(page.locator('.app-header')).toHaveCSS('background-color', 'rgb(245, 182, 211)');
+    await expect(page.locator('.home-choice--submit')).toHaveCSS(
+      'border-top-color',
+      'rgb(120, 130, 120)',
+    );
+    await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#365740');
     await expectTranslatedText(page.locator('h1'), 'app.home.title');
     await expectTranslatedText(page.locator('.home__lead'), 'app.home.lead');
     const submitLink = page.locator('a[href="/start"]');
@@ -32,6 +40,8 @@ test.describe('Root route', () => {
     await faqPanels.nth(0).locator('mat-expansion-panel-header').click();
     await expect(faqPanels.nth(0).locator('.home-faq__answer')).toBeVisible();
     const loginLink = page.locator('a[href="/login"]');
+    await expect(loginLink).toHaveCSS('color', 'rgb(54, 87, 64)');
+    await expect(faqPanels.first()).toHaveCSS('background-color', 'rgb(255, 255, 255)');
     await expectTranslatedText(loginLink, 'app.home.login');
 
     await page.setViewportSize({ width: 390, height: 844 });

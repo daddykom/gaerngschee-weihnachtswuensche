@@ -16,10 +16,10 @@ html {
       density: 0,
     ),
     $overrides: (
-      primary: #8a2858,
+      primary: #365740,
       on-primary: #ffffff,
       primary-container: #f5b6d3,
-      on-primary-container: #000000,
+      on-primary-container: #292e29,
       secondary: #2f6f60,
       on-secondary: #ffffff,
       secondary-container: #b3f2d0,
@@ -28,12 +28,22 @@ html {
       on-tertiary: #ffffff,
       tertiary-container: #b3d5f2,
       on-tertiary-container: #173446,
-      surface: #fff8fc,
-      surface-container-low: #f8eef4,
-      on-surface: #000000,
-      on-surface-variant: #6f6069,
-      outline: #8c7b85,
-      outline-variant: #8c7b85,
+      background: #f3f5f0,
+      on-background: #292e29,
+      surface: #ffffff,
+      surface-bright: #ffffff,
+      surface-dim: #f3f5f0,
+      surface-container-lowest: #ffffff,
+      surface-container-low: #ffffff,
+      surface-container: #ffffff,
+      surface-container-high: #ffffff,
+      surface-container-highest: #ffffff,
+      surface-variant: #ffffff,
+      surface-tint: #365740,
+      on-surface: #292e29,
+      on-surface-variant: #535e55,
+      outline: #788278,
+      outline-variant: #788278,
       error: #b3261e,
       error-container: #ffdad6
     )
@@ -80,16 +90,16 @@ a {
   --gl-content-max-width: 1180px;
   --gl-success-container: #dff4e8;
   --gl-success: #276749;
-  --gl-on-success-container: #1d5547;
+  --gl-on-success-container: var(--gl-success);
   --gl-warning-container: #fff2b7;
   --gl-warning: #6b5700;
-  --gl-on-warning-container: #4f4100;
+  --gl-on-warning-container: var(--gl-warning);
   --gl-info-container: #d8e9f7;
   --gl-info: #2c5d78;
-  --gl-on-info-container: #173446;
+  --gl-on-info-container: var(--gl-info);
   --gl-error-container: #ffdad6;
   --gl-error: #b3261e;
-  --gl-on-error-container: #690005;
+  --gl-on-error-container: var(--gl-error);
 }
 
 .gl-container {
@@ -178,19 +188,7 @@ a {
 body {
   color: var(--mat-sys-on-surface);
   position: relative;
-  background: #fff7fb;
-}
-
-body::before {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  content: '';
-  pointer-events: none;
-  background:
-    radial-gradient(circle at 10% 10%, rgb(242 179 213 / 42%), transparent 28rem),
-    radial-gradient(circle at 92% 12%, rgb(179 242 208 / 30%), transparent 25rem),
-    linear-gradient(180deg, #fffafd 0%, #fff7fb 100%);
+  background: var(--mat-sys-background);
 }
 
 app-root {

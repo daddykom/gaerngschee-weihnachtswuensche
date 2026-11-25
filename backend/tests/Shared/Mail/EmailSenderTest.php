@@ -164,7 +164,12 @@ final class EmailSenderTest extends TestCase
                 self::assertStringContainsString($link, $email->getHtmlBody());
                 self::assertStringContainsString('cid:gaerngschee-logo', $email->getHtmlBody());
                 self::assertStringContainsString('gaerngschee-logo', $email->getBody()->toString());
-                self::assertStringContainsString('#8a2858', $email->getHtmlBody());
+                self::assertStringContainsString('#365740', $email->getHtmlBody());
+                self::assertStringContainsString('#f3f5f0', $email->getHtmlBody());
+                self::assertStringContainsString('#ffffff', $email->getHtmlBody());
+                self::assertStringContainsString('#292e29', $email->getHtmlBody());
+                self::assertStringContainsString('#535e55', $email->getHtmlBody());
+                self::assertStringContainsString('#788278', $email->getHtmlBody());
                 self::assertStringContainsString('#f5b6d3', $email->getHtmlBody());
                 self::assertStringNotContainsString('#159447', $email->getHtmlBody());
 
@@ -369,7 +374,7 @@ final class EmailSenderTest extends TestCase
 
         self::assertSame('Bitte prüfe deinen Wunschzettel', $message['subject']);
         self::assertStringContainsString('zur Prüfung zurückgegeben', $message['html']);
-        self::assertStringContainsString('border:1px solid #8c7b85; border-radius:20px;', $message['html']);
+        self::assertStringContainsString('border:1px solid #788278; border-radius:20px;', $message['html']);
         self::assertStringContainsString('http://localhost:4200/login', $message['text']);
     }
 
