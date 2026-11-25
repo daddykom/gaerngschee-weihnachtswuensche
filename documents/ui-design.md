@@ -428,6 +428,18 @@ gl-stack--section
 anstelle beliebiger Grössenvarianten wie `small`, `medium`, `large` oder
 `xlarge`.
 
+## `gl-columns`
+
+`gl-columns` ordnet unterschiedlich hohe Inhalte mobil in einer und ab dem
+zentralen Layout-Breakpoint in zwei Spalten an. Die Lesereihenfolge verläuft
+innerhalb jeder Spalte von oben nach unten, danach von links nach rechts.
+Die Spalten werden anhand der Inhaltshöhen ausgeglichen; einzelne Elemente
+werden nicht zwischen Spalten aufgeteilt.
+
+Zwischen den Elementen und zwischen den Spalten gilt `--gl-space-lg`.
+Das Primitive eignet sich beispielsweise für Wünsche innerhalb eines
+Wunschzettels, deren Höhen unabhängig voneinander bleiben sollen.
+
 ## `gl-cluster`
 
 `gl-cluster` ordnet zusammengehörige Elemente horizontal an.

@@ -145,6 +145,25 @@ a {
   }
 }
 
+.gl-columns {
+  column-count: 1;
+  column-gap: var(--gl-space-lg);
+
+  > * {
+    box-sizing: border-box;
+    break-inside: avoid;
+    margin-block-end: var(--gl-space-lg);
+  }
+
+  > :last-child {
+    margin-block-end: 0;
+  }
+
+  @media (min-width: layout.$gl-section-breakpoint) {
+    column-count: 2;
+  }
+}
+
 .category-select-panel {
   max-height: calc(100vh - 2rem) !important;
 }

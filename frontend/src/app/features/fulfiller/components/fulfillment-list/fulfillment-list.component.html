@@ -58,52 +58,63 @@
                   <p class="gl-text--multiline">{{ order.currentText }}</p>
                 </div>
               }
-              <ul class="list-as-form gl-stack">
+              <ul class="list-as-form gl-columns">
                 @for (wish of order.items; track wish.id) {
-                  <li class="wish-entry gl-stack">
-                    <div class="wish-entry__content gl-stack">
-                      <h3>{{ wish.title || wish.wishNumber }}</h3>
-                      <p class="gl-text--multiline">{{ wish.currentDescription }}</p>
-                      @if (wish.personType && wish.personIndex) {
+                  <li class="wish-entry">
+                    <img
+                      class="wish-entry__image"
+                      src="/images/wish-gift.jpg"
+                      alt=""
+                      width="1200"
+                      height="675"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    <div class="wish-entry__body gl-stack">
+                      <div class="wish-entry__content gl-stack">
+                        <h3>{{ wish.title || wish.wishNumber }}</h3>
+                        <p class="gl-text--multiline">{{ wish.currentDescription }}</p>
+                        @if (wish.personType && wish.personIndex) {
+                          <p>
+                            {{
+                              (wish.personType === 'adult'
+                                ? 'app.fulfiller.wishDetails.adult'
+                                : 'app.fulfiller.wishDetails.child'
+                              ) | translate
+                            }}
+                            {{ wish.personIndex }}
+                          </p>
+                        }
                         <p>
-                          {{
-                            (wish.personType === 'adult'
-                              ? 'app.fulfiller.wishDetails.adult'
-                              : 'app.fulfiller.wishDetails.child'
-                            ) | translate
-                          }}
-                          {{ wish.personIndex }}
+                          <strong>{{
+                            'app.fulfiller.wishDetails.categories.' + wish.category | translate
+                          }}</strong>
                         </p>
-                      }
-                      <p>
-                        <strong>{{
-                          'app.fulfiller.wishDetails.categories.' + wish.category | translate
-                        }}</strong>
-                      </p>
-                      @if (wish.giftLink) {
-                        <a [href]="wish.giftLink" target="_blank" rel="noopener noreferrer">
-                          {{ 'app.fulfiller.wishDetails.giftLink' | translate }}
-                        </a>
+                        @if (wish.giftLink) {
+                          <a [href]="wish.giftLink" target="_blank" rel="noopener noreferrer">
+                            {{ 'app.fulfiller.wishDetails.giftLink' | translate }}
+                          </a>
+                        }
+                      </div>
+                      @if (wish.fulfillmentStatus === 'pending_confirmation') {
+                        <p class="wish-entry__reserved" role="status">
+                          {{ 'app.fulfiller.pendingConfirmation' | translate }}
+                        </p>
+                      } @else if (wish.fulfillmentStatus === 'reserved') {
+                        <p class="wish-entry__reserved" role="status">
+                          {{ 'app.fulfiller.reserved' | translate }}
+                        </p>
+                      } @else {
+                        <button
+                          mat-flat-button
+                          color="primary"
+                          type="button"
+                          (click)="reserve.emit(wish)"
+                        >
+                          {{ 'app.fulfiller.reserve' | translate }}
+                        </button>
                       }
                     </div>
-                    @if (wish.fulfillmentStatus === 'pending_confirmation') {
-                      <p class="wish-entry__reserved" role="status">
-                        {{ 'app.fulfiller.pendingConfirmation' | translate }}
-                      </p>
-                    } @else if (wish.fulfillmentStatus === 'reserved') {
-                      <p class="wish-entry__reserved" role="status">
-                        {{ 'app.fulfiller.reserved' | translate }}
-                      </p>
-                    } @else {
-                      <button
-                        mat-flat-button
-                        color="primary"
-                        type="button"
-                        (click)="reserve.emit(wish)"
-                      >
-                        {{ 'app.fulfiller.reserve' | translate }}
-                      </button>
-                    }
                   </li>
                 }
               </ul>

@@ -36,6 +36,130 @@ test.describe('Fulfillment route', () => {
     await expect(page.locator('.app-footer__version')).toContainText(baseline.appVersion);
   });
 
+  for (const width of [390, 1280]) {
+    test(`keeps orders full width and stacks variable-height wishes in reading order at ${width}px`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await page.route('http://localhost:8083/public/fulfiller/orders**', async (route) => {
+        await route.fulfill({
+          json: {
+            orders: [1, 2, 3].map((index) => ({
+              id: `order-${index}`,
+              year: 2026,
+              orderNumber: index,
+              currentText: 'Anonymisierte Familieninformation',
+              items: [1, 2, 3, 4, 5, 6].map((itemNumber) => ({
+                id: `item-${index}-${itemNumber}`,
+                itemNumber,
+                wishNumber: `${index}-${itemNumber}`,
+                title: `Test wish ${index}-${itemNumber}`,
+                category: 'gift',
+                currentDescription: Array.from(
+                  { length: 1 + (itemNumber % 3) * 2 },
+                  () => 'A wish description for the responsive layout test',
+                ).join('\n'),
+                fulfillmentStatus: 'available',
+                reservedAt: null,
+                reservationExpiresAt: null,
+              })),
+            })),
+          },
+        });
+      });
+      await page.route('http://localhost:8083/public/fulfiller/wish-statuses', async (route) => {
+        await route.fulfill({ json: { items: [] } });
+      });
+      await page.route(
+        'http://localhost:8083/public/fulfiller/availability-version',
+        async (route) => {
+          await route.fulfill({ json: { version: 0 } });
+        },
+      );
+
+      await page.goto('/erfuellen');
+      const cards = page.locator('.fulfillment-order');
+      await expect(cards).toHaveCount(3);
+      const radius = await page.evaluate(
+        () => `${parseFloat(getComputedStyle(document.documentElement).fontSize)}px`,
+      );
+      await expect(cards.first()).toHaveCSS('border-radius', radius);
+      const padding = radius;
+      for (const side of ['top', 'right', 'bottom', 'left']) {
+        await expect(cards.first()).toHaveCSS(`padding-${side}`, padding);
+        await expect(cards.first().locator('mat-card-header')).toHaveCSS(`padding-${side}`, '0px');
+        await expect(cards.first().locator('mat-card-content')).toHaveCSS(`padding-${side}`, '0px');
+      }
+      const firstOrder = await cards.nth(0).boundingBox();
+      const secondOrder = await cards.nth(1).boundingBox();
+      const orderList = await cards.nth(0).locator('..').boundingBox();
+      expect(firstOrder).not.toBeNull();
+      expect(secondOrder).not.toBeNull();
+      expect(orderList).not.toBeNull();
+      expect(Math.abs(firstOrder!.width - orderList!.width)).toBeLessThan(1);
+      expect(Math.abs(firstOrder!.x - secondOrder!.x)).toBeLessThan(1);
+      expect(secondOrder!.y).toBeGreaterThan(firstOrder!.y + firstOrder!.height);
+
+      const wishes = cards.first().locator('.wish-entry');
+      await expect(wishes).toHaveCount(6);
+      await expect(wishes.first()).toHaveCSS('border-radius', radius);
+      for (const side of ['top', 'right', 'bottom', 'left']) {
+        await expect(wishes.first()).toHaveCSS(`padding-${side}`, '0px');
+        await expect(wishes.first().locator('.wish-entry__body')).toHaveCSS(
+          `padding-${side}`,
+          padding,
+        );
+      }
+      await expect(page.locator('.wish-entry__image')).toHaveCount(18);
+      const image = wishes.first().locator('.wish-entry__image');
+      await expect(image).toHaveAttribute('src', '/images/wish-gift.jpg');
+      await expect(image).toHaveAttribute('alt', '');
+      await image.scrollIntoViewIfNeeded();
+      await expect
+        .poll(() => image.evaluate((image: HTMLImageElement) => image.naturalWidth))
+        .toBeGreaterThan(0);
+      await expect(wishes.first()).toHaveCSS('overflow', 'hidden');
+      const imageBounds = await image.boundingBox();
+      const wishBounds = await wishes.first().boundingBox();
+      expect(imageBounds).not.toBeNull();
+      expect(wishBounds).not.toBeNull();
+      expect(Math.abs(imageBounds!.x - wishBounds!.x - 1)).toBeLessThan(1);
+      expect(Math.abs(imageBounds!.y - wishBounds!.y - 1)).toBeLessThan(1);
+      expect(Math.abs(imageBounds!.width - wishBounds!.width + 2)).toBeLessThan(1);
+      const bounds = await wishes.evaluateAll((elements) =>
+        elements.map((element) => {
+          const { x, y, width, height } = element.getBoundingClientRect();
+          return { x, y, width, height };
+        }),
+      );
+      const gap = await cards
+        .first()
+        .locator('.gl-columns')
+        .evaluate((element) => parseFloat(getComputedStyle(element).columnGap));
+      const columns = [...new Set(bounds.map((bounds) => Math.round(bounds.x)))];
+      expect(columns).toHaveLength(width === 1280 ? 2 : 1);
+      expect(new Set(bounds.map((bounds) => Math.round(bounds.height))).size).toBeGreaterThan(1);
+      let columnChanges = 0;
+      for (let index = 1; index < bounds.length; index++) {
+        const previous = bounds[index - 1];
+        const current = bounds[index];
+        expect(Math.abs(current.width - previous.width)).toBeLessThan(1);
+        if (Math.abs(current.x - previous.x) < 1) {
+          expect(Math.abs(current.y - previous.y - previous.height - gap)).toBeLessThan(1);
+        } else {
+          columnChanges++;
+          expect(current.x).toBeGreaterThan(previous.x);
+          expect(Math.abs(current.y - bounds[0].y)).toBeLessThan(1);
+          expect(Math.abs(current.x - previous.x - previous.width - gap)).toBeLessThan(1);
+        }
+      }
+      expect(columnChanges).toBe(width === 1280 ? 1 : 0);
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+      ).toBe(true);
+    });
+  }
+
   test('shows wishes grouped by definitive order and reserves one wish', async ({ page }) => {
     const requests: URL[] = [];
     await page.route('http://localhost:8083/public/fulfiller/orders**', async (route) => {

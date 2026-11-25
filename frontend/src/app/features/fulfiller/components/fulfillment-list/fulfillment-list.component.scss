@@ -4,13 +4,30 @@
 
 .fulfillment-order {
   width: 100%;
+  border-radius: 1rem;
+  padding: 1rem;
+
+  > mat-card-header,
+  > mat-card-content {
+    padding: 0;
+  }
 }
 
 .wish-entry {
-  padding: var(--gl-space-md);
   border: 1px solid #8c7b85;
-  border-radius: 0.25rem;
+  border-radius: 1rem;
   background: #fff8fc;
+  overflow: hidden;
+}
+
+.wish-entry__image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.wish-entry__body {
+  padding: 1rem;
 }
 
 .wish-entry__content {
