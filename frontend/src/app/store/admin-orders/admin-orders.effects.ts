@@ -2,8 +2,12 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { catchError, map, of, switchMap, withLatestFrom } from 'rxjs';
+import { catchError, map, mergeMap, of, switchMap, takeUntil, withLatestFrom } from 'rxjs';
 import { AdminOrdersService } from '../../shared/services/admin-orders.service';
+import { AuthActions } from '../auth/auth.actions';
+import { SessionActions } from '../auth/session.actions';
+import { ImageTransfersActions } from '../image-transfers/image-transfers.actions';
+import { QueuedImageTransfer } from '../image-transfers/image-transfers.state';
 import { NavigationActions } from '../navigation/navigation.actions';
 import { NotificationActions } from '../notification/notification.actions';
 import { AdminOrdersActions } from './admin-orders.actions';
@@ -36,13 +40,38 @@ export const saveAdminOrderEffect = createEffect(
   (actions$ = inject(Actions), service = inject(AdminOrdersService)) =>
     actions$.pipe(
       ofType(AdminOrdersActions.save),
-      switchMap(({ order, action }) =>
+      switchMap(({ order, action, imageChanges = [] }) =>
         service.update(order, action).pipe(
-          map(({ order: savedOrder, mailSent }) =>
-            AdminOrdersActions.saveSuccess({ order: savedOrder, mailSent }),
-          ),
+          mergeMap(({ order: savedOrder, mailSent }) => {
+            const transfers: QueuedImageTransfer[] = imageChanges
+              .filter(({ itemId }) => savedOrder.items.some((item) => item.id === itemId))
+              .map(({ itemId, change }) => ({
+                id: crypto.randomUUID(),
+                orderId: savedOrder.id,
+                itemId,
+                status: 'queued',
+                change,
+              }));
+            return transfers.length === 0
+              ? [AdminOrdersActions.saveSuccess({ order: savedOrder, mailSent })]
+              : [
+                  AdminOrdersActions.saveSuccess({ order: savedOrder, mailSent }),
+                  ImageTransfersActions.transfersQueued({ transfers }),
+                ];
+          }),
           catchError((error: HttpErrorResponse) =>
             of(AdminOrdersActions.saveFailure({ errorCode: errorCode(error) })),
+          ),
+          takeUntil(
+            actions$.pipe(
+              ofType(
+                AuthActions.logoutRequested,
+                AuthActions.logoutRequestedWithRedirect,
+                AuthActions.loginSuccess,
+                AuthActions.registrationLoginSuccess,
+                SessionActions.sessionExpired,
+              ),
+            ),
           ),
         ),
       ),

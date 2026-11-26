@@ -52,6 +52,11 @@ describe('AdminOrdersService', () => {
           giftLink: 'https://example.com/gift',
           publicationStatus: 'approved',
           adminNotes: null,
+          imageChange: {
+            operation: 'replace',
+            revision: 0,
+            file: new File(['image'], 'gift.png', { type: 'image/png' }),
+          },
         },
       ],
     } as never;

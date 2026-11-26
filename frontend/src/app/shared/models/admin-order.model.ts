@@ -1,3 +1,4 @@
+import { OrderItemImageChange } from './order-item-image.model';
 import { OrderItemCategory, OrderItemPersonType, OrderStatus } from './order.model';
 
 export type AdminPublicationStatus = 'draft' | 'submitted' | 'rejected' | 'approved';
@@ -66,6 +67,7 @@ export interface AdminOrderFormValue {
       currentReason: string;
       currentTitle: string;
       adminNotes: string;
+      imageChange?: OrderItemImageChange;
     }
   >;
 }

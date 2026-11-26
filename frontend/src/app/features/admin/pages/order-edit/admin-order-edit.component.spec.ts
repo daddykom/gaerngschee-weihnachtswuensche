@@ -185,6 +185,43 @@ describe('AdminOrderEditComponent', () => {
     );
   });
 
+  it('retains image edits in the form, detects replaced files and snapshots them for saving', async () => {
+    const dispatch = vi.spyOn(store, 'dispatch');
+    const first = new File(['first'], 'gift.png', { type: 'image/png' });
+    const second = new File(['other'], 'gift.png', { type: 'image/png' });
+    for (const file of [first, second]) {
+      dispatch.mockClear();
+      component.formModel.update((model) => ({
+        ...model,
+        items: model.items.map((item) => ({
+          ...item,
+          imageChange: { operation: 'replace' as const, revision: 0, file },
+        })),
+      }));
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(dispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: AdminOrdersActions.formChanged.type,
+          changes: expect.objectContaining({
+            items: [
+              expect.objectContaining({ imageChange: { operation: 'replace', revision: 0, file } }),
+            ],
+          }),
+        }),
+      );
+    }
+    component.save();
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: AdminOrdersActions.save.type,
+        imageChanges: [
+          { itemId: 'item-1', change: { operation: 'replace', revision: 0, file: second } },
+        ],
+      }),
+    );
+  });
+
   it('saves the selected status with the order', () => {
     const dispatch = vi.spyOn(store, 'dispatch');
 

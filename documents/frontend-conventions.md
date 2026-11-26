@@ -153,6 +153,49 @@ provideEffects(registrationsEffects)
 
 ## Reactive Patterns
 
+### Background wish-image transfers
+
+Image edits belong to the existing admin order form:
+`AdminOrderFormValue.items[].imageChange` is either a replacement with a `File`
+and the current image revision, or a removal with that revision. It is changed
+through the same partial form-update action as the other fields. There is no
+separate image draft outside the form.
+
+The order editor snapshots image changes with the save event.
+`AdminOrdersService` continues to send only wish data in its JSON PATCH;
+image files are never serialized into that request. Only after the backend
+confirms the wish-data save does its effect queue image transfers for wishes
+present in the saved response. A failed save leaves the form intact and starts
+no image requests. Navigation after saving does not wait for the images.
+
+`imageTransfersFeature` and `imageTransfersEffects` are deliberately registered
+at application level in `app.config.ts`, unlike route-bound admin editing
+features. The queue must survive both editor destruction and navigation outside
+the admin routes. It contains committed transfer jobs, not another form draft.
+
+`OrderItemImagesService` uses multipart POST with `image` and `revision` and
+the existing XHR backend for upload progress. Binary preview retrieval and
+metadata retrieval use separate requests. Removals use DELETE with the revision.
+All requests use the existing credentials and CSRF interceptors.
+
+Transfers run sequentially and use discriminated states: `queued`, `uploading`,
+`success` and `error`. Percentages are bounded and monotonic; missing upload totals
+do not create estimated progress. Even 100 percent remains `uploading` until the
+backend confirms persistence. Success releases the file; failure retains it for
+an explicit image-only retry. A revision conflict is not automatically retried
+or rebased onto another administrator's change.
+
+When a queued change to the same wish was based on this application's preceding
+write, its expected revision advances after that write succeeds. Logout, account
+changes and session expiry cancel requests and clear the queue. An outstanding
+wish-data save is also cancelled so it cannot queue a late upload for a previous
+session.
+
+Files stay in memory in the form/transfer state and are not persisted to browser
+storage or encoded as Base64. Reloading or closing the tab cannot resume them.
+The upload controls, global progress display and unload warning are added in
+the subsequent UI steps.
+
 ### RxJS Usage
 
 - Prefer Observables for async operations
