@@ -11,6 +11,11 @@ use App\Registration\Data\OrderRepository;
 use App\Registration\Actions\AdminOrderListAction;
 use App\Registration\Actions\AdminOrderUpdateAction;
 use App\Registration\Actions\AdminStatisticsAction;
+use App\Registration\Actions\AdminOrderItemImageUploadAction;
+use App\Registration\Actions\AdminOrderItemImageGetAction;
+use App\Registration\Actions\AdminOrderItemImageMetadataAction;
+use App\Registration\Actions\AdminOrderItemImageDeleteAction;
+use App\Registration\Data\OrderItemImageRepository;
 use App\Configuration\Data\FrontendConfigRepository;
 use App\Middleware\AuthMiddleware;
 use App\Middleware\GroupMiddleware;
@@ -44,8 +49,9 @@ final class AdminRoutes
         ?AdminOrderUpdateAction $adminOrderUpdateAction = null,
         ?EmailTestAction $emailTestAction = null,
         ?AdminStatisticsAction $adminStatisticsAction = null,
+        ?OrderItemImageRepository $orderItemImages = null,
     ): void {
-        $app->group('/admin', function (RouteCollectorProxy $group) use ($userRepository, $emailSender, $fairgateTestAction, $orderRepository, $configRepository, $rateLimitService, $fairgateLookupAction, $adminOrderListAction, $adminOrderUpdateAction, $emailTestAction, $adminStatisticsAction): void {
+        $app->group('/admin', function (RouteCollectorProxy $group) use ($userRepository, $emailSender, $fairgateTestAction, $orderRepository, $configRepository, $rateLimitService, $fairgateLookupAction, $adminOrderListAction, $adminOrderUpdateAction, $emailTestAction, $adminStatisticsAction, $orderItemImages): void {
 
             $statistics = $group->get('/statistics', $adminStatisticsAction ?? new AdminStatisticsAction(config: $configRepository));
             $statistics->add(new GroupMiddleware(['admin'], $userRepository))->add(new AuthMiddleware());
@@ -55,6 +61,16 @@ final class AdminRoutes
 
             $orderUpdate = $group->patch('/orders/{orderId}', $adminOrderUpdateAction ?? new AdminOrderUpdateAction($orderRepository, $emailSender));
             $orderUpdate->add(new GroupMiddleware(['admin'], $userRepository))->add(new AuthMiddleware());
+
+            $imagePath = '/orders/{orderId}/items/{itemId}/image';
+            $imageUpload = $group->post($imagePath, new AdminOrderItemImageUploadAction($orderItemImages));
+            $imageUpload->add(new GroupMiddleware(['admin'], $userRepository))->add(new AuthMiddleware());
+            $imageGet = $group->get($imagePath, new AdminOrderItemImageGetAction($orderItemImages));
+            $imageGet->add(new GroupMiddleware(['admin'], $userRepository))->add(new AuthMiddleware());
+            $imageMetadata = $group->get($imagePath . '/metadata', new AdminOrderItemImageMetadataAction($orderItemImages));
+            $imageMetadata->add(new GroupMiddleware(['admin'], $userRepository))->add(new AuthMiddleware());
+            $imageDelete = $group->delete($imagePath, new AdminOrderItemImageDeleteAction($orderItemImages));
+            $imageDelete->add(new GroupMiddleware(['admin'], $userRepository))->add(new AuthMiddleware());
 
             $list = $group->get('/users', new ListUsersAction($userRepository));
             $list->add(new GroupMiddleware(['admin'], $userRepository))->add(new AuthMiddleware());

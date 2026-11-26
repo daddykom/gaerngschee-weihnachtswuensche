@@ -137,6 +137,20 @@ final class TestDatabase
                 updated_at TEXT
             )',
         );
+        require_once __DIR__ . '/../../../db/migrations/20261126204712_create_order_item_images_table.php';
+        require_once __DIR__ . '/../../../db/migrations/20261126205635_add_image_revision_to_order_items.php';
+        $foreignKeys = (int) $pdo->query('PRAGMA foreign_keys')->fetchColumn();
+        $adapter = new \Phinx\Db\Adapter\SQLiteAdapter(['adapter' => 'sqlite']);
+        $adapter->setConnection($pdo);
+        foreach ([
+            new \CreateOrderItemImagesTable('test', 20261126204712),
+            new \AddImageRevisionToOrderItems('test', 20261126205635),
+        ] as $migration) {
+            $migration->setAdapter($adapter);
+            $migration->setMigratingUp(true);
+            $migration->change();
+        }
+        $pdo->exec('PRAGMA foreign_keys = ' . $foreignKeys);
         $pdo->exec(
             'CREATE TABLE fulfiller_reservation_tokens (
                 id TEXT PRIMARY KEY,

@@ -112,6 +112,49 @@ final class Application
 }
 ```
 
+## Admin wish images
+
+Images are stored separately from wish data. Only authenticated administrators
+can use these endpoints; other authenticated groups receive 404. Mutations also
+require the normal `X-CSRF-Token`.
+
+Base path: `/admin/orders/{orderId}/items/{itemId}/image`.
+
+| Method | Path | Request / response |
+|---|---|---|
+| GET | Base path + `/metadata` | `{ revision: number, image: null \| { id, mimeType, width, height, byteSize, updatedAt } }` |
+| GET | Base path | Stored binary image with its actual MIME type; 404 without an image |
+| POST | Base path | `multipart/form-data` with one `image` file and the current integer `revision`; returns new metadata |
+| DELETE | Base path | JSON `{ "revision": number }`; returns incremented revision and `image: null` |
+
+Both IDs must identify the same existing wish. Every response from these actions
+is private and non-cacheable. Image responses also use `nosniff`.
+
+Uploads accept JPEG, PNG and WebP up to 5 MiB, at most 8192 pixels per dimension
+and 12 million pixels in total. The server checks and decodes actual image bytes,
+ignoring client filenames and declared types, then re-encodes the same format.
+EXIF metadata and trailing content are not retained. Stored output must also
+fit within 5 MiB. SVG, GIF, incomplete files and invalid images are rejected.
+
+An upload does not save wish text. The later frontend workflow first saves wish
+data, then starts a separate image request. Images are validated before taking
+the short database write lock, and the upload action releases the PHP session
+lock so unrelated admin requests can proceed. The repository locks the wish
+and checks its image revision again before committing.
+
+Stale upload/removal requests return `IMAGE_REVISION_CONFLICT` (409), including
+after an intervening removal. Database failures roll back the image replacement
+and preserve the previous image. Other relevant error codes are
+`IMAGE_REQUIRED`, `IMAGE_REVISION_REQUIRED`, `INVALID_IMAGE`,
+`IMAGE_DIMENSIONS_EXCEEDED` (422), `IMAGE_TOO_LARGE` (413),
+`ORDER_ITEM_NOT_FOUND` / `IMAGE_NOT_FOUND` (404), and
+`IMAGE_UPLOAD_FAILED` / `IMAGE_DELETE_FAILED` / `IMAGE_LOAD_FAILED` (500).
+
+The Docker image enables GD JPEG/WebP codecs. PHP allows 5 MiB files and
+6 MiB multipart bodies. Nginx raises its 64 KiB body limit to 6 MiB only for
+the image base path; other endpoints and the JSON parser retain their existing
+64 KiB limits. Non-Docker deployments need equivalent GD and upload settings.
+
 ## Testumgebung und Fairgate-Fake
 
 ### Fairgate-Zugriff im Real-Modus

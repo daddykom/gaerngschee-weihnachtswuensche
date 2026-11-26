@@ -169,10 +169,16 @@ The image bytes are stored in `image_data` as `MEDIUMBLOB`, not as Base64.
 UUID `id` and `created_at` / `updated_at` follow the usual table conventions.
 Existing wishes require no image row and are not changed by the migration.
 
-The schema leaves upload validation and access control to the application.
-It does not expose images or change wish-list responses. Admin-only image
-upload and separate persistence after saving wish data are implemented in
-subsequent steps.
+`order_items.image_revision` starts at zero and increases on every image upload
+or removal, including removal when no image is present. The value survives image
+deletion so an old upload cannot resurrect an image after a newer removal.
+Image replacement/removal, revision increment and the wish's `updated_at` change
+are atomic. Other wish fields are not changed by image requests.
+
+Admin-only image endpoints are documented in
+[backend-conventions.md](./backend-conventions.md#admin-wish-images).
+Neither public nor client wish-list responses contain image bytes or image
+metadata. The frontend upload workflow is implemented in subsequent steps.
 
 The migration tests run against SQLite by default. To additionally verify
 the migrated MariaDB integration schema, run from the repository root:
