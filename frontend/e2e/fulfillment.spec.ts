@@ -126,6 +126,12 @@ test.describe('Fulfillment route', () => {
       const wishes = cards.first().locator('.wish-entry');
       await expect(wishes).toHaveCount(6);
       await expect(wishes.first()).toHaveCSS('border-radius', radius);
+      for (const card of [cards.first(), wishes.first()]) {
+        await expect(card).not.toHaveCSS('box-shadow', 'none');
+        for (const side of ['top', 'right', 'bottom', 'left']) {
+          await expect(card).toHaveCSS(`border-${side}-width`, '0px');
+        }
+      }
       for (const side of ['top', 'right', 'bottom', 'left']) {
         await expect(wishes.first()).toHaveCSS(`padding-${side}`, '0px');
         await expect(wishes.first().locator('.wish-entry__body')).toHaveCSS(
@@ -146,9 +152,9 @@ test.describe('Fulfillment route', () => {
       const wishBounds = await wishes.first().boundingBox();
       expect(imageBounds).not.toBeNull();
       expect(wishBounds).not.toBeNull();
-      expect(Math.abs(imageBounds!.x - wishBounds!.x - 1)).toBeLessThan(1);
-      expect(Math.abs(imageBounds!.y - wishBounds!.y - 1)).toBeLessThan(1);
-      expect(Math.abs(imageBounds!.width - wishBounds!.width + 2)).toBeLessThan(1);
+      expect(Math.abs(imageBounds!.x - wishBounds!.x)).toBeLessThan(1);
+      expect(Math.abs(imageBounds!.y - wishBounds!.y)).toBeLessThan(1);
+      expect(Math.abs(imageBounds!.width - wishBounds!.width)).toBeLessThan(1);
       const bounds = await wishes.evaluateAll((elements) =>
         elements.map((element) => {
           const { x, y, width, height } = element.getBoundingClientRect();

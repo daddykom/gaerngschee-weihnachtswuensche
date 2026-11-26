@@ -625,6 +625,12 @@ die benötigte Darstellung bereits bereitstellt.
 
 # 13. Cards
 
+Die drei Karten auf der Startseite sowie Wunschzettel und einzelne Wünsche
+unter `/erfuellen` verwenden statt eines Rahmens den gemeinsamen Schatten
+`--gl-card-shadow` aus `frontend/src/styles.scss`.
+Ihre Rundung bleibt bei `1rem`. Bilder innerhalb der Wunschkarten werden
+an diesen Rundungen abgeschnitten; der äussere Kartenschatten bleibt sichtbar.
+
 `mat-card` ist kein allgemeiner Page-Container.
 
 Eine Page wird nicht automatisch in eine Card verpackt.

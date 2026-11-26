@@ -21,7 +21,8 @@
 .home-choice {
   min-width: 0;
   padding: var(--gl-space-xl);
-  border: 1px solid var(--mat-sys-outline-variant);
+  border: 0;
+  box-shadow: var(--gl-card-shadow);
   border-radius: 1rem;
 }
 
@@ -51,6 +52,8 @@
 
 .home-faq {
   overflow: hidden;
+  border: 0;
+  box-shadow: var(--gl-card-shadow);
   border-radius: 1rem;
   padding: 1rem;
 

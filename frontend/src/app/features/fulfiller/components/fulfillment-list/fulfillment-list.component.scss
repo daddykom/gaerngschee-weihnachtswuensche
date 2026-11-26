@@ -4,6 +4,8 @@
 
 .fulfillment-order {
   width: 100%;
+  border: 0;
+  box-shadow: var(--gl-card-shadow);
   border-radius: 1rem;
   padding: 1rem;
 
@@ -35,7 +37,8 @@
 }
 
 .wish-entry {
-  border: 1px solid #8c7b85;
+  border: 0;
+  box-shadow: var(--gl-card-shadow);
   border-radius: 1rem;
   background: var(--gl-surface-soft);
   overflow: hidden;
