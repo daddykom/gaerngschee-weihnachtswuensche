@@ -166,7 +166,7 @@ test('keeps the assignment until the whole order is saved and then queues the no
           message.Subject === 'Deine Wunschreservierung wurde aufgehoben',
       ),
     ).toHaveLength(0);
-    await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+    await page.getByRole('button', { name: 'Weiter', exact: true }).click();
     await page.waitForURL(`**/admin/orders/${draft.id}/edit`);
     await expectTranslatedText(
       page.locator('.app-notification'),

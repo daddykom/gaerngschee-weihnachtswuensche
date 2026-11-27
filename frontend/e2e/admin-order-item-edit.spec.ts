@@ -75,7 +75,7 @@ test.describe('Admin order item edit route', () => {
         page.locator('.app-notification'),
         'app.admin.fulfillerRemoval.pending',
       );
-      await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+      await page.getByRole('button', { name: 'Weiter', exact: true }).click();
       await page.waitForURL('**/admin/orders/order-1/edit');
       expect(removals).toBe(0);
       await expectTranslatedText(
@@ -87,7 +87,7 @@ test.describe('Admin order item edit route', () => {
       await expect(
         page.getByRole('textbox', { name: 'Aktueller Wunschtitel', exact: true }),
       ).toHaveValue('Unsaved wish title');
-      await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+      await page.getByRole('button', { name: 'Weiter', exact: true }).click();
       await page.waitForURL('**/admin/orders/order-1/edit');
       await page.getByRole('button', { name: 'Speichern', exact: true }).click();
       await expect(page).toHaveURL(/\/admin\/overview$/);
@@ -157,7 +157,7 @@ test.describe('Admin order item edit route', () => {
       .fill('Unsaved conflict title');
     await page.getByRole('button', { name: 'Erfüller entfernen', exact: true }).click();
     await page.getByRole('dialog').getByRole('button', { name: 'Ja', exact: true }).click();
-    await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+    await page.getByRole('button', { name: 'Weiter', exact: true }).click();
     await page.waitForURL('**/admin/orders/order-1/edit');
     await page.getByRole('button', { name: 'Speichern', exact: true }).click();
     await expectTranslatedText(
