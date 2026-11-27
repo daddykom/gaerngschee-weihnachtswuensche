@@ -779,7 +779,7 @@
         "title": "Admin-Übersicht",
         "filters": {
           "title": "Filter",
-          "email": "E-Mail durchsuchen",
+          "email": "Besteller- oder Erfüller-E-Mail",
           "orderNumber": "Zettelnummer suchen",
           "status": "Status",
           "category": "Kategorie",
