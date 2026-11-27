@@ -1,0 +1,58 @@
+<section class="gl-stack" aria-labelledby="wish-image-heading">
+  <h2 id="wish-image-heading">{{ 'app.admin.itemImage.title' | translate }}</h2>
+  <p id="wish-image-hint">{{ 'app.admin.itemImage.hint' | translate }}</p>
+  <div
+    class="image-drop-zone gl-stack"
+    (dragover)="dragOver($event)"
+    (drop)="drop($event)"
+    [attr.aria-disabled]="disabled()"
+    data-testid="image-drop-zone"
+  >
+    <p>{{ 'app.admin.itemImage.dropHint' | translate }}</p>
+    <input
+      #fileInput
+      hidden
+      type="file"
+      accept="image/jpeg,image/png,image/webp"
+      [disabled]="disabled()"
+      (change)="select($event)"
+    />
+    <div class="gl-cluster">
+      <button
+        mat-stroked-button
+        type="button"
+        [disabled]="disabled()"
+        (click)="fileInput.click()"
+        aria-describedby="wish-image-hint"
+      >
+        {{ 'app.admin.itemImage.choose' | translate }}
+      </button>
+      @if (change() || storedImage()) {
+        <button
+          mat-button
+          type="button"
+          [disabled]="disabled() || change()?.operation === 'remove'"
+          (click)="removeClicked.emit()"
+        >
+          {{ 'app.admin.itemImage.remove' | translate }}
+        </button>
+      }
+      @if (change()) {
+        <button mat-button type="button" [disabled]="disabled()" (click)="resetClicked.emit()">
+          {{ 'app.admin.itemImage.reset' | translate }}
+        </button>
+      }
+    </div>
+    @if (change(); as selection) {
+      @if (selection.operation === 'replace') {
+        <p class="image-file-name">{{ selection.file.name }}</p>
+      } @else {
+        <p>{{ 'app.admin.itemImage.removalPending' | translate }}</p>
+      }
+    }
+    @if (previewUrl(); as url) {
+      <img class="image-preview" [src]="url" [alt]="'app.admin.itemImage.previewAlt' | translate" />
+    }
+    <app-control-error [control]="control()" translationPrefix="app.admin.itemImage.errors" />
+  </div>
+</section>

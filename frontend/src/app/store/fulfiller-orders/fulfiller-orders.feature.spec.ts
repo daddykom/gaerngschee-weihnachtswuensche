@@ -37,6 +37,32 @@ describe('fulfillerOrdersFeature', () => {
     ).toMatchObject({ orders: [order], loadStatus: 'loaded' });
   });
 
+  it('falls back only for the matching image and ignores failures from an older image URL', () => {
+    const imagePath = '/public/fulfiller/wishes/item-1/images/new-image';
+    const withImage = { ...order, items: [{ ...order.items[0], imagePath }] };
+    const state = { ...initialState, orders: [withImage] };
+    expect(
+      fulfillerOrdersFeature.reducer(
+        state,
+        FulfillerOrdersActions.imageLoadFailed({
+          itemId: 'item-1',
+          imagePath: '/old-image',
+        }),
+      ).orders[0].items[0].imagePath,
+    ).toBe(imagePath);
+    const result = fulfillerOrdersFeature.reducer(
+      state,
+      FulfillerOrdersActions.imageLoadFailed({
+        itemId: 'item-1',
+        imagePath,
+      }),
+    );
+    expect(result.orders[0].items[0].imagePath).toBeNull();
+    expect(state.orders[0].items[0].imagePath).toBe(imagePath);
+    expect(result.loadStatus).toBe(state.loadStatus);
+    expect(result.orders[0].items[0].currentDescription).toBe(order.items[0].currentDescription);
+  });
+
   it('patches only matching wish statuses without rebuilding the order list', () => {
     const state = { ...initialState, orders: [order] };
     const result = fulfillerOrdersFeature.reducer(

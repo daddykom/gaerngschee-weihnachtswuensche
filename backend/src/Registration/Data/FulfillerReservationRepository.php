@@ -120,11 +120,12 @@ final class FulfillerReservationRepository
     {
         $statement = $this->pdo->prepare(
             "SELECT items.id, items.item_number, items.category, items.current_title, items.current_description,
-                     items.gift_link,
+                      items.gift_link, images.id AS image_id,
                     items.fulfillment_status, items.reserved_at, items.reservation_expires_at,
                     orders.id AS order_id, orders.year, orders.order_number
              FROM order_items items
-             INNER JOIN orders ON orders.id = items.order_id
+              INNER JOIN orders ON orders.id = items.order_id
+              LEFT JOIN order_item_images images ON images.order_item_id = items.id
              WHERE items.id = :id AND items.publication_status = 'approved' AND orders.status = 'definitive'",
         );
         $statement->execute(['id' => $itemId]);
@@ -162,10 +163,11 @@ final class FulfillerReservationRepository
         $statement = $this->pdo->prepare(
             'SELECT orders.id, orders.year, orders.order_number, orders.current_text,
                     items.id AS item_id, items.item_number, items.category, items.current_title, items.current_description,
-                     items.gift_link,
+                      items.gift_link, images.id AS image_id,
                     items.fulfillment_status, items.reserved_at, items.reservation_expires_at
              FROM orders
-             INNER JOIN order_items items ON items.order_id = orders.id
+              INNER JOIN order_items items ON items.order_id = orders.id
+              LEFT JOIN order_item_images images ON images.order_item_id = items.id
              WHERE ' . implode(' AND ', $conditions) . '
              ORDER BY orders.year DESC, orders.order_number ASC, items.item_number ASC, items.id ASC',
         );
@@ -225,6 +227,9 @@ final class FulfillerReservationRepository
             'title' => (string) ($item['current_title'] ?? $item['current_description']),
             'currentDescription' => (string) $item['current_description'],
             'giftLink' => $item['gift_link'] ?? null,
+            'imagePath' => isset($item['image_id'])
+                ? '/public/fulfiller/wishes/' . rawurlencode((string) $item[$idKey]) . '/images/' . rawurlencode((string) $item['image_id'])
+                : null,
             'fulfillmentStatus' => (string) $item['fulfillment_status'],
             'reservedAt' => $item['reserved_at'],
             'reservationExpiresAt' => $item['reservation_expires_at'] ?? null,

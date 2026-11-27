@@ -61,5 +61,36 @@ describe('FulfillmentListComponent', () => {
     );
     expect(fixture.nativeElement.textContent).not.toContain('app.order.items.');
     expect(fixture.nativeElement.textContent).not.toContain('Private');
+    expect(fixture.nativeElement.querySelector('img').getAttribute('src')).toBe(
+      '/images/wish-gift.jpg',
+    );
+  });
+
+  it('selects a stored wish image and reports failure without retrying a failed fallback', async () => {
+    const wish = {
+      id: 'item-1',
+      itemNumber: 1,
+      wishNumber: '12-1',
+      category: 'gift' as const,
+      title: 'Wish',
+      currentDescription: 'Description',
+      fulfillmentStatus: 'available' as const,
+      reservedAt: null,
+      reservationExpiresAt: null,
+      imagePath: '/public/fulfiller/wishes/item-1/images/image-1',
+    };
+    fixture.componentRef.setInput('imageBaseUrl', 'http://localhost:8083');
+    fixture.componentRef.setInput('orders', [
+      { id: 'order-1', year: 2026, orderNumber: 12, currentText: null, items: [wish] },
+    ]);
+    fixture.detectChanges();
+    const image = fixture.nativeElement.querySelector('img') as HTMLImageElement;
+    expect(image.getAttribute('src')).toBe('http://localhost:8083' + wish.imagePath);
+    expect(image.getAttribute('loading')).toBe('lazy');
+    const emit = vi.spyOn(component.imageFailed, 'emit');
+    image.dispatchEvent(new Event('error'));
+    expect(emit).toHaveBeenCalledExactlyOnceWith({ itemId: wish.id, imagePath: wish.imagePath });
+    component.onImageError({ ...wish, imagePath: null });
+    expect(emit).toHaveBeenCalledTimes(1);
   });
 });

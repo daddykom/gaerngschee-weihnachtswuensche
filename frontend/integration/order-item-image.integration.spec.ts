@@ -1,0 +1,423 @@
+import { expect, test } from '@playwright/test';
+import { execFile } from 'node:child_process';
+import { createHash } from 'node:crypto';
+import { resolve } from 'node:path';
+import { promisify } from 'node:util';
+import { loginAsAdmin } from './support/admin-login';
+import { authHeaders } from './support/auth-header';
+
+const executeFile = promisify(execFile);
+const apiUrl = 'http://localhost:8082';
+
+async function fixtureCommand(...args: string[]): Promise<string> {
+  const { stdout } = await executeFile('docker', [
+    'compose',
+    '-f',
+    resolve(process.cwd(), '..', 'docker-compose.integration.yml'),
+    'exec',
+    '-T',
+    'integration-backend',
+    'php',
+    '/var/www/html/tests/Support/SeedOrderItemImageFixture.php',
+    ...args,
+  ]);
+  return stdout;
+}
+
+test.describe('Admin wish image API', () => {
+  let fixture: {
+    ownerId: string;
+    userId: string;
+    userEmail: string;
+    orderId: string;
+    itemId: string;
+    images: string[];
+  };
+  let imageUrl: string;
+
+  test.beforeEach(async ({ page }) => {
+    fixture = JSON.parse(await fixtureCommand('create'));
+    imageUrl = `${apiUrl}/admin/orders/${fixture.orderId}/items/${fixture.itemId}/image`;
+    await loginAsAdmin(page);
+  });
+
+  test.afterEach(async () => {
+    if (fixture) {
+      await fixtureCommand('cleanup', fixture.ownerId, fixture.userId);
+    }
+  });
+
+  test('shows published wish images anonymously, hides drafts and revokes replaced or withdrawn URLs', async ({
+    page,
+    browser,
+    request,
+  }) => {
+    const headers = await authHeaders(page);
+    const uploaded = await page.request.post(imageUrl, {
+      headers,
+      multipart: {
+        revision: '0',
+        image: {
+          name: 'wish.png',
+          mimeType: 'image/png',
+          buffer: Buffer.from(fixture.images[0], 'base64'),
+        },
+      },
+    });
+    expect(uploaded.status()).toBe(200);
+    const state = await uploaded.json();
+    const originalPath = `/public/fulfiller/wishes/${fixture.itemId}/images/${state.image.id}`;
+    expect((await request.get(`${apiUrl}${originalPath}`)).status()).toBe(404);
+    const orders = await (
+      await page.request.get(`${apiUrl}/admin/orders`, { params: { 'status[]': 'draft' } })
+    ).json();
+    const order = orders.orders.find(
+      (candidate: { id: string }) => candidate.id === fixture.orderId,
+    );
+    const title = `Public image ${fixture.itemId}`;
+    const published = await page.request.patch(`${apiUrl}/admin/orders/${fixture.orderId}`, {
+      headers,
+      data: {
+        action: 'save',
+        order: { ...order, status: 'definitive', currentText: 'Anonymous image family' },
+        items: order.items.map((item: Record<string, unknown>) => ({
+          ...item,
+          currentTitle: title,
+          publicationStatus: 'approved',
+        })),
+      },
+    });
+    expect(published.status()).toBe(200);
+    const list = await (
+      await request.get(`${apiUrl}/public/fulfiller/orders`, { params: { q: title } })
+    ).json();
+    expect(list.orders[0].items[0].imagePath).toBe(originalPath);
+    expect(JSON.stringify(list)).not.toContain(fixture.images[0]);
+    const publicImage = await request.get(`${apiUrl}${originalPath}`);
+    expect(publicImage.status()).toBe(200);
+    expect(publicImage.headers()['content-type']).toBe('image/png');
+    expect(publicImage.headers()['cache-control']).toContain('no-store');
+    expect(await publicImage.body()).toEqual(await (await page.request.get(imageUrl)).body());
+
+    const publicContext = await browser.newContext({ baseURL: new URL(page.url()).origin });
+    try {
+      const publicPage = await publicContext.newPage();
+      await publicPage.goto('/erfuellen');
+      const wish = publicPage
+        .locator('.wish-entry')
+        .filter({ has: publicPage.getByRole('heading', { name: title, exact: true }) });
+      const image = wish.locator('img');
+      await image.scrollIntoViewIfNeeded();
+      await expect(image).toHaveAttribute('src', `${apiUrl}${originalPath}`);
+      await expect
+        .poll(() => image.evaluate((element: HTMLImageElement) => element.naturalWidth))
+        .toBe(12);
+      expect((await publicContext.request.get(imageUrl)).status()).toBe(401);
+    } finally {
+      await publicContext.close();
+    }
+
+    const replacement = await page.request.post(imageUrl, {
+      headers,
+      multipart: {
+        revision: '1',
+        image: {
+          name: 'wish.jpg',
+          mimeType: 'image/jpeg',
+          buffer: Buffer.from(fixture.images[1], 'base64'),
+        },
+      },
+    });
+    expect(replacement.status()).toBe(200);
+    expect((await request.get(`${apiUrl}${originalPath}`)).status()).toBe(404);
+    const replacementId = (await replacement.json()).image.id;
+    const replacementPath = `/public/fulfiller/wishes/${fixture.itemId}/images/${replacementId}`;
+    expect((await request.get(`${apiUrl}${replacementPath}`)).headers()['content-type']).toBe(
+      'image/jpeg',
+    );
+    const withdrawn = await page.request.patch(`${apiUrl}/admin/orders/${fixture.orderId}`, {
+      headers,
+      data: {
+        action: 'save',
+        order: { ...order, status: 'in_review', currentText: 'Anonymous image family' },
+        items: order.items.map((item: Record<string, unknown>) => ({
+          ...item,
+          currentTitle: title,
+          publicationStatus: 'approved',
+        })),
+      },
+    });
+    expect(withdrawn.status()).toBe(200);
+    expect((await request.get(`${apiUrl}${replacementPath}`)).status()).toBe(404);
+  });
+
+  test('stages images in the browser and persists upload and removal only after saving wish data', async ({
+    page,
+  }) => {
+    await page.goto('/admin/overview');
+    await page.getByRole('combobox', { name: 'Status', exact: true }).click();
+    await page.getByRole('option', { name: 'Entwurf', exact: true }).click();
+    await page.keyboard.press('Escape');
+    await page.locator(`a[href="/admin/orders/${fixture.orderId}/edit"]`).click();
+    await page
+      .getByRole('textbox', { name: 'Aktueller Order-Text' })
+      .fill('Image upload integration fixture');
+    await page
+      .locator(`a[href="/admin/orders/${fixture.orderId}/edit/item/${fixture.itemId}"]`)
+      .click();
+    const editor = page.locator('app-order-item-image-editor');
+    await editor.locator('input[type=file]').setInputFiles({
+      name: 'wish.png',
+      mimeType: 'image/png',
+      buffer: Buffer.from(fixture.images[0], 'base64'),
+    });
+    await expect(editor.getByRole('img')).toBeVisible();
+    expect(await (await page.request.get(`${imageUrl}/metadata`)).json()).toEqual({
+      revision: 0,
+      image: null,
+    });
+    await page.getByRole('button', { name: 'Weiter', exact: true }).click();
+    await page.waitForURL(`**/admin/orders/${fixture.orderId}/edit`);
+    const upload = page.waitForResponse(
+      (response) => response.url() === imageUrl && response.request().method() === 'POST',
+    );
+    await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+    expect((await upload).status()).toBe(200);
+    await expect(
+      page.getByTestId('image-transfer-notices').locator('[data-status=success]'),
+    ).toHaveCount(1);
+    await expect
+      .poll(async () => (await (await page.request.get(`${imageUrl}/metadata`)).json()).revision)
+      .toBe(1);
+    await page.goto('/admin/overview');
+    await page.getByRole('combobox', { name: 'Status', exact: true }).click();
+    await page.getByRole('option', { name: 'Entwurf', exact: true }).click();
+    await page.keyboard.press('Escape');
+    await page.locator(`a[href="/admin/orders/${fixture.orderId}/edit"]`).click();
+    await page
+      .locator(`a[href="/admin/orders/${fixture.orderId}/edit/item/${fixture.itemId}"]`)
+      .click();
+    await expect(editor.getByRole('img')).toBeVisible();
+    await editor.getByRole('button', { name: 'Bild entfernen', exact: true }).click();
+    await expect(editor.getByRole('img')).toHaveCount(0);
+    expect((await (await page.request.get(`${imageUrl}/metadata`)).json()).revision).toBe(1);
+    await page.getByRole('button', { name: 'Weiter', exact: true }).click();
+    await page.waitForURL(`**/admin/orders/${fixture.orderId}/edit`);
+    const deletion = page.waitForResponse(
+      (response) => response.url() === imageUrl && response.request().method() === 'DELETE',
+    );
+    await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+    expect((await deletion).status()).toBe(200);
+    await expect(
+      page.getByTestId('image-transfer-notices').locator('[data-status=success]'),
+    ).toHaveCount(1);
+    expect(await (await page.request.get(`${imageUrl}/metadata`)).json()).toEqual({
+      revision: 2,
+      image: null,
+    });
+  });
+
+  test('retains saved wish data after a transport failure and retries only the image against the real backend', async ({
+    page,
+  }) => {
+    await page.goto('/admin/overview');
+    await page.getByRole('combobox', { name: 'Status', exact: true }).click();
+    await page.getByRole('option', { name: 'Entwurf', exact: true }).click();
+    await page.keyboard.press('Escape');
+    await page.locator(`a[href="/admin/orders/${fixture.orderId}/edit"]`).click();
+    await page
+      .getByRole('textbox', { name: 'Aktueller Order-Text' })
+      .fill('Retained after upload failure');
+    await page
+      .locator(`a[href="/admin/orders/${fixture.orderId}/edit/item/${fixture.itemId}"]`)
+      .click();
+    await page.locator('app-order-item-image-editor input[type=file]').setInputFiles({
+      name: 'wish.png',
+      mimeType: 'image/png',
+      buffer: Buffer.from(fixture.images[0], 'base64'),
+    });
+    await page.getByRole('button', { name: 'Weiter', exact: true }).click();
+    await page.waitForURL(`**/admin/orders/${fixture.orderId}/edit`);
+    let patches = 0;
+    page.on('request', (request) => {
+      if (
+        request.method() === 'PATCH' &&
+        request.url() === `${apiUrl}/admin/orders/${fixture.orderId}`
+      )
+        patches++;
+    });
+    // Simulate only the interrupted transport; the retry reaches PHP and MariaDB.
+    await page.route(imageUrl, (route) => route.abort('failed'), { times: 1 });
+    await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+    const job = page.getByTestId('image-transfer-notices').locator('[data-transfer-id]');
+    await expect(job).toHaveAttribute('data-status', 'error');
+    expect(await (await page.request.get(`${imageUrl}/metadata`)).json()).toEqual({
+      revision: 0,
+      image: null,
+    });
+    const storedOrders = await (
+      await page.request.get(`${apiUrl}/admin/orders`, { params: { 'status[]': 'draft' } })
+    ).json();
+    expect(
+      storedOrders.orders.find((order: { id: string }) => order.id === fixture.orderId).currentText,
+    ).toBe('Retained after upload failure');
+    await job.getByRole('button', { name: 'Bildänderung erneut versuchen' }).click();
+    await expect(job).toHaveAttribute('data-status', 'success');
+    expect((await (await page.request.get(`${imageUrl}/metadata`)).json()).revision).toBe(1);
+    expect(patches).toBe(1);
+  });
+
+  test('persists binary images separately, replaces safely and removes without exposing image bytes in orders', async ({
+    page,
+  }) => {
+    const headers = await authHeaders(page);
+    const metadata = () =>
+      page.request.get(`${imageUrl}/metadata`).then((response) => response.json());
+    const inspect = async () => JSON.parse(await fixtureCommand('inspect', fixture.itemId));
+    const upload = (buffer: Buffer, revision: number) =>
+      page.request.post(imageUrl, {
+        headers,
+        multipart: {
+          revision: String(revision),
+          image: { name: 'untrusted.svg', mimeType: 'image/svg+xml', buffer },
+        },
+      });
+    const beforeOrders = await (await page.request.get(`${apiUrl}/admin/orders`)).json();
+    const before = beforeOrders.orders.find(
+      (order: { id: string }) => order.id === fixture.orderId,
+    );
+    expect(await metadata()).toEqual({ revision: 0, image: null });
+    const png = Buffer.from(fixture.images[0], 'base64');
+    // Cross the old 64 KB limit and verify the complete accepted 5 MB input boundary.
+    const largePng = Buffer.concat([png, Buffer.alloc(5 * 1024 * 1024 - png.length)]);
+    const first = await upload(largePng, 0);
+    expect(first.status()).toBe(200);
+    const firstState = await first.json();
+    expect(firstState).toMatchObject({
+      revision: 1,
+      image: { mimeType: 'image/png', width: 12, height: 8 },
+    });
+    const image = await page.request.get(imageUrl);
+    expect(image.status()).toBe(200);
+    expect(image.headers()['content-type']).toBe('image/png');
+    expect(image.headers()['cache-control']).toContain('private');
+    expect(image.headers()['cache-control']).toContain('no-store');
+    expect(image.headers()['x-content-type-options']).toContain('nosniff');
+    const bytes = await image.body();
+    const stored = await inspect();
+    expect(stored.checksum).toBe(createHash('sha256').update(bytes).digest('hex'));
+    expect(Number(stored.byte_size)).toBe(bytes.length);
+    expect(bytes.length).toBeLessThan(65536);
+
+    for (const [index, mimeType] of ['image/jpeg', 'image/webp'].entries()) {
+      const replacement = await upload(Buffer.from(fixture.images[index + 1], 'base64'), index + 1);
+      expect(replacement.status()).toBe(200);
+      expect(await replacement.json()).toMatchObject({
+        revision: index + 2,
+        image: { mimeType, width: 12, height: 8 },
+      });
+    }
+    expect((await upload(png, 0)).status()).toBe(409);
+    const current = await metadata();
+    expect((await upload(Buffer.from('<svg/>'), 3)).status()).toBe(422);
+    expect(await metadata()).toEqual(current);
+    expect((await page.request.delete(imageUrl, { headers, data: { revision: 2 } })).status()).toBe(
+      409,
+    );
+    expect((await page.request.delete(imageUrl, { headers, data: { revision: 3 } })).status()).toBe(
+      200,
+    );
+    expect(await metadata()).toEqual({ revision: 4, image: null });
+    expect((await inspect()).id).toBeNull();
+    expect((await page.request.get(imageUrl)).status()).toBe(404);
+    expect((await upload(png, 0)).status()).toBe(409);
+
+    const afterOrders = await (await page.request.get(`${apiUrl}/admin/orders`)).json();
+    const after = afterOrders.orders.find((order: { id: string }) => order.id === fixture.orderId);
+    const { updatedAt: beforeUpdatedAt, ...beforeItem } = before.items[0];
+    const { updatedAt: afterUpdatedAt, ...afterItem } = after.items[0];
+    expect(afterItem).toEqual(beforeItem);
+    expect(JSON.stringify(afterOrders)).not.toContain('image_data');
+    expect(JSON.stringify(afterOrders)).not.toContain(fixture.images[0]);
+  });
+
+  test('enforces permissions, CSRF, upload limits and the order-item association', async ({
+    page,
+    request,
+  }) => {
+    const headers = await authHeaders(page);
+    const png = Buffer.from(fixture.images[0], 'base64');
+    const multipart = {
+      revision: '0',
+      image: { name: 'image.png', mimeType: 'image/png', buffer: png },
+    };
+    expect((await request.get(imageUrl)).status()).toBe(401);
+    expect((await request.get(`${imageUrl}/metadata`)).status()).toBe(401);
+    expect((await request.post(imageUrl, { multipart })).status()).toBe(401);
+    expect((await request.delete(imageUrl, { data: { revision: 0 } })).status()).toBe(401);
+    expect((await page.request.post(imageUrl, { multipart })).status()).toBe(403);
+    expect((await page.request.delete(imageUrl, { data: { revision: 0 } })).status()).toBe(403);
+    const oversized = await page.request.post(imageUrl, {
+      headers,
+      multipart: {
+        ...multipart,
+        image: { ...multipart.image, buffer: Buffer.alloc(5 * 1024 * 1024 + 1) },
+      },
+    });
+    expect(oversized.status()).toBe(413);
+    expect((await oversized.json()).error.code).toBe('IMAGE_TOO_LARGE');
+    const mismatch = imageUrl.replace(fixture.orderId, 'another-order');
+    expect((await page.request.post(mismatch, { headers, multipart })).status()).toBe(404);
+    expect((await page.request.get(`${mismatch}/metadata`)).status()).toBe(404);
+    expect((await page.request.delete(mismatch, { headers, data: { revision: 0 } })).status()).toBe(
+      404,
+    );
+
+    const login = await request.post(`${apiUrl}/auth/login`, {
+      data: { email: fixture.userEmail, password: 'image-fixture-password' },
+    });
+    expect(login.status()).toBe(200);
+    await request.get(`${apiUrl}/auth/session-status`);
+    const state = await request.storageState();
+    const csrf = state.cookies.find((cookie) => cookie.name === 'XSRF-TOKEN')!.value;
+    const userHeaders = { 'X-CSRF-Token': csrf };
+    expect((await request.get(imageUrl)).status()).toBe(404);
+    expect((await request.get(`${imageUrl}/metadata`)).status()).toBe(404);
+    expect((await request.post(imageUrl, { headers: userHeaders, multipart })).status()).toBe(404);
+    expect(
+      (await request.delete(imageUrl, { headers: userHeaders, data: { revision: 0 } })).status(),
+    ).toBe(404);
+    expect(await (await page.request.get(`${imageUrl}/metadata`)).json()).toEqual({
+      revision: 0,
+      image: null,
+    });
+    const oversizedJson = await page.request.patch(`${apiUrl}/admin/orders/${fixture.orderId}`, {
+      headers,
+      data: { padding: 'x'.repeat(70000) },
+    });
+    expect(oversizedJson.status()).toBe(413);
+  });
+
+  test('accepts only one concurrent upload with the same revision', async ({ page }) => {
+    const headers = await authHeaders(page);
+    const responses = await Promise.all(
+      fixture.images.slice(0, 2).map((image) =>
+        page.request.post(imageUrl, {
+          headers,
+          multipart: {
+            revision: '0',
+            image: {
+              name: 'wish',
+              mimeType: 'application/octet-stream',
+              buffer: Buffer.from(image, 'base64'),
+            },
+          },
+        }),
+      ),
+    );
+    expect(responses.map((response) => response.status()).sort()).toEqual([200, 409]);
+    const state = await (await page.request.get(`${imageUrl}/metadata`)).json();
+    expect(state.revision).toBe(1);
+    expect(state.image).not.toBeNull();
+  });
+});

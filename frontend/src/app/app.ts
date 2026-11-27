@@ -4,6 +4,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   ElementRef,
   inject,
   viewChild,
@@ -18,16 +19,23 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { filter, startWith } from 'rxjs';
 import { BUILD_INFO } from '../generated/build-info';
 import { AdminNavigationComponent } from './shared/components/admin-navigation/admin-navigation';
+import { ImageTransferNoticesComponent } from './shared/components/image-transfer-notices/image-transfer-notices.component';
 import { InfoBoxComponent } from './shared/components/info-box/info-box';
 import { AppUpdateActions, appUpdateFeature } from './store/app-update/app-update.feature';
 import { AuthActions } from './store/auth/auth.actions';
 import { selectAuthEmail, selectAuthGroup } from './store/auth/auth.feature';
 import { SessionActions } from './store/auth/session.actions';
 import { selectFrontendPublicConfigStatus } from './store/frontend-config/frontend-config.feature';
+import { ImageTransfersActions } from './store/image-transfers/image-transfers.actions';
+import {
+  selectHasPendingImageTransfers,
+  selectImageTransfers,
+} from './store/image-transfers/image-transfers.feature';
 import { selectNotification } from './store/notification/notification.feature';
 
 @Component({
   imports: [
+    ImageTransferNoticesComponent,
     RouterOutlet,
     RouterLink,
     AdminNavigationComponent,
@@ -66,9 +74,23 @@ export class App {
   readonly isFulfiller = computed(() => this.authGroup() === 'wunscherfueller');
   readonly appVersion = BUILD_INFO.appVersion;
   readonly pendingBuildId = this.store.selectSignal(appUpdateFeature.selectPendingBuildId);
+  readonly imageTransfers = this.store.selectSignal(selectImageTransfers);
+  private readonly hasPendingImageTransfers = this.store.selectSignal(
+    selectHasPendingImageTransfers,
+  );
   private lastScrolledNotification: unknown = null;
 
   constructor() {
+    effect((onCleanup) => {
+      if (!this.hasPendingImageTransfers()) return;
+      const warnBeforeUnload = (event: BeforeUnloadEvent): void => {
+        // Browsers supply their own warning text and may require prior user interaction.
+        event.preventDefault();
+        event.returnValue = '';
+      };
+      window.addEventListener('beforeunload', warnBeforeUnload);
+      onCleanup(() => window.removeEventListener('beforeunload', warnBeforeUnload));
+    });
     const isRegistrationLogin =
       this.router.parseUrl(this.location.path()).root.children['primary']?.segments[0]?.path ===
       'client-login';
@@ -100,6 +122,14 @@ export class App {
 
   reloadClicked(): void {
     this.store.dispatch(AppUpdateActions.reloadClicked());
+  }
+
+  retryImageTransfer(id: string): void {
+    this.store.dispatch(ImageTransfersActions.retryClicked({ id }));
+  }
+
+  dismissImageTransfer(id: string): void {
+    this.store.dispatch(ImageTransfersActions.dismissClicked({ id }));
   }
 
   readonly pageTitleKey = computed(() => {

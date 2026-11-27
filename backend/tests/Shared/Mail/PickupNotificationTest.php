@@ -26,7 +26,7 @@ final class PickupNotificationTest extends TestCase
         $card = $xpath->query('//table[@width="600"]')->item(0);
         self::assertInstanceOf(\DOMElement::class, $card);
         self::assertStringContainsString('border-radius:20px', $card->getAttribute('style'));
-        self::assertStringContainsString('border:1px solid #8c7b85', $card->getAttribute('style'));
+        self::assertStringContainsString('border:1px solid #212121', $card->getAttribute('style'));
         $logoParent = $xpath->query('//img[@alt="Gärngschee"]/parent::td')->item(0);
         $qrParent = $xpath->query('//img[@id="pickup-qr-code"]/parent::td')->item(0);
         self::assertInstanceOf(\DOMElement::class, $logoParent);
@@ -34,7 +34,7 @@ final class PickupNotificationTest extends TestCase
         self::assertSame('center', $logoParent->getAttribute('align'));
         self::assertSame('center', $qrParent->getAttribute('align'));
         self::assertStringContainsString('background-color:#dff4e8', $message['html']);
-        self::assertStringContainsString('bgcolor="#8a2858"', $message['html']);
+        self::assertStringContainsString('bgcolor="#e30614"', $message['html']);
         self::assertStringContainsString('Dein Wunschzettel ist vollständig.', $message['html']);
         self::assertStringContainsString('QR-Code als PNG öffnen', $message['html']);
         self::assertStringContainsString($code['imageUrl'], $message['text']);

@@ -6,8 +6,8 @@
   display: grid;
   gap: var(--gl-space-md);
   padding: var(--gl-space-md);
-  border: 1px solid #8c7b85;
-  background: #fff8fc;
+  border: 1px solid var(--mat-sys-outline);
+  background: var(--mat-sys-surface);
 }
 
 .item-editor__category,
@@ -21,7 +21,7 @@
 }
 
 .item-editor__category span {
-  color: #6f6069;
+  color: var(--mat-sys-on-surface-variant);
 }
 
 @media (min-width: 48rem) {
@@ -39,8 +39,8 @@
 .original-text {
   margin: 0;
   padding: var(--gl-space-md);
-  border-left: 0.25rem solid #8c7b85;
-  background: #fff8fc;
+  border-left: 0.25rem solid var(--mat-sys-outline);
+  background: var(--mat-sys-surface);
   white-space: pre-wrap;
 }
 

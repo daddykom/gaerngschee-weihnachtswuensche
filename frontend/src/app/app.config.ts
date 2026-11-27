@@ -19,6 +19,8 @@ import { sessionEffects } from './store/auth/session.effects';
 import { eventsFeature } from './store/events/events.feature';
 import { frontendConfigEffects } from './store/frontend-config/frontend-config.effects';
 import { frontendConfigFeature } from './store/frontend-config/frontend-config.feature';
+import { imageTransfersEffects } from './store/image-transfers/image-transfers.effects';
+import { imageTransfersFeature } from './store/image-transfers/image-transfers.feature';
 import { navigationEffects } from './store/navigation/navigation.effects';
 import { notificationEffects } from './store/notification/notification.effects';
 import { notificationFeature } from './store/notification/notification.feature';
@@ -42,6 +44,7 @@ export const appConfig: ApplicationConfig = {
     provideState(notificationFeature),
     provideState(frontendConfigFeature),
     provideState(eventsFeature),
+    provideState(imageTransfersFeature),
     provideEffects(
       appUpdateEffects,
       authEffects,
@@ -49,6 +52,7 @@ export const appConfig: ApplicationConfig = {
       navigationEffects,
       notificationEffects,
       sessionEffects,
+      imageTransfersEffects,
     ),
     ...storeDevtoolsProviders,
     provideTranslateService({

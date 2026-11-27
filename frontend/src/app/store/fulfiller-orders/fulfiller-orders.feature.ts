@@ -6,6 +6,15 @@ export const fulfillerOrdersFeature = createFeature({
   name: 'fulfillerOrders',
   reducer: createReducer<FulfillerOrdersState>(
     initialState,
+    on(FulfillerOrdersActions.imageLoadFailed, (state, { itemId, imagePath }) => ({
+      ...state,
+      orders: state.orders.map((order) => ({
+        ...order,
+        items: order.items.map((item) =>
+          item.id === itemId && item.imagePath === imagePath ? { ...item, imagePath: null } : item,
+        ),
+      })),
+    })),
     on(FulfillerOrdersActions.load, (state) => ({
       ...state,
       loadStatus: 'loading',

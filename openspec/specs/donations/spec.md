@@ -27,6 +27,28 @@ E-Mail bestätigt und bleibt bis zur Bestätigung zehn Minuten vorläufig.
 - Die Liste kann nach Kategorie und korrigierten Texten durchsucht werden
 - Erfüller wählt genau einen Weihnachtswunsch aus
 
+### Wunschbilder in der öffentlichen Liste
+
+- Unter `/erfuellen` ersetzt das durch Administratoren gespeicherte Wunschbild
+  das dekorative Bild des jeweiligen Wunsches. Ohne Bild oder bei einem
+  fehlgeschlagenen Bildabruf bleibt `/images/wish-gift.jpg` der Fallback.
+- Der Bildbereich bleibt unabhängig vom Originalformat 16:9. Das Bild wird
+  proportional zentriert und flächendeckend dargestellt; überstehende Ränder
+  dürfen abgeschnitten werden. Wunschtexte, Kartenbreiten und Reservierung
+  ändern sich dadurch nicht.
+- Die öffentliche Wunschliste liefert nur `imagePath` oder `null`, keine
+  Binärdaten, Base64-Inhalte oder internen Bildmetadaten.
+- Der öffentliche Bildabruf erfordert keinen Login, aber ein geöffnetes
+  Erfüller-Datumsfenster und einen genehmigten Wunsch einer definitiven
+  Bestellung. Eine zwischenzeitliche Reservierung entzieht bestehenden
+  Wunschkarten nicht das Bild.
+- Die Kombination aus Wunsch-ID und aktueller Bild-ID muss übereinstimmen.
+  Bilder unveröffentlichter, zurückgezogener oder abgelehnter Wünsche sowie
+  entfernte oder ersetzte Bilder sind unter der alten URL nicht abrufbar.
+- Upload, Ersetzen und Löschen bleiben ausschliesslich Administratoren erlaubt.
+  JPEG, PNG und WebP bleiben die unterstützten Uploadformate; „unabhängig vom
+  Format“ beschreibt hier das Seitenverhältnis, keine zusätzlichen Dateitypen.
+
 ### F2: Reservierung per E-Mail bestätigen
 
 - E-Mail-Adresse, Datenschutzzustimmung und verbindliche Übergabezusage erfassen
@@ -115,6 +137,7 @@ interface ReservedWish {
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/public/fulfiller/orders` | Öffentliche definitive Bestellungen laden |
+| GET | `/public/fulfiller/wishes/{itemId}/images/{imageId}` | Aktuelles Bild eines veröffentlichten Wunsches laden |
 | GET | `/public/fulfiller/wish-statuses` | Nur Wunschstatus aktualisieren |
 | POST | `/public/fulfiller-reservation-start` | Vorläufige Reservierung anfordern |
 | POST | `/auth/fulfiller-reservation-confirm` | Reservierung über E-Mail-Token bestätigen |

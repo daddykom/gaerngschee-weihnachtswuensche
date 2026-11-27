@@ -12,6 +12,43 @@ use Symfony\Component\Mime\Email;
 
 final class EmailSenderTest extends TestCase
 {
+    public function testAllTestEmailTemplatesUseTheSharedPalette(): void
+    {
+        $templates = [
+            'client-order', 'fulfiller-reservation', 'fulfiller-reservation-confirmation',
+            'fulfiller-reminder', 'fairgate-registration-required', 'fairgate-registration-available',
+            'user-created', 'user-email-changed', 'password-reset', 'order-ready-for-pickup',
+            'order-confirmation-saved', 'order-confirmation-definitive', 'order-confirmation-changes_requested',
+        ];
+        $parameters = [
+            'loginUrl' => 'https://example.com/login', 'campaignYear' => 2026,
+            'wishNumber' => '12-1', 'wishTitle' => 'Test wish', 'wishDescription' => 'Test description',
+            'wishLink' => 'https://example.com/gift', 'handoverDate' => '20 December',
+            'handoverTime' => '10–12', 'handoverLocation' => 'Basel',
+            'fairgateUrl' => 'https://example.com/fairgate', 'startUrl' => 'https://example.com/start',
+            'temporaryPassword' => 'test-password', 'resetUrl' => 'https://example.com/reset',
+            'year' => 2026, 'orderNumber' => 12, 'pickupDate' => '21 December', 'pickupLocation' => 'Basel',
+        ];
+        foreach ($templates as $template) {
+            $mailer = $this->createMock(MailerInterface::class);
+            $mailer->expects(self::once())->method('send')->with(self::callback(static function (Email $email) use ($template): bool {
+                $html = $email->getHtmlBody();
+                foreach (['#f0e2df', '#ffffff', '#f5b6d3', '#212121'] as $color) {
+                    self::assertStringContainsString($color, $html, $template);
+                }
+                foreach (['#365740', '#f3f5f0', '#292e29', '#535e55', '#788278'] as $color) {
+                    self::assertStringNotContainsString($color, $html, $template);
+                }
+                return true;
+            }));
+            (new EmailSender($mailer, 'noreply@example.com', 'Gärngschee'))->sendTestEmail(
+                'recipient@example.com',
+                $template,
+                $parameters,
+            );
+        }
+    }
+
     public function testAdminCanSendTheFulfillerReleaseTemplate(): void
     {
         $mailer = $this->createMock(MailerInterface::class);
@@ -184,7 +221,11 @@ final class EmailSenderTest extends TestCase
                 self::assertStringContainsString($link, $email->getHtmlBody());
                 self::assertStringContainsString('cid:gaerngschee-logo', $email->getHtmlBody());
                 self::assertStringContainsString('gaerngschee-logo', $email->getBody()->toString());
-                self::assertStringContainsString('#8a2858', $email->getHtmlBody());
+                self::assertStringContainsString('#e30614', $email->getHtmlBody());
+                self::assertStringContainsString('#f0e2df', $email->getHtmlBody());
+                self::assertStringContainsString('#ffffff', $email->getHtmlBody());
+                self::assertStringContainsString('#212121', $email->getHtmlBody());
+                self::assertStringContainsString('#595959', $email->getHtmlBody());
                 self::assertStringContainsString('#f5b6d3', $email->getHtmlBody());
                 self::assertStringNotContainsString('#159447', $email->getHtmlBody());
 
@@ -389,7 +430,7 @@ final class EmailSenderTest extends TestCase
 
         self::assertSame('Bitte prüfe deinen Wunschzettel', $message['subject']);
         self::assertStringContainsString('zur Prüfung zurückgegeben', $message['html']);
-        self::assertStringContainsString('border:1px solid #8c7b85; border-radius:20px;', $message['html']);
+        self::assertStringContainsString('border:1px solid #212121; border-radius:20px;', $message['html']);
         self::assertStringContainsString('http://localhost:4200/login', $message['text']);
     }
 

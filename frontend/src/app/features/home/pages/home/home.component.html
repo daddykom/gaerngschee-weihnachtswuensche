@@ -16,7 +16,7 @@
             <p>{{ 'app.home.submit.text' | translate: { year } }}</p>
           </div>
           @if (campaignStatus() === 'open') {
-            <a mat-flat-button color="primary" routerLink="/start">
+            <a mat-stroked-button color="primary" routerLink="/start">
               {{ 'app.home.submit.action' | translate }}
             </a>
           } @else if (campaignStatus() === 'not_started') {
@@ -55,7 +55,7 @@
           <p>{{ 'app.home.fulfill.text' | translate: { year } }}</p>
         </div>
         @if (fulfillerStatus() === 'open') {
-          <a mat-stroked-button color="primary" routerLink="/erfuellen">
+          <a mat-flat-button color="primary" routerLink="/erfuellen">
             {{ 'app.home.fulfill.action' | translate }}
           </a>
         } @else if (fulfillerStatus() === 'not_started') {
@@ -77,8 +77,8 @@
           <mat-accordion displayMode="flat">
             @for (item of wunscherFaqItems; track item) {
               <mat-expansion-panel>
-                <mat-expansion-panel-header>
-                  <mat-panel-title>{{
+                <mat-expansion-panel-header class="home-faq__question">
+                  <mat-panel-title class="home-faq__question-title">{{
                     'app.home.faq.wunscher.' + item + '.question' | translate
                   }}</mat-panel-title>
                 </mat-expansion-panel-header>
@@ -99,8 +99,8 @@
           <mat-accordion displayMode="flat">
             @for (item of wunscherfuellerFaqItems; track item) {
               <mat-expansion-panel>
-                <mat-expansion-panel-header>
-                  <mat-panel-title>{{
+                <mat-expansion-panel-header class="home-faq__question">
+                  <mat-panel-title class="home-faq__question-title">{{
                     'app.home.faq.wunscherfueller.' + item + '.question' | translate
                   }}</mat-panel-title>
                 </mat-expansion-panel-header>

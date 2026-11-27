@@ -203,6 +203,12 @@ versendet die Nachricht mit den beim Speichern übernommenen Wunschtexten.
 | `order-confirmation-changes_requested.html.twig` | Aufforderung zur Prüfung und erneuten Einreichung der aktuellen Texte, mit allgemeinen und wunschbezogenen Rückmeldungen in HTML und Klartext | `ORDER.year`, `ORDER.loginUrl`, optional `ORDER.adminNotes`, `ORDER.orderNumber`, `ORDER.items[]` mit `publicationStatus` (Fallback `status`), `adminNotes`, `currentTitle`, optional `wishNumber` oder `itemNumber` (ohne Nummer: Position im Wunschzettel); Admin-Testparameter: `year`, `loginUrl`, optional `orderFeedback`, `wishNumber`, `wishTitle`, `wishFeedback` |
 | `order-ready-for-pickup.html.twig` | Abholbenachrichtigung im Layout der Registrierungs-E-Mail, mit Abholdatum/-zeit und mehrzeiligem Abholort aus der Konfiguration, eingebettetem QR-PNG und Link auf dasselbe PNG | `ORDER.year`, `ORDER.orderNumber`, `PICKUP_DATE` (Konfiguration `pickup_date`), `PICKUP_LOCATION` (Konfiguration `pickup_location`), `QR_DATA_URI`, `QR_IMAGE_URL`, `LOGO_CID` (Farben über das globale `EMAIL_THEME`); Admin-Testparameter: `year`, `orderNumber`, optional `pickupDate` (Text) und `pickupLocation` (Textarea); leere Testwerte verwenden die Konfiguration |
 
+Alle aufgeführten Vorlagen verwenden die zentrale `EMAIL_THEME`-Palette:
+Seitenhintergrund `#f0e2df`, weisse Inhaltsflächen, rosa Header `#f5b6d3`,
+rote Primäraktionen und Links auf Weiss `#e30614`, Haupttext und Rahmen
+`#212121` sowie Sekundärtext `#595959`. Statusfarben bleiben unverändert.
+Die Farbwerte benötigen keine zusätzlichen Template- oder Admin-Testparameter.
+
 Neue E-Mail-Vorlagen dürfen nicht nur im Template-Verzeichnis angelegt werden:
 Die Versandlogik, Übersetzungen, die Admin-E-Mail-Testauswahl und die
 zugehörigen Tests müssen im selben Änderungsumfang geprüft und aktualisiert

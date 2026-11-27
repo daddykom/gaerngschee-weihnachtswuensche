@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
+import { environment } from '../../../../../environments/environment';
 import { FulfillerWish } from '../../../../shared/models/fulfiller-order.model';
 import { FulfillerOrdersActions } from '../../../../store/fulfiller-orders/fulfiller-orders.actions';
 import {
@@ -24,6 +25,11 @@ export class FulfillmentPageComponent {
   private readonly dialog = inject(MatDialog);
 
   readonly orders = this.store.selectSignal(selectFulfillerOrders);
+  readonly imageBaseUrl = environment.apiUrl;
+
+  imageFailed(event: { itemId: string; imagePath: string }): void {
+    this.store.dispatch(FulfillerOrdersActions.imageLoadFailed(event));
+  }
   readonly search = this.store.selectSignal(selectFulfillerOrdersSearch);
   readonly category = this.store.selectSignal(selectFulfillerOrdersCategory);
   readonly loadStatus = this.store.selectSignal(selectFulfillerOrdersLoadStatus);

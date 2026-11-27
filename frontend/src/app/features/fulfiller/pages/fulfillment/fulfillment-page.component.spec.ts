@@ -1,7 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
-import { provideMockStore } from '@ngrx/store/testing';
+import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { provideTranslateService } from '@ngx-translate/core';
+import { FulfillerOrdersActions } from '../../../../store/fulfiller-orders/fulfiller-orders.actions';
 import { FulfillmentPageComponent } from './fulfillment-page.component';
 
 describe('FulfillmentPageComponent', () => {
@@ -35,5 +36,12 @@ describe('FulfillmentPageComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('passes failed image events to the store', () => {
+    const dispatch = vi.spyOn(TestBed.inject(MockStore), 'dispatch');
+    const event = { itemId: 'item-1', imagePath: '/image-1' };
+    component.imageFailed(event);
+    expect(dispatch).toHaveBeenCalledWith(FulfillerOrdersActions.imageLoadFailed(event));
   });
 });

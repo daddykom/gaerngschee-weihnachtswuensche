@@ -13,8 +13,8 @@
   display: grid;
   gap: var(--gl-space-sm);
   padding: var(--gl-space-md);
-  border: 1px solid #8c7b85;
-  background: #fff8fc;
+  border: 1px solid var(--mat-sys-outline);
+  background: var(--mat-sys-surface);
 }
 
 .order-list__row:not(.order-list__row--header) {
@@ -58,7 +58,7 @@
 .order-list__label {
   display: block;
   margin-bottom: var(--gl-space-xs);
-  color: #6f6069;
+  color: var(--mat-sys-on-surface-variant);
   font-size: 0.875rem;
 }
 
@@ -102,7 +102,7 @@
     padding: 0 calc(var(--gl-space-md) + 1px) var(--gl-space-sm);
     border: 0;
     background: transparent;
-    color: #6f6069;
+    color: var(--mat-sys-on-surface-variant);
     font-weight: 700;
     overflow-wrap: anywhere;
   }

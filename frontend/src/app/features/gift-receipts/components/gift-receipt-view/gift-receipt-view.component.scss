@@ -4,7 +4,7 @@
 }
 
 .gift-receipt-item {
-  border: 1px solid #8c7b85;
+  border: 1px solid var(--mat-sys-outline);
   padding: var(--gl-space-md);
   overflow-wrap: anywhere;
 }

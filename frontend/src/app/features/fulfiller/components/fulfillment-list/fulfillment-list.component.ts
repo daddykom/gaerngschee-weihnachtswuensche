@@ -34,6 +34,12 @@ export class FulfillmentListComponent {
   readonly searchChanged = output<string>();
   readonly categoryChanged = output<FulfillerCategory | ''>();
   readonly reserve = output<FulfillerWish>();
+  readonly imageBaseUrl = input('');
+  readonly imageFailed = output<{ itemId: string; imagePath: string }>();
+
+  onImageError(wish: FulfillerWish): void {
+    if (wish.imagePath) this.imageFailed.emit({ itemId: wish.id, imagePath: wish.imagePath });
+  }
 
   readonly categories: FulfillerCategory[] = ['gift', 'voucher'];
 }

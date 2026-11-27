@@ -13,6 +13,7 @@ import {
   AdminOrderFormStatus,
   AdminOrderFormValue,
 } from '../../../../shared/models/admin-order.model';
+import { imageChangeError } from '../../../../shared/models/order-item-image-validation';
 import { ORDER_STATUS_WORKFLOW } from '../../../../shared/models/order.model';
 import { AdminOrdersActions } from '../../../../store/admin-orders/admin-orders.actions';
 import {
@@ -139,6 +140,15 @@ export class AdminOrderEditComponent {
       this.orderForm().markAsTouched();
       return;
     }
+    const invalidImage = model.items.find((item) => imageChangeError(item.imageChange));
+    if (invalidImage) {
+      this.store.dispatch(
+        NavigationActions.navigate({
+          target: `/admin/orders/${order.id}/edit/item/${invalidImage.id}`,
+        }),
+      );
+      return;
+    }
     if (model.items.some((item) => item.currentDescription.trim() === '')) {
       this.store.dispatch(
         NotificationActions.show({
@@ -174,6 +184,9 @@ export class AdminOrderEditComponent {
           items: model.items.map((item) => ({ ...item })),
         },
         action: 'save',
+        imageChanges: model.items.flatMap((item) =>
+          item.imageChange ? [{ itemId: item.id, change: item.imageChange }] : [],
+        ),
       }),
     );
   }
@@ -199,7 +212,10 @@ export class AdminOrderEditComponent {
     if (previous.adultsCount !== current.adultsCount) changes.adultsCount = current.adultsCount;
     if (previous.childrenCount !== current.childrenCount)
       changes.childrenCount = current.childrenCount;
-    if (JSON.stringify(previous.items) !== JSON.stringify(current.items)) {
+    if (
+      JSON.stringify(previous.items) !== JSON.stringify(current.items) ||
+      current.items.some((item, index) => item.imageChange !== previous.items[index]?.imageChange)
+    ) {
       changes.items = current.items.map((item) => ({ ...item }));
     }
     return changes;

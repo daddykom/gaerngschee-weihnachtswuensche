@@ -7,7 +7,10 @@ RUN apk add --no-cache \
     mariadb-client \
     libzip-dev \
     oniguruma-dev \
-      libpng-dev \
+    libpng-dev \
+    libjpeg-turbo-dev \
+    libwebp-dev \
+    && docker-php-ext-configure gd --with-jpeg --with-webp \
     && docker-php-ext-install \
     pdo \
     pdo_mysql \

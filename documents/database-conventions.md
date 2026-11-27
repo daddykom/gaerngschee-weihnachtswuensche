@@ -158,6 +158,43 @@ DB_PASS=root
 
 ## Coding Standards
 
+### Wish images
+
+`order_item_images` stores the optional image for an existing wish separately
+from `order_items`. A unique `order_item_id` allows at most one image per
+wish; deleting the wish also deletes its image through a cascading foreign key.
+
+The image bytes are stored in `image_data` as `MEDIUMBLOB`, not as Base64.
+`mime_type`, `width`, `height` and `byte_size` describe the stored image.
+UUID `id` and `created_at` / `updated_at` follow the usual table conventions.
+Existing wishes require no image row and are not changed by the migration.
+
+`order_items.image_revision` starts at zero and increases on every image upload
+or removal, including removal when no image is present. The value survives image
+deletion so an old upload cannot resurrect an image after a newer removal.
+Image replacement/removal, revision increment and the wish's `updated_at` change
+are atomic. Other wish fields are not changed by image requests.
+
+Admin-only image endpoints are documented in
+[backend-conventions.md](./backend-conventions.md#admin-wish-images).
+Neither public nor client wish-list responses contain image bytes. Client
+responses remain unchanged. Public fulfiller wishes include only an optional
+`imagePath`, derived from the current image ID without loading the BLOB.
+Public binary retrieval is limited to published wishes; admin-only writes
+and the existing storage schema remain unchanged.
+
+The migration tests run against SQLite by default. To additionally verify
+the migrated MariaDB integration schema, run from the repository root:
+
+```bash
+docker compose -f docker-compose.integration.yml exec -T \
+  -e ORDER_ITEM_IMAGES_MYSQL_TEST=1 integration-backend \
+  vendor/bin/phpunit -c phpunit.xml.dist \
+  tests/Registration/OrderItemImagesMigrationTest.php
+```
+
+These tests refuse non-integration MySQL databases and roll back their fixtures.
+
 ### Migration Rules
 
 1. Always use `change()` method (allows rollback)

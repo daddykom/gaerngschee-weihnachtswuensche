@@ -20,20 +20,22 @@ räumliche Anordnung.
 
 ## Farbsystem
 
-Das Gärngschee-Farbsystem verwendet eine helle rosa Grundstimmung, einen
-dunklen Pflaumenton für Text und Aktionen sowie klar unterscheidbare
+Das Gärngschee-Farbsystem verwendet einen hellen rosabeigen Seitenhintergrund,
+weisse Oberflächen, rote Aktionen, dunkle Texte und rosa Markenbereiche sowie klar unterscheidbare
 Statusfarben. Farben werden nach ihrer semantischen Rolle verwendet und
 nicht seiten- oder komponentenspezifisch frei gewählt.
 
 | Rolle | Farbe | Verwendung |
 |---|---|---|
-| Seitenhintergrund | `#fff7fb` | Globaler Seitenhintergrund |
-| Oberfläche | `#fff8fc` | Karten, E-Mail-Flächen und Inhaltsbereiche |
-| Header / Primärcontainer | `#f5b6d3` | E-Mail-Header und hervorgehobene Markenbereiche |
-| Primärfarbe | `#8a2858` | Links, Buttons und primäre Aktionen |
-| Haupttext | `#000000` | Überschriften und normale Textinhalte |
-| Sekundärtext | `#6f6069` | Beschreibungen und ergänzende Informationen |
-| Rahmen | `#8c7b85` | Grenzen und Trennlinien |
+| Seitenhintergrund | `#f0e2df` | Globaler Seitenhintergrund ohne Farbverlauf |
+| Oberfläche | `#ffffff` | Einstieg „Wünsche erfüllen“, einzelne Wünsche, FAQ, Formularfelder und E-Mail-Flächen |
+| Header / Primärcontainer | `#f5b6d3` | Header, Footer, Einstieg „Wunsch einreichen“, Wunschzettel und E-Mail-Header |
+| Primärfarbe | `#e30614` | Primärbuttons mit weissem Text und Textlinks auf Weiss |
+| Textlink auf getönter Fläche | `#a00510` | Textlinks auf Rosa und dem Seitenhintergrund |
+| Sekundärbutton | `#ffffff` | Weisse Fläche mit Haupttext und Rahmen in `#212121` |
+| Haupttext | `#212121` | Überschriften und normale Textinhalte |
+| Sekundärtext | `#595959` | Beschreibungen und ergänzende Informationen |
+| Rahmen | `#212121` | Grenzen und Trennlinien |
 | Erfolg-Hintergrund | `#dff4e8` | Erfolgs- und Bestätigungsbereiche |
 | Erfolg-Text | `#276749` | Text und Hervorhebungen in Erfolgsbereichen |
 | Warnung-Hintergrund | `#fff2b7` | Warnungen und offene Prüfungen |
@@ -44,14 +46,26 @@ nicht seiten- oder komponentenspezifisch frei gewählt.
 | Fehler-Text | `#b3261e` | Text, Rahmen und Hervorhebungen in Fehlerbereichen |
 
 Rosa ist die Marken- und Primärcontainerfarbe, nicht die Farbe für
-Informationen. Links und primäre Aktionen verwenden `#8a2858`; ein beliebiger
-roter Link ist nicht Teil des Farbsystems.
+Informationen. Primärbuttons verwenden `#e30614` mit weissem Text.
+Textlinks sind unterstrichen und auf Weiss ebenfalls `#e30614`.
+Auf Rosa und dem Seitenhintergrund verwenden Textlinks `#a00510`, damit
+der Kontrast mindestens 4,5:1 beträgt. Der Linkfarbkontext wird über
+`--gl-link-color` vererbt; weisse Karten setzen ihn auf die Primärfarbe
+zurück, rosa Container auf `--gl-link-on-tint`.
 
 Die Rahmenfarbe erreicht auf den hellen Oberflächen einen ausreichenden
 Kontrast für sichtbare UI-Grenzen. Frontend und E-Mail-Vorlagen verwenden für
 den Marken-Header den gemeinsamen Wert `#f5b6d3`. Die semantischen
 Statusfarben für Information, Warnung, Erfolg und Fehler sind systemweit
 einheitlich.
+
+Das Frontend definiert die Farben zentral in `frontend/src/styles.scss`.
+Komponenten verwenden die semantischen Material-Variablen `--mat-sys-*`
+und für Statusbereiche die Variablen `--gl-success*`, `--gl-warning*`,
+`--gl-info*` und `--gl-error*` statt direkter Hex-Werte.
+E-Mails verwenden die zentrale `EMAIL_THEME`-Palette in
+`backend/src/Shared/Mail/EmailSender.php`; die Farben werden für
+E-Mail-Clients als Inline-Werte ausgegeben.
 
 Für ausreichende Lesbarkeit werden Text und Hintergrund immer als Paar
 verwendet. Eine Information darf nicht ausschließlich durch Farbe vermittelt
@@ -68,12 +82,15 @@ Farbrollen und ihre praktische Verwendung.
 
 ### Farben der Home-Karten
 
-Die beiden Home-Karten verwenden Rosa und Mintgrün als Kategorienfarben:
+Die beiden Home-Karten verwenden unterschiedliche Oberflächen als Kategorienfarben:
 
--   Die Karte zum Erfüllen eines Weihnachtswunsches verwendet den primären Container und damit die
-    Markenfarbe Rosa.
--   Die Karte zum Erhalten von Weihnachtswünsche verwendet den sekundären Container
-    und damit Mintgrün.
+-   Die Karte zum Erfüllen eines Weihnachtswunsches verwendet die sanfte
+    Oberfläche `--mat-sys-surface` (`#ffffff`), ebenso wie die einzelnen
+    Wunschkarten unter `/erfuellen`.
+-   Die Karte zum Erhalten von Weihnachtswünschen verwendet den primären
+    Container und damit die Markenfarbe Rosa.
+-   Die Wunschzettel unter `/erfuellen` verwenden ebenfalls Rosa, ihre
+    einzelnen Wunschkarten bleiben Weiss.
 
 Diese Farben beschreiben unterschiedliche Einstiege, aber keinen Status. Sie
 stehen weder für Erfolg noch für eine abgeschlossene oder verfügbare Aktion.
@@ -420,6 +437,18 @@ gl-stack--section
 anstelle beliebiger Grössenvarianten wie `small`, `medium`, `large` oder
 `xlarge`.
 
+## `gl-columns`
+
+`gl-columns` ordnet unterschiedlich hohe Inhalte mobil in einer und ab dem
+zentralen Layout-Breakpoint in zwei Spalten an. Die Lesereihenfolge verläuft
+innerhalb jeder Spalte von oben nach unten, danach von links nach rechts.
+Die Spalten werden anhand der Inhaltshöhen ausgeglichen; einzelne Elemente
+werden nicht zwischen Spalten aufgeteilt.
+
+Zwischen den Elementen und zwischen den Spalten gilt `--gl-space-lg`.
+Das Primitive eignet sich beispielsweise für Wünsche innerhalb eines
+Wunschzettels, deren Höhen unabhängig voneinander bleiben sollen.
+
 ## `gl-cluster`
 
 `gl-cluster` ordnet zusammengehörige Elemente horizontal an.
@@ -603,6 +632,22 @@ die benötigte Darstellung bereits bereitstellt.
 ------------------------------------------------------------------------
 
 # 13. Cards
+
+Die drei Karten auf der Startseite sowie Wunschzettel und einzelne Wünsche
+unter `/erfuellen` verwenden statt eines Rahmens den gemeinsamen Schatten
+`--gl-card-shadow` aus `frontend/src/styles.scss`.
+Ihre Rundung bleibt bei `1rem`; der äussere Kartenschatten bleibt sichtbar.
+Bilder innerhalb der Wunschkarten besitzen oben und seitlich einen Innenabstand
+von `--gl-space-md` (`1rem`) und einen kleineren eigenen Radius von `0.5rem`.
+Der Abstand zum darunterliegenden Text entsteht durch das bestehende Padding
+des Karteninhalts. Dies gilt auch für das dekorative Standardbild.
+
+Der Bildbereich jeder Wunschkarte unter `/erfuellen` behält das Seitenverhältnis
+16:9. Ein vorhandenes Wunschbild füllt ihn mit zentriertem `object-fit: cover`,
+ohne Verzerrung und bei Bedarf mit beschnittenen Rändern. Hoch-, Quer- und
+quadratische Formate verändern die Bildfläche nicht. Ohne Wunschbild oder bei
+einem fehlgeschlagenen Abruf wird `/images/wish-gift.jpg` im selben Bereich
+angezeigt.
 
 `mat-card` ist kein allgemeiner Page-Container.
 

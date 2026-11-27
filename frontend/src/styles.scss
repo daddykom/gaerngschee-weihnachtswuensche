@@ -16,10 +16,10 @@ html {
       density: 0,
     ),
     $overrides: (
-      primary: #8a2858,
+      primary: #e30614,
       on-primary: #ffffff,
       primary-container: #f5b6d3,
-      on-primary-container: #000000,
+      on-primary-container: #212121,
       secondary: #2f6f60,
       on-secondary: #ffffff,
       secondary-container: #b3f2d0,
@@ -28,14 +28,30 @@ html {
       on-tertiary: #ffffff,
       tertiary-container: #b3d5f2,
       on-tertiary-container: #173446,
-      surface: #fff8fc,
-      surface-container-low: #f8eef4,
-      on-surface: #000000,
-      on-surface-variant: #6f6069,
-      outline: #8c7b85,
-      outline-variant: #8c7b85,
+      background: #f0e2df,
+      on-background: #212121,
+      surface: #ffffff,
+      surface-bright: #ffffff,
+      surface-dim: #f0e2df,
+      surface-container-lowest: #ffffff,
+      surface-container-low: #ffffff,
+      surface-container: #ffffff,
+      surface-container-high: #ffffff,
+      surface-container-highest: #ffffff,
+      surface-variant: #ffffff,
+      surface-tint: #e30614,
+      on-surface: #212121,
+      on-surface-variant: #595959,
+      outline: #212121,
+      outline-variant: #212121,
       error: #b3261e,
       error-container: #ffdad6
+    )
+  );
+  @include mat.button-overrides(
+    (
+      outlined-label-text-color: var(--mat-sys-on-surface),
+      text-label-text-color: var(--gl-link-color),
     )
   );
   height: 100%;
@@ -69,10 +85,14 @@ h4 {
 }
 
 a {
-  color: var(--mat-sys-primary);
+  color: var(--gl-link-color);
+  text-decoration: underline;
 }
 
 :root {
+  --gl-card-shadow: 0 0.125rem 0.5rem rgb(33 33 33 / 12%);
+  --gl-link-on-tint: #a00510;
+  --gl-link-color: var(--gl-link-on-tint);
   --gl-space-sm: 0.5rem;
   --gl-space-md: 1rem;
   --gl-space-lg: 1.5rem;
@@ -80,16 +100,29 @@ a {
   --gl-content-max-width: 1180px;
   --gl-success-container: #dff4e8;
   --gl-success: #276749;
-  --gl-on-success-container: #1d5547;
+  --gl-on-success-container: var(--gl-success);
   --gl-warning-container: #fff2b7;
   --gl-warning: #6b5700;
-  --gl-on-warning-container: #4f4100;
+  --gl-on-warning-container: var(--gl-warning);
   --gl-info-container: #d8e9f7;
   --gl-info: #2c5d78;
-  --gl-on-info-container: #173446;
+  --gl-on-info-container: var(--gl-info);
   --gl-error-container: #ffdad6;
   --gl-error: #b3261e;
-  --gl-on-error-container: #690005;
+  --gl-on-error-container: var(--gl-error);
+}
+
+mat-card,
+mat-expansion-panel,
+mat-dialog-container,
+mat-menu {
+  --gl-link-color: var(--mat-sys-primary);
+}
+
+// Outlined fields and buttons have no Material container-color token.
+.mat-mdc-text-field-wrapper,
+[mat-stroked-button]:not(:disabled) {
+  background-color: var(--mat-sys-surface);
 }
 
 .gl-container {
@@ -135,6 +168,25 @@ a {
   }
 }
 
+.gl-columns {
+  column-count: 1;
+  column-gap: var(--gl-space-lg);
+
+  > * {
+    box-sizing: border-box;
+    break-inside: avoid;
+    margin-block-end: var(--gl-space-lg);
+  }
+
+  > :last-child {
+    margin-block-end: 0;
+  }
+
+  @media (min-width: layout.$gl-section-breakpoint) {
+    column-count: 2;
+  }
+}
+
 .category-select-panel {
   max-height: calc(100vh - 2rem) !important;
 }
@@ -147,7 +199,8 @@ a {
 }
 
 .gl-button--secondary {
-  border: 1px solid var(--mat-sys-primary-container) !important;
+  background-color: var(--mat-sys-surface);
+  border: 1px solid var(--mat-sys-outline) !important;
 }
 
 .gl-button--secondary[color='warn'],
@@ -178,19 +231,7 @@ a {
 body {
   color: var(--mat-sys-on-surface);
   position: relative;
-  background: #fff7fb;
-}
-
-body::before {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  content: '';
-  pointer-events: none;
-  background:
-    radial-gradient(circle at 10% 10%, rgb(242 179 213 / 42%), transparent 28rem),
-    radial-gradient(circle at 92% 12%, rgb(179 242 208 / 30%), transparent 25rem),
-    linear-gradient(180deg, #fffafd 0%, #fff7fb 100%);
+  background: var(--mat-sys-background);
 }
 
 app-root {

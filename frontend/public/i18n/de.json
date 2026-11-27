@@ -457,7 +457,7 @@
       "ordersTitle": "Wunschzettel",
       "orderTitle": "Wunschzettel {{orderNumber}}",
       "year": "Aktionsjahr {{year}}",
-      "familyInformation": "Anonymisierte Familieninformation",
+      "familyInformation": "Familieninformation",
       "loading": "Wünsche werden geladen ...",
       "empty": "Es wurden keine passenden verfügbaren Wünsche gefunden.",
       "reserve": "Diesen Wunsch erfüllen",
@@ -644,7 +644,42 @@
       "sessionExpiredWarningMessage": "Du wirst in {{seconds}} Sekunden abgemeldet.",
       "staySignedIn": "Angemeldet bleiben"
     },
+    "imageTransfers": {
+      "uploading": "Bild wird hochgeladen: {{percent}} %",
+      "removing": "Bild wird entfernt.",
+      "success": "Bild erfolgreich gespeichert.",
+      "removed": "Bild erfolgreich entfernt.",
+      "errorTitle": "Bildänderung fehlgeschlagen",
+      "openWish": "Wunsch öffnen",
+      "retry": "Bildänderung erneut versuchen",
+      "dismiss": "Meldung schliessen",
+      "errors": {
+        "failed": "Die Bildänderung konnte nicht bestätigt werden. Die Wunschdaten bleiben gespeichert. Du kannst die Bildänderung erneut versuchen.",
+        "conflict": "Das Bild wurde inzwischen geändert. Die Wunschdaten bleiben gespeichert. Öffne den Wunsch und prüfe das aktuelle Bild, bevor du eine neue Bildänderung speicherst.",
+        "tooLarge": "Das Bild ist grösser als 5 MiB. Die Wunschdaten bleiben gespeichert. Öffne den Wunsch und wähle ein kleineres Bild.",
+        "dimensions": "Das Bild hat zu viele Bildpunkte oder zu grosse Abmessungen. Die Wunschdaten bleiben gespeichert. Öffne den Wunsch und wähle ein kleineres Bild.",
+        "invalidImage": "Die Datei ist kein gültiges JPEG-, PNG- oder WebP-Bild. Die Wunschdaten bleiben gespeichert. Öffne den Wunsch und wähle ein anderes Bild.",
+        "notFound": "Der Wunsch oder das Bild ist nicht mehr vorhanden. Öffne den Wunsch zur Prüfung."
+      }
+    },
     "admin": {
+      "itemImage": {
+        "title": "Bild zum Wunsch (optional)",
+        "hint": "JPEG, PNG oder WebP, maximal 5 MiB. Das Bild wird erst mit dem Wunschzettel gespeichert und ist vorerst nur für Administratoren sichtbar.",
+        "dropHint": "Bild hierher ziehen oder eine Datei auswählen.",
+        "choose": "Bild auswählen",
+        "remove": "Bild entfernen",
+        "reset": "Bildänderung verwerfen",
+        "removalPending": "Das Bild wird beim Speichern des Wunschzettels entfernt.",
+        "previewAlt": "Vorschau des Wunschbilds",
+        "reload": "Wunschbild erneut laden",
+        "loadErrorTitle": "Wunschbild nicht geladen",
+        "loadError": "Das Wunschbild konnte nicht geladen werden. Die Texte können weiterhin bearbeitet werden. Versuche das Bild erneut zu laden.",
+        "errors": {
+          "tooLarge": "Das Bild darf höchstens 5 MiB gross sein.",
+          "fileType": "Bitte wähle ein JPEG-, PNG- oder WebP-Bild."
+        }
+      },
       "statistics": {
         "title": "Kennzahlen",
         "campaign": "Aktionsübersicht {{year}}",
@@ -766,6 +801,9 @@
           "pickupDate": "Abholdatum und Zeit (optional; leer = Konfiguration)",
           "pickupLocation": "Abholort (optional; leer = Konfiguration)"
         }
+      },
+      "itemEditor": {
+        "continue": "Weiter"
       },
       "fulfillerRemoval": {
         "title": "Erfüller entfernen",

@@ -13,6 +13,7 @@ export const FulfillerOrdersActions = createActionGroup({
     'Category Changed': props<{ category: FulfillerCategory | '' }>(),
     'Load Success': props<{ orders: FulfillerOrder[] }>(),
     'Load Failure': props<{ errorCode: string }>(),
+    'Image Load Failed': props<{ itemId: string; imagePath: string }>(),
     'Reservation Form Changed': props<{
       changes: Partial<{ email: string; privacyAccepted: boolean }>;
     }>(),

@@ -16,13 +16,13 @@ test.describe('Start route', () => {
     );
   });
 
-  test('displays the Fairgate info box with a background color', async ({ page }) => {
+  test('displays the Fairgate info box using the information colors', async ({ page }) => {
     await page.goto('/start');
-    const backgroundColor = await page
-      .locator('app-info-box .info-box')
-      .evaluate((element) => getComputedStyle(element).backgroundColor);
-
-    expect(backgroundColor).toMatch(/^rgb\(/);
+    const infoBox = page.locator('app-info-box .info-box');
+    await expect(infoBox).toHaveCSS('background-color', 'rgb(216, 233, 247)');
+    await expect(infoBox).toHaveCSS('border-inline-start-color', 'rgb(44, 93, 120)');
+    await expect(infoBox.locator('.info-box__icon')).toHaveCSS('color', 'rgb(44, 93, 120)');
+    await expect(infoBox.locator('.info-box__content')).toHaveCSS('color', 'rgb(33, 33, 33)');
   });
 
   test('validates an invalid email without calling the backend', async ({ page }) => {

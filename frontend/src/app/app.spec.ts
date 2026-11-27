@@ -11,6 +11,11 @@ import { AuthActions } from './store/auth/auth.actions';
 import { initialState as authInitialState } from './store/auth/auth.state';
 import { SessionActions } from './store/auth/session.actions';
 import { initialState as frontendConfigInitialState } from './store/frontend-config/frontend-config.state';
+import { ImageTransfersActions } from './store/image-transfers/image-transfers.actions';
+import {
+  selectHasPendingImageTransfers,
+  selectImageTransfers,
+} from './store/image-transfers/image-transfers.feature';
 
 @Component({ changeDetection: ChangeDetectionStrategy.Eager, template: '' })
 class TestPage {}
@@ -28,7 +33,11 @@ describe('App', () => {
       providers: [
         provideTranslateService(),
         provideMockStore({
-          selectors: [{ selector: appUpdateFeature.selectPendingBuildId, value: null }],
+          selectors: [
+            { selector: appUpdateFeature.selectPendingBuildId, value: null },
+            { selector: selectImageTransfers, value: [] },
+            { selector: selectHasPendingImageTransfers, value: false },
+          ],
           initialState: {
             auth: authInitialState,
             frontendConfig: { ...frontendConfigInitialState, publicStatus: 'loaded' },
@@ -88,7 +97,11 @@ describe('App', () => {
         providers: [
           provideTranslateService(),
           provideMockStore({
-            selectors: [{ selector: appUpdateFeature.selectPendingBuildId, value: null }],
+            selectors: [
+              { selector: appUpdateFeature.selectPendingBuildId, value: null },
+              { selector: selectImageTransfers, value: [] },
+              { selector: selectHasPendingImageTransfers, value: false },
+            ],
             initialState: {
               notification: {
                 current: {
@@ -120,7 +133,11 @@ describe('App', () => {
         providers: [
           provideTranslateService(),
           provideMockStore({
-            selectors: [{ selector: appUpdateFeature.selectPendingBuildId, value: null }],
+            selectors: [
+              { selector: appUpdateFeature.selectPendingBuildId, value: null },
+              { selector: selectImageTransfers, value: [] },
+              { selector: selectHasPendingImageTransfers, value: false },
+            ],
             initialState: {
               notification: {
                 current: {
@@ -168,7 +185,11 @@ describe('App', () => {
         providers: [
           provideTranslateService(),
           provideMockStore({
-            selectors: [{ selector: appUpdateFeature.selectPendingBuildId, value: null }],
+            selectors: [
+              { selector: appUpdateFeature.selectPendingBuildId, value: null },
+              { selector: selectImageTransfers, value: [] },
+              { selector: selectHasPendingImageTransfers, value: false },
+            ],
             initialState: {
               notification: {
                 current: {
@@ -220,6 +241,48 @@ describe('App', () => {
     expect(dispatch).toHaveBeenCalledWith(AuthActions.logoutRequested());
   });
 
+  it('registers the unload warning only while transfers are pending and cleans it up on destruction', async () => {
+    const store = TestBed.inject(MockStore);
+    const pending = store.overrideSelector(selectHasPendingImageTransfers, false);
+    const add = vi.spyOn(window, 'addEventListener');
+    const remove = vi.spyOn(window, 'removeEventListener');
+    const fixture = TestBed.createComponent(App);
+    await fixture.whenStable();
+    const unload = () => {
+      const event = new Event('beforeunload', { cancelable: true });
+      window.dispatchEvent(event);
+      return event.defaultPrevented;
+    };
+    expect(unload()).toBe(false);
+    pending.setResult(true);
+    store.refreshState();
+    await fixture.whenStable();
+    expect(unload()).toBe(true);
+    expect(add).toHaveBeenCalledWith('beforeunload', expect.any(Function));
+    pending.setResult(false);
+    store.refreshState();
+    await fixture.whenStable();
+    expect(unload()).toBe(false);
+    expect(remove).toHaveBeenCalledWith('beforeunload', expect.any(Function));
+    pending.setResult(true);
+    store.refreshState();
+    await fixture.whenStable();
+    fixture.destroy();
+    expect(unload()).toBe(false);
+  });
+
+  it('dispatches transfer retry and dismissal without dispatching a wish save', () => {
+    const store = TestBed.inject(MockStore);
+    const dispatch = vi.spyOn(store, 'dispatch');
+    const app = TestBed.createComponent(App).componentInstance;
+    app.retryImageTransfer('transfer-1');
+    app.dismissImageTransfer('transfer-1');
+    expect(dispatch).toHaveBeenCalledWith(ImageTransfersActions.retryClicked({ id: 'transfer-1' }));
+    expect(dispatch).toHaveBeenCalledWith(
+      ImageTransfersActions.dismissClicked({ id: 'transfer-1' }),
+    );
+  });
+
   it('shows the pending update and dispatches the reload click from the notice', async () => {
     const store = TestBed.inject(MockStore);
     store.overrideSelector(appUpdateFeature.selectPendingBuildId, 'new-build');
@@ -255,7 +318,11 @@ describe('App', () => {
         providers: [
           provideTranslateService(),
           provideMockStore({
-            selectors: [{ selector: appUpdateFeature.selectPendingBuildId, value: null }],
+            selectors: [
+              { selector: appUpdateFeature.selectPendingBuildId, value: null },
+              { selector: selectImageTransfers, value: [] },
+              { selector: selectHasPendingImageTransfers, value: false },
+            ],
             initialState: {
               auth: { ...authInitialState, group: 'admin', email: 'admin@example.com' },
               notification: { current: null },
