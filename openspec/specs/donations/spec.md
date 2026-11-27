@@ -71,6 +71,30 @@ E-Mail bestätigt und bleibt bis zur Bestätigung zehn Minuten vorläufig.
 - Statusänderungen nachvollziehbar speichern
 - Offene Fulfiller-Listen aktualisieren nur die betroffenen Statuswerte
 
+### F5: Erfüller administrativ entfernen
+
+- Im Admin-Wunscheditor erscheint „Erfüller entfernen“ als Secondary-Button bei
+  vorläufigen und bestätigten Zuordnungen ohne Geschenkeingang.
+- Bei eingegangenen oder abgeschlossenen Geschenken wird der Button nicht angezeigt;
+  das Backend verbietet die Freigabe ebenfalls.
+- „Nein“, Escape und das Schliessen des Bestätigungsdialogs verändern nichts.
+- „Ja“ merkt die Entfernung ausschliesslich im Formular-Store vor, ohne API-Aufruf.
+  Ein globaler Infohinweis erklärt, dass Entfernung und E-Mail-Benachrichtigung
+  erst beim Speichern des gesamten Wunschzettels wirksam werden.
+- Navigation zwischen Wunsch und Wunschzettel erhält die Vormerkung.
+  Verwerfen ohne Speichern verändert weder Zuordnung noch öffentliche Sichtbarkeit.
+- Der Server prüft die erwartete Zuordnung unter einer Sperre gegen parallele
+  Änderungen. Zuordnung, Reservierungsdaten und offene Bestätigungslinks werden
+  aufgehoben, während Wunschtexte und Veröffentlichungsstatus unverändert bleiben.
+- Beim Speichern werden Wunschzetteländerungen, Erfüller-Entfernung und die
+  Benachrichtigung an die bisherige Adresse in einer gemeinsamen Transaktion
+  gespeichert. Ein Konflikt oder Fehler verwirft alle Änderungen.
+  Erst danach kann der Batch die Benachrichtigung versenden.
+- Der Wunsch wird wieder verfügbar. Die öffentlichen Sichtbarkeitsbedingungen
+  (definitive Bestellung, freigegebener Wunsch und Aktionszeitraum) bleiben gültig.
+- Bereits geöffnete öffentliche Listen laden neu verfügbare, zuvor fehlende
+  Wünsche beim nächsten Verfügbarkeits-Update nach.
+
 ## Data Model
 
 ### Donation
@@ -94,6 +118,7 @@ interface ReservedWish {
 | GET | `/public/fulfiller/wish-statuses` | Nur Wunschstatus aktualisieren |
 | POST | `/public/fulfiller-reservation-start` | Vorläufige Reservierung anfordern |
 | POST | `/auth/fulfiller-reservation-confirm` | Reservierung über E-Mail-Token bestätigen |
+| PATCH | `/admin/orders/{orderId}` | Wunschzettel inklusive vorgemerkter Erfüller-Entfernungen speichern (nur Admin) |
 
 ## Fachliche Regeln
 

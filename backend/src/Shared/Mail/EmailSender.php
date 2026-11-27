@@ -179,6 +179,20 @@ final class EmailSender implements EmailSenderInterface
         ];
     }
 
+    /** @param array<string, mixed> $wish */
+    public function renderFulfillerReleased(array $wish): array
+    {
+        $html = $this->twig->render('fulfiller-released.html.twig', [
+            'LOGO_CID' => 'cid:' . self::LOGO_CID,
+            'WISH' => $wish,
+        ]);
+        return [
+            'subject' => $this->translator->trans('app.mail.registration.fulfillerReleased.subject'),
+            'html' => $html,
+            'text' => $this->plainText($html, true),
+        ];
+    }
+
     public function sendUserCreated(string $recipient, string $temporaryPassword): void
     {
         $frontendBaseUrl = rtrim(getenv('FRONTEND_BASE_URL') ?: 'http://localhost:4200', '/');
@@ -288,6 +302,11 @@ final class EmailSender implements EmailSenderInterface
     public function sendTestEmail(string $recipient, string $template, array $parameters): void
     {
         $message = match ($template) {
+            'fulfiller-released' => $this->renderFulfillerReleased([
+                'wishNumber' => (string) $parameters['wishNumber'],
+                'title' => (string) $parameters['wishTitle'],
+                'currentDescription' => (string) $parameters['wishDescription'],
+            ]),
             'client-order' => $this->renderAnmeldungTest($recipient, AnmeldungMailVariant::ClientOrder, (string) $parameters['loginUrl'], null, (int) $parameters['campaignYear']),
             'fulfiller-reservation' => $this->renderAnmeldungTest($recipient, AnmeldungMailVariant::FulfillerReservation, (string) $parameters['loginUrl'], [
                 'wishNumber' => (string) $parameters['wishNumber'],

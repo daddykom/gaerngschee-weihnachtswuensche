@@ -59,6 +59,71 @@ describe('adminOrdersFeature', () => {
     });
   });
 
+  it('stages removal only in the form and discards it when the order list is reloaded', () => {
+    const item = {
+      id: 'item-1',
+      fulfillmentStatus: 'reserved',
+      fulfillerEmail: 'giver@example.com',
+      currentTitle: 'Persisted',
+    };
+    const form = {
+      status: 'changes_requested',
+      currentText: 'Unsaved family text',
+      adminNotes: 'Unsaved feedback',
+      adultsCount: 2,
+      childrenCount: 1,
+      items: [
+        { ...item, currentTitle: 'Unsaved wish title', currentDescription: 'Unsaved description' },
+      ],
+    };
+    const state = {
+      ...initialState,
+      orders: [{ ...order, items: [item] }] as never,
+      activeOrderId: order.id,
+      form: form as never,
+    };
+    const result = adminOrdersFeature.reducer(
+      state,
+      AdminOrdersActions.formChanged({
+        orderId: order.id,
+        changes: {
+          items: form.items.map((current) => ({
+            ...current,
+            fulfillerRemoval: {
+              fulfillerEmail: item.fulfillerEmail,
+              fulfillmentStatus: item.fulfillmentStatus,
+              reservedAt: null,
+              reservationExpiresAt: null,
+            },
+          })) as never,
+        },
+      }),
+    );
+    expect(result.form).toMatchObject({
+      currentText: 'Unsaved family text',
+      adminNotes: 'Unsaved feedback',
+      items: [
+        {
+          currentTitle: 'Unsaved wish title',
+          currentDescription: 'Unsaved description',
+          fulfillerEmail: 'giver@example.com',
+          fulfillmentStatus: 'reserved',
+          fulfillerRemoval: { fulfillerEmail: 'giver@example.com' },
+        },
+      ],
+    });
+    expect(result.orders[0].items[0]).toMatchObject({
+      currentTitle: 'Persisted',
+      fulfillerEmail: 'giver@example.com',
+    });
+    expect(adminOrdersFeature.reducer(result, AdminOrdersActions.load()).form).toBeNull();
+    const failed = adminOrdersFeature.reducer(
+      result,
+      AdminOrdersActions.saveFailure({ errorCode: 'GIFT_ALREADY_RECEIVED' }),
+    );
+    expect(failed.form).toEqual(result.form);
+  });
+
   it('keeps unsaved edits only in the active form and ignores updates for another order', () => {
     const form = {
       status: order.status,

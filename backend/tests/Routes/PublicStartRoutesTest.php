@@ -182,6 +182,11 @@ final class PublicStartRoutesTest extends TestCase
         return new AnmeldungService(
             $failToSend
                 ? new class () implements EmailSenderInterface {
+                    public function renderFulfillerReleased(array $wish): array
+                    {
+                        throw new \LogicException('Unexpected fulfiller-removal rendering.');
+                    }
+
                     public function renderFulfillerReminder(array $wishes, array $handover, string $locale = 'de'): array
                     {
                         return [];
@@ -230,6 +235,11 @@ final class PublicStartRoutesTest extends TestCase
                     }
                 }
             : new class () implements EmailSenderInterface {
+                public function renderFulfillerReleased(array $wish): array
+                {
+                    throw new \LogicException('Unexpected fulfiller-removal rendering.');
+                }
+
                 public function renderFulfillerReminder(array $wishes, array $handover, string $locale = 'de'): array
                 {
                     return [];

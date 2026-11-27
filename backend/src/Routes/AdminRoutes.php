@@ -56,6 +56,7 @@ final class AdminRoutes
             $orderUpdate = $group->patch('/orders/{orderId}', $adminOrderUpdateAction ?? new AdminOrderUpdateAction($orderRepository, $emailSender));
             $orderUpdate->add(new GroupMiddleware(['admin'], $userRepository))->add(new AuthMiddleware());
 
+
             $list = $group->get('/users', new ListUsersAction($userRepository));
             $list->add(new GroupMiddleware(['admin'], $userRepository))->add(new AuthMiddleware());
 

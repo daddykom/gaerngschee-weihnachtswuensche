@@ -734,6 +734,7 @@
           "fulfiller-reservation": "Reservation für Erfüller",
           "fulfiller-reservation-confirmation": "Bestätigte Wunscherfüllung",
           "fulfiller-reminder": "Abgabeerinnerung für Erfüller",
+          "fulfiller-released": "Erfüller-Zuordnung aufgehoben",
           "fairgate-registration-required": "Fairgate-Registrierung erforderlich",
           "fairgate-registration-available": "Fairgate-Registrierung verfügbar",
           "user-created": "Benutzer erstellt",
@@ -765,6 +766,14 @@
           "pickupDate": "Abholdatum und Zeit (optional; leer = Konfiguration)",
           "pickupLocation": "Abholort (optional; leer = Konfiguration)"
         }
+      },
+      "fulfillerRemoval": {
+        "title": "Erfüller entfernen",
+        "button": "Erfüller entfernen",
+        "confirmation": "Möchtest du die Entfernung der Zuordnung zu {{ email }} vormerken? Die Entfernung und die E-Mail-Benachrichtigung werden erst beim Speichern des Wunschzettels wirksam.",
+        "yes": "Ja",
+        "no": "Nein",
+        "pending": "Der Erfüller wird erst entfernt und per E-Mail informiert, wenn du den Wunschzettel speicherst."
       },
       "overview": {
         "title": "Admin-Übersicht",
@@ -877,6 +886,10 @@
         "errorTitle": "Übersicht konnte nicht geladen werden",
         "errors": {
           "INVALID_ORDER_DATA": "Die Bestelldaten sind ungültig.",
+          "GIFT_ALREADY_RECEIVED": "Ein betroffenes Geschenk ist bereits eingegangen. Der Wunschzettel wurde nicht gespeichert; der Erfüller kann nicht entfernt werden.",
+          "FULFILLER_CHANGED": "Eine zur Entfernung vorgemerkte Erfüller-Zuordnung hat sich inzwischen geändert. Der Wunschzettel wurde nicht gespeichert. Bitte prüfe die aktuelle Zuordnung.",
+          "WISH_NOT_FOUND": "Ein betroffener Wunsch wurde nicht gefunden. Der Wunschzettel wurde nicht gespeichert.",
+          "INVALID_RESERVATION_DATA": "Die Daten einer vorgemerkten Erfüller-Entfernung sind unvollständig. Bitte prüfe den Wunschzettel.",
           "ORDER_NOT_FOUND": "Die Wunschzettel wurde nicht gefunden.",
           "REJECTION_REASON_REQUIRED": "Für eine Zurückweisung ist eine Begründung erforderlich.",
           "ITEMS_NOT_ACCEPTED": "Alle Wünsche müssen zuerst akzeptiert werden.",
@@ -1198,6 +1211,14 @@
           "time": "Zeitfenster",
           "location": "Ort",
           "keepMessage": "Bitte bewahre diese E-Mail auf und bringe den Wunsch zum angegebenen Zeitpunkt an den angegebenen Ort."
+        },
+        "fulfillerReleased": {
+          "subject": "Deine Wunschreservierung wurde aufgehoben",
+          "title": "Wunschreservierung aufgehoben",
+          "body": "Das Gärngschee-Team hat deine Zuordnung zu folgendem Weihnachtswunsch aufgehoben:",
+          "wishNumber": "Wunschnummer",
+          "noDelivery": "Bitte besorge und liefere für diesen Wunsch kein Geschenk mehr. Frühere Zusagen und Bestätigungslinks gelten für diesen Wunsch nicht mehr.",
+          "thanks": "Vielen Dank für deine Bereitschaft zu helfen. Bei Fragen kannst du dich an das Gärngschee-Team wenden."
         },
         "fulfillerReminder": {
           "subject": "Erinnerung an die Abgabe deiner Geschenke",

@@ -3,7 +3,16 @@ import { OrderItemCategory, OrderItemPersonType, OrderStatus } from './order.mod
 export type AdminPublicationStatus = 'draft' | 'submitted' | 'rejected' | 'approved';
 export type AdminOrderFormStatus = OrderStatus | 'unchanged';
 
+export interface FulfillerAssignment {
+  fulfillerEmail: string | null;
+  fulfillmentStatus: string;
+  reservedAt: string | null;
+  reservationExpiresAt: string | null;
+}
+
 export interface AdminOrderItem {
+  /** Form-only intent; persisted only when the entire order is saved. */
+  fulfillerRemoval?: FulfillerAssignment;
   id: string;
   orderId: string;
   itemNumber?: number | null;
