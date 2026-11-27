@@ -42,7 +42,9 @@ test.describe('Admin order item edit route', () => {
       expect(
         await section.evaluate((element) => element.getBoundingClientRect().right),
       ).toBeLessThanOrEqual(width);
-      await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+      const continueButton = page.getByRole('button', { name: 'Weiter', exact: true });
+      await expectTranslatedText(continueButton, 'app.admin.itemEditor.continue');
+      await continueButton.click();
       await page.waitForURL('**/admin/orders/order-1/edit');
       await page.getByRole('link', { name: 'Ändern' }).first().click();
       await expect(section.getByRole('img')).toBeVisible();
@@ -126,7 +128,7 @@ test.describe('Admin order item edit route', () => {
       section.locator('.control-error'),
       'app.admin.itemImage.errors.fileType',
     );
-    await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+    await page.getByRole('button', { name: 'Weiter', exact: true }).click();
     await expect(section.getByRole('button', { name: 'Bild auswählen' })).toBeFocused();
     await expect(page).toHaveURL(/\/edit\/item\/item-1$/);
     await section.getByRole('button', { name: 'Bildänderung verwerfen' }).click();
@@ -210,7 +212,7 @@ test.describe('Admin order item edit route', () => {
     await page.getByRole('link', { name: 'Ändern' }).first().click();
     await page.getByRole('combobox', { name: 'Neuer Status' }).click();
     await page.getByRole('option', { name: 'Änderung erforderlich' }).click();
-    await page.getByRole('button', { name: 'Speichern' }).click();
+    await page.getByRole('button', { name: 'Weiter', exact: true }).click();
 
     await expectTranslatedText(
       page
@@ -242,7 +244,7 @@ test.describe('Admin order item edit route', () => {
       .fill('Nicht erfüllbar');
     await page.getByRole('combobox', { name: 'Neuer Status' }).click();
     await page.getByRole('option', { name: 'Änderung erforderlich' }).click();
-    await page.getByRole('button', { name: 'Speichern' }).click();
+    await page.getByRole('button', { name: 'Weiter', exact: true }).click();
 
     await page.waitForURL('**/admin/orders/order-1/edit');
     expect(patchCount).toBe(0);

@@ -26,7 +26,7 @@ async function stageImage(page: Page): Promise<void> {
       'base64',
     ),
   });
-  await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+  await page.getByRole('button', { name: 'Weiter', exact: true }).click();
   await page.waitForURL('**/admin/orders/order-1/edit');
 }
 
@@ -152,7 +152,7 @@ test.describe('Admin order edit route', () => {
       .fill('Please review the first wish');
     await page.getByRole('combobox', { name: 'Neuer Status', exact: true }).click();
     await page.getByRole('option', { name: 'Änderung erforderlich' }).click();
-    await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+    await page.getByRole('button', { name: 'Weiter', exact: true }).click();
     await page.waitForURL('**/admin/orders/order-1/edit');
     await expect(page.getByRole('textbox', { name: /Rückmeldung zum Wunschzettel/ })).toHaveValue(
       'Please review the family text',
@@ -165,7 +165,7 @@ test.describe('Admin order edit route', () => {
     await page
       .getByRole('textbox', { name: 'Aktueller Wunschtitel', exact: true })
       .fill('Edited second title');
-    await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+    await page.getByRole('button', { name: 'Weiter', exact: true }).click();
     await page.waitForURL('**/admin/orders/order-1/edit');
     expect(saved).toBeUndefined();
     await page.getByRole('button', { name: 'Speichern', exact: true }).click();
@@ -243,7 +243,7 @@ test.describe('Admin order edit route', () => {
     await page.getByRole('link', { name: 'Ändern' }).first().click();
     await page.getByRole('combobox', { name: 'Neuer Status' }).click();
     await page.getByRole('option', { name: 'Freigegeben' }).click();
-    await page.getByRole('button', { name: 'Speichern' }).click();
+    await page.getByRole('button', { name: 'Weiter', exact: true }).click();
     await page.waitForURL('**/admin/orders/order-1/edit');
 
     expect(patchCount).toBe(0);

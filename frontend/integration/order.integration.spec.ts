@@ -185,7 +185,7 @@ test('returns order and wish feedback to the requester after an admin review', a
       .fill('Please review the wish text');
     await page.getByRole('combobox', { name: 'Neuer Status', exact: true }).click();
     await page.getByRole('option', { name: 'Änderung erforderlich' }).click();
-    await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+    await page.getByRole('button', { name: 'Weiter', exact: true }).click();
     await page.waitForURL(`**/admin/orders/${draft.id}/edit`);
     await expect(page.getByRole('textbox', { name: /Rückmeldung zum Wunschzettel/ })).toHaveValue(
       'Please review the family text',

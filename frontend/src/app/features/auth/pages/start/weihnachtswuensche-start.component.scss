@@ -42,6 +42,11 @@ p {
   border-radius: 18px;
 }
 
+.email-section {
+  --gl-link-color: var(--mat-sys-primary);
+  background: var(--mat-sys-surface);
+}
+
 .email-section h2,
 .steps h2 {
   margin: 0;

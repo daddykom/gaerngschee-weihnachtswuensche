@@ -335,10 +335,10 @@ test('sends a pickup QR email whose public fallback renders the identical PNG wi
         const cardBounds = await card.boundingBox();
         expect(cardBounds).not.toBeNull();
         await expect(card).toHaveCSS('border-radius', '20px');
-        await expect(preview.locator('body')).toHaveCSS('background-color', 'rgb(243, 245, 240)');
-        await expect(preview.locator('body')).toHaveCSS('color', 'rgb(41, 46, 41)');
+        await expect(preview.locator('body')).toHaveCSS('background-color', 'rgb(240, 226, 223)');
+        await expect(preview.locator('body')).toHaveCSS('color', 'rgb(33, 33, 33)');
         await expect(card).toHaveCSS('background-color', 'rgb(255, 255, 255)');
-        await expect(card).toHaveCSS('border-top-color', 'rgb(120, 130, 120)');
+        await expect(card).toHaveCSS('border-top-color', 'rgb(33, 33, 33)');
         for (const selector of ['img[alt="Gärngschee"]', '#pickup-qr-code']) {
           const bounds = await preview.locator(selector).boundingBox();
           expect(bounds).not.toBeNull();
@@ -349,7 +349,7 @@ test('sends a pickup QR email whose public fallback renders the identical PNG wi
         const button = preview.getByRole('link').first();
         await expectTranslatedText(button, 'app.mail.pickup.button');
         await expect(button).toHaveAttribute('href', imageUrl!);
-        await expect(button.locator('..')).toHaveCSS('background-color', 'rgb(54, 87, 64)');
+        await expect(button.locator('..')).toHaveCSS('background-color', 'rgb(227, 6, 20)');
         await expect(preview.getByRole('link', { name: imageUrl!, exact: true })).toBeVisible();
         expect(
           await preview.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),

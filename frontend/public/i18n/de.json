@@ -801,6 +801,9 @@
           "pickupLocation": "Abholort (optional; leer = Konfiguration)"
         }
       },
+      "itemEditor": {
+        "continue": "Weiter"
+      },
       "overview": {
         "title": "Admin-Übersicht",
         "filters": {

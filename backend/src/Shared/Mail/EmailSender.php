@@ -31,10 +31,10 @@ final class EmailSender implements EmailSenderInterface
     private const LOGO_CID = 'gaerngschee-logo';
     private const PICKUP_QR_CID = 'pickup-qr-code';
     private const EMAIL_THEME = [
-        'pageBackground' => '#f3f5f0',
+        'pageBackground' => '#f0e2df',
         'surface' => '#ffffff',
         'primaryContainer' => '#f5b6d3',
-        'primary' => '#365740',
+        'primary' => '#e30614',
         'onPrimary' => '#ffffff',
         'successContainer' => '#dff4e8',
         'success' => '#276749',
@@ -44,9 +44,9 @@ final class EmailSender implements EmailSenderInterface
         'info' => '#2c5d78',
         'errorContainer' => '#ffdad6',
         'error' => '#b3261e',
-        'text' => '#292e29',
-        'mutedText' => '#535e55',
-        'outline' => '#788278',
+        'text' => '#212121',
+        'mutedText' => '#595959',
+        'outline' => '#212121',
     ];
 
     private readonly MailerInterface $mailer;

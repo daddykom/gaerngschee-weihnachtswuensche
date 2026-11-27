@@ -22,7 +22,7 @@ test.describe('Start route', () => {
     await expect(infoBox).toHaveCSS('background-color', 'rgb(216, 233, 247)');
     await expect(infoBox).toHaveCSS('border-inline-start-color', 'rgb(44, 93, 120)');
     await expect(infoBox.locator('.info-box__icon')).toHaveCSS('color', 'rgb(44, 93, 120)');
-    await expect(infoBox.locator('.info-box__content')).toHaveCSS('color', 'rgb(41, 46, 41)');
+    await expect(infoBox.locator('.info-box__content')).toHaveCSS('color', 'rgb(33, 33, 33)');
   });
 
   test('validates an invalid email without calling the backend', async ({ page }) => {

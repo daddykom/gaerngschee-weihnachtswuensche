@@ -43,11 +43,12 @@
 }
 
 .home-choice--submit {
+  --gl-link-color: var(--gl-link-on-tint);
   background: var(--mat-sys-primary-container);
 }
 
 .home-choice--fulfill {
-  background: var(--gl-surface-soft);
+  background: var(--mat-sys-surface);
 }
 
 .home-faq {

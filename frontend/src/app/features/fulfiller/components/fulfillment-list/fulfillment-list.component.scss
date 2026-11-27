@@ -3,6 +3,8 @@
 }
 
 .fulfillment-order {
+  --gl-link-color: var(--gl-link-on-tint);
+  background: var(--mat-sys-primary-container);
   width: 100%;
   border: 0;
   box-shadow: var(--gl-card-shadow);
@@ -29,7 +31,7 @@
 
 .fulfillment-order__content > .gl-stack > p {
   margin-top: 0;
-  color: #777777;
+  color: var(--mat-sys-on-surface-variant);
 }
 
 .fulfillment-order__content > .gl-stack > strong {
@@ -37,10 +39,11 @@
 }
 
 .wish-entry {
+  --gl-link-color: var(--mat-sys-primary);
   border: 0;
   box-shadow: var(--gl-card-shadow);
   border-radius: 1rem;
-  background: var(--gl-surface-soft);
+  background: var(--mat-sys-surface);
   overflow: hidden;
 }
 

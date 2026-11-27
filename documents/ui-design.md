@@ -20,20 +20,22 @@ räumliche Anordnung.
 
 ## Farbsystem
 
-Das Gärngschee-Farbsystem verwendet einen hellen graugrünen Seitenhintergrund,
-weisse Oberflächen, dunkelgrüne Aktionen, dunkle Texte und rosa Markenbereiche sowie klar unterscheidbare
+Das Gärngschee-Farbsystem verwendet einen hellen rosabeigen Seitenhintergrund,
+weisse Oberflächen, rote Aktionen, dunkle Texte und rosa Markenbereiche sowie klar unterscheidbare
 Statusfarben. Farben werden nach ihrer semantischen Rolle verwendet und
 nicht seiten- oder komponentenspezifisch frei gewählt.
 
 | Rolle | Farbe | Verwendung |
 |---|---|---|
-| Seitenhintergrund | `#f3f5f0` | Globaler Seitenhintergrund ohne Farbverlauf |
-| Oberfläche | `#ffffff` | Karten, E-Mail-Flächen und Inhaltsbereiche |
-| Header / Primärcontainer | `#f5b6d3` | E-Mail-Header und hervorgehobene Markenbereiche |
-| Primärfarbe | `#365740` | Links, Buttons und primäre Aktionen |
-| Haupttext | `#292e29` | Überschriften und normale Textinhalte |
-| Sekundärtext | `#535e55` | Beschreibungen und ergänzende Informationen |
-| Rahmen | `#788278` | Grenzen und Trennlinien |
+| Seitenhintergrund | `#f0e2df` | Globaler Seitenhintergrund ohne Farbverlauf |
+| Oberfläche | `#ffffff` | Einstieg „Wünsche erfüllen“, einzelne Wünsche, FAQ, Formularfelder und E-Mail-Flächen |
+| Header / Primärcontainer | `#f5b6d3` | Header, Footer, Einstieg „Wunsch einreichen“, Wunschzettel und E-Mail-Header |
+| Primärfarbe | `#e30614` | Primärbuttons mit weissem Text und Textlinks auf Weiss |
+| Textlink auf getönter Fläche | `#a00510` | Textlinks auf Rosa und dem Seitenhintergrund |
+| Sekundärbutton | `#ffffff` | Weisse Fläche mit Haupttext und Rahmen in `#212121` |
+| Haupttext | `#212121` | Überschriften und normale Textinhalte |
+| Sekundärtext | `#595959` | Beschreibungen und ergänzende Informationen |
+| Rahmen | `#212121` | Grenzen und Trennlinien |
 | Erfolg-Hintergrund | `#dff4e8` | Erfolgs- und Bestätigungsbereiche |
 | Erfolg-Text | `#276749` | Text und Hervorhebungen in Erfolgsbereichen |
 | Warnung-Hintergrund | `#fff2b7` | Warnungen und offene Prüfungen |
@@ -44,8 +46,12 @@ nicht seiten- oder komponentenspezifisch frei gewählt.
 | Fehler-Text | `#b3261e` | Text, Rahmen und Hervorhebungen in Fehlerbereichen |
 
 Rosa ist die Marken- und Primärcontainerfarbe, nicht die Farbe für
-Informationen. Links und primäre Aktionen verwenden `#365740`; ein beliebiger
-roter Link ist nicht Teil des Farbsystems.
+Informationen. Primärbuttons verwenden `#e30614` mit weissem Text.
+Textlinks sind unterstrichen und auf Weiss ebenfalls `#e30614`.
+Auf Rosa und dem Seitenhintergrund verwenden Textlinks `#a00510`, damit
+der Kontrast mindestens 4,5:1 beträgt. Der Linkfarbkontext wird über
+`--gl-link-color` vererbt; weisse Karten setzen ihn auf die Primärfarbe
+zurück, rosa Container auf `--gl-link-on-tint`.
 
 Die Rahmenfarbe erreicht auf den hellen Oberflächen einen ausreichenden
 Kontrast für sichtbare UI-Grenzen. Frontend und E-Mail-Vorlagen verwenden für
@@ -76,13 +82,15 @@ Farbrollen und ihre praktische Verwendung.
 
 ### Farben der Home-Karten
 
-Die beiden Home-Karten verwenden unterschiedliche Rosatöne als Kategorienfarben:
+Die beiden Home-Karten verwenden unterschiedliche Oberflächen als Kategorienfarben:
 
 -   Die Karte zum Erfüllen eines Weihnachtswunsches verwendet die sanfte
-    Oberfläche `--gl-surface-soft` (`#fff8fc`), ebenso wie die einzelnen
+    Oberfläche `--mat-sys-surface` (`#ffffff`), ebenso wie die einzelnen
     Wunschkarten unter `/erfuellen`.
 -   Die Karte zum Erhalten von Weihnachtswünschen verwendet den primären
     Container und damit die Markenfarbe Rosa.
+-   Die Wunschzettel unter `/erfuellen` verwenden ebenfalls Rosa, ihre
+    einzelnen Wunschkarten bleiben Weiss.
 
 Diese Farben beschreiben unterschiedliche Einstiege, aber keinen Status. Sie
 stehen weder für Erfolg noch für eine abgeschlossene oder verfügbare Aktion.

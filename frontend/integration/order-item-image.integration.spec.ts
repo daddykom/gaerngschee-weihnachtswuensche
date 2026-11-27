@@ -176,7 +176,7 @@ test.describe('Admin wish image API', () => {
       revision: 0,
       image: null,
     });
-    await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+    await page.getByRole('button', { name: 'Weiter', exact: true }).click();
     await page.waitForURL(`**/admin/orders/${fixture.orderId}/edit`);
     const upload = page.waitForResponse(
       (response) => response.url() === imageUrl && response.request().method() === 'POST',
@@ -201,7 +201,7 @@ test.describe('Admin wish image API', () => {
     await editor.getByRole('button', { name: 'Bild entfernen', exact: true }).click();
     await expect(editor.getByRole('img')).toHaveCount(0);
     expect((await (await page.request.get(`${imageUrl}/metadata`)).json()).revision).toBe(1);
-    await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+    await page.getByRole('button', { name: 'Weiter', exact: true }).click();
     await page.waitForURL(`**/admin/orders/${fixture.orderId}/edit`);
     const deletion = page.waitForResponse(
       (response) => response.url() === imageUrl && response.request().method() === 'DELETE',
@@ -236,7 +236,7 @@ test.describe('Admin wish image API', () => {
       mimeType: 'image/png',
       buffer: Buffer.from(fixture.images[0], 'base64'),
     });
-    await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+    await page.getByRole('button', { name: 'Weiter', exact: true }).click();
     await page.waitForURL(`**/admin/orders/${fixture.orderId}/edit`);
     let patches = 0;
     page.on('request', (request) => {

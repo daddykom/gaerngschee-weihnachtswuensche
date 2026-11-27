@@ -51,6 +51,7 @@ test.describe('Fulfillment route', () => {
                   title: `Image fixture ${index}`,
                   category: 'gift',
                   currentDescription: 'An image fixture',
+                  giftLink: 'https://example.com/gift',
                   fulfillmentStatus: 'available',
                   reservedAt: null,
                   reservationExpiresAt: null,
@@ -68,6 +69,18 @@ test.describe('Fulfillment route', () => {
       await page.goto('/erfuellen');
       const pictures = page.locator('.wish-entry__image');
       await expect(pictures).toHaveCount(5);
+      await expect(page.locator('.fulfillment-order')).toHaveCSS(
+        'background-color',
+        'rgb(245, 182, 211)',
+      );
+      for (const wish of await page.locator('.wish-entry').all()) {
+        await expect(wish).toHaveCSS('background-color', 'rgb(255, 255, 255)');
+        await expect(wish.locator('a')).toHaveCSS('color', 'rgb(227, 6, 20)');
+        await expect(wish.locator('a')).toHaveCSS('text-decoration-line', 'underline');
+      }
+      for (const field of await page.locator('.mat-mdc-text-field-wrapper').all()) {
+        await expect(field).toHaveCSS('background-color', 'rgb(255, 255, 255)');
+      }
       for (let index = 0; index < 5; index++) {
         const image = pictures.nth(index);
         await image.scrollIntoViewIfNeeded();
@@ -196,7 +209,7 @@ test.describe('Fulfillment route', () => {
       );
       await expect(cards.first().locator('mat-card-content > .gl-stack > p')).toHaveCSS(
         'color',
-        'rgb(119, 119, 119)',
+        'rgb(89, 89, 89)',
       );
       const radius = await page.evaluate(
         () => `${parseFloat(getComputedStyle(document.documentElement).fontSize)}px`,
