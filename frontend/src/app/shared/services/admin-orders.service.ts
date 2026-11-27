@@ -2,7 +2,12 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { AdminOrder } from '../models/admin-order.model';
+import { AdminOrder, AdminOrderItem } from '../models/admin-order.model';
+
+export type FulfillerAssignment = Pick<
+  AdminOrderItem,
+  'fulfillerEmail' | 'fulfillmentStatus' | 'reservedAt' | 'reservationExpiresAt'
+>;
 
 export interface AdminOrderListResponse {
   orders: AdminOrder[];
@@ -21,6 +26,23 @@ export interface AdminOrderUpdateResponse {
 export class AdminOrdersService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiUrl}/admin/orders`;
+
+  releaseFulfiller(
+    orderId: string,
+    itemId: string,
+    assignment: FulfillerAssignment,
+  ): Observable<{ item: AdminOrderItem }> {
+    return this.http.post<{ item: AdminOrderItem }>(
+      `${this.baseUrl}/${encodeURIComponent(orderId)}/items/${encodeURIComponent(itemId)}/release-fulfiller`,
+      {
+        fulfillerEmail: assignment.fulfillerEmail ?? null,
+        fulfillmentStatus: assignment.fulfillmentStatus,
+        reservedAt: assignment.reservedAt ?? null,
+        reservationExpiresAt: assignment.reservationExpiresAt ?? null,
+      },
+      { withCredentials: true },
+    );
+  }
 
   list(statuses: string[], categories: string[]): Observable<AdminOrderListResponse> {
     let params = new HttpParams();

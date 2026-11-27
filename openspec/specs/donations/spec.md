@@ -71,6 +71,25 @@ E-Mail bestätigt und bleibt bis zur Bestätigung zehn Minuten vorläufig.
 - Statusänderungen nachvollziehbar speichern
 - Offene Fulfiller-Listen aktualisieren nur die betroffenen Statuswerte
 
+### F5: Erfüller administrativ entfernen
+
+- Im Admin-Wunscheditor erscheint „Erfüller entfernen“ als Secondary-Button bei
+  vorläufigen und bestätigten Zuordnungen ohne Geschenkeingang.
+- Bei eingegangenen oder abgeschlossenen Geschenken wird der Button nicht angezeigt;
+  das Backend verbietet die Freigabe ebenfalls.
+- „Nein“, Escape und das Schliessen des Bestätigungsdialogs verändern nichts.
+- „Ja“ entfernt die Zuordnung sofort und unabhängig vom Speichern der Bestellung.
+  Nicht gespeicherte Textänderungen bleiben im Formular erhalten.
+- Der Server prüft die erwartete Zuordnung unter einer Sperre gegen parallele
+  Änderungen. Zuordnung, Reservierungsdaten und offene Bestätigungslinks werden
+  aufgehoben, während Wunschtexte und Veröffentlichungsstatus unverändert bleiben.
+- Die Benachrichtigung an die bisherige Erfüller-Adresse wird in derselben
+  Transaktion in der E-Mail-Warteschlange gespeichert und vom Batch versendet.
+- Der Wunsch wird wieder verfügbar. Die öffentlichen Sichtbarkeitsbedingungen
+  (definitive Bestellung, freigegebener Wunsch und Aktionszeitraum) bleiben gültig.
+- Bereits geöffnete öffentliche Listen laden neu verfügbare, zuvor fehlende
+  Wünsche beim nächsten Verfügbarkeits-Update nach.
+
 ## Data Model
 
 ### Donation
@@ -94,6 +113,7 @@ interface ReservedWish {
 | GET | `/public/fulfiller/wish-statuses` | Nur Wunschstatus aktualisieren |
 | POST | `/public/fulfiller-reservation-start` | Vorläufige Reservierung anfordern |
 | POST | `/auth/fulfiller-reservation-confirm` | Reservierung über E-Mail-Token bestätigen |
+| POST | `/admin/orders/{orderId}/items/{itemId}/release-fulfiller` | Zuordnung entfernen und Benachrichtigung vormerken (nur Admin) |
 
 ## Fachliche Regeln
 

@@ -6,6 +6,49 @@ export const adminOrdersFeature = createFeature({
   name: 'adminOrders',
   reducer: createReducer<AdminOrdersState>(
     initialState,
+    on(AdminOrdersActions.fulfillerRemovalConfirmed, (state, { itemId }) => ({
+      ...state,
+      fulfillerRelease: { status: 'loading' as const, itemId },
+    })),
+    on(AdminOrdersActions.fulfillerRemovalFailed, (state, { itemId, errorCode }) => ({
+      ...state,
+      fulfillerRelease: { status: 'error' as const, itemId, errorCode },
+    })),
+    on(AdminOrdersActions.fulfillerRemoved, (state, { orderId, item }) => {
+      // Merge only persisted fulfillment data, never replace unsaved wish text.
+      const fulfillment = {
+        fulfillmentStatus: item.fulfillmentStatus,
+        fulfillerEmail: item.fulfillerEmail,
+        reservedAt: item.reservedAt,
+        reservationExpiresAt: item.reservationExpiresAt,
+        dueAt: item.dueAt,
+        receivedAt: item.receivedAt,
+        updatedAt: item.updatedAt,
+      };
+      return {
+        ...state,
+        fulfillerRelease: { status: 'loaded' as const, itemId: item.id },
+        orders: state.orders.map((order) =>
+          order.id !== orderId
+            ? order
+            : {
+                ...order,
+                items: order.items.map((current) =>
+                  current.id === item.id ? { ...current, ...fulfillment } : current,
+                ),
+              },
+        ),
+        form:
+          state.activeOrderId !== orderId || state.form === null
+            ? state.form
+            : {
+                ...state.form,
+                items: state.form.items.map((current) =>
+                  current.id === item.id ? { ...current, ...fulfillment } : current,
+                ),
+              },
+      };
+    }),
     on(AdminOrdersActions.load, (state) => ({
       ...state,
       loadStatus: 'loading',
@@ -78,6 +121,7 @@ export const adminOrdersFeature = createFeature({
 });
 
 export const {
+  selectFulfillerRelease: selectAdminFulfillerRelease,
   selectOrders: selectAdminOrders,
   selectFilteredOrders: selectAdminFilteredOrders,
   selectSearchForm: selectAdminOrderSearchForm,

@@ -734,6 +734,7 @@
           "fulfiller-reservation": "Reservation für Erfüller",
           "fulfiller-reservation-confirmation": "Bestätigte Wunscherfüllung",
           "fulfiller-reminder": "Abgabeerinnerung für Erfüller",
+          "fulfiller-released": "Erfüller-Zuordnung aufgehoben",
           "fairgate-registration-required": "Fairgate-Registrierung erforderlich",
           "fairgate-registration-available": "Fairgate-Registrierung verfügbar",
           "user-created": "Benutzer erstellt",
@@ -764,6 +765,22 @@
           "orderNumber": "Zettelnummer",
           "pickupDate": "Abholdatum und Zeit (optional; leer = Konfiguration)",
           "pickupLocation": "Abholort (optional; leer = Konfiguration)"
+        }
+      },
+      "fulfillerRemoval": {
+        "title": "Erfüller entfernen",
+        "button": "Erfüller entfernen",
+        "confirmation": "Möchtest du die Zuordnung zu {{ email }} entfernen? Der Wunsch wird sofort wieder zur Erfüllung freigegeben, sofern er veröffentlicht ist. Der bisherige Erfüller wird per E-Mail informiert.",
+        "yes": "Ja",
+        "no": "Nein",
+        "success": "Der Erfüller wurde entfernt. Die Benachrichtigung wurde zum Versand vorgemerkt. Noch nicht gespeicherte Wunschänderungen bleiben erhalten.",
+        "errors": {
+          "GIFT_ALREADY_RECEIVED": "Das Geschenk ist bereits eingegangen. Der Erfüller kann nicht entfernt werden.",
+          "FULFILLER_CHANGED": "Die Zuordnung hat sich inzwischen geändert. Bitte lade den Wunsch neu, bevor du es erneut versuchst.",
+          "WISH_NOT_FOUND": "Der Wunsch wurde nicht gefunden.",
+          "INVALID_RESERVATION_DATA": "Die Reservierungsdaten sind unvollständig. Bitte lade den Wunsch neu.",
+          "FULFILLER_RELEASE_FAILED": "Der Erfüller konnte nicht entfernt werden. Bitte versuche es erneut.",
+          "REQUEST_FAILED": "Der Erfüller konnte nicht entfernt werden. Bitte prüfe die Verbindung und versuche es erneut."
         }
       },
       "overview": {
@@ -1198,6 +1215,14 @@
           "time": "Zeitfenster",
           "location": "Ort",
           "keepMessage": "Bitte bewahre diese E-Mail auf und bringe den Wunsch zum angegebenen Zeitpunkt an den angegebenen Ort."
+        },
+        "fulfillerReleased": {
+          "subject": "Deine Wunschreservierung wurde aufgehoben",
+          "title": "Wunschreservierung aufgehoben",
+          "body": "Das Gärngschee-Team hat deine Zuordnung zu folgendem Weihnachtswunsch aufgehoben:",
+          "wishNumber": "Wunschnummer",
+          "noDelivery": "Bitte besorge und liefere für diesen Wunsch kein Geschenk mehr. Frühere Zusagen und Bestätigungslinks gelten für diesen Wunsch nicht mehr.",
+          "thanks": "Vielen Dank für deine Bereitschaft zu helfen. Bei Fragen kannst du dich an das Gärngschee-Team wenden."
         },
         "fulfillerReminder": {
           "subject": "Erinnerung an die Abgabe deiner Geschenke",

@@ -3,6 +3,148 @@ import { expectTranslatedText } from './support/assertions';
 import { expect, test } from './support/test';
 
 test.describe('Admin order item edit route', () => {
+  for (const status of ['reserved', 'pending_confirmation']) {
+    test(`removes a ${status} giver only after Yes and keeps unsaved wish edits`, async ({
+      page,
+    }) => {
+      await loginAsAdmin(page);
+      const order = orderFixture();
+      const item = {
+        ...(order['items'] as Record<string, unknown>[])[0],
+        fulfillmentStatus: status,
+        fulfillerEmail: 'giver@example.com',
+        reservedAt: status === 'reserved' ? '2026-11-01 12:00:00' : null,
+        reservationExpiresAt: status === 'pending_confirmation' ? '2026-12-01 12:10:00' : null,
+        receivedAt: null,
+      };
+      await mockOrders(page, { ...order, items: [item] });
+      let removals = 0;
+      await page.route('**/admin/orders/order-1/items/item-1/release-fulfiller', async (route) => {
+        removals++;
+        expect(route.request().method()).toBe('POST');
+        expect(route.request().postDataJSON()).toEqual({
+          fulfillerEmail: item.fulfillerEmail,
+          fulfillmentStatus: status,
+          reservedAt: item.reservedAt,
+          reservationExpiresAt: item.reservationExpiresAt,
+        });
+        await route.fulfill({
+          json: {
+            item: {
+              ...item,
+              fulfillmentStatus: 'available',
+              fulfillerEmail: null,
+              reservedAt: null,
+              reservationExpiresAt: null,
+              dueAt: null,
+            },
+          },
+        });
+      });
+      await page.goto('/admin/overview');
+      await page.locator('a[href="/admin/orders/order-1/edit"]').click();
+      await page.getByRole('link', { name: 'Ändern' }).first().click();
+      const remove = page.getByRole('button', { name: 'Erfüller entfernen', exact: true });
+      await expect(remove).toHaveAttribute('mat-stroked-button', '');
+      await expectTranslatedText(remove, 'app.admin.fulfillerRemoval.button');
+      await page
+        .getByRole('textbox', { name: 'Aktueller Wunschtitel', exact: true })
+        .fill('Unsaved wish title');
+      await remove.click();
+      const dialog = page.getByRole('dialog');
+      await expectTranslatedText(dialog, 'app.admin.fulfillerRemoval.confirmation');
+      await dialog.getByRole('button', { name: 'Nein', exact: true }).click();
+      expect(removals).toBe(0);
+      await remove.click();
+      await page.keyboard.press('Escape');
+      await expect(dialog).toHaveCount(0);
+      expect(removals).toBe(0);
+      await remove.click();
+      await dialog.getByRole('button', { name: 'Ja', exact: true }).click();
+      await expect(remove).toHaveCount(0);
+      expect(removals).toBe(1);
+      await expect(page).toHaveURL(/\/edit\/item\/item-1$/);
+      await expect(
+        page.getByRole('textbox', { name: 'Aktueller Wunschtitel', exact: true }),
+      ).toHaveValue('Unsaved wish title');
+      await expectTranslatedText(
+        page.locator('.app-notification'),
+        'app.admin.fulfillerRemoval.success',
+      );
+    });
+  }
+
+  for (const assignment of [
+    { fulfillmentStatus: 'available', fulfillerEmail: null, receivedAt: null },
+    {
+      fulfillmentStatus: 'received',
+      fulfillerEmail: 'giver@example.com',
+      receivedAt: '2026-11-01',
+    },
+    { fulfillmentStatus: 'completed', fulfillerEmail: 'giver@example.com', receivedAt: null },
+    {
+      fulfillmentStatus: 'reserved',
+      fulfillerEmail: 'giver@example.com',
+      receivedAt: '2026-11-01',
+    },
+  ]) {
+    test(`hides the removal button for ${assignment.fulfillmentStatus} with receipt ${assignment.receivedAt}`, async ({
+      page,
+    }) => {
+      await loginAsAdmin(page);
+      const order = orderFixture();
+      await mockOrders(page, {
+        ...order,
+        items: [{ ...(order['items'] as Record<string, unknown>[])[0], ...assignment }],
+      });
+      await page.goto('/admin/overview');
+      await page.locator('a[href="/admin/orders/order-1/edit"]').click();
+      await page.getByRole('link', { name: 'Ändern' }).first().click();
+      await expect(page.locator('app-admin-order-item-edit')).toBeVisible();
+      await expect(
+        page.getByRole('button', { name: 'Erfüller entfernen', exact: true }),
+      ).toHaveCount(0);
+    });
+  }
+
+  test('keeps the assignment and unsaved text after a parallel receipt conflict', async ({
+    page,
+  }) => {
+    await loginAsAdmin(page);
+    const order = orderFixture();
+    await mockOrders(page, {
+      ...order,
+      items: [
+        {
+          ...(order['items'] as Record<string, unknown>[])[0],
+          fulfillmentStatus: 'reserved',
+          fulfillerEmail: 'giver@example.com',
+        },
+      ],
+    });
+    await page.route('**/release-fulfiller', (route) =>
+      route.fulfill({
+        status: 409,
+        json: { error: { code: 'GIFT_ALREADY_RECEIVED' } },
+      }),
+    );
+    await page.goto('/admin/overview');
+    await page.locator('a[href="/admin/orders/order-1/edit"]').click();
+    await page.getByRole('link', { name: 'Ändern' }).first().click();
+    await page
+      .getByRole('textbox', { name: 'Aktueller Wunschtitel', exact: true })
+      .fill('Unsaved conflict title');
+    await page.getByRole('button', { name: 'Erfüller entfernen', exact: true }).click();
+    await page.getByRole('dialog').getByRole('button', { name: 'Ja', exact: true }).click();
+    await expectTranslatedText(
+      page.locator('.app-notification'),
+      'app.admin.fulfillerRemoval.errors.GIFT_ALREADY_RECEIVED',
+    );
+    await expect(
+      page.getByRole('textbox', { name: 'Aktueller Wunschtitel', exact: true }),
+    ).toHaveValue('Unsaved conflict title');
+  });
+
   test('shows original and edited title and description separately and retains the internal message', async ({
     page,
   }) => {

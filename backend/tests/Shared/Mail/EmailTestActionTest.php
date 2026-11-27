@@ -26,6 +26,9 @@ final class EmailTestActionTest extends TestCase
         self::assertSame(200, $response->getStatusCode());
         self::assertSame('client-order', $body['templates'][0]['id']);
         self::assertSame('loginUrl', $body['templates'][0]['fields'][0]['key']);
+        $released = array_values(array_filter($body['templates'], static fn (array $template): bool => $template['id'] === 'fulfiller-released'))[0];
+        self::assertSame(['wishNumber', 'wishTitle', 'wishDescription'], array_column($released['fields'], 'key'));
+        self::assertSame([true, true, true], array_column($released['fields'], 'required'));
         $pickup = array_values(array_filter($body['templates'], static fn (array $template): bool => $template['id'] === 'order-ready-for-pickup'));
         self::assertCount(1, $pickup);
         self::assertSame(['year', 'orderNumber', 'pickupDate', 'pickupLocation'], array_column($pickup[0]['fields'], 'key'));

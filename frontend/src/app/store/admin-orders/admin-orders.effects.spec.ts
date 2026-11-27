@@ -9,6 +9,7 @@ import { AdminOrdersService } from '../../shared/services/admin-orders.service';
 import { NavigationActions } from '../navigation/navigation.actions';
 import { AdminOrdersActions } from './admin-orders.actions';
 import {
+  adminOrdersEffects,
   loadAdminOrdersEffect,
   navigateBackAfterAdminOrderSaveEffect,
   saveAdminOrderEffect,
@@ -16,12 +17,12 @@ import {
 
 describe('admin orders effects', () => {
   let actions$: Subject<Action>;
-  let service: { list: Mock; update: Mock };
+  let service: { list: Mock; update: Mock; releaseFulfiller: Mock };
   let store: MockStore;
 
   beforeEach(() => {
     actions$ = new Subject<Action>();
-    service = { list: vi.fn(), update: vi.fn() };
+    service = { list: vi.fn(), update: vi.fn(), releaseFulfiller: vi.fn() };
     TestBed.configureTestingModule({
       providers: [
         provideMockActions(() => actions$),
@@ -70,6 +71,52 @@ describe('admin orders effects', () => {
     });
     actions$.next(AdminOrdersActions.filtersChanged({ statuses: [], categories: [] }));
     await expect(failure).resolves.toEqual(AdminOrdersActions.loadFailure({ errorCode: 'DENIED' }));
+  });
+
+  it('releases only the selected assignment without invoking the order save', async () => {
+    const item = { id: 'item-1', fulfillmentStatus: 'available', fulfillerEmail: null } as never;
+    const assignment = {
+      fulfillmentStatus: 'reserved',
+      fulfillerEmail: 'giver@example.com',
+      reservedAt: null,
+      reservationExpiresAt: null,
+    };
+    service.releaseFulfiller.mockReturnValueOnce(of({ item }));
+    const result = firstValueFrom(
+      TestBed.runInInjectionContext(() => adminOrdersEffects.releaseAdminFulfillerEffect()),
+    );
+    actions$.next(
+      AdminOrdersActions.fulfillerRemovalConfirmed({
+        orderId: 'order-1',
+        itemId: 'item-1',
+        assignment,
+      }),
+    );
+    await expect(result).resolves.toEqual(
+      AdminOrdersActions.fulfillerRemoved({ orderId: 'order-1', item }),
+    );
+    expect(service.update).not.toHaveBeenCalled();
+    service.releaseFulfiller.mockReturnValueOnce(
+      throwError(
+        () => new HttpErrorResponse({ error: { error: { code: 'GIFT_ALREADY_RECEIVED' } } }),
+      ),
+    );
+    const failure = firstValueFrom(
+      TestBed.runInInjectionContext(() => adminOrdersEffects.releaseAdminFulfillerEffect()),
+    );
+    actions$.next(
+      AdminOrdersActions.fulfillerRemovalConfirmed({
+        orderId: 'order-1',
+        itemId: 'item-1',
+        assignment,
+      }),
+    );
+    await expect(failure).resolves.toEqual(
+      AdminOrdersActions.fulfillerRemovalFailed({
+        itemId: 'item-1',
+        errorCode: 'GIFT_ALREADY_RECEIVED',
+      }),
+    );
   });
 
   it('updates the complete order with the selected action and maps failures', async () => {

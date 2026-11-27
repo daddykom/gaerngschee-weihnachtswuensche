@@ -41,6 +41,9 @@ final class AdminOrderRoutesTest extends TestCase
         );
 
         self::assertSame(401, $response->getStatusCode());
+        self::assertSame(401, Application::create(new RateLimitService($this->pdo))->handle(
+            (new ServerRequestFactory())->createServerRequest('POST', '/admin/orders/order-1/items/item-1/release-fulfiller'),
+        )->getStatusCode());
     }
 
     public function testNonAdminCannotListOrUpdateOrders(): void
@@ -51,6 +54,7 @@ final class AdminOrderRoutesTest extends TestCase
 
         self::assertSame(404, $app->handle((new ServerRequestFactory())->createServerRequest('GET', '/admin/orders'))->getStatusCode());
         self::assertSame(404, $app->handle($this->request('PATCH', '/admin/orders/order-1', []))->getStatusCode());
+        self::assertSame(404, $app->handle($this->request('POST', '/admin/orders/order-1/items/item-1/release-fulfiller', []))->getStatusCode());
     }
 
     public function testAdminCanListOrdersWithServerSideFilters(): void

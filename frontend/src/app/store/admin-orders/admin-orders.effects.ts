@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { catchError, map, of, switchMap, withLatestFrom } from 'rxjs';
+import { catchError, exhaustMap, map, of, switchMap, withLatestFrom } from 'rxjs';
 import { AdminOrdersService } from '../../shared/services/admin-orders.service';
 import { NavigationActions } from '../navigation/navigation.actions';
 import { NotificationActions } from '../notification/notification.actions';
@@ -94,6 +94,41 @@ export const adminOrdersNotificationEffect = createEffect(
 );
 
 export const adminOrdersEffects = {
+  releaseAdminFulfillerEffect: createEffect(
+    (actions$ = inject(Actions), service = inject(AdminOrdersService)) =>
+      actions$.pipe(
+        ofType(AdminOrdersActions.fulfillerRemovalConfirmed),
+        exhaustMap(({ orderId, itemId, assignment }) =>
+          service.releaseFulfiller(orderId, itemId, assignment).pipe(
+            map(({ item }) => AdminOrdersActions.fulfillerRemoved({ orderId, item })),
+            catchError((error: HttpErrorResponse) =>
+              of(
+                AdminOrdersActions.fulfillerRemovalFailed({ itemId, errorCode: errorCode(error) }),
+              ),
+            ),
+          ),
+        ),
+      ),
+    { functional: true },
+  ),
+  fulfillerRemovalNotificationEffect: createEffect(
+    (actions$ = inject(Actions)) =>
+      actions$.pipe(
+        ofType(AdminOrdersActions.fulfillerRemoved, AdminOrdersActions.fulfillerRemovalFailed),
+        map((action) =>
+          NotificationActions.show({
+            variant: action.type === AdminOrdersActions.fulfillerRemoved.type ? 'success' : 'error',
+            titleKey: 'app.admin.fulfillerRemoval.title',
+            messageKey:
+              action.type === AdminOrdersActions.fulfillerRemoved.type
+                ? 'app.admin.fulfillerRemoval.success'
+                : `app.admin.fulfillerRemoval.errors.${action.errorCode}`,
+            preserveOnRoutes: ['/admin/overview', '/admin/orders'],
+          }),
+        ),
+      ),
+    { functional: true },
+  ),
   loadAdminOrdersEffect,
   saveAdminOrderEffect,
   navigateBackAfterAdminOrderSaveEffect,

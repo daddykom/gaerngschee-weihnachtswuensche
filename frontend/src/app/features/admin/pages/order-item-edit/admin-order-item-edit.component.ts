@@ -8,12 +8,14 @@ import {
 } from '@angular/core';
 import { form, FormField, required, validate } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
+import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog';
 import { ControlErrorComponent } from '../../../../shared/components/control-error/control-error';
 import {
   AdminOrder,
@@ -24,6 +26,7 @@ import {
 import { OrderItemCategory, OrderItemPersonType } from '../../../../shared/models/order.model';
 import { AdminOrdersActions } from '../../../../store/admin-orders/admin-orders.actions';
 import {
+  selectAdminFulfillerRelease,
   selectAdminOrders,
   selectAdminOrdersActiveOrderId,
   selectAdminOrdersForm,
@@ -60,6 +63,17 @@ interface ItemFormValue {
 export class AdminOrderItemEditComponent {
   private readonly store = inject(Store);
   private readonly route = inject(ActivatedRoute);
+  private readonly dialog = inject(MatDialog);
+  readonly fulfillerRelease = this.store.selectSignal(selectAdminFulfillerRelease);
+  readonly removingFulfiller = computed(() => this.fulfillerRelease()?.status === 'loading');
+  readonly canRemoveFulfiller = computed(() => {
+    const item = this.item();
+    return (
+      !!item?.fulfillerEmail &&
+      !item.receivedAt &&
+      ['pending_confirmation', 'reserved'].includes(item.fulfillmentStatus)
+    );
+  });
   readonly orders = this.store.selectSignal(selectAdminOrders);
   readonly storeForm = this.store.selectSignal(selectAdminOrdersForm);
   private readonly activeOrderId = this.store.selectSignal(selectAdminOrdersActiveOrderId);
@@ -101,6 +115,38 @@ export class AdminOrderItemEditComponent {
 
   cancel(): void {
     this.store.dispatch(NavigationActions.navigate({ target: 'back' }));
+  }
+
+  removeFulfiller(): void {
+    const item = this.item();
+    const order = this.order();
+    if (!item || !order || !this.canRemoveFulfiller() || this.removingFulfiller()) return;
+    this.dialog
+      .open(ConfirmDialogComponent, {
+        data: {
+          title: 'app.admin.fulfillerRemoval.title',
+          message: 'app.admin.fulfillerRemoval.confirmation',
+          messageParams: { email: item.fulfillerEmail ?? '' },
+          confirmLabel: 'app.admin.fulfillerRemoval.yes',
+          cancelLabel: 'app.admin.fulfillerRemoval.no',
+        },
+      })
+      .afterClosed()
+      .subscribe((confirmed) => {
+        if (confirmed === true)
+          this.store.dispatch(
+            AdminOrdersActions.fulfillerRemovalConfirmed({
+              orderId: order.id,
+              itemId: item.id,
+              assignment: {
+                fulfillerEmail: item.fulfillerEmail,
+                fulfillmentStatus: item.fulfillmentStatus,
+                reservedAt: item.reservedAt,
+                reservationExpiresAt: item.reservationExpiresAt,
+              },
+            }),
+          );
+      });
   }
 
   constructor() {
@@ -145,6 +191,9 @@ export class AdminOrderItemEditComponent {
             AdminOrdersActions.formLoaded({ orderId: currentOrder.id, form: orderForm }),
           );
         }
+      } else if (currentOrder !== undefined && currentItem !== undefined) {
+        this.order.set(currentOrder);
+        this.item.set(currentItem);
       }
     });
 

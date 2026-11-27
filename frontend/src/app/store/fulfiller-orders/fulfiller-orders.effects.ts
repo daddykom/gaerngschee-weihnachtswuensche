@@ -18,6 +18,7 @@ import { FulfillerOrdersService } from '../../shared/services/fulfiller-orders.s
 import { NotificationActions } from '../notification/notification.actions';
 import { FulfillerOrdersActions } from './fulfiller-orders.actions';
 import {
+  selectFulfillerOrders,
   selectFulfillerOrdersCategory,
   selectFulfillerOrdersSearch,
   selectFulfillerReservationForm,
@@ -159,6 +160,26 @@ export const fulfillerOrdersNotificationEffect = createEffect(
 );
 
 export const fulfillerOrdersEffects = {
+  reloadReleasedWishesEffect: createEffect(
+    (actions$ = inject(Actions), store = inject(Store), service = inject(FulfillerOrdersService)) =>
+      actions$.pipe(
+        ofType(FulfillerOrdersActions.wishStatusesUpdated),
+        withLatestFrom(
+          store.select(selectFulfillerOrders),
+          store.select(selectFulfillerOrdersSearch),
+          store.select(selectFulfillerOrdersCategory),
+        ),
+        filter(([{ items }, orders]) =>
+          items.some(
+            (item) =>
+              item.fulfillmentStatus === 'available' &&
+              !orders.some((order) => order.items.some((current) => current.id === item.id)),
+          ),
+        ),
+        switchMap(([, , search, category]) => loadOrders(service, search, category)),
+      ),
+    { functional: true },
+  ),
   loadFulfillerOrdersEffect,
   filterFulfillerOrdersEffect,
   requestFulfillerReservationEffect,

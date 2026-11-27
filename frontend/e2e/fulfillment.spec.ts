@@ -2,6 +2,63 @@ import { expectTranslatedText } from './support/assertions';
 import { expect, test } from './support/test';
 
 test.describe('Fulfillment route', () => {
+  test('loads a released wish that was absent from an already open list', async ({ page }) => {
+    let released = false;
+    await page.route('**/public/fulfiller/orders**', (route) =>
+      route.fulfill({
+        json: {
+          orders: released
+            ? [
+                {
+                  id: 'order-released',
+                  year: 2026,
+                  orderNumber: 12,
+                  currentText: null,
+                  items: [
+                    {
+                      id: 'wish-released',
+                      orderId: 'order-released',
+                      itemNumber: 1,
+                      wishNumber: '12-1',
+                      title: 'Released wish',
+                      currentDescription: 'Available again',
+                      category: 'gift',
+                      fulfillmentStatus: 'available',
+                      reservedAt: null,
+                      reservationExpiresAt: null,
+                    },
+                  ],
+                },
+              ]
+            : [],
+        },
+      }),
+    );
+    await page.route('**/public/fulfiller/availability-version', (route) =>
+      route.fulfill({ json: { version: released ? 1 : 0 } }),
+    );
+    await page.route('**/public/fulfiller/wish-statuses', (route) =>
+      route.fulfill({
+        json: {
+          items: [
+            {
+              id: 'wish-released',
+              fulfillmentStatus: 'available',
+              reservedAt: null,
+              reservationExpiresAt: null,
+            },
+          ],
+        },
+      }),
+    );
+    const initialPoll = page.waitForResponse('**/public/fulfiller/availability-version');
+    await page.goto('/erfuellen');
+    await initialPoll;
+    await expect(page.locator('.wish-entry')).toHaveCount(0);
+    released = true;
+    await expect(page.locator('.wish-entry')).toHaveCount(1, { timeout: 20_000 });
+    await expect(page.locator('.wish-entry h3')).toHaveText('Released wish');
+  });
   test('offers an update dialog when a new build is detected', async ({ page }) => {
     const baseline = await (await page.request.get('/build-info.json')).json();
     let changed = false;

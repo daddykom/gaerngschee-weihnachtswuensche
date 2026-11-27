@@ -59,6 +59,55 @@ describe('adminOrdersFeature', () => {
     });
   });
 
+  it('merges only fulfillment metadata and retains every unsaved form field', () => {
+    const item = {
+      id: 'item-1',
+      fulfillmentStatus: 'reserved',
+      fulfillerEmail: 'giver@example.com',
+      currentTitle: 'Persisted',
+    };
+    const form = {
+      status: 'changes_requested',
+      currentText: 'Unsaved family text',
+      adminNotes: 'Unsaved feedback',
+      adultsCount: 2,
+      childrenCount: 1,
+      items: [
+        { ...item, currentTitle: 'Unsaved wish title', currentDescription: 'Unsaved description' },
+      ],
+    } as never;
+    const state = {
+      ...initialState,
+      orders: [{ ...order, items: [item] }] as never,
+      activeOrderId: order.id,
+      form,
+    };
+    const result = adminOrdersFeature.reducer(
+      state,
+      AdminOrdersActions.fulfillerRemoved({
+        orderId: order.id,
+        item: { ...item, fulfillmentStatus: 'available', fulfillerEmail: null } as never,
+      }),
+    );
+    expect(result.form).toMatchObject({
+      currentText: 'Unsaved family text',
+      adminNotes: 'Unsaved feedback',
+      items: [
+        {
+          currentTitle: 'Unsaved wish title',
+          currentDescription: 'Unsaved description',
+          fulfillerEmail: null,
+          fulfillmentStatus: 'available',
+        },
+      ],
+    });
+    expect(result.orders[0].items[0]).toMatchObject({
+      currentTitle: 'Persisted',
+      fulfillerEmail: null,
+    });
+    expect(result.fulfillerRelease).toEqual({ status: 'loaded', itemId: 'item-1' });
+  });
+
   it('keeps unsaved edits only in the active form and ignores updates for another order', () => {
     const form = {
       status: order.status,
