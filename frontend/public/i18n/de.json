@@ -644,6 +644,24 @@
       "sessionExpiredWarningMessage": "Du wirst in {{seconds}} Sekunden abgemeldet.",
       "staySignedIn": "Angemeldet bleiben"
     },
+    "imageTransfers": {
+      "uploading": "Bild wird hochgeladen: {{percent}} %",
+      "removing": "Bild wird entfernt.",
+      "success": "Bild erfolgreich gespeichert.",
+      "removed": "Bild erfolgreich entfernt.",
+      "errorTitle": "Bildänderung fehlgeschlagen",
+      "openWish": "Wunsch öffnen",
+      "retry": "Bildänderung erneut versuchen",
+      "dismiss": "Meldung schliessen",
+      "errors": {
+        "failed": "Die Bildänderung konnte nicht bestätigt werden. Die Wunschdaten bleiben gespeichert. Du kannst die Bildänderung erneut versuchen.",
+        "conflict": "Das Bild wurde inzwischen geändert. Die Wunschdaten bleiben gespeichert. Öffne den Wunsch und prüfe das aktuelle Bild, bevor du eine neue Bildänderung speicherst.",
+        "tooLarge": "Das Bild ist grösser als 5 MiB. Die Wunschdaten bleiben gespeichert. Öffne den Wunsch und wähle ein kleineres Bild.",
+        "dimensions": "Das Bild hat zu viele Bildpunkte oder zu grosse Abmessungen. Die Wunschdaten bleiben gespeichert. Öffne den Wunsch und wähle ein kleineres Bild.",
+        "invalidImage": "Die Datei ist kein gültiges JPEG-, PNG- oder WebP-Bild. Die Wunschdaten bleiben gespeichert. Öffne den Wunsch und wähle ein anderes Bild.",
+        "notFound": "Der Wunsch oder das Bild ist nicht mehr vorhanden. Öffne den Wunsch zur Prüfung."
+      }
+    },
     "admin": {
       "itemImage": {
         "title": "Bild zum Wunsch (optional)",

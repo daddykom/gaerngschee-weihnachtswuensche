@@ -100,4 +100,36 @@ describe('imageTransfersFeature', () => {
       expect(reducer(uploading(), action)).toEqual(initialImageTransfersState);
     }
   });
+
+  it('retains the wish title for terminal notices and retries without keeping successful files', () => {
+    const labeledJob = { ...job, wishTitle: 'A bicycle' };
+    let state = reducer(
+      initialImageTransfersState,
+      actions.transfersQueued({ transfers: [labeledJob] }),
+    );
+    state = reducer(state, actions.transferStarted({ id: job.id }));
+    state = reducer(state, actions.transferFailed({ id: job.id, errorCode: 'REQUEST_FAILED' }));
+    expect(state.transfers[0].wishTitle).toBe('A bicycle');
+    state = reducer(state, actions.retryClicked({ id: job.id }));
+    expect(state.transfers[0].wishTitle).toBe('A bicycle');
+    state = reducer(state, actions.transferStarted({ id: job.id }));
+    state = reducer(
+      state,
+      actions.transferSucceeded({ id: job.id, result: { revision: 1, image: null } }),
+    );
+    expect(state.transfers[0].wishTitle).toBe('A bicycle');
+    expect(state.transfers[0]).not.toHaveProperty('change');
+  });
+
+  it('does not retry validation failures or revision conflicts with unchanged data', () => {
+    for (const errorCode of [
+      'IMAGE_REVISION_CONFLICT',
+      'IMAGE_TOO_LARGE',
+      'INVALID_IMAGE',
+      'IMAGE_DIMENSIONS_EXCEEDED',
+    ]) {
+      const state = reducer(uploading(), actions.transferFailed({ id: job.id, errorCode }));
+      expect(reducer(state, actions.retryClicked({ id: job.id }))).toEqual(state);
+    }
+  });
 });

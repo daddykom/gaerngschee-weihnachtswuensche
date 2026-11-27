@@ -1,0 +1,63 @@
+<div class="gl-stack" data-testid="image-transfer-notices">
+  @for (transfer of transfers(); track transfer.id) {
+    <div
+      class="gl-stack"
+      [attr.data-transfer-id]="transfer.id"
+      [attr.data-status]="transfer.status"
+    >
+      <div [attr.role]="transfer.status === 'error' ? 'alert' : 'status'" aria-atomic="true">
+        <app-info-box
+          [variant]="
+            transfer.status === 'error'
+              ? 'error'
+              : transfer.status === 'success'
+                ? 'success'
+                : 'info'
+          "
+        >
+          <div class="gl-stack">
+            @if (transfer.status === 'queued' || transfer.status === 'uploading') {
+              <strong>
+                {{
+                  (transfer.change.operation === 'remove'
+                    ? 'app.imageTransfers.removing'
+                    : 'app.imageTransfers.uploading'
+                  ) | translate: { percent: transfer.status === 'uploading' ? transfer.percent : 0 }
+                }}
+              </strong>
+            } @else if (transfer.status === 'success') {
+              <strong>{{
+                (transfer.result.image
+                  ? 'app.imageTransfers.success'
+                  : 'app.imageTransfers.removed'
+                ) | translate
+              }}</strong>
+            } @else {
+              <strong>{{ 'app.imageTransfers.errorTitle' | translate }}</strong>
+              <p>{{ errorMessageKey(transfer.errorCode) | translate }}</p>
+            }
+            @if (transfer.status !== 'success') {
+              <a
+                [routerLink]="['/admin/orders', transfer.orderId, 'edit', 'item', transfer.itemId]"
+              >
+                {{ transfer.wishTitle || ('app.imageTransfers.openWish' | translate) }}
+              </a>
+            }
+          </div>
+        </app-info-box>
+      </div>
+      @if (transfer.status === 'error' || transfer.status === 'success') {
+        <div class="gl-cluster">
+          @if (transfer.status === 'error' && canRetry(transfer.errorCode)) {
+            <button mat-button type="button" (click)="retryClicked.emit(transfer.id)">
+              {{ 'app.imageTransfers.retry' | translate }}
+            </button>
+          }
+          <button mat-button type="button" (click)="dismissClicked.emit(transfer.id)">
+            {{ 'app.imageTransfers.dismiss' | translate }}
+          </button>
+        </div>
+      }
+    </div>
+  }
+</div>

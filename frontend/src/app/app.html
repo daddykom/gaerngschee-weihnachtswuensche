@@ -58,6 +58,12 @@
           >
         </app-info-box>
       </div>
+      } @if (isAdmin() && imageTransfers().length > 0) {
+      <app-image-transfer-notices
+        [transfers]="imageTransfers()"
+        (retryClicked)="retryImageTransfer($event)"
+        (dismissClicked)="dismissImageTransfer($event)"
+      />
       } @if (pendingBuildId()) {
       <div class="gl-stack" role="status" aria-live="polite" data-testid="app-update-notice">
         <app-info-box variant="info" [title]="'app.update.notice.title' | translate">

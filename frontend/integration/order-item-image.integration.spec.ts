@@ -79,6 +79,9 @@ test.describe('Admin wish image API', () => {
     );
     await page.getByRole('button', { name: 'Speichern', exact: true }).click();
     expect((await upload).status()).toBe(200);
+    await expect(
+      page.getByTestId('image-transfer-notices').locator('[data-status=success]'),
+    ).toHaveCount(1);
     await expect
       .poll(async () => (await (await page.request.get(`${imageUrl}/metadata`)).json()).revision)
       .toBe(1);
@@ -101,10 +104,63 @@ test.describe('Admin wish image API', () => {
     );
     await page.getByRole('button', { name: 'Speichern', exact: true }).click();
     expect((await deletion).status()).toBe(200);
+    await expect(
+      page.getByTestId('image-transfer-notices').locator('[data-status=success]'),
+    ).toHaveCount(1);
     expect(await (await page.request.get(`${imageUrl}/metadata`)).json()).toEqual({
       revision: 2,
       image: null,
     });
+  });
+
+  test('retains saved wish data after a transport failure and retries only the image against the real backend', async ({
+    page,
+  }) => {
+    await page.goto('/admin/overview');
+    await page.getByRole('combobox', { name: 'Status', exact: true }).click();
+    await page.getByRole('option', { name: 'Entwurf', exact: true }).click();
+    await page.keyboard.press('Escape');
+    await page.locator(`a[href="/admin/orders/${fixture.orderId}/edit"]`).click();
+    await page
+      .getByRole('textbox', { name: 'Aktueller Order-Text' })
+      .fill('Retained after upload failure');
+    await page
+      .locator(`a[href="/admin/orders/${fixture.orderId}/edit/item/${fixture.itemId}"]`)
+      .click();
+    await page.locator('app-order-item-image-editor input[type=file]').setInputFiles({
+      name: 'wish.png',
+      mimeType: 'image/png',
+      buffer: Buffer.from(fixture.images[0], 'base64'),
+    });
+    await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+    await page.waitForURL(`**/admin/orders/${fixture.orderId}/edit`);
+    let patches = 0;
+    page.on('request', (request) => {
+      if (
+        request.method() === 'PATCH' &&
+        request.url() === `${apiUrl}/admin/orders/${fixture.orderId}`
+      )
+        patches++;
+    });
+    // Simulate only the interrupted transport; the retry reaches PHP and MariaDB.
+    await page.route(imageUrl, (route) => route.abort('failed'), { times: 1 });
+    await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+    const job = page.getByTestId('image-transfer-notices').locator('[data-transfer-id]');
+    await expect(job).toHaveAttribute('data-status', 'error');
+    expect(await (await page.request.get(`${imageUrl}/metadata`)).json()).toEqual({
+      revision: 0,
+      image: null,
+    });
+    const storedOrders = await (
+      await page.request.get(`${apiUrl}/admin/orders`, { params: { 'status[]': 'draft' } })
+    ).json();
+    expect(
+      storedOrders.orders.find((order: { id: string }) => order.id === fixture.orderId).currentText,
+    ).toBe('Retained after upload failure');
+    await job.getByRole('button', { name: 'Bildänderung erneut versuchen' }).click();
+    await expect(job).toHaveAttribute('data-status', 'success');
+    expect((await (await page.request.get(`${imageUrl}/metadata`)).json()).revision).toBe(1);
+    expect(patches).toBe(1);
   });
 
   test('persists binary images separately, replaces safely and removes without exposing image bytes in orders', async ({

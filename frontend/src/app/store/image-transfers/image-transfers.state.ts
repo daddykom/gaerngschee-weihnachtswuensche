@@ -7,6 +7,7 @@ interface ImageTransferIdentity {
   id: string;
   orderId: string;
   itemId: string;
+  wishTitle?: string;
 }
 
 export interface QueuedImageTransfer extends ImageTransferIdentity {

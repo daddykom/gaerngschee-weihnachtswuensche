@@ -1,4 +1,5 @@
 import { createFeature, createReducer, createSelector, on } from '@ngrx/store';
+import { isRetryableImageError } from '../../shared/models/order-item-image-retry';
 import { AuthActions } from '../auth/auth.actions';
 import { SessionActions } from '../auth/session.actions';
 import { ImageTransfersActions } from './image-transfers.actions';
@@ -54,6 +55,7 @@ export const imageTransfersFeature = createFeature({
               orderId: transfer.orderId,
               itemId: transfer.itemId,
               status: 'success',
+              ...(transfer.wishTitle !== undefined ? { wishTitle: transfer.wishTitle } : {}),
               result,
             };
           }
@@ -79,6 +81,7 @@ export const imageTransfersFeature = createFeature({
                 orderId: transfer.orderId,
                 itemId: transfer.itemId,
                 status: 'error',
+                ...(transfer.wishTitle !== undefined ? { wishTitle: transfer.wishTitle } : {}),
                 change: transfer.change,
                 errorCode,
               }
@@ -89,12 +92,15 @@ export const imageTransfersFeature = createFeature({
       ...state,
       transfers: state.transfers.map(
         (transfer): ImageTransfer =>
-          transfer.id === id && transfer.status === 'error'
+          transfer.id === id &&
+          transfer.status === 'error' &&
+          isRetryableImageError(transfer.errorCode)
             ? {
                 id,
                 orderId: transfer.orderId,
                 itemId: transfer.itemId,
                 status: 'queued',
+                ...(transfer.wishTitle !== undefined ? { wishTitle: transfer.wishTitle } : {}),
                 change: transfer.change,
               }
             : transfer,

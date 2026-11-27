@@ -1,8 +1,126 @@
 import { loginAsAdmin, mockOrders, orderFixture } from './support/admin-orders';
 import { expectTranslatedText } from './support/assertions';
-import { expect, test } from './support/test';
+import { expect, test, type Page } from './support/test';
+
+const imageUrl = 'http://localhost:8083/admin/orders/order-1/items/item-1/image';
+const imageResult = {
+  revision: 1,
+  image: { id: 'image-1', mimeType: 'image/png', width: 1, height: 1, byteSize: 68, updatedAt: '' },
+};
+
+async function stageImage(page: Page): Promise<void> {
+  await loginAsAdmin(page);
+  const order = orderFixture();
+  await mockOrders(page, order);
+  await page.route('http://localhost:8083/admin/orders/order-1', (route) =>
+    route.fulfill({ json: { order, mailSent: false } }),
+  );
+  await page.goto('/admin/overview');
+  await page.locator('a[href="/admin/orders/order-1/edit"]').click();
+  await page.getByRole('link', { name: 'Ändern', exact: true }).first().click();
+  await page.locator('app-order-item-image-editor input[type=file]').setInputFiles({
+    name: 'gift.png',
+    mimeType: 'image/png',
+    buffer: Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aD1sAAAAASUVORK5CYII=',
+      'base64',
+    ),
+  });
+  await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+  await page.waitForURL('**/admin/orders/order-1/edit');
+}
 
 test.describe('Admin order edit route', () => {
+  test('keeps global upload progress across navigation, warns before reload and goes directly to success', async ({
+    page,
+  }) => {
+    await stageImage(page);
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => (release = resolve));
+    await page.route(imageUrl, async (route) => {
+      await gate;
+      await route.fulfill({ json: imageResult });
+    });
+    try {
+      await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+      const notice = page.getByTestId('image-transfer-notices');
+      const job = notice.locator('[data-transfer-id]');
+      await expect(job).toHaveAttribute('data-status', 'uploading');
+      await expectTranslatedText(job.locator('strong'), 'app.imageTransfers.uploading');
+      await expect(job.locator('strong')).toContainText(/\d+ %/);
+      const warning = page.waitForEvent('dialog');
+      const reload = page.evaluate(() => window.location.reload()).catch(() => undefined);
+      const dialog = await warning;
+      expect(dialog.type()).toBe('beforeunload');
+      await dialog.dismiss();
+      await reload;
+      await page.getByRole('link', { name: 'Home', exact: true }).click();
+      await expect(page).toHaveURL(/\/$/);
+      await expect(job).toHaveAttribute('data-status', 'uploading');
+      release();
+      await expect(job).toHaveAttribute('data-status', 'success');
+      await expectTranslatedText(job.locator('strong'), 'app.imageTransfers.success');
+      await expect(job.getByRole('link')).toHaveCount(0);
+      expect(
+        await page.evaluate(() => {
+          const event = new Event('beforeunload', { cancelable: true });
+          window.dispatchEvent(event);
+          return event.defaultPrevented;
+        }),
+      ).toBe(false);
+      await job.getByRole('button', { name: 'Meldung schliessen' }).click();
+      await expect(notice).toHaveCount(0);
+    } finally {
+      release();
+    }
+  });
+
+  test('shows image failures globally and retries only the image request, never the wish save', async ({
+    page,
+  }) => {
+    await stageImage(page);
+    let patches = 0;
+    let uploads = 0;
+    page.on('request', (request) => {
+      if (request.method() === 'PATCH' && request.url().endsWith('/admin/orders/order-1'))
+        patches++;
+    });
+    await page.route(imageUrl, async (route) => {
+      uploads++;
+      await route.fulfill(
+        uploads === 1
+          ? { status: 500, json: { error: { code: 'IMAGE_UPLOAD_FAILED' } } }
+          : { json: imageResult },
+      );
+    });
+    await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+    const job = page.getByTestId('image-transfer-notices').locator('[data-transfer-id]');
+    await expect(job).toHaveAttribute('data-status', 'error');
+    await expectTranslatedText(job.getByRole('alert'), 'app.imageTransfers.errors.failed');
+    await job.getByRole('button', { name: 'Bildänderung erneut versuchen' }).click();
+    await expect(job).toHaveAttribute('data-status', 'success');
+    expect(uploads).toBe(2);
+    expect(patches).toBe(1);
+  });
+
+  test('explains revision conflicts without offering an unsafe retry', async ({ page }) => {
+    await stageImage(page);
+    await page.route(imageUrl, (route) =>
+      route.fulfill({
+        status: 409,
+        json: { error: { code: 'IMAGE_REVISION_CONFLICT' } },
+      }),
+    );
+    await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+    const job = page.getByTestId('image-transfer-notices').locator('[data-transfer-id]');
+    await expect(job).toHaveAttribute('data-status', 'error');
+    await expectTranslatedText(job.locator('p'), 'app.imageTransfers.errors.conflict');
+    await expect(job.getByRole('button', { name: 'Bildänderung erneut versuchen' })).toHaveCount(0);
+    await expect(job.getByRole('link')).toHaveAttribute(
+      'href',
+      '/admin/orders/order-1/edit/item/item-1',
+    );
+  });
   test('preserves general feedback, status and all edited wishes across editor navigation', async ({
     page,
   }) => {

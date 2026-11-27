@@ -143,6 +143,7 @@ export const saveAdminOrderEffect = createEffect(
                 id: crypto.randomUUID(),
                 orderId: savedOrder.id,
                 itemId,
+                wishTitle: savedOrder.items.find((item) => item.id === itemId)?.currentTitle,
                 status: 'queued',
                 change,
               }));

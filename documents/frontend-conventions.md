@@ -214,7 +214,27 @@ available. Controls for a wish with a pending transfer are disabled, without
 blocking text editing or navigation. Successful transfers refresh the stored
 image context. Public wish presentation continues to use its decorative image.
 
-The global progress display and unload warning follow in the final UI step.
+`ImageTransferNoticesComponent` presents every transfer from the application-wide
+store in the central information zone in `app.html`, independently of route
+notifications. Pending uploads show only their upload percentage (including
+100 percent until persistence is confirmed), followed directly by success or
+error. Deletions use a removal message. Pending and failed transfers link back
+to the wish editor; success notices contain no link. There is no processing
+stage or automatic dismissal.
+
+Transient errors offer an explicit image-only retry. Validation failures,
+missing wishes/images and revision conflicts require checking the wish instead
+of resending unchanged data. This retry policy is also enforced by the reducer.
+Dismissal releases retained files from failed transfers without reverting
+already saved wish data.
+
+While jobs are queued or uploading, the app shell registers a `beforeunload`
+listener. It requests the browser's native confirmation on reload, tab closure
+or external navigation; internal router navigation stays unblocked. The listener
+is removed when transfers finish, the session clears the queue, or the app is
+destroyed. Browsers control the wording and may suppress the warning without
+prior user interaction or when terminating a mobile browser. Uploads cannot be
+resumed after reloading or closing the tab.
 
 ### RxJS Usage
 
