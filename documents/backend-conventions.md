@@ -155,6 +155,28 @@ The Docker image enables GD JPEG/WebP codecs. PHP allows 5 MiB files and
 the image base path; other endpoints and the JSON parser retain their existing
 64 KiB limits. Non-Docker deployments need equivalent GD and upload settings.
 
+## Public wish images
+
+`GET /public/fulfiller/orders` includes an optional `imagePath` on each wish:
+`null` without an image, otherwise
+`/public/fulfiller/wishes/{itemId}/images/{imageId}`. Only the reference is
+selected for list responses; binary image data is never included in JSON.
+The image ID changes on replacement, so a newly loaded list does not reuse an
+old image URL.
+
+`GET /public/fulfiller/wishes/{itemId}/images/{imageId}` requires no login but
+checks the same fulfiller date window as the public list and requires an
+`approved` wish in a `definitive` order. Existing cards can still retrieve the
+image after reservation. Drafts, rejected or withdrawn wishes, absent images,
+mismatched IDs and replaced image URLs return 404. A closed date window returns
+the same 403 codes as the public list.
+
+The endpoint returns the stored JPEG, PNG or WebP with its actual MIME type,
+`nosniff` and `Cache-Control: no-store`. Publication is checked on every request;
+there is no publicly cacheable copy retained by this endpoint. The endpoint is
+read-only. Upload, replacement, deletion and unrestricted admin preview remain
+protected by the existing admin routes. No new database migration is required.
+
 ## Testumgebung und Fairgate-Fake
 
 ### Fairgate-Zugriff im Real-Modus

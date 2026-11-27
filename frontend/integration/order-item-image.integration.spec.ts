@@ -47,6 +47,110 @@ test.describe('Admin wish image API', () => {
     }
   });
 
+  test('shows published wish images anonymously, hides drafts and revokes replaced or withdrawn URLs', async ({
+    page,
+    browser,
+    request,
+  }) => {
+    const headers = await authHeaders(page);
+    const uploaded = await page.request.post(imageUrl, {
+      headers,
+      multipart: {
+        revision: '0',
+        image: {
+          name: 'wish.png',
+          mimeType: 'image/png',
+          buffer: Buffer.from(fixture.images[0], 'base64'),
+        },
+      },
+    });
+    expect(uploaded.status()).toBe(200);
+    const state = await uploaded.json();
+    const originalPath = `/public/fulfiller/wishes/${fixture.itemId}/images/${state.image.id}`;
+    expect((await request.get(`${apiUrl}${originalPath}`)).status()).toBe(404);
+    const orders = await (
+      await page.request.get(`${apiUrl}/admin/orders`, { params: { 'status[]': 'draft' } })
+    ).json();
+    const order = orders.orders.find(
+      (candidate: { id: string }) => candidate.id === fixture.orderId,
+    );
+    const title = `Public image ${fixture.itemId}`;
+    const published = await page.request.patch(`${apiUrl}/admin/orders/${fixture.orderId}`, {
+      headers,
+      data: {
+        action: 'save',
+        order: { ...order, status: 'definitive', currentText: 'Anonymous image family' },
+        items: order.items.map((item: Record<string, unknown>) => ({
+          ...item,
+          currentTitle: title,
+          publicationStatus: 'approved',
+        })),
+      },
+    });
+    expect(published.status()).toBe(200);
+    const list = await (
+      await request.get(`${apiUrl}/public/fulfiller/orders`, { params: { q: title } })
+    ).json();
+    expect(list.orders[0].items[0].imagePath).toBe(originalPath);
+    expect(JSON.stringify(list)).not.toContain(fixture.images[0]);
+    const publicImage = await request.get(`${apiUrl}${originalPath}`);
+    expect(publicImage.status()).toBe(200);
+    expect(publicImage.headers()['content-type']).toBe('image/png');
+    expect(publicImage.headers()['cache-control']).toContain('no-store');
+    expect(await publicImage.body()).toEqual(await (await page.request.get(imageUrl)).body());
+
+    const publicContext = await browser.newContext({ baseURL: new URL(page.url()).origin });
+    try {
+      const publicPage = await publicContext.newPage();
+      await publicPage.goto('/erfuellen');
+      const wish = publicPage
+        .locator('.wish-entry')
+        .filter({ has: publicPage.getByRole('heading', { name: title, exact: true }) });
+      const image = wish.locator('img');
+      await image.scrollIntoViewIfNeeded();
+      await expect(image).toHaveAttribute('src', `${apiUrl}${originalPath}`);
+      await expect
+        .poll(() => image.evaluate((element: HTMLImageElement) => element.naturalWidth))
+        .toBe(12);
+      expect((await publicContext.request.get(imageUrl)).status()).toBe(401);
+    } finally {
+      await publicContext.close();
+    }
+
+    const replacement = await page.request.post(imageUrl, {
+      headers,
+      multipart: {
+        revision: '1',
+        image: {
+          name: 'wish.jpg',
+          mimeType: 'image/jpeg',
+          buffer: Buffer.from(fixture.images[1], 'base64'),
+        },
+      },
+    });
+    expect(replacement.status()).toBe(200);
+    expect((await request.get(`${apiUrl}${originalPath}`)).status()).toBe(404);
+    const replacementId = (await replacement.json()).image.id;
+    const replacementPath = `/public/fulfiller/wishes/${fixture.itemId}/images/${replacementId}`;
+    expect((await request.get(`${apiUrl}${replacementPath}`)).headers()['content-type']).toBe(
+      'image/jpeg',
+    );
+    const withdrawn = await page.request.patch(`${apiUrl}/admin/orders/${fixture.orderId}`, {
+      headers,
+      data: {
+        action: 'save',
+        order: { ...order, status: 'in_review', currentText: 'Anonymous image family' },
+        items: order.items.map((item: Record<string, unknown>) => ({
+          ...item,
+          currentTitle: title,
+          publicationStatus: 'approved',
+        })),
+      },
+    });
+    expect(withdrawn.status()).toBe(200);
+    expect((await request.get(`${apiUrl}${replacementPath}`)).status()).toBe(404);
+  });
+
   test('stages images in the browser and persists upload and removal only after saving wish data', async ({
     page,
   }) => {

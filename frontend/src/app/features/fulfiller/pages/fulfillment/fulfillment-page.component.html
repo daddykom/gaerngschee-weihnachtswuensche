@@ -1,5 +1,7 @@
 <app-fulfillment-list
   [orders]="orders()"
+  [imageBaseUrl]="imageBaseUrl"
+  (imageFailed)="imageFailed($event)"
   [search]="search()"
   [category]="category()"
   [loadStatus]="loadStatus()"

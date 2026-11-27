@@ -55,6 +55,25 @@ final class OrderItemImageRepository
         return ['data' => $image['image_data'], 'mimeType' => $image['mime_type']];
     }
 
+    /** Only images of published wishes may be read without administrator access. */
+    public function publicImage(string $itemId, string $imageId): array
+    {
+        $statement = $this->pdo->prepare(
+            "SELECT images.image_data, images.mime_type
+             FROM order_item_images images
+             INNER JOIN order_items items ON items.id = images.order_item_id
+             INNER JOIN orders ON orders.id = items.order_id
+             WHERE items.id = :item AND images.id = :image
+               AND items.publication_status = 'approved' AND orders.status = 'definitive'",
+        );
+        $statement->execute(['item' => $itemId, 'image' => $imageId]);
+        $image = $statement->fetch();
+        if ($image === false) {
+            throw new OrderItemImageException('IMAGE_NOT_FOUND', 404);
+        }
+        return ['data' => $image['image_data'], 'mimeType' => $image['mime_type']];
+    }
+
     /** @param array{data: string, mimeType: string, width: int, height: int, byteSize: int} $image */
     public function replace(string $orderId, string $itemId, int $revision, array $image): array
     {

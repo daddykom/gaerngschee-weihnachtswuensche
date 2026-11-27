@@ -2,6 +2,113 @@ import { expectTranslatedText } from './support/assertions';
 import { expect, test } from './support/test';
 
 test.describe('Fulfillment route', () => {
+  for (const width of [390, 1280]) {
+    test(`fits portrait, landscape and square wish images into the same frame with safe fallbacks at ${width}px`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 900 });
+      const dimensions = [
+        [480, 120],
+        [120, 480],
+        [200, 200],
+      ];
+      const images = await page.evaluate(
+        (sizes) =>
+          sizes.map(([width, height]) => {
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            canvas.getContext('2d')!.fillRect(0, 0, width, height);
+            return canvas.toDataURL('image/png').split(',')[1];
+          }),
+        dimensions,
+      );
+      let failedRequests = 0;
+      await page.route('http://localhost:8083/public/fulfiller/wishes/**', (route) => {
+        const index = Number(route.request().url().split('/').pop());
+        if (index === 4) {
+          failedRequests++;
+          return route.fulfill({ status: 404, json: { error: { code: 'IMAGE_NOT_FOUND' } } });
+        }
+        return route.fulfill({
+          contentType: 'image/png',
+          body: Buffer.from(images[index], 'base64'),
+        });
+      });
+      await page.route('http://localhost:8083/public/fulfiller/orders**', (route) =>
+        route.fulfill({
+          json: {
+            orders: [
+              {
+                id: 'order-1',
+                year: 2026,
+                orderNumber: 12,
+                currentText: null,
+                items: [0, 1, 2, 3, 4].map((index) => ({
+                  id: `wish-${index}`,
+                  itemNumber: index + 1,
+                  wishNumber: `12-${index + 1}`,
+                  title: `Image fixture ${index}`,
+                  category: 'gift',
+                  currentDescription: 'An image fixture',
+                  fulfillmentStatus: 'available',
+                  reservedAt: null,
+                  reservationExpiresAt: null,
+                  imagePath:
+                    index === 3 ? null : `/public/fulfiller/wishes/wish-${index}/images/${index}`,
+                })),
+              },
+            ],
+          },
+        }),
+      );
+      await page.route('http://localhost:8083/public/fulfiller/availability-version', (route) =>
+        route.fulfill({ json: { version: 0 } }),
+      );
+      await page.goto('/erfuellen');
+      const pictures = page.locator('.wish-entry__image');
+      await expect(pictures).toHaveCount(5);
+      for (let index = 0; index < 5; index++) {
+        const image = pictures.nth(index);
+        await image.scrollIntoViewIfNeeded();
+        await expect
+          .poll(() => image.evaluate((element: HTMLImageElement) => element.naturalWidth))
+          .toBeGreaterThan(0);
+        if (index >= 3) await expect(image).toHaveAttribute('src', '/images/wish-gift.jpg');
+        else
+          await expect(image).toHaveAttribute(
+            'src',
+            `http://localhost:8083/public/fulfiller/wishes/wish-${index}/images/${index}`,
+          );
+        const geometry = await image.evaluate((element: HTMLImageElement) => {
+          const image = element.getBoundingClientRect();
+          const card = element.closest('.wish-entry')!.getBoundingClientRect();
+          return {
+            ratio: image.width / image.height,
+            fit: getComputedStyle(element).objectFit,
+            position: getComputedStyle(element).objectPosition,
+            naturalRatio: element.naturalWidth / element.naturalHeight,
+            radius: parseFloat(getComputedStyle(element).borderRadius),
+            inset: parseFloat(getComputedStyle(document.documentElement).fontSize),
+            top: image.top - card.top,
+            left: image.left - card.left,
+            right: card.right - image.right,
+          };
+        });
+        expect(geometry.ratio).toBeCloseTo(16 / 9, 1);
+        expect(geometry.fit).toBe('cover');
+        expect(geometry.position).toBe('50% 50%');
+        expect(geometry.radius).toBeCloseTo(geometry.inset / 2);
+        for (const inset of [geometry.top, geometry.left, geometry.right]) {
+          expect(inset).toBeCloseTo(geometry.inset, 1);
+        }
+        if (index < 3)
+          expect(geometry.naturalRatio).toBeCloseTo(dimensions[index][0] / dimensions[index][1]);
+      }
+      expect(failedRequests).toBe(1);
+    });
+  }
+
   test('offers an update dialog when a new build is detected', async ({ page }) => {
     const baseline = await (await page.request.get('/build-info.json')).json();
     let changed = false;
@@ -152,9 +259,10 @@ test.describe('Fulfillment route', () => {
       const wishBounds = await wishes.first().boundingBox();
       expect(imageBounds).not.toBeNull();
       expect(wishBounds).not.toBeNull();
-      expect(Math.abs(imageBounds!.x - wishBounds!.x)).toBeLessThan(1);
-      expect(Math.abs(imageBounds!.y - wishBounds!.y)).toBeLessThan(1);
-      expect(Math.abs(imageBounds!.width - wishBounds!.width)).toBeLessThan(1);
+      expect(imageBounds!.x - wishBounds!.x).toBeCloseTo(parseFloat(padding), 1);
+      expect(imageBounds!.y - wishBounds!.y).toBeCloseTo(parseFloat(padding), 1);
+      expect(wishBounds!.width - imageBounds!.width).toBeCloseTo(2 * parseFloat(padding), 1);
+      await expect(image).toHaveCSS('border-radius', spacing);
       const bounds = await wishes.evaluateAll((elements) =>
         elements.map((element) => {
           const { x, y, width, height } = element.getBoundingClientRect();

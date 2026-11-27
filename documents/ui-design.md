@@ -628,8 +628,18 @@ die benötigte Darstellung bereits bereitstellt.
 Die drei Karten auf der Startseite sowie Wunschzettel und einzelne Wünsche
 unter `/erfuellen` verwenden statt eines Rahmens den gemeinsamen Schatten
 `--gl-card-shadow` aus `frontend/src/styles.scss`.
-Ihre Rundung bleibt bei `1rem`. Bilder innerhalb der Wunschkarten werden
-an diesen Rundungen abgeschnitten; der äussere Kartenschatten bleibt sichtbar.
+Ihre Rundung bleibt bei `1rem`; der äussere Kartenschatten bleibt sichtbar.
+Bilder innerhalb der Wunschkarten besitzen oben und seitlich einen Innenabstand
+von `--gl-space-md` (`1rem`) und einen kleineren eigenen Radius von `0.5rem`.
+Der Abstand zum darunterliegenden Text entsteht durch das bestehende Padding
+des Karteninhalts. Dies gilt auch für das dekorative Standardbild.
+
+Der Bildbereich jeder Wunschkarte unter `/erfuellen` behält das Seitenverhältnis
+16:9. Ein vorhandenes Wunschbild füllt ihn mit zentriertem `object-fit: cover`,
+ohne Verzerrung und bei Bedarf mit beschnittenen Rändern. Hoch-, Quer- und
+quadratische Formate verändern die Bildfläche nicht. Ohne Wunschbild oder bei
+einem fehlgeschlagenen Abruf wird `/images/wish-gift.jpg` im selben Bereich
+angezeigt.
 
 `mat-card` ist kein allgemeiner Page-Container.
 

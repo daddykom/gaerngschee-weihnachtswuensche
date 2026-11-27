@@ -44,10 +44,18 @@
   overflow: hidden;
 }
 
+.wish-entry__media {
+  padding: var(--gl-space-md) var(--gl-space-md) 0;
+}
+
 .wish-entry__image {
   display: block;
   width: 100%;
+  aspect-ratio: 16 / 9;
   height: auto;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 0.5rem;
 }
 
 .wish-entry__body {

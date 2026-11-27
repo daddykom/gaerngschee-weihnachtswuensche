@@ -177,8 +177,11 @@ are atomic. Other wish fields are not changed by image requests.
 
 Admin-only image endpoints are documented in
 [backend-conventions.md](./backend-conventions.md#admin-wish-images).
-Neither public nor client wish-list responses contain image bytes or image
-metadata. The frontend upload workflow is implemented in subsequent steps.
+Neither public nor client wish-list responses contain image bytes. Client
+responses remain unchanged. Public fulfiller wishes include only an optional
+`imagePath`, derived from the current image ID without loading the BLOB.
+Public binary retrieval is limited to published wishes; admin-only writes
+and the existing storage schema remain unchanged.
 
 The migration tests run against SQLite by default. To additionally verify
 the migrated MariaDB integration schema, run from the repository root:

@@ -58,15 +58,20 @@
               <ul class="list-as-form gl-columns">
                 @for (wish of order.items; track wish.id) {
                   <li class="wish-entry">
-                    <img
-                      class="wish-entry__image"
-                      src="/images/wish-gift.jpg"
-                      alt=""
-                      width="1200"
-                      height="675"
-                      loading="lazy"
-                      decoding="async"
-                    />
+                    <div class="wish-entry__media">
+                      <img
+                        class="wish-entry__image"
+                        [src]="
+                          wish.imagePath ? imageBaseUrl() + wish.imagePath : '/images/wish-gift.jpg'
+                        "
+                        (error)="onImageError(wish)"
+                        [alt]="wish.imagePath ? wish.title || wish.wishNumber : ''"
+                        width="1200"
+                        height="675"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </div>
                     <div class="wish-entry__body gl-stack">
                       <div class="wish-entry__content gl-stack">
                         <h3>{{ wish.title || wish.wishNumber }}</h3>

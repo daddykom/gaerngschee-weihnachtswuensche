@@ -212,7 +212,28 @@ success or failure and restores the progress cursor. Image-load failures appear
 in the central notification zone; text editing and an explicit reload remain
 available. Controls for a wish with a pending transfer are disabled, without
 blocking text editing or navigation. Successful transfers refresh the stored
-image context. Public wish presentation continues to use its decorative image.
+image context.
+
+### Public wish images
+
+The `/erfuellen` list displays a wish's optional public `imagePath`, prefixed
+with the API base URL supplied by its container. With no image it retains
+`/images/wish-gift.jpg`. The existing lazy-loaded `<img>` occupies a 16:9 frame
+with centered `object-fit: cover`: portrait, landscape and square images fill
+the same area without distortion, with cropping when necessary. Uploaded
+images use the wish title/number as alternative text; the decorative fallback
+has empty alternative text.
+
+The view emits an image-failure event. Its container dispatches the matching
+NgRx event, and the reducer clears only that wish's matching image reference,
+revealing the fallback. Errors for an older image reference cannot clear a
+newer image. Failure of the decorative fallback does not create a retry loop.
+Image failure does not block the wish list or change reservation behavior.
+The list response contains references only; binary image loading remains a
+separate public request checked against publication and the fulfiller date
+window.
+
+### Background transfer notices
 
 `ImageTransferNoticesComponent` presents every transfer from the application-wide
 store in the central information zone in `app.html`, independently of route
