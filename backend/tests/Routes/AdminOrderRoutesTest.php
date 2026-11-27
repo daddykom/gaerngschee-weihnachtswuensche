@@ -19,6 +19,12 @@ use Tests\Support\RecordingEmailSender;
 
 final class AdminOrderRoutesTest extends TestCase
 {
+    public function testImmediateFulfillerRemovalRouteDoesNotExist(): void
+    {
+        $this->expectException(\Slim\Exception\HttpNotFoundException::class);
+        $this->createApp()->handle($this->request('POST', '/admin/orders/order-1/items/item-1/release-fulfiller', []));
+    }
+
     private \PDO $pdo;
     private UserRepository $users;
 

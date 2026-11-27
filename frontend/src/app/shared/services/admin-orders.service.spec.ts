@@ -94,4 +94,27 @@ describe('AdminOrdersService', () => {
     });
     request.flush({ order });
   });
+
+  it('sends the removal intent with the wish only on the order PATCH', () => {
+    const fulfillerRemoval = {
+      fulfillerEmail: 'giver@example.com',
+      fulfillmentStatus: 'reserved',
+      reservedAt: '2026-11-01',
+      reservationExpiresAt: null,
+    };
+    service
+      .update({
+        id: 'order-1',
+        items: [{ id: 'item-1', currentTitle: 'Saved title', fulfillerRemoval }],
+      } as never)
+      .subscribe();
+    const request = httpTesting.expectOne('http://localhost:8083/admin/orders/order-1');
+    expect(request.request.method).toBe('PATCH');
+    expect(request.request.body.items[0]).toMatchObject({
+      id: 'item-1',
+      currentTitle: 'Saved title',
+      fulfillerRemoval,
+    });
+    request.flush({ order: { id: 'order-1' }, mailSent: false });
+  });
 });

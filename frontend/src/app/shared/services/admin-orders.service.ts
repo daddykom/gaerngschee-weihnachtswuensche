@@ -56,6 +56,7 @@ export class AdminOrdersService {
           giftLink: item.giftLink,
           publicationStatus: item.publicationStatus,
           adminNotes: item.adminNotes,
+          ...(item.fulfillerRemoval ? { fulfillerRemoval: item.fulfillerRemoval } : {}),
         })),
         action,
       },

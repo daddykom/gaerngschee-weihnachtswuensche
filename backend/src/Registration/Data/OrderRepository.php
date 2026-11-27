@@ -332,7 +332,7 @@ final class OrderRepository
     }
 
     /** @param array<string, mixed> $order @param list<array<string, mixed>> $items */
-    public function saveAdministration(array $order, array $items): array
+    public function saveAdministration(array $order, array $items, ?callable $renderFulfillerRelease = null): array
     {
         $this->pdo->beginTransaction();
         try {
@@ -380,6 +380,17 @@ final class OrderRepository
                     'status' => $item['publicationStatus'],
                     'admin_notes' => $item['adminNotes'] ?? null,
                 ]);
+                if (isset($item['fulfillerRemoval'])) {
+                    if ($renderFulfillerRelease === null) {
+                        throw new \LogicException('Fulfiller-removal notification renderer is required.');
+                    }
+                    (new FulfillerReleaseRepository($this->pdo))->release(
+                        (string) $order['id'],
+                        (string) $item['id'],
+                        $item['fulfillerRemoval'],
+                        $renderFulfillerRelease,
+                    );
+                }
             }
             if ($order['status'] === 'definitive') {
                 $this->assignDefinitiveNumbers((string) $order['id']);

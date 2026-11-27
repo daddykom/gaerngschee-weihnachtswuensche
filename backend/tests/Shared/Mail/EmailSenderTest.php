@@ -49,6 +49,26 @@ final class EmailSenderTest extends TestCase
         }
     }
 
+    public function testAdminCanSendTheFulfillerReleaseTemplate(): void
+    {
+        $mailer = $this->createMock(MailerInterface::class);
+        $mailer->expects(self::once())->method('send')->with(self::callback(static function (Email $email): bool {
+            self::assertSame('Deine Wunschreservierung wurde aufgehoben', $email->getSubject());
+            foreach ([$email->getHtmlBody(), $email->getTextBody()] as $body) {
+                self::assertStringContainsString('12-1', $body);
+                self::assertStringContainsString('Edited wish title', $body);
+                self::assertStringContainsString('Second line', $body);
+                self::assertStringNotContainsString('app.mail.', $body);
+            }
+            return true;
+        }));
+        (new EmailSender($mailer, 'noreply@example.com', 'Gärngschee'))->sendTestEmail(
+            'giver@example.com',
+            'fulfiller-released',
+            ['wishNumber' => '12-1', 'wishTitle' => 'Edited wish title', 'wishDescription' => "First line\nSecond line"],
+        );
+    }
+
     public function testReviewEmailContainsOnlyRelevantFeedbackAndEditedWishTitlesInBothFormats(): void
     {
         $sender = new EmailSender($this->createMock(MailerInterface::class), 'noreply@example.com', 'Gärngschee');

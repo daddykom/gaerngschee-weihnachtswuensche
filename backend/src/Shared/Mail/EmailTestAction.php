@@ -27,6 +27,11 @@ final class EmailTestAction
             ['key' => 'wishDescription', 'type' => 'textarea', 'required' => true],
             ['key' => 'wishLink', 'type' => 'url', 'required' => false],
         ]],
+        'fulfiller-released' => ['fields' => [
+            ['key' => 'wishNumber', 'type' => 'text', 'required' => true],
+            ['key' => 'wishTitle', 'type' => 'text', 'required' => true],
+            ['key' => 'wishDescription', 'type' => 'textarea', 'required' => true],
+        ]],
         'fulfiller-reservation-confirmation' => ['fields' => [
             ['key' => 'wishNumber', 'type' => 'text', 'required' => true],
             ['key' => 'wishTitle', 'type' => 'text', 'required' => true],

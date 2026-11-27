@@ -42,6 +42,18 @@
             {{ 'app.admin.overview.receivedAt' | translate }}: {{ currentItem.receivedAt ?? '—' }}
           }
         </p>
+        @if (canRemoveFulfiller()) {
+          <div class="gl-cluster">
+            <button
+              class="gl-button--secondary"
+              mat-stroked-button
+              type="button"
+              (click)="removeFulfiller()"
+            >
+              {{ 'app.admin.fulfillerRemoval.button' | translate }}
+            </button>
+          </div>
+        }
         <div class="gl-grid gl-grid--2">
           <mat-form-field appearance="outline" subscriptSizing="dynamic">
             <mat-label>{{ 'app.order.items.person' | translate }}</mat-label>

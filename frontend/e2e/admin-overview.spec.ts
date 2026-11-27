@@ -204,7 +204,10 @@ test.describe('Admin order overview route', () => {
             {
               ...orderFixture(),
               requesterEmail: 'Anna@Example.ch',
-              items: [{ id: 'item-1' }, { id: 'item-2' }],
+              items: [
+                { id: 'item-1', fulfillerEmail: null },
+                { id: 'item-2', fulfillerEmail: 'Giver@Donation.ch' },
+              ],
             },
             { ...orderFixture(), id: 'order-2', requesterEmail: 'other@example.org' },
           ],
@@ -241,6 +244,13 @@ test.describe('Admin order overview route', () => {
     await expect(page).toHaveURL(/\/admin\/overview$/);
     await expect(search).toHaveValue('NA@EXAMPLE');
     await expect(page.getByRole('table').getByRole('row')).toHaveCount(2);
+    const requestsAfterBack = listRequests;
+    await search.fill(' IVER@DONATION ');
+    await expect(page.getByRole('table').getByRole('row')).toHaveCount(2);
+    await expect(page.getByRole('table')).toContainText('Anna@Example.ch');
+    await expect(page.getByRole('table')).not.toContainText('other@example.org');
+    await expect(summary.locator('span').last()).toContainText('2');
+    expect(listRequests).toBe(requestsAfterBack);
     await search.fill('missing');
     await expect(page.getByRole('table').getByRole('row')).toHaveCount(1);
     await expect(summary.locator('span').first()).toContainText('0');

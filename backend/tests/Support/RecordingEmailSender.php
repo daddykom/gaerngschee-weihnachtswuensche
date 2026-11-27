@@ -32,6 +32,11 @@ final class RecordingEmailSender implements EmailSenderInterface
         return ['subject' => 'reminder', 'html' => json_encode($wishes, JSON_THROW_ON_ERROR), 'text' => 'reminder'];
     }
 
+    public function renderFulfillerReleased(array $wish): array
+    {
+        return ['subject' => 'released', 'html' => json_encode($wish, JSON_THROW_ON_ERROR), 'text' => 'released'];
+    }
+
     public function sendAnmeldung(string $recipient, AnmeldungMailVariant $variant, string $locale = 'de', ?string $loginUrl = null, ?array $wish = null, ?int $campaignYear = null): void
     {
         $this->recipients[] = $recipient;

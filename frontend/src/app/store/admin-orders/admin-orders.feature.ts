@@ -93,7 +93,8 @@ export const adminOrdersFeature = createFeature({
       const orderNumber = searchForm.orderNumber.trim();
       return orders.filter(
         (order) =>
-          order.requesterEmail.toLowerCase().includes(search) &&
+          (order.requesterEmail.toLowerCase().includes(search) ||
+            order.items.some((item) => item.fulfillerEmail?.toLowerCase().includes(search))) &&
           (orderNumber === '' ||
             (/^\d+$/.test(orderNumber) && order.orderNumber === Number(orderNumber))),
       );

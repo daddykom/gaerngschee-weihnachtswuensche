@@ -8,12 +8,14 @@ import {
 } from '@angular/core';
 import { form, FormField, required, validate } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
+import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog';
 import { ControlErrorComponent } from '../../../../shared/components/control-error/control-error';
 import {
   AdminOrder,
@@ -68,6 +70,21 @@ interface ItemFormValue {
 export class AdminOrderItemEditComponent {
   private readonly store = inject(Store);
   private readonly route = inject(ActivatedRoute);
+  private readonly dialog = inject(MatDialog);
+  readonly removalPlanned = computed(
+    () =>
+      !!this.storeForm()?.items.find((candidate) => candidate.id === this.item()?.id)
+        ?.fulfillerRemoval,
+  );
+  readonly canRemoveFulfiller = computed(() => {
+    const item = this.item();
+    return (
+      !!item?.fulfillerEmail &&
+      !this.removalPlanned() &&
+      !item.receivedAt &&
+      ['pending_confirmation', 'reserved'].includes(item.fulfillmentStatus)
+    );
+  });
   readonly imageRequest = this.store.selectSignal(selectAdminItemImage);
   private readonly transfers = this.store.selectSignal(selectImageTransfers);
   readonly imageBusy = computed(() =>
@@ -126,6 +143,59 @@ export class AdminOrderItemEditComponent {
     this.store.dispatch(NavigationActions.navigate({ target: 'back' }));
   }
 
+  removeFulfiller(): void {
+    const item = this.item();
+    const order = this.order();
+    if (!item || !order || !this.canRemoveFulfiller()) return;
+    this.dialog
+      .open(ConfirmDialogComponent, {
+        data: {
+          title: 'app.admin.fulfillerRemoval.title',
+          message: 'app.admin.fulfillerRemoval.confirmation',
+          messageParams: { email: item.fulfillerEmail ?? '' },
+          confirmLabel: 'app.admin.fulfillerRemoval.yes',
+          cancelLabel: 'app.admin.fulfillerRemoval.no',
+        },
+      })
+      .afterClosed()
+      .subscribe((confirmed) => {
+        const form = this.storeForm();
+        if (confirmed !== true || !form || this.activeOrderId() !== order.id) return;
+        this.syncItem();
+        this.store.dispatch(
+          AdminOrdersActions.formChanged({
+            orderId: order.id,
+            changes: {
+              items: this.storeForm()!.items.map((current) =>
+                current.id !== item.id
+                  ? current
+                  : {
+                      ...current,
+                      fulfillerRemoval: {
+                        fulfillerEmail: item.fulfillerEmail ?? null,
+                        fulfillmentStatus: item.fulfillmentStatus,
+                        reservedAt: item.reservedAt ?? null,
+                        reservationExpiresAt: item.reservationExpiresAt ?? null,
+                      },
+                    },
+              ),
+            },
+          }),
+        );
+        this.store.dispatch(
+          NotificationActions.show({
+            variant: 'info',
+            titleKey: 'app.admin.fulfillerRemoval.title',
+            messageKey: 'app.admin.fulfillerRemoval.pending',
+            preserveOnRoutes: [
+              `/admin/orders/${order.id}/edit`,
+              `/admin/orders/${order.id}/edit/item/${item.id}`,
+            ],
+          }),
+        );
+      });
+  }
+
   constructor() {
     effect(() => {
       const orderId = this.route.snapshot.paramMap.get('orderId');
@@ -171,6 +241,9 @@ export class AdminOrderItemEditComponent {
             AdminOrdersActions.formLoaded({ orderId: currentOrder.id, form: orderForm }),
           );
         }
+      } else if (currentOrder !== undefined && currentItem !== undefined) {
+        this.order.set(currentOrder);
+        this.item.set(currentItem);
       }
     });
 
