@@ -8,7 +8,7 @@ import { issueRegistrationToken } from './support/registration-token';
 
 const api = 'http://localhost:8082';
 
-test('releases a confirmed giver immediately, preserves the draft and sends the queued notification through the batch', async ({
+test('keeps the assignment until the whole order is saved and then queues the notification atomically', async ({
   page,
   request,
 }) => {
@@ -104,27 +104,77 @@ test('releases a confirmed giver immediately, preserves the draft and sends the 
     await page.keyboard.press('Escape');
     await page.locator(`a[href="/admin/orders/${draft.id}/edit"]`).click();
     await page.locator(`a[href="/admin/orders/${draft.id}/edit/item/${itemId}"]`).click();
+    const savedTitle = `${title} updated`;
     await page
       .getByRole('textbox', { name: 'Aktueller Wunschtitel', exact: true })
-      .fill('Unsaved release edit');
-    const url = `${api}/admin/orders/${draft.id}/items/${itemId}/release-fulfiller`;
-    expect((await page.request.post(url, { data: {} })).status()).toBe(403);
+      .fill(savedTitle);
+    const url = `${api}/admin/orders/${draft.id}`;
+    expect((await page.request.patch(url, { data: {} })).status()).toBe(403);
     await page.getByRole('button', { name: 'Erfüller entfernen', exact: true }).click();
     await page.getByRole('dialog').getByRole('button', { name: 'Nein', exact: true }).click();
     await page.getByRole('button', { name: 'Erfüller entfernen', exact: true }).click();
-    const releaseResponse = page.waitForResponse(url);
     await page.getByRole('dialog').getByRole('button', { name: 'Ja', exact: true }).click();
-    expect((await releaseResponse).status()).toBe(200);
     await expect(page.getByRole('button', { name: 'Erfüller entfernen', exact: true })).toHaveCount(
       0,
     );
     await expect(
       page.getByRole('textbox', { name: 'Aktueller Wunschtitel', exact: true }),
-    ).toHaveValue('Unsaved release edit');
+    ).toHaveValue(savedTitle);
     await expectTranslatedText(
       page.locator('.app-notification'),
-      'app.admin.fulfillerRemoval.success',
+      'app.admin.fulfillerRemoval.pending',
     );
+    const beforeSave = (
+      await (
+        await page.request.get(`${api}/admin/orders`, { params: { 'status[]': 'definitive' } })
+      ).json()
+    ).orders;
+    expect(
+      beforeSave.find((order: { id: string }) => order.id === draft.id).items[0],
+    ).toMatchObject({
+      currentTitle: title,
+      fulfillerEmail: recipient,
+      fulfillmentStatus: 'reserved',
+    });
+    expect(
+      (await (await request.get(`${api}/public/fulfiller/orders`, { params: { q: title } })).json())
+        .orders,
+    ).toHaveLength(0);
+    execFileSync(
+      'docker',
+      [
+        'compose',
+        '-f',
+        resolve(process.cwd(), '..', 'docker-compose.integration.yml'),
+        'exec',
+        '-T',
+        'integration-backend',
+        'php',
+        '/var/www/html/bin/process-orders.php',
+      ],
+      { encoding: 'utf8' },
+    );
+    const beforeMessages = (
+      await (await request.get('http://localhost:8025/api/v1/messages')).json()
+    ).messages;
+    expect(
+      beforeMessages.filter(
+        (message: { Subject: string; To: Array<{ Address: string }> }) =>
+          message.To.some((to) => to.Address === recipient) &&
+          message.Subject === 'Deine Wunschreservierung wurde aufgehoben',
+      ),
+    ).toHaveLength(0);
+    await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+    await page.waitForURL(`**/admin/orders/${draft.id}/edit`);
+    await expectTranslatedText(
+      page.locator('.app-notification'),
+      'app.admin.fulfillerRemoval.pending',
+    );
+    const releaseResponse = page.waitForResponse(
+      (response) => response.url() === url && response.request().method() === 'PATCH',
+    );
+    await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+    expect((await releaseResponse).status()).toBe(200);
     const publicOrders = (
       await (await request.get(`${api}/public/fulfiller/orders`, { params: { q: title } })).json()
     ).orders;
@@ -132,7 +182,7 @@ test('releases a confirmed giver immediately, preserves the draft and sends the 
     expect(publicOrders[0].items[0]).toMatchObject({
       id: itemId,
       fulfillmentStatus: 'available',
-      title,
+      title: savedTitle,
     });
     const orders = (
       await (
@@ -141,24 +191,10 @@ test('releases a confirmed giver immediately, preserves the draft and sends the 
     ).orders;
     const persisted = orders.find((order: { id: string }) => order.id === draft.id).items[0];
     expect(persisted).toMatchObject({
-      currentTitle: title,
+      currentTitle: savedTitle,
       fulfillerEmail: null,
       reservedAt: null,
     });
-    expect(
-      (
-        await page.request.post(url, {
-          headers,
-          data: {
-            fulfillerEmail: recipient,
-            fulfillmentStatus: 'reserved',
-            reservedAt: null,
-            reservationExpiresAt: null,
-          },
-        })
-      ).status(),
-    ).toBe(409);
-
     execFileSync(
       'docker',
       [
@@ -185,9 +221,8 @@ test('releases a confirmed giver immediately, preserves the draft and sends the 
       await request.get(`http://localhost:8025/api/v1/message/${notices[0].ID}`)
     ).json();
     for (const body of [notice.HTML, notice.Text]) {
-      expect(body).toContain(title);
+      expect(body).toContain(savedTitle);
       expect(body).toContain('Published release description');
-      expect(body).not.toContain('Unsaved release edit');
       expect(body).not.toContain('app.mail.');
     }
     // Two administrators cannot remove a newly assigned giver twice.
@@ -205,14 +240,18 @@ test('releases a confirmed giver immediately, preserves the draft and sends the 
         await page.request.get(`${api}/admin/orders`, { params: { 'status[]': 'definitive' } })
       ).json()
     ).orders;
-    const pending = latest.find((order: { id: string }) => order.id === draft.id).items[0];
-    const data = {
+    const pendingOrder = latest.find((order: { id: string }) => order.id === draft.id);
+    const pending = pendingOrder.items[0];
+    const fulfillerRemoval = {
       fulfillerEmail: pending.fulfillerEmail,
       fulfillmentStatus: pending.fulfillmentStatus,
       reservedAt: pending.reservedAt,
       reservationExpiresAt: pending.reservationExpiresAt,
     };
-    const removals = await Promise.all([0, 1].map(() => page.request.post(url, { headers, data })));
+    const data = { order: pendingOrder, items: [{ ...pending, fulfillerRemoval }], action: 'save' };
+    const removals = await Promise.all(
+      [0, 1].map(() => page.request.patch(url, { headers, data })),
+    );
     expect(removals.map((response) => response.status()).sort()).toEqual([200, 409]);
     execFileSync(
       'docker',

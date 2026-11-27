@@ -182,8 +182,10 @@ eine administrativ aufgehobene Zuordnung, mit Wunschnummer, bearbeitetem Titel
 und mehrzeiliger Beschreibung sowie dem Hinweis, kein Geschenk mehr zu liefern.
 Parameter: `WISH.wishNumber`, `WISH.title`, `WISH.currentDescription`, `LOGO_CID`
 (Palette über `EMAIL_THEME`). Admin-Testparameter: `wishNumber`, `wishTitle`,
-`wishDescription`. Der Versand wird atomar mit der Freigabe in `email_queue`
-vorgemerkt und über den bestehenden Batch ausgeführt.
+`wishDescription`. Die Erfüller-Entfernung wird zunächst nur im Formular-Store
+vorgemerkt. Erst beim Speichern des Wunschzettels werden Änderungen, Entfernung
+und Versandvormerkung in `email_queue` atomar gespeichert. Der bestehende Batch
+versendet die Nachricht mit den beim Speichern übernommenen Wunschtexten.
 
 | Template | Zweck | Parameter |
 |---|---|---|

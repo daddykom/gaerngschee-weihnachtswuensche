@@ -10,7 +10,6 @@ use App\Fairgate\Actions\FairgateLookupAction;
 use App\Registration\Data\OrderRepository;
 use App\Registration\Actions\AdminOrderListAction;
 use App\Registration\Actions\AdminOrderUpdateAction;
-use App\Registration\Actions\AdminFulfillerReleaseAction;
 use App\Registration\Actions\AdminStatisticsAction;
 use App\Configuration\Data\FrontendConfigRepository;
 use App\Middleware\AuthMiddleware;
@@ -57,8 +56,6 @@ final class AdminRoutes
             $orderUpdate = $group->patch('/orders/{orderId}', $adminOrderUpdateAction ?? new AdminOrderUpdateAction($orderRepository, $emailSender));
             $orderUpdate->add(new GroupMiddleware(['admin'], $userRepository))->add(new AuthMiddleware());
 
-            $fulfillerRelease = $group->post('/orders/{orderId}/items/{itemId}/release-fulfiller', new AdminFulfillerReleaseAction());
-            $fulfillerRelease->add(new GroupMiddleware(['admin'], $userRepository))->add(new AuthMiddleware());
 
             $list = $group->get('/users', new ListUsersAction($userRepository));
             $list->add(new GroupMiddleware(['admin'], $userRepository))->add(new AuthMiddleware());

@@ -117,6 +117,11 @@ final class StartRegistrationActionTest extends TestCase
     {
         return new AnmeldungService(
             new class () implements EmailSenderInterface {
+                public function renderFulfillerReleased(array $wish): array
+                {
+                    throw new \LogicException('Unexpected fulfiller-removal rendering.');
+                }
+
                 public function renderFulfillerReminder(array $wishes, array $handover, string $locale = 'de'): array
                 {
                     return [];

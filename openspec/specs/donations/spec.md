@@ -78,13 +78,18 @@ E-Mail bestätigt und bleibt bis zur Bestätigung zehn Minuten vorläufig.
 - Bei eingegangenen oder abgeschlossenen Geschenken wird der Button nicht angezeigt;
   das Backend verbietet die Freigabe ebenfalls.
 - „Nein“, Escape und das Schliessen des Bestätigungsdialogs verändern nichts.
-- „Ja“ entfernt die Zuordnung sofort und unabhängig vom Speichern der Bestellung.
-  Nicht gespeicherte Textänderungen bleiben im Formular erhalten.
+- „Ja“ merkt die Entfernung ausschliesslich im Formular-Store vor, ohne API-Aufruf.
+  Ein globaler Infohinweis erklärt, dass Entfernung und E-Mail-Benachrichtigung
+  erst beim Speichern des gesamten Wunschzettels wirksam werden.
+- Navigation zwischen Wunsch und Wunschzettel erhält die Vormerkung.
+  Verwerfen ohne Speichern verändert weder Zuordnung noch öffentliche Sichtbarkeit.
 - Der Server prüft die erwartete Zuordnung unter einer Sperre gegen parallele
   Änderungen. Zuordnung, Reservierungsdaten und offene Bestätigungslinks werden
   aufgehoben, während Wunschtexte und Veröffentlichungsstatus unverändert bleiben.
-- Die Benachrichtigung an die bisherige Erfüller-Adresse wird in derselben
-  Transaktion in der E-Mail-Warteschlange gespeichert und vom Batch versendet.
+- Beim Speichern werden Wunschzetteländerungen, Erfüller-Entfernung und die
+  Benachrichtigung an die bisherige Adresse in einer gemeinsamen Transaktion
+  gespeichert. Ein Konflikt oder Fehler verwirft alle Änderungen.
+  Erst danach kann der Batch die Benachrichtigung versenden.
 - Der Wunsch wird wieder verfügbar. Die öffentlichen Sichtbarkeitsbedingungen
   (definitive Bestellung, freigegebener Wunsch und Aktionszeitraum) bleiben gültig.
 - Bereits geöffnete öffentliche Listen laden neu verfügbare, zuvor fehlende
@@ -113,7 +118,7 @@ interface ReservedWish {
 | GET | `/public/fulfiller/wish-statuses` | Nur Wunschstatus aktualisieren |
 | POST | `/public/fulfiller-reservation-start` | Vorläufige Reservierung anfordern |
 | POST | `/auth/fulfiller-reservation-confirm` | Reservierung über E-Mail-Token bestätigen |
-| POST | `/admin/orders/{orderId}/items/{itemId}/release-fulfiller` | Zuordnung entfernen und Benachrichtigung vormerken (nur Admin) |
+| PATCH | `/admin/orders/{orderId}` | Wunschzettel inklusive vorgemerkter Erfüller-Entfernungen speichern (nur Admin) |
 
 ## Fachliche Regeln
 

@@ -26,12 +26,12 @@ import {
 import { OrderItemCategory, OrderItemPersonType } from '../../../../shared/models/order.model';
 import { AdminOrdersActions } from '../../../../store/admin-orders/admin-orders.actions';
 import {
-  selectAdminFulfillerRelease,
   selectAdminOrders,
   selectAdminOrdersActiveOrderId,
   selectAdminOrdersForm,
 } from '../../../../store/admin-orders/admin-orders.feature';
 import { NavigationActions } from '../../../../store/navigation/navigation.actions';
+import { NotificationActions } from '../../../../store/notification/notification.actions';
 
 interface ItemFormValue {
   category: OrderItemCategory;
@@ -64,12 +64,16 @@ export class AdminOrderItemEditComponent {
   private readonly store = inject(Store);
   private readonly route = inject(ActivatedRoute);
   private readonly dialog = inject(MatDialog);
-  readonly fulfillerRelease = this.store.selectSignal(selectAdminFulfillerRelease);
-  readonly removingFulfiller = computed(() => this.fulfillerRelease()?.status === 'loading');
+  readonly removalPlanned = computed(
+    () =>
+      !!this.storeForm()?.items.find((candidate) => candidate.id === this.item()?.id)
+        ?.fulfillerRemoval,
+  );
   readonly canRemoveFulfiller = computed(() => {
     const item = this.item();
     return (
       !!item?.fulfillerEmail &&
+      !this.removalPlanned() &&
       !item.receivedAt &&
       ['pending_confirmation', 'reserved'].includes(item.fulfillmentStatus)
     );
@@ -120,7 +124,7 @@ export class AdminOrderItemEditComponent {
   removeFulfiller(): void {
     const item = this.item();
     const order = this.order();
-    if (!item || !order || !this.canRemoveFulfiller() || this.removingFulfiller()) return;
+    if (!item || !order || !this.canRemoveFulfiller()) return;
     this.dialog
       .open(ConfirmDialogComponent, {
         data: {
@@ -133,19 +137,40 @@ export class AdminOrderItemEditComponent {
       })
       .afterClosed()
       .subscribe((confirmed) => {
-        if (confirmed === true)
-          this.store.dispatch(
-            AdminOrdersActions.fulfillerRemovalConfirmed({
-              orderId: order.id,
-              itemId: item.id,
-              assignment: {
-                fulfillerEmail: item.fulfillerEmail,
-                fulfillmentStatus: item.fulfillmentStatus,
-                reservedAt: item.reservedAt,
-                reservationExpiresAt: item.reservationExpiresAt,
-              },
-            }),
-          );
+        const form = this.storeForm();
+        if (confirmed !== true || !form || this.activeOrderId() !== order.id) return;
+        this.syncItem();
+        this.store.dispatch(
+          AdminOrdersActions.formChanged({
+            orderId: order.id,
+            changes: {
+              items: this.storeForm()!.items.map((current) =>
+                current.id !== item.id
+                  ? current
+                  : {
+                      ...current,
+                      fulfillerRemoval: {
+                        fulfillerEmail: item.fulfillerEmail ?? null,
+                        fulfillmentStatus: item.fulfillmentStatus,
+                        reservedAt: item.reservedAt ?? null,
+                        reservationExpiresAt: item.reservationExpiresAt ?? null,
+                      },
+                    },
+              ),
+            },
+          }),
+        );
+        this.store.dispatch(
+          NotificationActions.show({
+            variant: 'info',
+            titleKey: 'app.admin.fulfillerRemoval.title',
+            messageKey: 'app.admin.fulfillerRemoval.pending',
+            preserveOnRoutes: [
+              `/admin/orders/${order.id}/edit`,
+              `/admin/orders/${order.id}/edit/item/${item.id}`,
+            ],
+          }),
+        );
       });
   }
 

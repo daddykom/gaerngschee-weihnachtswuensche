@@ -6,6 +6,7 @@ namespace App\Registration\Actions;
 
 use App\Registration\Data\OrderRepository;
 use App\Registration\Services\OrderStatus;
+use App\Registration\Services\FulfillerReleaseException;
 use App\Shared\Database\Database;
 use App\Shared\Http\JsonRequest;
 use App\Shared\Http\JsonResponse;
@@ -70,7 +71,22 @@ final class AdminOrderUpdateAction
                 return JsonResponse::error($response, 'REJECTION_REASON_REQUIRED', 422);
             }
             $allApproved = $allApproved && $publicationStatus === 'approved';
+            $removal = null;
+            if (isset($item['fulfillerRemoval'])) {
+                if (!is_array($item['fulfillerRemoval'])) {
+                    return JsonResponse::error($response, 'INVALID_RESERVATION_DATA', 422);
+                }
+                $removal = [];
+                foreach (['fulfillerEmail', 'fulfillmentStatus', 'reservedAt', 'reservationExpiresAt'] as $field) {
+                    if (!array_key_exists($field, $item['fulfillerRemoval'])
+                        || ($item['fulfillerRemoval'][$field] !== null && !is_string($item['fulfillerRemoval'][$field]))) {
+                        return JsonResponse::error($response, 'INVALID_RESERVATION_DATA', 422);
+                    }
+                    $removal[$field] = $item['fulfillerRemoval'][$field];
+                }
+            }
             $normalizedItems[] = [
+                'fulfillerRemoval' => $removal,
                 'id' => $item['id'],
                 'category' => in_array($item['category'] ?? null, ['gift', 'voucher'], true)
                     ? $item['category']
@@ -140,7 +156,9 @@ final class AdminOrderUpdateAction
                 'adminNotes' => $order['adminNotes'] ?? null,
                 'adultsCount' => $order['adultsCount'] ?? 0,
                 'childrenCount' => $order['childrenCount'] ?? 0,
-            ], $normalizedItems);
+            ], $normalizedItems, fn (array $wish): array => ($this->emails ?? new EmailSender())->renderFulfillerReleased($wish));
+        } catch (FulfillerReleaseException $exception) {
+            return JsonResponse::error($response, $exception->getMessage(), $exception->httpStatus);
         } catch (\Throwable $exception) {
             ExceptionLogger::log('admin order update failed for ' . $orderId, $exception);
             $diagnostic = sprintf(

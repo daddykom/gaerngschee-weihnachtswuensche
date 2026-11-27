@@ -8,6 +8,9 @@ use App\Registration\Services\AnmeldungMailVariant;
 
 interface EmailSenderInterface
 {
+    /** @param array<string, mixed> $wish */
+    public function renderFulfillerReleased(array $wish): array;
+
     public function sendAnmeldung(
         string $recipient,
         AnmeldungMailVariant $variant,

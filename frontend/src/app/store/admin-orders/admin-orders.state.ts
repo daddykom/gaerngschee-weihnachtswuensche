@@ -9,11 +9,6 @@ export interface AdminOrderSearchForm {
 }
 
 export interface AdminOrdersState {
-  fulfillerRelease:
-    | { status: 'initial' }
-    | { status: 'loading'; itemId: string }
-    | { status: 'loaded'; itemId: string }
-    | { status: 'error'; itemId: string; errorCode: string };
   orders: AdminOrder[];
   statuses: string[];
   categories: string[];
@@ -26,7 +21,6 @@ export interface AdminOrdersState {
 }
 
 export const initialState: AdminOrdersState = {
-  fulfillerRelease: { status: 'initial' },
   orders: [],
   statuses: ['released', 'in_review'],
   categories: [],

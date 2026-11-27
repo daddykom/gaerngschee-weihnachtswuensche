@@ -770,18 +770,10 @@
       "fulfillerRemoval": {
         "title": "Erfüller entfernen",
         "button": "Erfüller entfernen",
-        "confirmation": "Möchtest du die Zuordnung zu {{ email }} entfernen? Der Wunsch wird sofort wieder zur Erfüllung freigegeben, sofern er veröffentlicht ist. Der bisherige Erfüller wird per E-Mail informiert.",
+        "confirmation": "Möchtest du die Entfernung der Zuordnung zu {{ email }} vormerken? Die Entfernung und die E-Mail-Benachrichtigung werden erst beim Speichern des Wunschzettels wirksam.",
         "yes": "Ja",
         "no": "Nein",
-        "success": "Der Erfüller wurde entfernt. Die Benachrichtigung wurde zum Versand vorgemerkt. Noch nicht gespeicherte Wunschänderungen bleiben erhalten.",
-        "errors": {
-          "GIFT_ALREADY_RECEIVED": "Das Geschenk ist bereits eingegangen. Der Erfüller kann nicht entfernt werden.",
-          "FULFILLER_CHANGED": "Die Zuordnung hat sich inzwischen geändert. Bitte lade den Wunsch neu, bevor du es erneut versuchst.",
-          "WISH_NOT_FOUND": "Der Wunsch wurde nicht gefunden.",
-          "INVALID_RESERVATION_DATA": "Die Reservierungsdaten sind unvollständig. Bitte lade den Wunsch neu.",
-          "FULFILLER_RELEASE_FAILED": "Der Erfüller konnte nicht entfernt werden. Bitte versuche es erneut.",
-          "REQUEST_FAILED": "Der Erfüller konnte nicht entfernt werden. Bitte prüfe die Verbindung und versuche es erneut."
-        }
+        "pending": "Der Erfüller wird erst entfernt und per E-Mail informiert, wenn du den Wunschzettel speicherst."
       },
       "overview": {
         "title": "Admin-Übersicht",
@@ -894,6 +886,10 @@
         "errorTitle": "Übersicht konnte nicht geladen werden",
         "errors": {
           "INVALID_ORDER_DATA": "Die Bestelldaten sind ungültig.",
+          "GIFT_ALREADY_RECEIVED": "Ein betroffenes Geschenk ist bereits eingegangen. Der Wunschzettel wurde nicht gespeichert; der Erfüller kann nicht entfernt werden.",
+          "FULFILLER_CHANGED": "Eine zur Entfernung vorgemerkte Erfüller-Zuordnung hat sich inzwischen geändert. Der Wunschzettel wurde nicht gespeichert. Bitte prüfe die aktuelle Zuordnung.",
+          "WISH_NOT_FOUND": "Ein betroffener Wunsch wurde nicht gefunden. Der Wunschzettel wurde nicht gespeichert.",
+          "INVALID_RESERVATION_DATA": "Die Daten einer vorgemerkten Erfüller-Entfernung sind unvollständig. Bitte prüfe den Wunschzettel.",
           "ORDER_NOT_FOUND": "Die Wunschzettel wurde nicht gefunden.",
           "REJECTION_REASON_REQUIRED": "Für eine Zurückweisung ist eine Begründung erforderlich.",
           "ITEMS_NOT_ACCEPTED": "Alle Wünsche müssen zuerst akzeptiert werden.",

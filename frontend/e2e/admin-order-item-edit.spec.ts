@@ -4,7 +4,7 @@ import { expect, test } from './support/test';
 
 test.describe('Admin order item edit route', () => {
   for (const status of ['reserved', 'pending_confirmation']) {
-    test(`removes a ${status} giver only after Yes and keeps unsaved wish edits`, async ({
+    test(`stages a ${status} giver removal without HTTP and saves it only with the order`, async ({
       page,
     }) => {
       await loginAsAdmin(page);
@@ -19,25 +19,29 @@ test.describe('Admin order item edit route', () => {
       };
       await mockOrders(page, { ...order, items: [item] });
       let removals = 0;
-      await page.route('**/admin/orders/order-1/items/item-1/release-fulfiller', async (route) => {
+      await page.route('**/admin/orders/order-1', async (route) => {
         removals++;
-        expect(route.request().method()).toBe('POST');
-        expect(route.request().postDataJSON()).toEqual({
+        expect(route.request().method()).toBe('PATCH');
+        const body = route.request().postDataJSON();
+        expect(body.items[0].fulfillerRemoval).toEqual({
           fulfillerEmail: item.fulfillerEmail,
           fulfillmentStatus: status,
           reservedAt: item.reservedAt,
           reservationExpiresAt: item.reservationExpiresAt,
         });
+        expect(body.items[0].currentTitle).toBe('Unsaved wish title');
         await route.fulfill({
           json: {
-            item: {
-              ...item,
-              fulfillmentStatus: 'available',
-              fulfillerEmail: null,
-              reservedAt: null,
-              reservationExpiresAt: null,
-              dueAt: null,
+            order: {
+              ...order,
+              ...body.order,
+              items: body.items.map((current: Record<string, unknown>) => ({
+                ...current,
+                fulfillerEmail: null,
+                fulfillmentStatus: 'available',
+              })),
             },
+            mailSent: false,
           },
         });
       });
@@ -62,15 +66,32 @@ test.describe('Admin order item edit route', () => {
       await remove.click();
       await dialog.getByRole('button', { name: 'Ja', exact: true }).click();
       await expect(remove).toHaveCount(0);
-      expect(removals).toBe(1);
+      expect(removals).toBe(0);
       await expect(page).toHaveURL(/\/edit\/item\/item-1$/);
       await expect(
         page.getByRole('textbox', { name: 'Aktueller Wunschtitel', exact: true }),
       ).toHaveValue('Unsaved wish title');
       await expectTranslatedText(
         page.locator('.app-notification'),
-        'app.admin.fulfillerRemoval.success',
+        'app.admin.fulfillerRemoval.pending',
       );
+      await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+      await page.waitForURL('**/admin/orders/order-1/edit');
+      expect(removals).toBe(0);
+      await expectTranslatedText(
+        page.locator('.app-notification'),
+        'app.admin.fulfillerRemoval.pending',
+      );
+      await page.getByRole('link', { name: 'Ändern' }).first().click();
+      await expect(remove).toHaveCount(0);
+      await expect(
+        page.getByRole('textbox', { name: 'Aktueller Wunschtitel', exact: true }),
+      ).toHaveValue('Unsaved wish title');
+      await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+      await page.waitForURL('**/admin/orders/order-1/edit');
+      await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+      await expect(page).toHaveURL(/\/admin\/overview$/);
+      expect(removals).toBe(1);
     });
   }
 
@@ -122,7 +143,7 @@ test.describe('Admin order item edit route', () => {
         },
       ],
     });
-    await page.route('**/release-fulfiller', (route) =>
+    await page.route('**/admin/orders/order-1', (route) =>
       route.fulfill({
         status: 409,
         json: { error: { code: 'GIFT_ALREADY_RECEIVED' } },
@@ -136,13 +157,52 @@ test.describe('Admin order item edit route', () => {
       .fill('Unsaved conflict title');
     await page.getByRole('button', { name: 'Erfüller entfernen', exact: true }).click();
     await page.getByRole('dialog').getByRole('button', { name: 'Ja', exact: true }).click();
+    await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+    await page.waitForURL('**/admin/orders/order-1/edit');
+    await page.getByRole('button', { name: 'Speichern', exact: true }).click();
     await expectTranslatedText(
       page.locator('.app-notification'),
-      'app.admin.fulfillerRemoval.errors.GIFT_ALREADY_RECEIVED',
+      'app.admin.overview.errors.GIFT_ALREADY_RECEIVED',
     );
+    await page.getByRole('link', { name: 'Ändern' }).first().click();
     await expect(
       page.getByRole('textbox', { name: 'Aktueller Wunschtitel', exact: true }),
     ).toHaveValue('Unsaved conflict title');
+  });
+
+  test('discards the planned removal when leaving the order without saving', async ({ page }) => {
+    await loginAsAdmin(page);
+    const order = orderFixture();
+    await mockOrders(page, {
+      ...order,
+      items: [
+        {
+          ...(order['items'] as Record<string, unknown>[])[0],
+          fulfillmentStatus: 'reserved',
+          fulfillerEmail: 'giver@example.com',
+        },
+      ],
+    });
+    let mutations = 0;
+    page.on('request', (request) => {
+      if (request.url().includes('/admin/orders') && request.method() !== 'GET') mutations++;
+    });
+    await page.goto('/admin/overview');
+    await page.locator('a[href="/admin/orders/order-1/edit"]').click();
+    await page.getByRole('link', { name: 'Ändern' }).first().click();
+    await page.getByRole('button', { name: 'Erfüller entfernen', exact: true }).click();
+    await page.getByRole('dialog').getByRole('button', { name: 'Ja', exact: true }).click();
+    await expectTranslatedText(
+      page.locator('.app-notification'),
+      'app.admin.fulfillerRemoval.pending',
+    );
+    await page.goto('/admin/overview');
+    await page.locator('a[href="/admin/orders/order-1/edit"]').click();
+    await page.getByRole('link', { name: 'Ändern' }).first().click();
+    await expect(
+      page.getByRole('button', { name: 'Erfüller entfernen', exact: true }),
+    ).toBeVisible();
+    expect(mutations).toBe(0);
   });
 
   test('shows original and edited title and description separately and retains the internal message', async ({
