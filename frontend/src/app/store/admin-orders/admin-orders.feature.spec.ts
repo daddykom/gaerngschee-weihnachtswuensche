@@ -4,6 +4,41 @@ import { adminOrdersFeature } from './admin-orders.feature';
 import { initialState } from './admin-orders.state';
 
 describe('adminOrdersFeature', () => {
+  it('tracks protected image loading independently of the order form', () => {
+    const identity = { orderId: 'order-1', itemId: 'item-1' };
+    const loading = adminOrdersFeature.reducer(
+      initialState,
+      AdminOrdersActions.imageEditorEntered(identity),
+    );
+    expect(loading.itemImage).toEqual({ status: 'loading', ...identity });
+    const loaded = adminOrdersFeature.reducer(
+      loading,
+      AdminOrdersActions.imageLoaded({
+        ...identity,
+        data: { revision: 2, image: null },
+        blob: null,
+      }),
+    );
+    expect(loaded.itemImage).toEqual({
+      status: 'loaded',
+      ...identity,
+      data: { revision: 2, image: null },
+      blob: null,
+    });
+    expect(loaded.form).toBe(initialState.form);
+    const retry = adminOrdersFeature.reducer(
+      loaded,
+      AdminOrdersActions.imageReloadClicked(identity),
+    );
+    const failed = adminOrdersFeature.reducer(
+      retry,
+      AdminOrdersActions.imageLoadFailed({
+        ...identity,
+        errorCode: 'REQUEST_FAILED',
+      }),
+    );
+    expect(failed.itemImage).toEqual({ status: 'error', ...identity, errorCode: 'REQUEST_FAILED' });
+  });
   const order: AdminOrder = {
     id: 'order-1',
     userId: 'user-1',

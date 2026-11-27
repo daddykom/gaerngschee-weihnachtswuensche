@@ -185,6 +185,30 @@ describe('AdminOrderEditComponent', () => {
     );
   });
 
+  it('returns to an invalid image field rather than saving invalid image changes', () => {
+    const dispatch = vi.spyOn(store, 'dispatch');
+    component.formModel.update((model) => ({
+      ...model,
+      items: model.items.map((item) => ({
+        ...item,
+        imageChange: {
+          operation: 'replace',
+          revision: 0,
+          file: new File(['invalid'], 'gift.svg', { type: 'image/svg+xml' }),
+        },
+      })),
+    }));
+    component.save();
+    expect(dispatch).toHaveBeenCalledWith(
+      NavigationActions.navigate({
+        target: '/admin/orders/order-1/edit/item/item-1',
+      }),
+    );
+    expect(dispatch).not.toHaveBeenCalledWith(
+      expect.objectContaining({ type: AdminOrdersActions.save.type }),
+    );
+  });
+
   it('retains image edits in the form, detects replaced files and snapshots them for saving', async () => {
     const dispatch = vi.spyOn(store, 'dispatch');
     const first = new File(['first'], 'gift.png', { type: 'image/png' });

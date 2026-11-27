@@ -22,6 +22,10 @@ export async function loginAsAdmin(page: Page): Promise<void> {
 
 export async function mockOrders(page: Page, order: Record<string, unknown>): Promise<void> {
   await page.route('http://localhost:8083/admin/orders**', async (route) => {
+    if (route.request().url().endsWith('/image/metadata')) {
+      await route.fulfill({ json: { revision: 0, image: null } });
+      return;
+    }
     await route.fulfill({
       status: 200,
       contentType: 'application/json',

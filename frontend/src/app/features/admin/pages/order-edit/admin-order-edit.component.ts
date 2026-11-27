@@ -13,6 +13,7 @@ import {
   AdminOrderFormStatus,
   AdminOrderFormValue,
 } from '../../../../shared/models/admin-order.model';
+import { imageChangeError } from '../../../../shared/models/order-item-image-validation';
 import { ORDER_STATUS_WORKFLOW } from '../../../../shared/models/order.model';
 import { AdminOrdersActions } from '../../../../store/admin-orders/admin-orders.actions';
 import {
@@ -137,6 +138,15 @@ export class AdminOrderEditComponent {
         : this.formModel();
     if (order === null || !this.orderForm().valid()) {
       this.orderForm().markAsTouched();
+      return;
+    }
+    const invalidImage = model.items.find((item) => imageChangeError(item.imageChange));
+    if (invalidImage) {
+      this.store.dispatch(
+        NavigationActions.navigate({
+          target: `/admin/orders/${order.id}/edit/item/${invalidImage.id}`,
+        }),
+      );
       return;
     }
     if (model.items.some((item) => item.currentDescription.trim() === '')) {

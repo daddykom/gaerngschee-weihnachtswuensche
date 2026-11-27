@@ -21,16 +21,23 @@ import {
   AdminOrderItem,
   AdminPublicationStatus,
 } from '../../../../shared/models/admin-order.model';
+import { imageChangeError } from '../../../../shared/models/order-item-image-validation';
+import { OrderItemImageChange } from '../../../../shared/models/order-item-image.model';
 import { OrderItemCategory, OrderItemPersonType } from '../../../../shared/models/order.model';
 import { AdminOrdersActions } from '../../../../store/admin-orders/admin-orders.actions';
 import {
+  selectAdminItemImage,
   selectAdminOrders,
   selectAdminOrdersActiveOrderId,
   selectAdminOrdersForm,
 } from '../../../../store/admin-orders/admin-orders.feature';
+import { selectImageTransfers } from '../../../../store/image-transfers/image-transfers.feature';
 import { NavigationActions } from '../../../../store/navigation/navigation.actions';
+import { NotificationActions } from '../../../../store/notification/notification.actions';
+import { OrderItemImageEditorComponent } from './order-item-image-editor/order-item-image-editor.component';
 
 interface ItemFormValue {
+  imageChange: OrderItemImageChange | null;
   category: OrderItemCategory;
   personType: OrderItemPersonType | null;
   personIndex: number | null;
@@ -45,6 +52,7 @@ interface ItemFormValue {
 @Component({
   selector: 'app-admin-order-item-edit',
   imports: [
+    OrderItemImageEditorComponent,
     TranslatePipe,
     FormField,
     ControlErrorComponent,
@@ -60,6 +68,16 @@ interface ItemFormValue {
 export class AdminOrderItemEditComponent {
   private readonly store = inject(Store);
   private readonly route = inject(ActivatedRoute);
+  readonly imageRequest = this.store.selectSignal(selectAdminItemImage);
+  private readonly transfers = this.store.selectSignal(selectImageTransfers);
+  readonly imageBusy = computed(() =>
+    (this.transfers() ?? []).some(
+      (job) =>
+        job.orderId === this.order()?.id &&
+        job.itemId === this.item()?.id &&
+        (job.status === 'queued' || job.status === 'uploading'),
+    ),
+  );
   readonly orders = this.store.selectSignal(selectAdminOrders);
   readonly storeForm = this.store.selectSignal(selectAdminOrdersForm);
   private readonly activeOrderId = this.store.selectSignal(selectAdminOrdersActiveOrderId);
@@ -71,6 +89,7 @@ export class AdminOrderItemEditComponent {
     'rejected',
   ];
   readonly formModel = signal<ItemFormValue>({
+    imageChange: null,
     category: 'gift',
     personType: null,
     personIndex: null,
@@ -83,6 +102,10 @@ export class AdminOrderItemEditComponent {
   });
   private previousItem: ItemFormValue | null = null;
   readonly itemForm = form(this.formModel, (schema) => {
+    validate(schema.imageChange, ({ value }) => {
+      const kind = imageChangeError(value());
+      return kind ? { kind } : null;
+    });
     required(schema.category);
     required(schema.currentDescription);
     validate(schema.adminNotes, ({ valueOf }) =>
@@ -113,8 +136,10 @@ export class AdminOrderItemEditComponent {
         this.order.set(currentOrder);
         this.item.set(currentItem);
         const existingForm = this.activeOrderId() === currentOrder.id ? this.storeForm() : null;
-        const editableItem = existingForm?.items.find((item) => item.id === itemId) ?? currentItem;
+        const formItem = existingForm?.items.find((item) => item.id === itemId);
+        const editableItem = formItem ?? currentItem;
         const formValue: ItemFormValue = {
+          imageChange: formItem?.imageChange ?? null,
           category: editableItem.category,
           personType: editableItem.personType ?? null,
           personIndex: editableItem.personIndex ?? null,
@@ -126,6 +151,7 @@ export class AdminOrderItemEditComponent {
           publicationStatus: editableItem.publicationStatus,
         };
         this.formModel.set(formValue);
+        if (formValue.imageChange) this.itemForm.imageChange().markAsTouched();
         this.previousItem = { ...formValue };
         if (!existingForm) {
           const orderForm: AdminOrderFormValue = {
@@ -157,6 +183,10 @@ export class AdminOrderItemEditComponent {
     const model = this.formModel();
     if (order === null || item === null || !this.itemForm().valid()) {
       this.itemForm().markAsTouched();
+      if (this.itemForm.imageChange().invalid()) {
+        document.querySelector<HTMLElement>('app-order-item-image-editor button')?.focus();
+        document.querySelector('app-order-item-image-editor')?.scrollIntoView({ block: 'center' });
+      }
       return;
     }
     this.syncItem();
@@ -199,6 +229,7 @@ export class AdminOrderItemEditComponent {
       return {};
     }
     const changes: Partial<ItemFormValue> = {};
+    if (previous.imageChange !== current.imageChange) changes.imageChange = current.imageChange;
     if (previous.category !== current.category) {
       changes.category = current.category;
     }
@@ -227,6 +258,48 @@ export class AdminOrderItemEditComponent {
       changes.publicationStatus = current.publicationStatus;
     }
     return changes;
+  }
+
+  reloadImage(): void {
+    const orderId = this.order()?.id;
+    const itemId = this.item()?.id;
+    if (orderId && itemId) {
+      this.store.dispatch(NotificationActions.clear());
+      this.store.dispatch(AdminOrdersActions.imageReloadClicked({ orderId, itemId }));
+    }
+  }
+
+  selectImage(file: File): void {
+    const request = this.imageRequest();
+    if (request?.status !== 'loaded' || this.imageBusy()) return;
+    this.formModel.update((model) => ({
+      ...model,
+      imageChange: {
+        operation: 'replace',
+        revision: model.imageChange?.revision ?? request.data.revision,
+        file,
+      },
+    }));
+    this.itemForm.imageChange().markAsTouched();
+    this.syncItem();
+  }
+
+  removeImage(): void {
+    const request = this.imageRequest();
+    if (request?.status !== 'loaded' || this.imageBusy()) return;
+    this.formModel.update((model) => ({
+      ...model,
+      imageChange: request.data.image
+        ? { operation: 'remove', revision: model.imageChange?.revision ?? request.data.revision }
+        : null,
+    }));
+    this.syncItem();
+  }
+
+  resetImage(): void {
+    if (this.imageBusy()) return;
+    this.formModel.update((model) => ({ ...model, imageChange: null }));
+    this.syncItem();
   }
 
   private persons(

@@ -1,4 +1,6 @@
 import { createFeature, createReducer, createSelector, on } from '@ngrx/store';
+import { AuthActions } from '../auth/auth.actions';
+import { SessionActions } from '../auth/session.actions';
 import { AdminOrdersActions } from './admin-orders.actions';
 import { AdminOrdersState, initialState } from './admin-orders.state';
 
@@ -6,6 +8,28 @@ export const adminOrdersFeature = createFeature({
   name: 'adminOrders',
   reducer: createReducer<AdminOrdersState>(
     initialState,
+    on(
+      AdminOrdersActions.imageEditorEntered,
+      AdminOrdersActions.imageReloadClicked,
+      (state, { orderId, itemId }) => ({
+        ...state,
+        itemImage: { status: 'loading', orderId, itemId },
+      }),
+    ),
+    on(AdminOrdersActions.imageLoaded, (state, { orderId, itemId, data, blob }) => ({
+      ...state,
+      itemImage: { status: 'loaded', orderId, itemId, data, blob },
+    })),
+    on(AdminOrdersActions.imageLoadFailed, (state, { orderId, itemId, errorCode }) => ({
+      ...state,
+      itemImage: { status: 'error', orderId, itemId, errorCode },
+    })),
+    on(
+      AuthActions.logoutRequested,
+      AuthActions.logoutRequestedWithRedirect,
+      SessionActions.sessionExpired,
+      (state) => ({ ...state, itemImage: { status: 'initial' } }),
+    ),
     on(AdminOrdersActions.load, (state) => ({
       ...state,
       loadStatus: 'loading',
@@ -78,6 +102,7 @@ export const adminOrdersFeature = createFeature({
 });
 
 export const {
+  selectItemImage: selectAdminItemImage,
   selectOrders: selectAdminOrders,
   selectFilteredOrders: selectAdminFilteredOrders,
   selectSearchForm: selectAdminOrderSearchForm,

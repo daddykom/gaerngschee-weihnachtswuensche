@@ -645,6 +645,23 @@
       "staySignedIn": "Angemeldet bleiben"
     },
     "admin": {
+      "itemImage": {
+        "title": "Bild zum Wunsch (optional)",
+        "hint": "JPEG, PNG oder WebP, maximal 5 MiB. Das Bild wird erst mit dem Wunschzettel gespeichert und ist vorerst nur für Administratoren sichtbar.",
+        "dropHint": "Bild hierher ziehen oder eine Datei auswählen.",
+        "choose": "Bild auswählen",
+        "remove": "Bild entfernen",
+        "reset": "Bildänderung verwerfen",
+        "removalPending": "Das Bild wird beim Speichern des Wunschzettels entfernt.",
+        "previewAlt": "Vorschau des Wunschbilds",
+        "reload": "Wunschbild erneut laden",
+        "loadErrorTitle": "Wunschbild nicht geladen",
+        "loadError": "Das Wunschbild konnte nicht geladen werden. Die Texte können weiterhin bearbeitet werden. Versuche das Bild erneut zu laden.",
+        "errors": {
+          "tooLarge": "Das Bild darf höchstens 5 MiB gross sein.",
+          "fileType": "Bitte wähle ein JPEG-, PNG- oder WebP-Bild."
+        }
+      },
       "statistics": {
         "title": "Kennzahlen",
         "campaign": "Aktionsübersicht {{year}}",

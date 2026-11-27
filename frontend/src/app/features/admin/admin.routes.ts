@@ -17,6 +17,7 @@ import { fairgateTestFeature } from '../../store/fairgate-test/fairgate-test.fea
 import { configurationResolver } from './pages/configuration/configuration.resolver';
 import { emailTestResolver } from './pages/email-test/email-test.resolver';
 import { adminOrdersResolver } from './pages/order-edit/admin-orders.resolver';
+import { adminOrderItemImageResolver } from './pages/order-item-edit/admin-order-item-image-resolver';
 import { adminOverviewResolver } from './pages/overview/admin-overview.resolver';
 import { adminStatisticsResolver } from './pages/statistics/admin-statistics.resolver';
 import { userEditResolver } from './pages/users/user-edit.resolver';
@@ -65,6 +66,7 @@ export const adminRoutes: Routes = [
         children: [
           {
             path: ':orderId/edit/item/:itemId',
+            resolve: { image: adminOrderItemImageResolver },
             canActivate: [groupGuard(['admin'])],
             data: { pageTitle: 'app.admin.overview.itemEditTitle' },
             loadComponent: () =>

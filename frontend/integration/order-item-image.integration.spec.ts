@@ -47,6 +47,66 @@ test.describe('Admin wish image API', () => {
     }
   });
 
+  test('stages images in the browser and persists upload and removal only after saving wish data', async ({
+    page,
+  }) => {
+    await page.goto('/admin/overview');
+    await page.getByRole('combobox', { name: 'Status', exact: true }).click();
+    await page.getByRole('option', { name: 'Entwurf', exact: true }).click();
+    await page.keyboard.press('Escape');
+    await page.locator(`a[href="/admin/orders/${fixture.orderId}/edit"]`).click();
+    await page
+      .getByRole('textbox', { name: 'Aktueller Order-Text' })
+      .fill('Image upload integration fixture');
+    await page
+      .locator(`a[href="/admin/orders/${fixture.orderId}/edit/item/${fixture.itemId}"]`)
+      .click();
+    const editor = page.locator('app-order-item-image-editor');
+    await editor.locator('input[type=file]').setInputFiles({
+      name: 'wish.png',
+      mimeType: 'image/png',
+      buffer: Buffer.from(fixture.images[0], 'base64'),
+    });
+    await expect(editor.getByRole('img')).toBeVisible();
+    expect(await (await page.request.get(`${imageUrl}/metadata`)).json()).toEqual({
+      revision: 0,
+      image: null,
+    });
+    await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+    await page.waitForURL(`**/admin/orders/${fixture.orderId}/edit`);
+    const upload = page.waitForResponse(
+      (response) => response.url() === imageUrl && response.request().method() === 'POST',
+    );
+    await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+    expect((await upload).status()).toBe(200);
+    await expect
+      .poll(async () => (await (await page.request.get(`${imageUrl}/metadata`)).json()).revision)
+      .toBe(1);
+    await page.goto('/admin/overview');
+    await page.getByRole('combobox', { name: 'Status', exact: true }).click();
+    await page.getByRole('option', { name: 'Entwurf', exact: true }).click();
+    await page.keyboard.press('Escape');
+    await page.locator(`a[href="/admin/orders/${fixture.orderId}/edit"]`).click();
+    await page
+      .locator(`a[href="/admin/orders/${fixture.orderId}/edit/item/${fixture.itemId}"]`)
+      .click();
+    await expect(editor.getByRole('img')).toBeVisible();
+    await editor.getByRole('button', { name: 'Bild entfernen', exact: true }).click();
+    await expect(editor.getByRole('img')).toHaveCount(0);
+    expect((await (await page.request.get(`${imageUrl}/metadata`)).json()).revision).toBe(1);
+    await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+    await page.waitForURL(`**/admin/orders/${fixture.orderId}/edit`);
+    const deletion = page.waitForResponse(
+      (response) => response.url() === imageUrl && response.request().method() === 'DELETE',
+    );
+    await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+    expect((await deletion).status()).toBe(200);
+    expect(await (await page.request.get(`${imageUrl}/metadata`)).json()).toEqual({
+      revision: 2,
+      image: null,
+    });
+  });
+
   test('persists binary images separately, replaces safely and removes without exposing image bytes in orders', async ({
     page,
   }) => {

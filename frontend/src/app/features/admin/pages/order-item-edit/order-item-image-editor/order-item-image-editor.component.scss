@@ -1,0 +1,16 @@
+.image-drop-zone {
+  border: 1px dashed var(--mat-sys-outline);
+  border-radius: var(--gl-space-sm);
+  padding: var(--gl-space-md);
+}
+
+.image-preview {
+  display: block;
+  width: 100%;
+  max-height: 20rem;
+  object-fit: contain;
+}
+
+.image-file-name {
+  overflow-wrap: anywhere;
+}

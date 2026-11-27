@@ -129,6 +129,23 @@
           />
         </mat-form-field>
       </section>
+      @if (imageRequest(); as request) {
+        @if (request.status === 'loaded') {
+          <app-order-item-image-editor
+            [change]="formModel().imageChange"
+            [storedImage]="request.blob"
+            [control]="itemForm.imageChange()"
+            [disabled]="imageBusy()"
+            (fileSelected)="selectImage($event)"
+            (removeClicked)="removeImage()"
+            (resetClicked)="resetImage()"
+          />
+        } @else if (request.status === 'error') {
+          <button mat-button type="button" (click)="reloadImage()">
+            {{ 'app.admin.itemImage.reload' | translate }}
+          </button>
+        }
+      }
       <mat-form-field appearance="outline" subscriptSizing="dynamic">
         <mat-label>{{ 'app.admin.overview.newStatus' | translate }}</mat-label>
         <mat-select [formField]="itemForm.publicationStatus">

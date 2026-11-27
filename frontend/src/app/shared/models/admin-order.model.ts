@@ -67,7 +67,7 @@ export interface AdminOrderFormValue {
       currentReason: string;
       currentTitle: string;
       adminNotes: string;
-      imageChange?: OrderItemImageChange;
+      imageChange?: OrderItemImageChange | null;
     }
   >;
 }

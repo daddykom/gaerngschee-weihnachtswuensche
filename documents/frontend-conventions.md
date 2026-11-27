@@ -193,8 +193,28 @@ session.
 
 Files stay in memory in the form/transfer state and are not persisted to browser
 storage or encoded as Base64. Reloading or closing the tab cannot resume them.
-The upload controls, global progress display and unload warning are added in
-the subsequent UI steps.
+The admin wish editor provides a Material-button file picker, a drop zone,
+and an object-URL preview through the presentation-only
+`OrderItemImageEditorComponent`. Preview URLs are released when replaced or
+when the component is destroyed. Selecting, removing or resetting an image
+updates only `items[].imageChange` through the existing partial form event.
+`null` (or an absent change) means the stored image is unchanged.
+
+Client-side type and size errors use Signal Forms and `ControlErrorComponent`.
+The backend remains responsible for validating the actual image content and
+dimensions. Invalid selections cannot be committed; saving the parent form
+returns to the affected wish when necessary. Resetting a selection restores the
+stored image, while removing a stored image stages a revision-checked deletion.
+
+The wish-editor resolver loads image metadata and, if present, its protected
+binary preview through the admin-orders effects. It releases navigation after
+success or failure and restores the progress cursor. Image-load failures appear
+in the central notification zone; text editing and an explicit reload remain
+available. Controls for a wish with a pending transfer are disabled, without
+blocking text editing or navigation. Successful transfers refresh the stored
+image context. Public wish presentation continues to use its decorative image.
+
+The global progress display and unload warning follow in the final UI step.
 
 ### RxJS Usage
 
