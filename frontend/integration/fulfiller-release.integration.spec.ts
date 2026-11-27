@@ -102,6 +102,8 @@ test('keeps the assignment until the whole order is saved and then queues the no
     await page.getByRole('combobox', { name: 'Status', exact: true }).click();
     await page.getByRole('option', { name: 'Definitiv', exact: true }).click();
     await page.keyboard.press('Escape');
+    await page.getByRole('searchbox').fill(recipient.toUpperCase());
+    await expect(page.getByRole('table').getByRole('row')).toHaveCount(2);
     await page.locator(`a[href="/admin/orders/${draft.id}/edit"]`).click();
     await page.locator(`a[href="/admin/orders/${draft.id}/edit/item/${itemId}"]`).click();
     const savedTitle = `${title} updated`;

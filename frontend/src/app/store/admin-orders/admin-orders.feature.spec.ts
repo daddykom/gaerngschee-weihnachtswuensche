@@ -254,6 +254,51 @@ describe('adminOrdersFeature', () => {
     ).toEqual([]);
   });
 
+  it('also matches any giver email, tolerates missing emails and returns each order only once', () => {
+    const orders = [
+      {
+        ...order,
+        orderNumber: 12,
+        items: [
+          { id: 'wish-1', fulfillerEmail: null },
+          { id: 'wish-2', fulfillerEmail: 'Giver@Example.ch' },
+          { id: 'wish-3', fulfillerEmail: 'Giver@Example.ch' },
+        ] as AdminOrder['items'],
+      },
+      {
+        ...order,
+        id: 'order-2',
+        orderNumber: 123,
+        items: [{ id: 'wish-4' }, { id: 'wish-5', fulfillerEmail: null }] as AdminOrder['items'],
+      },
+      { ...order, id: 'order-3', orderNumber: 124, requesterEmail: 'giver@example.ch', items: [] },
+    ];
+    expect(
+      adminOrdersFeature.selectFilteredOrders.projector(orders, {
+        email: '  IVER@EXAMPLE  ',
+        orderNumber: '',
+      }),
+    ).toEqual([orders[0], orders[2]]);
+    expect(
+      adminOrdersFeature.selectFilteredOrders.projector(orders, {
+        email: 'giver@',
+        orderNumber: '12',
+      }),
+    ).toEqual([orders[0]]);
+    expect(
+      adminOrdersFeature.selectFilteredOrders.projector(orders, {
+        email: 'giver@',
+        orderNumber: '123',
+      }),
+    ).toEqual([]);
+    expect(
+      adminOrdersFeature.selectFilteredOrders.projector(orders, {
+        email: '',
+        orderNumber: '',
+      }),
+    ).toEqual(orders);
+  });
+
   it('preserves the order number when only the email or list filters change', () => {
     const state = adminOrdersFeature.reducer(
       initialState,
